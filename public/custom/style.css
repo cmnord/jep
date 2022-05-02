@@ -1,0 +1,42 @@
+body {
+  max-width: 800px;
+  margin: 0.5em auto;
+  padding: 10px;
+  font-family: "Ariel", sans-serif;
+}
+
+.link {
+  width: 100%;
+  max-width: 600px;
+  border: 1px solid black;
+  word-wrap: break-word;
+  position: fixed;
+  background-color: white;
+  margin-top: 1.5em;
+  padding: 1em 10px;
+}
+
+.category-name {
+  margin-bottom: 2em;
+}
+
+label, input {
+  display: inline-block;
+  width: 100%;
+  margin: 0.25em;
+  font-size: 16px;
+  line-height: 18px;
+}
+
+input.question-input {
+  margin-bottom: 2em;
+}
+
+hr {
+  border: 1px solid black;
+  margin: 2em 0;
+}
+
+#custom-questions {
+  margin-top: 15em;
+}

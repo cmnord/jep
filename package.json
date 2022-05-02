@@ -1,0 +1,27 @@
+{
+  "name": "jeopardy",
+  "version": "1.0.0",
+  "description": "A fun, little Jeopardy app for web dev trivia!",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.16.3",
+    "axios": "^0.21.0"
+  },
+  "engines": {
+    "node": "8.x"
+  },
+  "repository": {
+    "url": "https://glitch.com/edit/#!/jeopardy"
+  },
+  "license": "MIT",
+  "keywords": [
+    "node",
+    "glitch",
+    "express",
+    "trivia",
+    "jeopardy"
+  ]
+}
