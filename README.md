@@ -1,15 +1,20 @@
 # jep
 
-Cloned from https://glitch.com/~jeopardy-remixable-app (https://jeopardy-remixable-app.glitch.me/).
+Frontend forked from https://glitch.com/~jeopardy-remixable-app
+(https://jeopardy-remixable-app.glitch.me/).
 
-# Installation
+## Development
 
-```sh
-npm install
+This project is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+
+```
+$ yarn install
 ```
 
-# Run locally
-
-```sh
-node server.js
 ```
+$ yarn dev
+```
+
+## License
+
+[MIT](https://github.com/cmnord/jep/blob/main/LICENSE) © [cmnord](https://github.com/cmnord/)

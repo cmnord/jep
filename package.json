@@ -1,27 +1,25 @@
 {
-  "name": "jeopardy",
-  "version": "1.0.0",
+  "name": "jep",
+  "version": "0.1.0",
   "description": "A fun, little Jeopardy app for web dev trivia!",
-  "main": "server.js",
+  "private": true,
   "scripts": {
-    "start": "node server.js"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
   "dependencies": {
-    "express": "^4.16.3",
-    "axios": "^0.21.0"
+    "next": "12.1.5",
+    "react": "18.1.0",
+    "react-dom": "18.1.0"
   },
-  "engines": {
-    "node": "8.x"
-  },
-  "repository": {
-    "url": "https://glitch.com/edit/#!/jeopardy"
-  },
-  "license": "MIT",
-  "keywords": [
-    "node",
-    "glitch",
-    "express",
-    "trivia",
-    "jeopardy"
-  ]
+  "devDependencies": {
+    "@types/node": "17.0.31",
+    "@types/react": "18.0.8",
+    "@types/react-dom": "18.0.3",
+    "eslint": "8.14.0",
+    "eslint-config-next": "12.1.5",
+    "typescript": "4.6.4"
+  }
 }
