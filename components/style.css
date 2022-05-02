@@ -10,6 +10,13 @@
 
 body {
   margin: 0;
+  max-width: 800px;
+  padding: 10px;
+  font-family: "Ariel", sans-serif;
+}
+
+.link {
+  margin: .5em 0;
 }
 
 .board {
