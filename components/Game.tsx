@@ -10,19 +10,9 @@ interface Props {
 	day: number;
 }
 
-const emptyCategory: Category = {
-	name: "",
-	clues: []
-}
-
-const emptyBoard: Board = {
-	round: Round.Jeopardy,
-	categories: [emptyCategory, emptyCategory, emptyCategory, emptyCategory, emptyCategory],
-}
-
 /** Game maintains the game state. */
 export default function Game(props: Props) {
-	const [board, setBoard] = useState<Board>(emptyBoard);
+	const [board, setBoard] = useState<Board>();
 	const [currentClue, setCurrentClue] = useState<Clue>();
 	const [step, setStep] = useState(1);
 
@@ -37,11 +27,13 @@ export default function Game(props: Props) {
 	}, [data]);
 
 	const handleClickClue = (categoryIdx: number, clueIdx: number) => {
-		const clue = board.categories[categoryIdx].clues[clueIdx];
+		const clue = board?.categories[categoryIdx].clues[clueIdx];
 		// not yet answered
-		if (clue.order === 0) {
+		if (clue?.order === 0) {
 			setBoard(prevBoard => {
-				prevBoard.categories[categoryIdx].clues[clueIdx].order = step;
+				if (prevBoard) {
+					prevBoard.categories[categoryIdx].clues[clueIdx].order = step;
+				}
 				return prevBoard;
 			});
 			setCurrentClue(clue);
@@ -51,7 +43,7 @@ export default function Game(props: Props) {
 	if (error !== undefined) {
 		return <div>Error :(</div>;
 	} else if (data?.error) {
-		return <div>Error2: {data.message}</div>;
+		return <div>Error: {data.message}</div>;
 	}
 
 	const handleClickPrompt = () => {

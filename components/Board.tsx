@@ -4,16 +4,19 @@ import cn from "classnames";
 
 interface Props {
 	step: number;
-	board: Board;
+	board?: Board;
 	onClickClue: (categoryIdx: number, clueIdx: number) => void;
 }
 
+const NUM_CATEGORIES = 6;
+const NUM_CLUES_PER_CATEGORY = 5;
+
 /** BoardComponent is purely presentational and renders the board. */
 export default function BoardComponent(props: Props) {
-	const renderClue = (categoryIdx: number) => (clue: Clue, clueIdx: number) => {
+	const renderClue = (categoryIdx: number) => (clue: Clue | undefined, clueIdx: number) => {
 		const clueValue = (clueIdx + 1) * 200;
-		const isActive = clue.order === props.step;
-		const isAnswered = clue.order > 0 && !isActive;
+		const isActive = clue?.order === props.step;
+		const isAnswered = clue?.order && clue.order > 0 && !isActive;
 		const clueText = isAnswered ? clue.answer : `$${clueValue}`;
 		return <div className={cn(styles.question, {
 			[styles.isAnswered]: isAnswered,
@@ -25,11 +28,21 @@ export default function BoardComponent(props: Props) {
 		</div>
 	}
 
-	const renderCategory = (category: Category, categoryIdx: number) => {
+	const renderCategory = (category: Category | undefined, categoryIdx: number) => {
+		const categoryTitle = category?.name ?? "loading...";
+		const clues = new Array<Clue | undefined>(NUM_CLUES_PER_CATEGORY);
+		for (let i = 0; i < NUM_CLUES_PER_CATEGORY; i++) {
+			clues[i] = category?.clues[i]
+		}
 		return <>
-			<div className={styles.category} key={categoryIdx}>{category.name}</div>
-			{category.clues.map(renderClue(categoryIdx))}
+			<div className={styles.category} key={categoryIdx}>{categoryTitle}</div>
+			{clues.map(renderClue(categoryIdx))}
 		</>;
 	}
-	return (<div className={styles.board}>{props.board.categories.map(renderCategory)}</div>);
+
+	const categories = new Array<Category | undefined>(NUM_CATEGORIES);
+	for (let i = 0; i < NUM_CATEGORIES; i++) {
+		categories[i] = props.board?.categories[i];
+	}
+	return (<div className={styles.board}>{categories.map(renderCategory)}</div>);
 }
