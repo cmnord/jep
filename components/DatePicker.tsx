@@ -11,7 +11,7 @@ export default function DatePicker() {
 
   /** toDateValue converts the Date to YYYY-MM-DD */
   const toDateValue = (date: Date): string => {
-    return date.toLocaleDateString('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit' })
+    return date.toLocaleDateString('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit' });
   }
 
   return (

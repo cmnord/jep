@@ -27,6 +27,7 @@ export default async function mockGameResponse(
       answer: question.answer,
       order: 0,
       value: (i + 1) * 200,
+      isDailyDouble: false,
     })),
     ...questions["Dolly Parton"].map((question, i) => ({
       category: "Dolly Parton",
@@ -34,6 +35,7 @@ export default async function mockGameResponse(
       answer: question.answer,
       order: 0,
       value: (i + 1) * 200,
+      isDailyDouble: false,
     })),
     ...questions.Ferns.map((question, i) => ({
       category: "Ferns",
@@ -41,6 +43,7 @@ export default async function mockGameResponse(
       answer: question.answer,
       order: 0,
       value: (i + 1) * 200,
+      isDailyDouble: false,
     })),
     ...questions["New York City"].map((question, i) => ({
       category: "New York City",
@@ -48,6 +51,7 @@ export default async function mockGameResponse(
       answer: question.answer,
       order: 0,
       value: (i + 1) * 200,
+      isDailyDouble: false,
     })),
     ...questions["Pasta Shapes"].map((question, i) => ({
       category: "Pasta Shapes",
@@ -55,6 +59,7 @@ export default async function mockGameResponse(
       answer: question.answer,
       order: 0,
       value: (i + 1) * 200,
+      isDailyDouble: false,
     }))
   );
 
@@ -67,6 +72,7 @@ export default async function mockGameResponse(
       answer: "",
       order: 0,
       value: 0,
+      isDailyDouble: false,
     },
   };
 

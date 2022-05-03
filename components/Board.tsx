@@ -11,9 +11,10 @@ interface Props {
 /** BoardComponent is purely presentational and renders the board. */
 export default function BoardComponent(props: Props) {
 	const renderClue = (categoryIdx: number) => (clue: Clue, clueIdx: number) => {
+		const clueValue = (clueIdx + 1) * 200;
 		const isActive = clue.order === props.step;
 		const isAnswered = clue.order > 0 && !isActive;
-		const clueText = isAnswered ? clue.answer : `$${clue.value}`;
+		const clueText = isAnswered ? clue.answer : `$${clueValue}`;
 		return <div className={cn(styles.question, {
 			[styles.isAnswered]: isAnswered,
 			[styles.isActive]: isActive,

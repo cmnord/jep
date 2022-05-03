@@ -8,7 +8,8 @@ interface Props {
 	onClick: () => void;
 }
 export default function Prompt(props: Props) {
+	const content = props.clue?.isDailyDouble ? "Daily Double" : props.clue?.clue;
 	return <div className={cn(styles.prompt, {
 		[styles.isActive]: props.clue !== undefined,
-	})} onClick={props.onClick}>{props.clue?.clue}</div>
+	})} onClick={props.onClick}>{content}</div>
 }

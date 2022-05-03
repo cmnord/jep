@@ -9,7 +9,8 @@ export interface Clue {
   answer: string;
   /** order is the order of when it was selected by the players and starts at 1. */
   order: number;
-  value: number | "Daily Double";
+  value: number;
+  isDailyDouble: boolean;
 }
 
 export interface Category {
@@ -50,20 +51,39 @@ interface ApiResponseError {
   message: string;
 }
 
-interface ApiResponseGame {
-  jeopardy: Clue[];
-  "double jeopardy": Clue[];
-  "final jeopardy": Clue;
+interface ApiResponseClue {
+  category: string;
+  clue: string;
+  /** answer is not in the form of a question. */
+  answer: string;
+  /** order is the order of when it was selected by the players and starts at 1. */
+  order: number;
+  value: number | "Daily Double";
 }
 
-export const cluesToBoard = (round: Round, clues: Clue[]): Board => {
+interface ApiResponseGame {
+  jeopardy: ApiResponseClue[];
+  "double jeopardy": ApiResponseClue[];
+  "final jeopardy": ApiResponseClue;
+}
+
+const apiResponseToClue = (apiClue: ApiResponseClue): Clue => ({
+  category: apiClue.category,
+  clue: apiClue.clue,
+  answer: apiClue.answer,
+  order: 0,
+  value: apiClue.value === "Daily Double" ? 0 : apiClue.value,
+  isDailyDouble: apiClue.value === "Daily Double",
+});
+
+export const cluesToBoard = (round: Round, clues: ApiResponseClue[]): Board => {
   const categoryNames = new Map<string, Clue[]>();
   clues.forEach((clue) => {
     const clues = categoryNames.get(clue.category);
     if (clues) {
-      categoryNames.set(clue.category, [...clues, clue]);
+      categoryNames.set(clue.category, [...clues, apiResponseToClue(clue)]);
     } else {
-      categoryNames.set(clue.category, [clue]);
+      categoryNames.set(clue.category, [apiResponseToClue(clue)]);
     }
   });
 
@@ -106,13 +126,13 @@ export default async function gameResponse(
   // must be in MM-DD-YYYY format
   const apiUrl = `https://jarchive-json.glitch.me/game/${month}/${day}/${year}`;
 
-  const apiResponseToGame = (apiResonse: ApiResponseGame): Game => ({
-    jeopardy: cluesToBoard(Round.Jeopardy, apiResonse.jeopardy),
+  const apiResponseToGame = (apiResponse: ApiResponseGame): Game => ({
+    jeopardy: cluesToBoard(Round.Jeopardy, apiResponse.jeopardy),
     doubleJeopardy: cluesToBoard(
       Round.DoubleJeopardy,
-      apiResonse["double jeopardy"]
+      apiResponse["double jeopardy"]
     ),
-    finalJeopardy: apiResonse["final jeopardy"],
+    finalJeopardy: apiResponseToClue(apiResponse["final jeopardy"]),
   });
 
   await fetch(PROXY_URL + apiUrl)
