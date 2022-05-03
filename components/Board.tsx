@@ -17,7 +17,13 @@ export default function BoardComponent(props: Props) {
 		const clueValue = (clueIdx + 1) * 200;
 		const isActive = clue?.order === props.step;
 		const isAnswered = clue?.order && clue.order > 0 && !isActive;
-		const clueText = isAnswered ? clue.answer : `$${clueValue}`;
+		const clueText = isAnswered ? (
+			<div>
+				{clue.isDailyDouble ? <p>DAILY DOUBLE</p> : null}
+				<p>{clue.clue}</p>
+				<p className={styles.answer}>{clue.answer}</p>
+			</div>
+		) : `$${clueValue}`;
 		return <div className={cn(styles.question, {
 			[styles.isAnswered]: isAnswered,
 			[styles.isActive]: isActive,
