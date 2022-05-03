@@ -30,7 +30,7 @@ export default function DatePicker() {
             }
           }}
         >
-          <span>Play this game {date.toString()}</span>
+          <span>Play this game</span>
         </Link>
       </button>
     </form>);

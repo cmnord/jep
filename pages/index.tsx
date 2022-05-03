@@ -19,7 +19,17 @@ const Home: NextPage = () => {
           Play
         </h1>
 
-        <DatePicker />
+
+        <div className={styles.description}>
+          <DatePicker />
+        </div>
+
+        <div className={styles.grid}>
+          <a href="https://j-archive.com" className={styles.card}>
+            <h2>J! Archive &rarr;</h2>
+            <p>Visit the J! Archive home page itself to find episode dates.</p>
+          </a>
+        </div>
       </main>
     </div>
   )
