@@ -108,5 +108,27 @@
       "clue": "This NYC bridge's anchorage-to-anchorage total length is 2,910 feet",
       "answer": "Throgs Neck Bridge"
     }
+  ],
+  "Dairy Products": [
+    {
+      "clue": "A separator divides milk into light & heavy parts; this substance is light, so as they say, it rises to the top",
+      "answer": "cream"
+    },
+    {
+      "clue": "This product that's 80% milk fat typically takes 24 hours to make as the globules of fat are broken down so the fat will coagulate",
+      "answer": "butter"
+    },
+    {
+      "clue": "Milk is tested for these, such as penicillin, which may have been used to treat cows that fell ill",
+      "answer": "antibiotics"
+    },
+    {
+      "clue": "This process requires higher temperatures for products with more sugar & fat; for chocolate milk, it's 180 degrees, compared to 162 for milk",
+      "answer": "pasteurization"
+    },
+    {
+      "clue": "Greek-style this, like oikos, has become popular with its lush texture",
+      "answer": "yogurt"
+    }
   ]
 }

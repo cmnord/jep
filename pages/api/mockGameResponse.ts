@@ -60,6 +60,14 @@ export default async function mockGameResponse(
       order: 0,
       value: (i + 1) * 200,
       isDailyDouble: false,
+    })),
+    ...questions["Dairy Products"].map((question, i) => ({
+      category: "Dairy Products",
+      clue: question.clue,
+      answer: question.answer,
+      order: 0,
+      value: (i + 1) * 200,
+      isDailyDouble: false,
     }))
   );
 
