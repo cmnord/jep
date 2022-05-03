@@ -1,7 +1,8 @@
 import useSWR from "swr";
-import { useEffect, useState } from "react";
-import { GameResponse, Board, Round, Category } from "../pages/api/gameResponse";
+import React, { useEffect, useState } from "react";
+import { GameResponse, Board, Round, Category, Clue } from "../pages/api/gameResponse";
 import BoardComponent from "./Board";
+import Prompt from "./Prompt";
 
 interface Props {
 	year: number;
@@ -22,6 +23,8 @@ const emptyBoard: Board = {
 /** Game maintains the game state. */
 export default function Game(props: Props) {
 	const [board, setBoard] = useState<Board>(emptyBoard);
+	const [currentClue, setCurrentClue] = useState<Clue>();
+	const [step, setStep] = useState(1);
 
 	const { data, error } = useSWR<GameResponse>(`/api/mockGameResponse?year=${props.year}&month=${props.month}&day=${props.day}`,
 		(input, init) => fetch(input, init).then((res) => res.json()));
@@ -33,12 +36,31 @@ export default function Game(props: Props) {
 		}
 	}, [data]);
 
+	const handleClickClue = (categoryIdx: number, clueIdx: number) => {
+		const clue = board.categories[categoryIdx].clues[clueIdx];
+		// not yet answered
+		if (clue.order === 0) {
+			setBoard(prevBoard => {
+				prevBoard.categories[categoryIdx].clues[clueIdx].order = step;
+				return prevBoard;
+			});
+			setCurrentClue(clue);
+		}
+	}
+
 	if (error !== undefined) {
 		return <div>Error :(</div>;
 	} else if (data?.error) {
 		return <div>Error2: {data.message}</div>;
 	}
 
+	const handleClickPrompt = () => {
+		setCurrentClue(undefined);
+		setStep(step => step + 1);
+	}
 
-	return (<BoardComponent board={board} />);
+	return (<>
+		<Prompt clue={currentClue} onClick={() => handleClickPrompt()} />
+		<BoardComponent board={board} onClickClue={handleClickClue} step={step} />
+	</>);
 }

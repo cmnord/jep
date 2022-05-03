@@ -26,35 +26,35 @@ export default async function mockGameResponse(
       clue: question.clue,
       answer: question.answer,
       order: 0,
-      value: i * 200,
+      value: (i + 1) * 200,
     })),
     ...questions["Dolly Parton"].map((question, i) => ({
       category: "Dolly Parton",
       clue: question.clue,
       answer: question.answer,
       order: 0,
-      value: i * 200,
+      value: (i + 1) * 200,
     })),
     ...questions.Ferns.map((question, i) => ({
       category: "Ferns",
       clue: question.clue,
       answer: question.answer,
       order: 0,
-      value: i * 200,
+      value: (i + 1) * 200,
     })),
     ...questions["New York City"].map((question, i) => ({
       category: "New York City",
       clue: question.clue,
       answer: question.answer,
       order: 0,
-      value: i * 200,
+      value: (i + 1) * 200,
     })),
     ...questions["Pasta Shapes"].map((question, i) => ({
       category: "Pasta Shapes",
       clue: question.clue,
       answer: question.answer,
       order: 0,
-      value: i * 200,
+      value: (i + 1) * 200,
     }))
   );
 
