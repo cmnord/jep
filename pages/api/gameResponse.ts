@@ -18,14 +18,7 @@ export interface Category {
   clues: Clue[];
 }
 
-export enum Round {
-  Jeopardy,
-  DoubleJeopardy,
-  FinalJeopardy,
-}
-
 export interface Board {
-  round: Round;
   categories: Category[];
 }
 
@@ -76,7 +69,7 @@ const apiResponseToClue = (apiClue: ApiResponseClue): Clue => ({
   isDailyDouble: apiClue.value === "Daily Double",
 });
 
-export const cluesToBoard = (round: Round, clues: ApiResponseClue[]): Board => {
+export const cluesToBoard = (clues: ApiResponseClue[]): Board => {
   const categoryNames = new Map<string, Clue[]>();
   clues.forEach((clue) => {
     const clues = categoryNames.get(clue.category);
@@ -90,7 +83,6 @@ export const cluesToBoard = (round: Round, clues: ApiResponseClue[]): Board => {
   const categories: Category[] = [];
   categoryNames.forEach((clues, name) => categories.push({ name, clues }));
   return {
-    round,
     categories,
   };
 };
@@ -127,11 +119,8 @@ export default async function gameResponse(
   const apiUrl = `https://jarchive-json.glitch.me/game/${month}/${day}/${year}`;
 
   const apiResponseToGame = (apiResponse: ApiResponseGame): Game => ({
-    jeopardy: cluesToBoard(Round.Jeopardy, apiResponse.jeopardy),
-    doubleJeopardy: cluesToBoard(
-      Round.DoubleJeopardy,
-      apiResponse["double jeopardy"]
-    ),
+    jeopardy: cluesToBoard(apiResponse.jeopardy),
+    doubleJeopardy: cluesToBoard(apiResponse["double jeopardy"]),
     finalJeopardy: apiResponseToClue(apiResponse["final jeopardy"]),
   });
 

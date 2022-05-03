@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { cluesToBoard, GameResponse, Game, Clue, Round } from "./gameResponse";
+import { cluesToBoard, GameResponse, Game, Clue } from "./gameResponse";
 import questions from "./questions.json";
 
 export default async function mockGameResponse(
@@ -72,8 +72,8 @@ export default async function mockGameResponse(
   );
 
   const game: Game = {
-    jeopardy: cluesToBoard(Round.Jeopardy, clues),
-    doubleJeopardy: cluesToBoard(Round.DoubleJeopardy, []),
+    jeopardy: cluesToBoard(clues),
+    doubleJeopardy: cluesToBoard(clues),
     finalJeopardy: {
       category: "",
       clue: "",

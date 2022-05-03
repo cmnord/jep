@@ -2,19 +2,26 @@ import { Board, Category, Clue } from "../pages/api/gameResponse";
 import styles from "../styles/Board.module.css";
 import cn from "classnames";
 
+export enum Round {
+	Jeopardy = 1,
+	DoubleJeopardy,
+	FinalJeopardy,
+}
+
 interface Props {
 	step: number;
+	round: Round;
 	board?: Board;
 	onClickClue: (categoryIdx: number, clueIdx: number) => void;
 }
 
-const NUM_CATEGORIES = 6;
-const NUM_CLUES_PER_CATEGORY = 5;
+export const NUM_CATEGORIES = 6;
+export const NUM_CLUES_PER_CATEGORY = 5;
 
 /** BoardComponent is purely presentational and renders the board. */
 export default function BoardComponent(props: Props) {
 	const renderClue = (categoryIdx: number) => (clue: Clue | undefined, clueIdx: number) => {
-		const clueValue = (clueIdx + 1) * 200;
+		const clueValue = (clueIdx + 1) * 200 * props.round.valueOf();
 		const isActive = clue?.order === props.step;
 		const isAnswered = clue?.order && clue.order > 0 && !isActive;
 		const clueText = isAnswered ? (
