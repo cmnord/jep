@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { GameResponse, Game } from "../pages/api/gameResponse";
 import BoardComponent, { ClueState, BoardState, NUM_CATEGORIES, NUM_CLUES_PER_CATEGORY, Round } from "./Board";
 import Prompt from "./Prompt";
-import Preview, { SinglePreview, DoublePreview } from "./Preview";
+import { SinglePreview, DoublePreview, FinalPreview, EndPreview } from "./Preview";
 
 interface Props {
 	year: number;
@@ -147,9 +147,9 @@ export default function GameComponent(props: Props) {
 			case Round.Double:
 				return <DoublePreview onClick={handleDismissPreview} />;
 			case Round.Final:
-				return <Preview onClick={handleDismissFinalPreview}>final preview</Preview>;
+				return <FinalPreview onClick={handleDismissFinalPreview} />;
 			case Round.End:
-				return <Preview onClick={() => 1}>game summary</Preview>;
+				return <EndPreview finalClue={game?.final} />;
 		}
 	}
 

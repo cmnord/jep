@@ -13,7 +13,8 @@ const DatePicker: NextPage = () => {
 	const month = parseInt(monthStr, 10);
 	const day = parseInt(dayStr, 10);
 
-	const date = new Date(year, month, day);
+	// Month must be 0-indexed, so subtract 1.
+	const date = new Date(year, month - 1, day);
 	const dateStr = date.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
 	return (
