@@ -41,6 +41,19 @@
   align-items: center;
 }
 
+.answer {
+  margin-top: 1em;
+}
+
+.answerHidden {
+  color: #00008b;
+  text-shadow: none;
+}
+
+.answerShow {
+  color: cyan;
+}
+
 .timer{
   height: 4rem;
   width: 0%;

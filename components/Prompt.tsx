@@ -13,8 +13,25 @@ interface Props {
  */
 const MS_PER_CHARACTER = 50;
 
+enum State {
+	DailyDouble,
+	Final,
+	Clue,
+	Answer,
+}
+
 export default function Prompt(props: Props) {
-	const [clicked, setClicked] = useState(false);
+	const getInitialState = () => {
+		if (props.clue?.isDailyDouble) {
+			return State.DailyDouble;
+		} else if (props.clue?.isFinal) {
+			return State.Final;
+		}
+		return State.Clue;
+	}
+
+	const initialState = getInitialState();
+	const [state, setState] = useState(initialState);
 	const now = Date.now();
 	const [start, setStart] = useState(now);
 	const [progress, setProgress] = useState(now);
@@ -23,6 +40,7 @@ export default function Prompt(props: Props) {
 		const now = Date.now();
 		setStart(now);
 		setProgress(now);
+		setState(getInitialState());
 		if (props.clue) {
 			const interval = setInterval(() => {
 				setProgress(Date.now());
@@ -32,20 +50,36 @@ export default function Prompt(props: Props) {
 	}, [props.clue]);
 
 	const handleClick = () => {
-		if ((props.clue?.isFinal || props.clue?.isDailyDouble) && !clicked) {
-			setClicked(true);
-			return;
+		switch (state) {
+			case State.DailyDouble:
+			case State.Final:
+				setState(State.Clue);
+				return;
+			case State.Clue:
+				setState(State.Answer);
+				return;
+			case State.Answer:
+				props.onClick();
 		}
-		props.onClick();
 	}
 
 	const renderContent = () => {
-		if (props.clue?.isDailyDouble && !clicked) {
-			return "Daily Double";
-		} else if (props.clue?.isFinal && !clicked) {
-			return props.clue?.category;
-		} else {
-			return props.clue?.clue;
+		switch (state) {
+			case State.DailyDouble:
+				return <span>Daily Double</span>;
+			case State.Final:
+				return <span>{props.clue?.category}</span>;
+			case State.Clue:
+			case State.Answer:
+				return <div>
+					<div>{props.clue?.clue}</div>
+					<div className={cn(styles.answer, {
+						[styles.answerHidden]: state === State.Clue,
+						[styles.answerShow]: state === State.Answer,
+					})}>
+						{props.clue?.answer}
+					</div>
+				</div>;
 		}
 	};
 
@@ -65,7 +99,7 @@ export default function Prompt(props: Props) {
 	return <div className={cn(styles.prompt, {
 		[styles.isActive]: props.clue !== undefined,
 	})} onClick={handleClick}>
-		<div className={styles.text}><span>{renderContent()}</span></div>
+		<div className={styles.text}>{renderContent()}</div>
 		<div className={styles.timer} style={{ width: `${width}%` }} />
 	</div>;
 }
