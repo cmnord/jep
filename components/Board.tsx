@@ -1,6 +1,7 @@
 import { Board, Category, Clue } from "../pages/api/gameResponse";
 import styles from "../styles/Board.module.css";
 import cn from "classnames";
+import { Fragment } from "react";
 
 export enum Round {
 	Single = 1,
@@ -71,7 +72,7 @@ export default function BoardComponent(props: Props) {
 				<p className={styles.answer}>{clue?.answer}</p>
 			</div>
 		) : `$${clueValue}`;
-		return <div className={cn(styles.question, {
+		return <div key={`clue-${i}-${j}`} className={cn(styles.question, {
 			[styles.isAnswered]: isAnswered,
 			[styles.isActive]: isActive,
 		})
@@ -81,16 +82,16 @@ export default function BoardComponent(props: Props) {
 		</div>
 	}
 
-	const renderCategory = (category: Category | undefined, categoryIdx: number) => {
+	const renderCategory = (category: Category | undefined, i: number) => {
 		const categoryTitle = category?.name ?? "loading...";
 		const clues = new Array<Clue | undefined>(NUM_CLUES_PER_CATEGORY);
 		for (let i = 0; i < NUM_CLUES_PER_CATEGORY; i++) {
 			clues[i] = category?.clues[i]
 		}
-		return <>
-			<div className={styles.category} key={categoryIdx}>{categoryTitle}</div>
-			{clues.map(renderClue(categoryIdx))}
-		</>;
+		return <Fragment key={`category-${i}`}>
+			<div className={styles.category} key={`category-name-${i}`}>{categoryTitle}</div>
+			{clues.map(renderClue(i))}
+		</Fragment>;
 	}
 
 	const categories = new Array<Category | undefined>(NUM_CATEGORIES);
