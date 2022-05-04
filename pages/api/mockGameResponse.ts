@@ -1,5 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { cluesToBoard, GameResponse, Game, Clue } from "./gameResponse";
+import {
+  cluesToBoard,
+  GameResponse,
+  Game,
+  ApiResponseClue,
+} from "./gameResponse";
 import questions from "./questions.json";
 
 export default async function mockGameResponse(
@@ -19,7 +24,7 @@ export default async function mockGameResponse(
     return;
   }
 
-  const clues: Clue[] = [];
+  const clues: ApiResponseClue[] = [];
   clues.push(
     ...questions.Delaware.map((question, i) => ({
       category: "Delaware",
@@ -75,14 +80,19 @@ export default async function mockGameResponse(
     single: cluesToBoard(clues),
     double: cluesToBoard(clues),
     final: {
-      category: "",
-      clue: "",
-      answer: "",
-      order: 0,
+      category: "English Spelling",
+      clue: "There are at least 50 common exceptions to the rule expressed by this popular rhyming mnemonic couplet",
+      answer: "I before E, except after C",
       value: 0,
       isDailyDouble: false,
+      isFinal: true,
     },
   };
+
+  // Set some daily doubles
+  game.single.categories[2].clues[2].isDailyDouble = true;
+  game.double.categories[2].clues[2].isDailyDouble = true;
+  game.double.categories[3].clues[3].isDailyDouble = true;
 
   res.status(200).json({ error: false, game });
 }

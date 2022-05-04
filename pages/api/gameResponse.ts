@@ -7,10 +7,9 @@ export interface Clue {
   clue: string;
   /** answer is not in the form of a question. */
   answer: string;
-  /** order is the order of when it was selected by the players and starts at 1. */
-  order: number;
   value: number;
   isDailyDouble: boolean;
+  isFinal: boolean;
 }
 
 export interface Category {
@@ -44,7 +43,7 @@ interface ApiResponseError {
   message: string;
 }
 
-interface ApiResponseClue {
+export interface ApiResponseClue {
   category: string;
   clue: string;
   /** answer is not in the form of a question. */
@@ -60,13 +59,16 @@ interface ApiResponseGame {
   "final jeopardy": ApiResponseClue;
 }
 
-const apiResponseToClue = (apiClue: ApiResponseClue): Clue => ({
+const apiResponseToClue = (
+  apiClue: ApiResponseClue,
+  isFinal?: boolean
+): Clue => ({
   category: apiClue.category,
   clue: apiClue.clue,
   answer: apiClue.answer,
-  order: 0,
   value: apiClue.value === "Daily Double" ? 0 : apiClue.value,
   isDailyDouble: apiClue.value === "Daily Double",
+  isFinal: Boolean(isFinal),
 });
 
 export const cluesToBoard = (clues: ApiResponseClue[]): Board => {
@@ -121,7 +123,7 @@ export default async function gameResponse(
   const apiResponseToGame = (apiResponse: ApiResponseGame): Game => ({
     single: cluesToBoard(apiResponse.jeopardy),
     double: cluesToBoard(apiResponse["double jeopardy"]),
-    final: apiResponseToClue(apiResponse["final jeopardy"]),
+    final: apiResponseToClue(apiResponse["final jeopardy"], true),
   });
 
   await fetch(PROXY_URL + apiUrl)
