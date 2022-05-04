@@ -1,3 +1,9 @@
+@font-face {
+  font-family: 'Korinna-Agency';
+  src:  url('../public/fonts/Korinna-Agency.ttf.woff') format('woff'),
+        url('../public/fonts/Korinna-Agency.ttf.eot') format('eot');
+}
+
 .prompt {
   position: fixed;
  	top: 100%;

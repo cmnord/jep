@@ -1,9 +1,3 @@
-@font-face {
-  font-family: 'Korinna-Agency';
-  src:  url('https://cdn.glitch.com/a0ea5fd0-c422-4261-8950-fdebebccb098%2FOPTIKorinna-Agency.ttf.woff?v=1604940920210') format('woff'),
-        url('https://cdn.glitch.com/a0ea5fd0-c422-4261-8950-fdebebccb098%2FOPTIKorinna-Agency.ttf.eot?v=1604940746486') format('eot');
-}
-
 .board {
   width: 100vw;
   height: 100vh;
