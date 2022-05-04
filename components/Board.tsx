@@ -3,9 +3,9 @@ import styles from "../styles/Board.module.css";
 import cn from "classnames";
 
 export enum Round {
-	Jeopardy = 1,
-	DoubleJeopardy,
-	FinalJeopardy,
+	Single = 1,
+	Double,
+	Final,
 }
 
 interface Props {

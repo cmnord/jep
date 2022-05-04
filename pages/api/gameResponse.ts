@@ -23,9 +23,9 @@ export interface Board {
 }
 
 export interface Game {
-  jeopardy: Board;
-  doubleJeopardy: Board;
-  finalJeopardy: Clue;
+  single: Board;
+  double: Board;
+  final: Clue;
 }
 
 export type GameResponse =
@@ -119,9 +119,9 @@ export default async function gameResponse(
   const apiUrl = `https://jarchive-json.glitch.me/game/${month}/${day}/${year}`;
 
   const apiResponseToGame = (apiResponse: ApiResponseGame): Game => ({
-    jeopardy: cluesToBoard(apiResponse.jeopardy),
-    doubleJeopardy: cluesToBoard(apiResponse["double jeopardy"]),
-    finalJeopardy: apiResponseToClue(apiResponse["final jeopardy"]),
+    single: cluesToBoard(apiResponse.jeopardy),
+    double: cluesToBoard(apiResponse["double jeopardy"]),
+    final: apiResponseToClue(apiResponse["final jeopardy"]),
   });
 
   await fetch(PROXY_URL + apiUrl)

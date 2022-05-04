@@ -1,7 +1,7 @@
 {
   "name": "jep",
   "version": "0.1.0",
-  "description": "A fun, little Jeopardy app for web dev trivia!",
+  "description": "A J! trivia app",
   "private": true,
   "scripts": {
     "dev": "next dev",

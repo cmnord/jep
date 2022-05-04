@@ -12,11 +12,15 @@ const DatePicker: NextPage = () => {
 	const year = parseInt(yearStr, 10);
 	const month = parseInt(monthStr, 10);
 	const day = parseInt(dayStr, 10);
+
+	const date = new Date(year, month, day);
+	const dateStr = date.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
 	return (
 		<div>
 			<Head>
-				<title>Jeopardy!</title>
-				<meta name="description" content="A remixable Jeopardy web app with easily updatable answers and questions. Updated from an original version by @trentmwillis." />
+				<title>J!, {dateStr}</title>
+				<meta name="description" content="A J! trivia app" />
 				<link rel="icon" href="https://cdn.glitch.com/a0ea5fd0-c422-4261-8950-fdebebccb098%2Fjeopardy.png?v=1604939463216" type="image/png" sizes="16x16" />
 				<link rel="stylesheet" href="https://cdn.glitch.com/a0ea5fd0-c422-4261-8950-fdebebccb098%2FOPTIKorinna-Agency.ttf.eot?v=1604940746486" />
 			</Head>

@@ -1,6 +1,6 @@
 import useSWR from "swr";
 import React, { useEffect, useState } from "react";
-import { GameResponse, Board, Clue, Game } from "../pages/api/gameResponse";
+import { GameResponse, Clue, Game } from "../pages/api/gameResponse";
 import BoardComponent, { NUM_CATEGORIES, NUM_CLUES_PER_CATEGORY, Round } from "./Board";
 import Prompt from "./Prompt";
 
@@ -10,8 +10,8 @@ interface Props {
 	day: number;
 }
 
-const END_JEOPARDY_STEP = NUM_CATEGORIES * NUM_CLUES_PER_CATEGORY + 1;
-const END_DOUBLE_JEOPARDY_STEP = NUM_CATEGORIES * NUM_CLUES_PER_CATEGORY * 2 + 1;
+const END_SINGLE_STEP = NUM_CATEGORIES * NUM_CLUES_PER_CATEGORY + 1;
+const END_DOUBLE_STEP = NUM_CATEGORIES * NUM_CLUES_PER_CATEGORY * 2 + 1;
 
 /** Game maintains the game state. */
 export default function GameComponent(props: Props) {
@@ -30,18 +30,18 @@ export default function GameComponent(props: Props) {
 	}, [data]);
 
 	const roundForStep = (s: number) => {
-		if (s < END_JEOPARDY_STEP) {
-			return Round.Jeopardy;
-		} else if (s < END_DOUBLE_JEOPARDY_STEP) {
-			return Round.DoubleJeopardy;
+		if (s < END_SINGLE_STEP) {
+			return Round.Single;
+		} else if (s < END_DOUBLE_STEP) {
+			return Round.Double;
 		}
-		return Round.FinalJeopardy;
+		return Round.Final;
 	}
 
 	const boardForStep = (g: Game | undefined) => {
 		const round = roundForStep(step);
-		return round === Round.Jeopardy ? g?.jeopardy : g?.doubleJeopardy;
-		// TODO: g?.finalJeopardy;
+		return round === Round.Single ? g?.single : g?.double;
+		// TODO: g?.final;
 	}
 
 	const handleClickClue = (categoryIdx: number, clueIdx: number) => {

@@ -72,9 +72,9 @@ export default async function mockGameResponse(
   );
 
   const game: Game = {
-    jeopardy: cluesToBoard(clues),
-    doubleJeopardy: cluesToBoard(clues),
-    finalJeopardy: {
+    single: cluesToBoard(clues),
+    double: cluesToBoard(clues),
+    final: {
       category: "",
       clue: "",
       answer: "",
