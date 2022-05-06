@@ -1,11 +1,11 @@
-import { Clue, } from "../pages/api/gameResponse";
-import styles from "../styles/Prompt.module.css";
 import cn from "classnames";
-import { useEffect, useState } from 'react';
+import React, { KeyboardEvent, useEffect, useState } from "react";
+import { Clue } from "../pages/api/gameResponse";
+import styles from "../styles/Prompt.module.css";
 
 interface Props {
-	clue?: Clue;
-	onClick: () => void;
+  clue?: Clue;
+  onClick: () => void;
 }
 
 /** MS_PER_CHARACTER is a heuristic value to scale the amount of time per clue by
@@ -14,92 +14,113 @@ interface Props {
 const MS_PER_CHARACTER = 50;
 
 enum State {
-	DailyDouble,
-	Final,
-	Clue,
-	Answer,
+  DailyDouble,
+  Final,
+  ShowClue,
+  Answer,
 }
 
 export default function Prompt(props: Props) {
-	const getInitialState = () => {
-		if (props.clue?.isDailyDouble) {
-			return State.DailyDouble;
-		} else if (props.clue?.isFinal) {
-			return State.Final;
-		}
-		return State.Clue;
-	}
+  const getInitialState = () => {
+    if (props.clue?.isDailyDouble) {
+      return State.DailyDouble;
+    }
+    if (props.clue?.isFinal) {
+      return State.Final;
+    }
+    return State.ShowClue;
+  };
 
-	const initialState = getInitialState();
-	const [state, setState] = useState(initialState);
-	const now = Date.now();
-	const [start, setStart] = useState(now);
-	const [progress, setProgress] = useState(now);
+  const initialState = getInitialState();
+  const [state, setState] = useState(initialState);
+  const now = Date.now();
+  const [start, setStart] = useState(now);
+  const [progress, setProgress] = useState(now);
 
-	useEffect(() => {
-		const now = Date.now();
-		setStart(now);
-		setProgress(now);
-		setState(getInitialState());
-		if (props.clue) {
-			const interval = setInterval(() => {
-				setProgress(Date.now());
-			}, 1000);
-			return () => clearInterval(interval);
-		}
-	}, [props.clue]);
+  useEffect(() => {
+    const newNow = Date.now();
+    setStart(newNow);
+    setProgress(newNow);
+    setState(getInitialState());
+    if (props.clue) {
+      const interval = setInterval(() => {
+        setProgress(Date.now());
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+    return undefined;
+  }, [props.clue]);
 
-	const handleClick = () => {
-		switch (state) {
-			case State.DailyDouble:
-			case State.Final:
-				setState(State.Clue);
-				return;
-			case State.Clue:
-				setState(State.Answer);
-				return;
-			case State.Answer:
-				props.onClick();
-		}
-	}
+  const handleClick = () => {
+    switch (state) {
+      case State.DailyDouble:
+      case State.Final:
+        return setState(State.ShowClue);
+      case State.ShowClue:
+        return setState(State.Answer);
+      case State.Answer:
+      default:
+        return props.onClick();
+    }
+  };
 
-	const renderContent = () => {
-		switch (state) {
-			case State.DailyDouble:
-				return <span>Daily Double</span>;
-			case State.Final:
-				return <span>{props.clue?.category}</span>;
-			case State.Clue:
-			case State.Answer:
-				return <div>
-					<div>{props.clue?.clue}</div>
-					<div className={cn(styles.answer, {
-						[styles.answerHidden]: state === State.Clue,
-						[styles.answerShow]: state === State.Answer,
-					})}>
-						{props.clue?.answer}
-					</div>
-				</div>;
-		}
-	};
+  const handleClickKeyboard = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key !== "Enter") {
+      return;
+    }
+    handleClick();
+  };
 
-	const calculateWidth = () => {
-		const numCharactersInClue = props.clue?.clue.length ?? 0;
-		const clueDurationMS = MS_PER_CHARACTER * numCharactersInClue;
-		const diff = progress - start;
-		if (diff <= 0) {
-			return 0;
-		} else if (diff > clueDurationMS) {
-			return 100;
-		}
-		return (diff / clueDurationMS) * 100;
-	}
-	const width = calculateWidth();
+  const renderContent = () => {
+    switch (state) {
+      case State.DailyDouble:
+        return <span>Daily Double</span>;
+      case State.Final:
+        return <span>{props.clue?.category}</span>;
+      case State.Answer:
+      default:
+        return (
+          <div>
+            <div>{props.clue?.clue}</div>
+            <div
+              className={cn(styles.answer, {
+                [styles.answerHidden]: state === State.ShowClue,
+                [styles.answerShow]: state === State.Answer,
+              })}
+            >
+              {props.clue?.answer}
+            </div>
+          </div>
+        );
+    }
+  };
 
-	return <div className={cn(styles.prompt, {
-		[styles.isActive]: props.clue !== undefined,
-	})} onClick={handleClick}>
-		<div className={styles.text}>{renderContent()}</div>
-		<div className={styles.timer} style={{ width: `${width}%` }} />
-	</div>;
+  const calculateWidth = () => {
+    const numCharactersInClue = props.clue?.clue.length ?? 0;
+    const clueDurationMS = MS_PER_CHARACTER * numCharactersInClue;
+    const diff = progress - start;
+    if (diff <= 0) {
+      return 0;
+    }
+    if (diff > clueDurationMS) {
+      return 100;
+    }
+    return (diff / clueDurationMS) * 100;
+  };
+  const width = calculateWidth();
+
+  return (
+    <div
+      className={cn(styles.prompt, {
+        [styles.isActive]: props.clue !== undefined,
+      })}
+      onClick={handleClick}
+      onKeyDown={handleClickKeyboard}
+      role="button"
+      tabIndex={props.clue !== undefined ? 0 : undefined}
+    >
+      <div className={styles.text}>{renderContent()}</div>
+      <div className={styles.timer} style={{ width: `${width}%` }} />
+    </div>
+  );
 }

@@ -4,7 +4,9 @@
   background-color: black;
   color: white;
   display: grid;
-  font-family: BlinkMacSystemFont, -apple-system, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+  font-family: BlinkMacSystemFont, -apple-system, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    "Helvetica", "Arial", sans-serif;
   grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr;
   grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
   grid-auto-flow: column;
@@ -39,7 +41,8 @@
   text-shadow: 4px 4px black;
 }
 
-.question:not(.isAnswered):not(.isActive):hover {
+.question:not(.isAnswered):not(.isActive):hover,
+.question:focus {
   background-color: rgba(0, 0, 255, 0.75);
 }
 
@@ -47,7 +50,9 @@
   cursor: initial;
   color: white;
   font-size: 0px;
-  font-family: BlinkMacSystemFont, -apple-system, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+  font-family: BlinkMacSystemFont, -apple-system, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    "Helvetica", "Arial", sans-serif;
   text-shadow: none;
 }
 
@@ -55,6 +60,7 @@
   color: cyan;
 }
 
-.question.isAnswered:hover {
+.question.isAnswered:hover,
+.question.question.isAnswered:focus {
   font-size: 14px;
 }
