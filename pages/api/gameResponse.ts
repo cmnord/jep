@@ -74,16 +74,21 @@ const apiResponseToClue = (
 export const cluesToBoard = (clues: ApiResponseClue[]): Board => {
   const categoryNames = new Map<string, Clue[]>();
   clues.forEach((clue) => {
-    const clues = categoryNames.get(clue.category);
-    if (clues) {
-      categoryNames.set(clue.category, [...clues, apiResponseToClue(clue)]);
+    const cluesForCategory = categoryNames.get(clue.category);
+    if (cluesForCategory) {
+      categoryNames.set(clue.category, [
+        ...cluesForCategory,
+        apiResponseToClue(clue),
+      ]);
     } else {
       categoryNames.set(clue.category, [apiResponseToClue(clue)]);
     }
   });
 
   const categories: Category[] = [];
-  categoryNames.forEach((clues, name) => categories.push({ name, clues }));
+  categoryNames.forEach((cluesForCategory, name) =>
+    categories.push({ name, clues: cluesForCategory })
+  );
   return {
     categories,
   };
@@ -106,12 +111,11 @@ export default async function gameResponse(
     return;
   }
 
-  const strTo2Digits = (str: string) => {
-    return parseInt(str, 10).toLocaleString("en-US", {
+  const strTo2Digits = (str: string) =>
+    parseInt(str, 10).toLocaleString("en-US", {
       minimumIntegerDigits: 2,
       useGrouping: false,
     });
-  };
 
   const year = strTo2Digits(yearStr);
   const month = strTo2Digits(monthStr);
@@ -136,7 +140,6 @@ export default async function gameResponse(
         }
         const game = apiResponseToGame(answers);
         res.status(200).json({ error: false, game });
-        return;
       } else {
         res
           .status(response.status)
