@@ -1,38 +1,37 @@
-import Link from "next/link";
-import React, { KeyboardEvent } from "react";
-import styles from "../styles/Preview.module.css";
+import { useRouter } from "next/router";
+import React, { useState } from "react";
+import { Card, Modal } from "antd";
 import { Clue } from "../pages/api/gameResponse";
 
 interface Props {
+  buttonText: string;
+  title: string;
   onClick?: () => void;
   children?: React.ReactNode;
 }
 
 /** Preview is shown before a game or round starts. */
 export default function Preview(props: Props) {
-  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-    if (e.key !== "Enter") {
-      return;
-    }
+  const [showModal, setShowModal] = useState(true);
+
+  const handleClickOK = () => {
+    setShowModal(false);
     if (props.onClick) {
       props.onClick();
     }
   };
 
   return (
-    <div className={styles.overlay}>
-      <div className={styles.modal} role="dialog">
-        <div
-          className={styles.card}
-          onClick={props.onClick}
-          onKeyDown={handleKeyDown}
-          role="button"
-          tabIndex={0}
-        >
-          {props.children}
-        </div>
-      </div>
-    </div>
+    <Modal
+      title={<h2>{props.title}</h2>}
+      visible={showModal}
+      onOk={handleClickOK}
+      cancelButtonProps={{ style: { display: "none" } }}
+      closable={false}
+      okText={props.buttonText}
+    >
+      {props.children}
+    </Modal>
   );
 }
 
@@ -51,8 +50,7 @@ export function SinglePreview(props: {
     day: "numeric",
   });
   return (
-    <Preview onClick={props.onClick}>
-      <h2>Play &rarr;</h2>
+    <Preview onClick={props.onClick} title="Play &rarr;" buttonText="Start">
       <p>Click to play {dateStr}</p>
     </Preview>
   );
@@ -60,8 +58,11 @@ export function SinglePreview(props: {
 
 export function DoublePreview(props: { onClick: () => void }) {
   return (
-    <Preview onClick={props.onClick}>
-      <h2>Play Double &rarr;</h2>
+    <Preview
+      onClick={props.onClick}
+      title="Play Double &rarr;"
+      buttonText="Start"
+    >
       <p>Single round done! Click to play double</p>
     </Preview>
   );
@@ -69,24 +70,31 @@ export function DoublePreview(props: { onClick: () => void }) {
 
 export function FinalPreview(props: { onClick: () => void }) {
   return (
-    <Preview onClick={props.onClick}>
-      <h2>Play Final &rarr;</h2>
+    <Preview
+      onClick={props.onClick}
+      title="Play Final &rarr;"
+      buttonText="Start"
+    >
       <p>Double round done! Click for Final prompt</p>
     </Preview>
   );
 }
 
 export function EndPreview(props: { finalClue?: Clue }) {
+  const router = useRouter();
+  const handleClickHome = () => {
+    router.push("/");
+  };
+
   return (
-    <Link href="/">
-      <Preview>
-        <h2>Play Again &rarr;</h2>
-        <p>Game over!</p>
-        <div className={styles.clue}>
-          <p>{props.finalClue?.clue}</p>
-          <p className={styles.answer}>{props.finalClue?.answer}</p>
-        </div>
-      </Preview>
-    </Link>
+    <Preview title="Game over!" buttonText="Home" onClick={handleClickHome}>
+      <p>The final answer was:</p>
+      <Card>
+        <p>{props.finalClue?.clue}</p>
+        <p>
+          <strong>{props.finalClue?.answer}</strong>
+        </p>
+      </Card>
+    </Preview>
   );
 }

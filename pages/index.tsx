@@ -27,7 +27,6 @@ export default function Home() {
               <PlayForm />
 
               <Card
-                hoverable
                 title={<a href="https://j-archive.com">J! Archive &rarr;</a>}
               >
                 <p>

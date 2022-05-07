@@ -40,7 +40,7 @@ export default function BoardComponent(props: Props) {
     const isAnswered =
       Boolean(props.boardState?.get(i, j)?.isAnswered) && !isActive;
     const clueText = isAnswered ? (
-      <div>
+      <div className={styles.answeredQuestion}>
         {clue?.isDailyDouble ? <p>DAILY DOUBLE</p> : null}
         <p>{clue?.clue}</p>
         <p className={styles.answer}>{clue?.answer}</p>
