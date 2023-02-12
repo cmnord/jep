@@ -1,5 +1,6 @@
 import { json } from "@remix-run/node";
-import { Link, useLoaderData } from "@remix-run/react";
+import { useLoaderData } from "@remix-run/react";
+import Link from "~/components/link";
 
 interface Game {
   season: string;
@@ -19,11 +20,13 @@ export default function Index() {
   const data = useLoaderData<typeof loader>();
 
   return (
-    <div style={{ fontFamily: "system-ui, sans-serif", lineHeight: "1.4" }}>
-      <a href="https://j-archive.com">J! Archive &rarr;</a>
-      <p>Visit the J! Archive home page itself to find episode dates.</p>
-      <h2>Games</h2>
-      <ul>
+    <div>
+      <Link to="https://j-archive.com">J! Archive &rarr;</Link>
+      <p className="mb-4">
+        Visit the J! Archive home page itself to find episode dates.
+      </p>
+      <h2 className="text-2xl font-semibold mb-4">Games</h2>
+      <ul className="list-disc list-inside">
         {data.games.map((g) => (
           <li key={g.game}>
             <Link to={"/" + g.game + "/play"}>

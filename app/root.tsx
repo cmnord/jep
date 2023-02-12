@@ -8,6 +8,10 @@ import {
   ScrollRestoration,
 } from "@remix-run/react";
 
+import Link from "~/components/link";
+
+import styles from "./tailwind.css";
+
 export const meta: MetaFunction = () => ({
   charset: "utf-8",
   title: "jep!",
@@ -22,6 +26,7 @@ export const links: LinksFunction = () => [
     type: "image/png",
     sizes: "16x16",
   },
+  { rel: "stylesheet", href: styles },
 ];
 
 export default function App() {
@@ -31,15 +36,19 @@ export default function App() {
         <Meta />
         <Links />
       </head>
-      <body>
-        <h1>Jep!</h1>
-        <Outlet />
+      <body className="flex flex-col min-h-screen">
+        <nav className="p-6 bg-blue-900">
+          <h1 className="text-2xl font-bold text-white">Jep!</h1>
+        </nav>
+        <div className="p-12">
+          <Outlet />
+        </div>
         <ScrollRestoration />
         <Scripts />
         <LiveReload />
-        <div>
-          Made with &lt;3 by <a href="https://github.com/cmnord">cmnord</a>
-        </div>
+        <footer className="mt-auto p-6 text-center text-sm text-gray-500">
+          Made with &lt;3 by <Link to="https://github.com/cmnord">cmnord</Link>
+        </footer>
       </body>
     </html>
   );
