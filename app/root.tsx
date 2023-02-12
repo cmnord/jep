@@ -11,6 +11,7 @@ import {
 import Link from "~/components/link";
 
 import styles from "./tailwind.css";
+import globalStylesheet from "./styles.css";
 
 export const meta: MetaFunction = () => ({
   charset: "utf-8",
@@ -27,6 +28,7 @@ export const links: LinksFunction = () => [
     sizes: "16x16",
   },
   { rel: "stylesheet", href: styles },
+  { rel: "stylesheet", href: globalStylesheet },
 ];
 
 export default function App() {

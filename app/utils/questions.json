@@ -1,0 +1,134 @@
+{
+  "Ferns": [
+    {
+      "clue": "The leaf of a fern is often referred to as this",
+      "answer": "Frond"
+    },
+    {
+      "clue": "Unlike seed plants, ferns reproduce with these particles",
+      "answer": "Spores"
+    },
+    {
+      "clue": "Ferns first emerge in the fossil record in this period",
+      "answer": "Devonian"
+    },
+    {
+      "clue": "The study of ferns and other pteridophytes is called this",
+      "answer": "Pteridology"
+    },
+    {
+      "clue": "Ferns of this genus, commonly known as water ferns are small, floating plants that do not resemble ferns",
+      "answer": "Azolla"
+    }
+  ],
+  "Delaware": [
+    {
+      "clue": "This senator was reelected 6 times to represent Delaware",
+      "answer": "Joe Biden"
+    },
+    {
+      "clue": "This nickname pays homage to Delaware's order in ratifying the constitution",
+      "answer": "The First State"
+    },
+    {
+      "clue": "This historical geographic marker forms part of Delaware's border",
+      "answer": "The Mason-Dixon Line"
+    },
+    {
+      "clue": "Along with New Castle and Kent, this is the 3rd county in Delaware",
+      "answer": "Sussex"
+    },
+    {
+      "clue": "Before European contact people spoke this language family in the region now known as Delaware",
+      "answer": "Algonquian"
+    }
+  ],
+  "Dolly Parton": [
+    {
+      "clue": "Dolly got her start singing duets with this established star",
+      "answer": "Porter Wagoner"
+    },
+    {
+      "clue": "Dolly wrote this song featured in the movie The Bodyguard",
+      "answer": "I Will Always Love You"
+    },
+    {
+      "clue": "Dolly starred in this 1980 film with Jane Fonda and Lily Tomlin",
+      "answer": "9 to 5"
+    },
+    {
+      "clue": "Dolly, Emmylou Harris and this singer released an album in 1987",
+      "answer": "Linda Ronstadt"
+    },
+    {
+      "clue": "The Dollywood theme park is in this town in Tennessee",
+      "answer": "Pigeon Forge"
+    }
+  ],
+  "Pasta Shapes": [
+    {
+      "clue": "One of the most common filled pastas, this can be square, circular, or semi-circular",
+      "answer": "Raviolli"
+    },
+    {
+      "clue": "A long, thin, cylindrical pasta of Italian origin, made of semolina or flour and water.",
+      "answer": "Spaghetti"
+    },
+    {
+      "clue": "This type of pasta is commonly known as bow-tie pasta",
+      "answer": "Farfalle"
+    },
+    {
+      "clue": "Medium length tubes with ridges, cut diagonally at both ends",
+      "answer": "Penne"
+    },
+    {
+      "clue": "Long, thick, corkscrew-shaped pasta that may be solid or hollow.",
+      "answer": "Fusilli"
+    }
+  ],
+  "New York City": [
+    {
+      "clue": "In this year the English explorer Henry Hudson rediscovered New York Harbor while searching for the Northwest Passage",
+      "answer": "1609"
+    },
+    {
+      "clue": "The U.S. military's only active duty installation within New York City",
+      "answer": "Fort Hamilton"
+    },
+    {
+      "clue": "In 1774 the Government of New York enacted a law to widen this creek into a canal, to keep the watercourse in good condition",
+      "answer": "The Gowanus Canal"
+    },
+    {
+      "clue": "The coldest month on record in the city is this monrth in 1857, with a mean temperature of 19.6 °F",
+      "answer": "January"
+    },
+    {
+      "clue": "This NYC bridge's anchorage-to-anchorage total length is 2,910 feet",
+      "answer": "Throgs Neck Bridge"
+    }
+  ],
+  "Dairy Products": [
+    {
+      "clue": "A separator divides milk into light & heavy parts; this substance is light, so as they say, it rises to the top",
+      "answer": "cream"
+    },
+    {
+      "clue": "This product that's 80% milk fat typically takes 24 hours to make as the globules of fat are broken down so the fat will coagulate",
+      "answer": "butter"
+    },
+    {
+      "clue": "Milk is tested for these, such as penicillin, which may have been used to treat cows that fell ill",
+      "answer": "antibiotics"
+    },
+    {
+      "clue": "This process requires higher temperatures for products with more sugar & fat; for chocolate milk, it's 180 degrees, compared to 162 for milk",
+      "answer": "pasteurization"
+    },
+    {
+      "clue": "Greek-style this, like oikos, has become popular with its lush texture",
+      "answer": "yogurt"
+    }
+  ]
+}
