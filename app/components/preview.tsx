@@ -35,12 +35,12 @@ export default function Preview(props: Props) {
       <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
       <div className="fixed inset-0 z-10 overflow-y-auto">
         <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-          <div className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+          <div className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 w-full sm:max-w-lg">
             <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
               <div className="sm:flex sm:items-start">
                 <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                   <h3
-                    className="text-lg font-medium leading-6 text-gray-900"
+                    className="text-2xl font-medium leading-6 text-gray-900"
                     id="modal-title"
                   >
                     {props.title}
@@ -69,7 +69,7 @@ export function SinglePreview(props: { onClick: () => void }) {
   // Month must be 0-indexed, so subtract 1.
   return (
     <Preview onClick={props.onClick} title="Play &rarr;" buttonText="Start">
-      <p>Click to play</p>
+      <p className="text-sm text-gray-500">Click to play</p>
     </Preview>
   );
 }
@@ -81,7 +81,9 @@ export function DoublePreview(props: { onClick: () => void }) {
       title="Play Double &rarr;"
       buttonText="Start"
     >
-      <p>Single round done! Click to play double</p>
+      <p className="text-sm text-gray-500">
+        Single round done! Click to play double
+      </p>
     </Preview>
   );
 }
@@ -93,7 +95,9 @@ export function FinalPreview(props: { onClick: () => void }) {
       title="Play Final &rarr;"
       buttonText="Start"
     >
-      <p>Double round done! Click for Final prompt</p>
+      <p className="text-sm text-gray-500">
+        Double round done! Click for Final prompt
+      </p>
     </Preview>
   );
 }
@@ -114,10 +118,10 @@ export function EndPreview({ board }: { board: Board }) {
 
   return (
     <Preview title="Game over!" buttonText="Home" onClick={handleClickHome}>
-      <p>The final answer was:</p>
+      <p className="text-sm text-gray-500">The final answer was:</p>
       <div>
-        <p>{finalClue?.clue}</p>
-        <p>
+        <p className="text-sm text-gray-500">{finalClue?.clue}</p>
+        <p className="text-sm text-gray-500">
           <strong>{finalClue?.answer}</strong>
         </p>
       </div>
