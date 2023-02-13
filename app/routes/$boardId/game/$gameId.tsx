@@ -14,9 +14,6 @@ export function loader({ params }: LoaderArgs) {
     boardId,
     gameId,
     game,
-    year: 0,
-    month: 0,
-    day: 0,
   });
 }
 
@@ -28,12 +25,7 @@ export default function PlayGame() {
       <h1>
         Playing on board {data.boardId} w/ game {data.gameId}
       </h1>
-      <Game
-        game={data.game}
-        year={data.year}
-        month={data.month}
-        day={data.day}
-      />
+      <Game game={data.game} />
     </div>
   );
 }

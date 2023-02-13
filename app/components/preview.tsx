@@ -65,23 +65,11 @@ export default function Preview(props: Props) {
   );
 }
 
-export function SinglePreview(props: {
-  year: number;
-  month: number;
-  day: number;
-  onClick: () => void;
-}) {
+export function SinglePreview(props: { onClick: () => void }) {
   // Month must be 0-indexed, so subtract 1.
-  const date = new Date(props.year, props.month - 1, props.day);
-  const dateStr = date.toLocaleDateString(undefined, {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
   return (
     <Preview onClick={props.onClick} title="Play &rarr;" buttonText="Start">
-      <p>Click to play {dateStr}</p>
+      <p>Click to play</p>
     </Preview>
   );
 }

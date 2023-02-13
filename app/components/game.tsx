@@ -37,15 +37,9 @@ class GameState {
 export default function GameComponent({
   game,
   errorMsg,
-  year,
-  month,
-  day,
 }: {
   game: Game;
   errorMsg?: string;
-  year: number;
-  month: number;
-  day: number;
 }) {
   const [gameState, setGameState] = React.useState(new GameState(game));
   const [clueIdx, setClueIdx] = React.useState<{ i: number; j: number }>();
@@ -117,14 +111,7 @@ export default function GameComponent({
       case game.boards.length - 1:
         return <FinalPreview onClick={handleDismissFinalPreview} />;
       case 0:
-        return (
-          <SinglePreview
-            year={year}
-            month={month}
-            day={day}
-            onClick={handleDismissPreview}
-          />
-        );
+        return <SinglePreview onClick={handleDismissPreview} />;
       case 1:
         return <DoublePreview onClick={handleDismissPreview} />;
     }

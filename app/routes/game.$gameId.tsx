@@ -20,9 +20,6 @@ export async function loader({ request, params }: LoaderArgs) {
     return json({
       gameId,
       game: cachedGame,
-      year: 0,
-      month: 0,
-      day: 0,
     });
   }
 
@@ -33,9 +30,6 @@ export async function loader({ request, params }: LoaderArgs) {
   return json({
     gameId,
     game,
-    year: 0,
-    month: 0,
-    day: 0,
   });
 }
 
@@ -45,12 +39,7 @@ export default function PlayGame() {
   return (
     <div>
       <h1>Playing on random board w/ game {data.gameId}</h1>
-      <GameComponent
-        game={data.game}
-        year={data.year}
-        month={data.month}
-        day={data.day}
-      />
+      <GameComponent game={data.game} />
     </div>
   );
 }
