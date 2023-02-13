@@ -1,6 +1,5 @@
 export default class ClueState {
   isActive: boolean;
-
   isAnswered: boolean;
 
   constructor(state?: ClueState) {

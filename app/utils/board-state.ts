@@ -1,119 +1,58 @@
+import { Board } from "~/models/board.server";
 import ClueState from "./clue-state";
 
-type Tuple<T, N extends number> = N extends N
-  ? number extends N
-    ? T[]
-    : TupleOf<T, N, []>
-  : never;
-type TupleOf<T, N extends number, R extends unknown[]> = R["length"] extends N
-  ? R
-  : TupleOf<T, N, [T, ...R]>;
-
-type ValueState = Tuple<ClueState, 6>;
-type BoardTuple = Tuple<ValueState, 5>;
-
 export default class BoardState {
-  state: BoardTuple;
+  board: Board;
+  state: ClueState[][];
+  numClues: number;
+  numAnswered: number;
 
-  constructor(startState?: BoardState) {
-    if (startState) {
-      this.state = [
-        [
-          new ClueState(startState.get(0, 0)),
-          new ClueState(startState.get(0, 1)),
-          new ClueState(startState.get(0, 2)),
-          new ClueState(startState.get(0, 3)),
-          new ClueState(startState.get(0, 4)),
-          new ClueState(startState.get(0, 5)),
-        ],
-        [
-          new ClueState(startState.get(1, 0)),
-          new ClueState(startState.get(1, 1)),
-          new ClueState(startState.get(1, 2)),
-          new ClueState(startState.get(1, 3)),
-          new ClueState(startState.get(1, 4)),
-          new ClueState(startState.get(1, 5)),
-        ],
-        [
-          new ClueState(startState.get(2, 0)),
-          new ClueState(startState.get(2, 1)),
-          new ClueState(startState.get(2, 2)),
-          new ClueState(startState.get(2, 3)),
-          new ClueState(startState.get(2, 4)),
-          new ClueState(startState.get(2, 5)),
-        ],
-        [
-          new ClueState(startState.get(3, 0)),
-          new ClueState(startState.get(3, 1)),
-          new ClueState(startState.get(3, 2)),
-          new ClueState(startState.get(3, 3)),
-          new ClueState(startState.get(3, 4)),
-          new ClueState(startState.get(3, 5)),
-        ],
-        [
-          new ClueState(startState.get(4, 0)),
-          new ClueState(startState.get(4, 1)),
-          new ClueState(startState.get(4, 2)),
-          new ClueState(startState.get(4, 3)),
-          new ClueState(startState.get(4, 4)),
-          new ClueState(startState.get(4, 5)),
-        ],
-      ];
-      return;
+  constructor(board: Board) {
+    this.board = board;
+    this.state = [];
+    this.numClues = 0;
+    this.numAnswered = 0;
+
+    let j = 0;
+    for (const category of board.categories) {
+      const clues = board.clues[category];
+      for (let i = 0; i < clues.length; i++) {
+        const clueState = new ClueState();
+        const clueRow = this.state[i];
+        if (clueRow) {
+          clueRow.push(clueState);
+        } else {
+          this.state.push([clueState]);
+        }
+        if (clueState.isAnswered) {
+          this.numAnswered++;
+        }
+        this.numClues++;
+      }
+      j++;
     }
-
-    this.state = [
-      [
-        new ClueState(),
-        new ClueState(),
-        new ClueState(),
-        new ClueState(),
-        new ClueState(),
-        new ClueState(),
-      ],
-      [
-        new ClueState(),
-        new ClueState(),
-        new ClueState(),
-        new ClueState(),
-        new ClueState(),
-        new ClueState(),
-      ],
-      [
-        new ClueState(),
-        new ClueState(),
-        new ClueState(),
-        new ClueState(),
-        new ClueState(),
-        new ClueState(),
-      ],
-      [
-        new ClueState(),
-        new ClueState(),
-        new ClueState(),
-        new ClueState(),
-        new ClueState(),
-        new ClueState(),
-      ],
-      [
-        new ClueState(),
-        new ClueState(),
-        new ClueState(),
-        new ClueState(),
-        new ClueState(),
-        new ClueState(),
-      ],
-    ];
   }
 
   get(i: number, j: number) {
-    return this.state[i][j];
+    const row = this.state[i];
+    if (row) {
+      return row[j];
+    }
   }
 
   /** set returns a new BoardState with the cell set to the given value. */
   set(i: number, j: number, state: ClueState) {
-    const newBoard = new BoardState(this);
-    newBoard.state[i][j] = state;
-    return newBoard;
+    const prevState = this.state[i][j];
+    if (!prevState.isAnswered && state.isAnswered) {
+      this.numAnswered++;
+    } else if (prevState.isAnswered && !state.isAnswered) {
+      this.numAnswered--;
+    }
+    this.state[i][j] = state;
+    return this;
+  }
+
+  answered() {
+    return this.numAnswered === this.numClues;
   }
 }

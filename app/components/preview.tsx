@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "@remix-run/react";
 
-import { Clue } from "~/models/clue.server";
+import { Board } from "~/models/board.server";
 
 interface Props {
   buttonText: string;
@@ -53,7 +53,7 @@ export default function Preview(props: Props) {
               <button
                 onClick={handleClickOK}
                 type="button"
-                className="inline-flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm"
+                className="inline-flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm"
               >
                 {props.buttonText}
               </button>
@@ -110,20 +110,27 @@ export function FinalPreview(props: { onClick: () => void }) {
   );
 }
 
-export function EndPreview(props: { finalClue?: Clue }) {
+export function EndPreview({ board }: { board: Board }) {
   const navigate = useNavigate();
 
   const handleClickHome = () => {
     return navigate("/");
   };
 
+  const finalClue = (() => {
+    for (const category in board.clues) {
+      const clues = board.clues[category];
+      return clues[0];
+    }
+  })();
+
   return (
     <Preview title="Game over!" buttonText="Home" onClick={handleClickHome}>
       <p>The final answer was:</p>
       <div>
-        <p>{props.finalClue?.clue}</p>
+        <p>{finalClue?.clue}</p>
         <p>
-          <strong>{props.finalClue?.answer}</strong>
+          <strong>{finalClue?.answer}</strong>
         </p>
       </div>
     </Preview>

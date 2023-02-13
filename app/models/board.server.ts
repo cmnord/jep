@@ -1,6 +1,8 @@
 import { Clue } from "~/models/clue.server";
 
-export interface Board {
+export type Board = {
   categories: string[];
-  clues: Clue[][];
-}
+  clues: {
+    [key: string]: Clue[];
+  };
+};

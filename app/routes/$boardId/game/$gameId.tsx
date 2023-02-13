@@ -4,7 +4,7 @@ import { useLoaderData } from "@remix-run/react";
 import Game from "~/components/game";
 import { getMockGame } from "~/models/game.server";
 
-export function loader({ request, params }: LoaderArgs) {
+export function loader({ params }: LoaderArgs) {
   const boardId = params.boardId;
   const gameId = params.gameId;
 

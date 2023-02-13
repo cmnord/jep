@@ -1,10 +1,7 @@
 import * as React from "react";
+
 import { Game } from "~/models/game.server";
-import BoardComponent, {
-  NUM_CATEGORIES,
-  NUM_CLUES_PER_CATEGORY,
-  Round,
-} from "~/components/board";
+import BoardComponent from "~/components/board";
 import ClueState from "~/utils/clue-state";
 import BoardState from "~/utils/board-state";
 import Prompt from "~/components/prompt";
@@ -14,24 +11,27 @@ import {
   FinalPreview,
   EndPreview,
 } from "~/components/preview";
+import { Board } from "~/models/board.server";
 
-type GameState = {
-  [Round.Single]: BoardState;
-  [Round.Double]: BoardState;
-  [Round.Final]: ClueState;
-  [Round.End]: undefined;
-};
+class GameState {
+  boardStates: BoardState[];
 
-const TOTAL_NUM_CLUES = NUM_CATEGORIES * NUM_CLUES_PER_CATEGORY;
-/** FINAL_CLUE_IDX is a sentinel value to show the final clue index. */
-const FINAL_CLUE_IDX = { i: -1, j: -1 };
+  constructor(g: Game) {
+    this.boardStates = [];
+    for (const board of g.boards) {
+      this.boardStates.push(new BoardState(board));
+    }
+  }
 
-const emptyGameState: GameState = {
-  [Round.Single]: new BoardState(),
-  [Round.Double]: new BoardState(),
-  [Round.Final]: new ClueState(),
-  [Round.End]: undefined,
-};
+  get(round: number) {
+    return this.boardStates[round];
+  }
+
+  set(round: number, state: BoardState) {
+    this.boardStates[round] = state;
+    return this;
+  }
+}
 
 /** GameComponent maintains the game state. */
 export default function GameComponent({
@@ -47,54 +47,27 @@ export default function GameComponent({
   month: number;
   day: number;
 }) {
-  const [gameState, setGameState] = React.useState<GameState>(emptyGameState);
+  const [gameState, setGameState] = React.useState(new GameState(game));
   const [clueIdx, setClueIdx] = React.useState<{ i: number; j: number }>();
 
-  const [round, setRound] = React.useState(Round.Single);
-  const [cluesAnswered, setCluesAnswered] = React.useState(0);
+  const [round, setRound] = React.useState(0);
 
   const [showPreview, setShowPreview] = React.useState(true);
-
-  const boardForGame = (g: Game) => {
-    switch (round) {
-      case Round.Single:
-        return g?.single;
-      case Round.Double:
-        return g?.double;
-      case Round.Final:
-      case Round.End:
-      default:
-        return undefined;
-    }
-  };
 
   const getActiveClue = (idx?: { i: number; j: number }) => {
     if (!idx) {
       return undefined;
     }
-    const board = boardForGame(game);
+    const board = game.boards[round];
     if (board) {
-      return board.clues[idx.i][idx.j];
-    }
-    return game?.final;
-  };
-
-  const boardStateForRoundAndGameState = (r: Round, g: GameState) => {
-    switch (r) {
-      case Round.Single:
-        return g[Round.Single];
-      case Round.Double:
-        return g[Round.Double];
-      case Round.Final:
-      case Round.End:
-      default:
-        return undefined;
+      const category = board.categories[idx.j];
+      return board.clues[category][idx.i];
     }
   };
 
   const handleClickClue = (i: number, j: number) => {
-    const boardState = boardStateForRoundAndGameState(round, gameState);
-    if (!boardState || boardState.get(i, j).isAnswered) {
+    const boardState = gameState.get(round);
+    if (!boardState || boardState.get(i, j)?.isAnswered) {
       return;
     }
     // not yet answered
@@ -103,11 +76,7 @@ export default function GameComponent({
       isAnswered: false,
     });
     const newBoardState = boardState.set(i, j, newClueState);
-    const newGameState: GameState = {
-      ...gameState,
-      [round]: newBoardState,
-    };
-    setGameState(newGameState);
+    setGameState((gs) => gs.set(round, newBoardState));
     setClueIdx({ i, j });
   };
 
@@ -116,55 +85,21 @@ export default function GameComponent({
   }
 
   const handleClickPrompt = (idx?: { i: number; j: number }) => {
-    switch (round) {
-      case Round.Single:
-      case Round.Double: {
-        if (!idx) {
-          break;
-        }
-        const newClueState = new ClueState({
-          isAnswered: true,
-          isActive: false,
-        });
-        const newBoardState = gameState[round].set(idx.i, idx.j, newClueState);
-        const newGameState: GameState = {
-          ...gameState,
-          [round]: newBoardState,
-        };
-        setGameState(newGameState);
-        break;
-      }
-      case Round.Final: {
-        const newClueState = new ClueState({
-          isAnswered: true,
-          isActive: false,
-        });
-        const newGameState: GameState = {
-          ...gameState,
-          [round]: newClueState,
-        };
-        setGameState(newGameState);
-        break;
-      }
-      case Round.End:
-      default:
-        break;
+    if (!idx) {
+      return;
     }
+    const newClueState = new ClueState({
+      isAnswered: true,
+      isActive: false,
+    });
+    const newBoardState = gameState.get(round).set(idx.i, idx.j, newClueState);
+    setGameState((gs) => gs.set(round, newBoardState));
 
-    const newCluesAnswered = cluesAnswered + 1;
-    if (newCluesAnswered === TOTAL_NUM_CLUES) {
-      setRound(Round.Double);
-      setShowPreview(true);
-    } else if (newCluesAnswered === TOTAL_NUM_CLUES * 2) {
-      setRound(Round.Final);
-      setShowPreview(true);
-    } else if (newCluesAnswered === TOTAL_NUM_CLUES * 2 + 1) {
-      setRound(Round.End);
+    if (newBoardState.answered()) {
+      setRound((r) => r + 1);
       setShowPreview(true);
     }
-    setCluesAnswered(newCluesAnswered);
     setClueIdx(undefined);
-    return newCluesAnswered;
   };
 
   const handleDismissPreview = () => {
@@ -172,13 +107,16 @@ export default function GameComponent({
   };
 
   const handleDismissFinalPreview = () => {
-    setClueIdx(FINAL_CLUE_IDX);
     setShowPreview(false);
   };
 
   const renderPreview = () => {
     switch (round) {
-      case Round.Single:
+      case game.boards.length:
+        return <EndPreview board={game.boards[round - 1]} />;
+      case game.boards.length - 1:
+        return <FinalPreview onClick={handleDismissFinalPreview} />;
+      case 0:
         return (
           <SinglePreview
             year={year}
@@ -187,17 +125,12 @@ export default function GameComponent({
             onClick={handleDismissPreview}
           />
         );
-      case Round.Double:
+      case 1:
         return <DoublePreview onClick={handleDismissPreview} />;
-      case Round.Final:
-        return <FinalPreview onClick={handleDismissFinalPreview} />;
-      case Round.End:
-      default:
-        return <EndPreview finalClue={game?.final} />;
     }
   };
 
-  const board = boardForGame(game);
+  const board: Board | undefined = game.boards[round];
   return (
     <>
       {showPreview ? renderPreview() : null}
@@ -208,9 +141,9 @@ export default function GameComponent({
       {board && (
         <BoardComponent
           board={board}
-          boardState={boardStateForRoundAndGameState(round, gameState)}
+          roundMultiplier={round + 1}
+          boardState={gameState.get(round)}
           onClickClue={handleClickClue}
-          round={round}
         />
       )}
     </>

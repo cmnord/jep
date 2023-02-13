@@ -5,21 +5,13 @@ import { Board } from "~/models/board.server";
 import { Clue } from "~/models/clue.server";
 import BoardState from "~/utils/board-state";
 
-export enum Round {
-  Single = 1,
-  Double,
-  Final,
-  End,
-}
-
-export const NUM_CATEGORIES = 6;
-export const NUM_CLUES_PER_CATEGORY = 5;
+const NUM_CLUES_PER_CATEGORY = 5;
 
 function Clue({
   clue,
   i,
   j,
-  round,
+  roundMultiplier,
   isActive,
   isAnswered,
   onClick,
@@ -27,7 +19,7 @@ function Clue({
   clue: Clue;
   i: number;
   j: number;
-  round: Round;
+  roundMultiplier: number;
   isActive: boolean;
   isAnswered: boolean;
   onClick: (categoryIdx: number, clueIdx: number) => void;
@@ -43,7 +35,9 @@ function Clue({
     onClick(i, j);
   };
 
-  const clueValue = (i + 1) * 200 * round.valueOf();
+  const clueValue = (i + 1) * 200 * roundMultiplier;
+  const tabIndex = i * NUM_CLUES_PER_CATEGORY + j + 1;
+
   const clueText = isAnswered ? (
     <div className="opacity-0 hover:opacity-100 transition">
       {clue.isDailyDouble ? <p>DAILY DOUBLE</p> : null}
@@ -57,7 +51,6 @@ function Clue({
   );
   return (
     <td
-      key={`clue-${i}-${j}`}
       className={classNames(
         "p-5 bg-blue-900 hover:bg-blue-700 focus:bg-blue-700 transition-colors border-black border-8",
         { isActive }
@@ -65,7 +58,7 @@ function Clue({
       onClick={() => onClick(i, j)}
       onKeyDown={(e) => onClickKeyboard(e, i, j)}
       role="button"
-      tabIndex={i * NUM_CLUES_PER_CATEGORY + j + 1}
+      tabIndex={tabIndex}
     >
       <div className="flex justify-center items-center">{clueText}</div>
     </td>
@@ -76,12 +69,12 @@ function ClueRow({
   clues,
   i,
   boardState,
-  round,
+  roundMultiplier,
   onClickClue,
 }: {
   clues: Clue[];
   i: number;
-  round: Round;
+  roundMultiplier: number;
   boardState?: BoardState;
   onClickClue: (categoryIdx: number, clueIdx: number) => void;
 }) {
@@ -93,10 +86,11 @@ function ClueRow({
           Boolean(boardState?.get(i, j)?.isAnswered) && !isActive;
         return (
           <Clue
+            key={`clue-${i}-${j}`}
             clue={clue}
             i={i}
             j={j}
-            round={round}
+            roundMultiplier={roundMultiplier}
             isActive={isActive}
             isAnswered={isAnswered}
             onClick={onClickClue}
@@ -109,35 +103,60 @@ function ClueRow({
 /** BoardComponent is purely presentational and renders the board. */
 export default function BoardComponent({
   board,
-  round,
+  roundMultiplier,
   boardState,
   onClickClue,
 }: {
   board: Board;
-  round: Round;
+  roundMultiplier: number;
   boardState?: BoardState;
   onClickClue: (categoryIdx: number, clueIdx: number) => void;
 }) {
+  const clueRows = new Map<number, Clue[]>();
+  for (const category in board.clues) {
+    const clues = board.clues[category];
+    for (let i = 0; i < clues.length; i++) {
+      const clue = clues[i];
+      const clueValue = (i + 1) * 200 * roundMultiplier;
+      const clueRow = clueRows.get(clueValue);
+      if (clueRow) {
+        clueRow.push(clue);
+      } else {
+        clueRows.set(clueValue, [clue]);
+      }
+    }
+  }
+
+  const sortedClueRows = Array.from(clueRows.entries()).sort(
+    (a, b) => a[0] - b[0]
+  );
+
   return (
     <table className="bg-black text-white border-spacing-3 table-fixed w-full">
-      <tr>
-        {board.categories.map((category) => (
-          <th className="p-5 bg-blue-900 border-black border-8 font-impact">
-            <div className="text-4xl font-bold mb-2 break-words uppercase">
-              {category}
-            </div>
-          </th>
+      <tbody>
+        <tr>
+          {board.categories.map((category) => (
+            <th
+              key={category}
+              className="p-5 bg-blue-900 border-black border-8 font-impact"
+            >
+              <div className="text-4xl font-bold mb-2 break-words uppercase">
+                {category}
+              </div>
+            </th>
+          ))}
+        </tr>
+        {sortedClueRows.map(([value, clues], i) => (
+          <ClueRow
+            key={value}
+            clues={clues}
+            i={i}
+            roundMultiplier={roundMultiplier}
+            boardState={boardState}
+            onClickClue={onClickClue}
+          />
         ))}
-      </tr>
-      {board.clues.map((clues, i) => (
-        <ClueRow
-          clues={clues}
-          i={i}
-          round={round}
-          boardState={boardState}
-          onClickClue={onClickClue}
-        />
-      ))}
+      </tbody>
     </table>
   );
 }
