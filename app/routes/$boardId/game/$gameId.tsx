@@ -4,11 +4,11 @@ import { useLoaderData } from "@remix-run/react";
 import Game from "~/components/game";
 import { getMockGame } from "~/models/game.server";
 
-export function loader({ params }: LoaderArgs) {
+export async function loader({ params }: LoaderArgs) {
   const boardId = params.boardId;
   const gameId = params.gameId;
 
-  const game = getMockGame();
+  const game = await getMockGame("mini.jep.json");
 
   return json({
     boardId,
