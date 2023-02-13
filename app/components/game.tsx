@@ -5,13 +5,9 @@ import BoardComponent from "~/components/board";
 import ClueState from "~/utils/clue-state";
 import BoardState from "~/utils/board-state";
 import Prompt from "~/components/prompt";
-import {
-  SinglePreview,
-  DoublePreview,
-  FinalPreview,
-  EndPreview,
-} from "~/components/preview";
 import { Board } from "~/models/board.server";
+import Preview from "~/components/preview";
+import { Clue } from "~/models/clue.server";
 
 class GameState {
   boardStates: BoardState[];
@@ -48,8 +44,17 @@ export default function GameComponent({
 
   const [showPreview, setShowPreview] = React.useState(true);
 
+  const board: Board | undefined = game.boards[round];
+
+  let finalClue: Clue | undefined;
+  const finalBoard = game.boards[game.boards.length - 1];
+  for (const category in finalBoard.clues) {
+    const clues = finalBoard.clues[category];
+    finalClue = clues[clues.length - 1];
+    break;
+  }
+
   const getActiveClue = (i: number, j: number) => {
-    const board = game.boards[round];
     if (board) {
       const category = board.categories[j];
       return board.clues[category][i];
@@ -90,23 +95,15 @@ export default function GameComponent({
     setClueIdx(undefined);
   };
 
-  const renderPreview = () => {
-    switch (round) {
-      case game.boards.length:
-        return <EndPreview board={game.boards[round - 1]} />;
-      case game.boards.length - 1:
-        return <FinalPreview onClick={() => setShowPreview(false)} />;
-      case 0:
-        return <SinglePreview onClick={() => setShowPreview(false)} />;
-      case 1:
-        return <DoublePreview onClick={() => setShowPreview(false)} />;
-    }
-  };
-
-  const board: Board | undefined = game.boards[round];
   return (
     <>
-      {showPreview ? renderPreview() : null}
+      <Preview
+        round={round}
+        numRounds={game.boards.length}
+        isOpen={showPreview}
+        onClose={() => setShowPreview(false)}
+        finalClue={finalClue}
+      />
       <Prompt
         clue={clueIdx ? getActiveClue(clueIdx.i, clueIdx.j) : undefined}
         onClick={() =>

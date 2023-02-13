@@ -11,7 +11,6 @@ function Category({ category }: { category: string }) {
   const words = category.split(" ");
   const numWords = words.length;
   const wordScore = words.join("").length * numWords;
-  console.log(category, wordScore);
   return (
     <th className="p-4 bg-blue-1000 border-black text-shadow-1 border-8 font-impact border-b-12">
       <div
@@ -153,7 +152,7 @@ export default function BoardComponent({
   );
 
   return (
-    <div className="w-full overflow-scroll">
+    <div className="w-full overflow-scroll md:flex md:flex-col md:items-center">
       <table className="bg-black text-white border-spacing-3 table-fixed">
         <thead>
           <tr>
