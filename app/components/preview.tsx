@@ -41,9 +41,7 @@ export default function Preview({
           title="Play Final &rarr;"
           buttonContent="Start"
         >
-          <p className="text-gray-500">
-            Double round done! Click for Final prompt
-          </p>
+          <p className="text-gray-500">Round done! Click for final prompt</p>
         </Modal>
       );
     case 0:

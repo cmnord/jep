@@ -46,6 +46,15 @@ export default function GameComponent({
 
   const board: Board | undefined = game.boards[round];
 
+  const getActiveClue = (i: number, j: number) => {
+    if (board) {
+      const category = board.categories[j];
+      return board.clues[category][i];
+    }
+  };
+
+  const clue = clueIdx ? getActiveClue(clueIdx.i, clueIdx.j) : undefined;
+
   let finalClue: Clue | undefined;
   const finalBoard = game.boards[game.boards.length - 1];
   for (const category in finalBoard.clues) {
@@ -53,13 +62,6 @@ export default function GameComponent({
     finalClue = clues[clues.length - 1];
     break;
   }
-
-  const getActiveClue = (i: number, j: number) => {
-    if (board) {
-      const category = board.categories[j];
-      return board.clues[category][i];
-    }
-  };
 
   const handleClickClue = (i: number, j: number) => {
     const boardState = gameState.get(round);
@@ -105,7 +107,7 @@ export default function GameComponent({
         finalClue={finalClue}
       />
       <Prompt
-        clue={clueIdx ? getActiveClue(clueIdx.i, clueIdx.j) : undefined}
+        clue={clue}
         onClick={() =>
           clueIdx ? handleClickPrompt(clueIdx.i, clueIdx.j) : null
         }
