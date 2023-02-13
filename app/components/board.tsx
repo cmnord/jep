@@ -7,6 +7,27 @@ import BoardState from "~/utils/board-state";
 
 const NUM_CLUES_PER_CATEGORY = 5;
 
+function Category({ category }: { category: string }) {
+  const words = category.split(" ");
+  const numWords = words.length;
+  const wordScore = words.join("").length * numWords;
+  console.log(category, wordScore);
+  return (
+    <th className="p-4 bg-blue-900 border-black text-shadow-1 border-8 font-impact border-b-12">
+      <div
+        className={classNames("mt-auto font-bold break-words uppercase", {
+          "text-4xl": wordScore <= 5,
+          "text-3xl": wordScore > 5 && wordScore <= 20,
+          "text-2xl": wordScore > 20 && wordScore < 30,
+          "text-xl": wordScore > 30,
+        })}
+      >
+        {category}
+      </div>
+    </th>
+  );
+}
+
 function Clue({
   clue,
   i,
@@ -45,14 +66,14 @@ function Clue({
       <p className="text-cyan-300 mt-4">{clue.answer}</p>
     </div>
   ) : (
-    <div className="text-5xl text-yellow-400 text-shadow font-impact">
+    <div className="text-5xl text-yellow-500 text-shadow-3 font-impact">
       ${clueValue}
     </div>
   );
   return (
     <td
       className={classNames(
-        "p-5 bg-blue-900 hover:bg-blue-700 focus:bg-blue-700 transition-colors border-black border-8",
+        "px-5 py-4 bg-blue-900 hover:bg-blue-700 focus:bg-blue-700 transition-colors border-black border-8",
         { isActive }
       )}
       onClick={() => onClick(i, j)}
@@ -132,31 +153,28 @@ export default function BoardComponent({
   );
 
   return (
-    <table className="bg-black text-white border-spacing-3 table-fixed w-full">
-      <tbody>
-        <tr>
-          {board.categories.map((category) => (
-            <th
-              key={category}
-              className="p-5 bg-blue-900 border-black border-8 font-impact"
-            >
-              <div className="text-4xl font-bold mb-2 break-words uppercase">
-                {category}
-              </div>
-            </th>
+    <div className="w-full overflow-scroll">
+      <table className="bg-black text-white border-spacing-3 table-fixed">
+        <thead>
+          <tr>
+            {board.categories.map((category) => (
+              <Category key={category} category={category} />
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {sortedClueRows.map(([value, clues], i) => (
+            <ClueRow
+              key={value}
+              clues={clues}
+              i={i}
+              roundMultiplier={roundMultiplier}
+              boardState={boardState}
+              onClickClue={onClickClue}
+            />
           ))}
-        </tr>
-        {sortedClueRows.map(([value, clues], i) => (
-          <ClueRow
-            key={value}
-            clues={clues}
-            i={i}
-            roundMultiplier={roundMultiplier}
-            boardState={boardState}
-            onClickClue={onClickClue}
-          />
-        ))}
-      </tbody>
-    </table>
+        </tbody>
+      </table>
+    </div>
   );
 }

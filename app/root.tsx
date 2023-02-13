@@ -42,9 +42,7 @@ export default function App() {
         <nav className="p-6 bg-blue-900">
           <h1 className="text-2xl font-bold text-white">Jep!</h1>
         </nav>
-        <div className="p-12">
-          <Outlet />
-        </div>
+        <Outlet />
         <ScrollRestoration />
         <Scripts />
         <LiveReload />

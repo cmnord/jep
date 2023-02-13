@@ -1,9 +1,17 @@
-.text-shadow {
-  text-shadow: 4px 4px black;
+.text-shadow-1 {
+  text-shadow: 1px 1px black;
+}
+
+.text-shadow-3 {
+  text-shadow: 3px 3px black;
 }
 
 .font-impact {
   font-family: "Impact";
+}
+
+.border-b-12 {
+  border-bottom-width: 12px;
 }
 
 @font-face {

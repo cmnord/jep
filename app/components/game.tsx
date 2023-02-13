@@ -48,14 +48,11 @@ export default function GameComponent({
 
   const [showPreview, setShowPreview] = React.useState(true);
 
-  const getActiveClue = (idx?: { i: number; j: number }) => {
-    if (!idx) {
-      return undefined;
-    }
+  const getActiveClue = (i: number, j: number) => {
     const board = game.boards[round];
     if (board) {
-      const category = board.categories[idx.j];
-      return board.clues[category][idx.i];
+      const category = board.categories[j];
+      return board.clues[category][i];
     }
   };
 
@@ -78,15 +75,12 @@ export default function GameComponent({
     return <div>Error :({errorMsg}</div>;
   }
 
-  const handleClickPrompt = (idx?: { i: number; j: number }) => {
-    if (!idx) {
-      return;
-    }
+  const handleClickPrompt = (i: number, j: number) => {
     const newClueState = new ClueState({
       isAnswered: true,
       isActive: false,
     });
-    const newBoardState = gameState.get(round).set(idx.i, idx.j, newClueState);
+    const newBoardState = gameState.get(round).set(i, j, newClueState);
     setGameState((gs) => gs.set(round, newBoardState));
 
     if (newBoardState.answered()) {
@@ -96,24 +90,16 @@ export default function GameComponent({
     setClueIdx(undefined);
   };
 
-  const handleDismissPreview = () => {
-    setShowPreview(false);
-  };
-
-  const handleDismissFinalPreview = () => {
-    setShowPreview(false);
-  };
-
   const renderPreview = () => {
     switch (round) {
       case game.boards.length:
         return <EndPreview board={game.boards[round - 1]} />;
       case game.boards.length - 1:
-        return <FinalPreview onClick={handleDismissFinalPreview} />;
+        return <FinalPreview onClick={() => setShowPreview(false)} />;
       case 0:
-        return <SinglePreview onClick={handleDismissPreview} />;
+        return <SinglePreview onClick={() => setShowPreview(false)} />;
       case 1:
-        return <DoublePreview onClick={handleDismissPreview} />;
+        return <DoublePreview onClick={() => setShowPreview(false)} />;
     }
   };
 
@@ -122,8 +108,10 @@ export default function GameComponent({
     <>
       {showPreview ? renderPreview() : null}
       <Prompt
-        clue={getActiveClue(clueIdx)}
-        onClick={() => handleClickPrompt(clueIdx)}
+        clue={clueIdx ? getActiveClue(clueIdx.i, clueIdx.j) : undefined}
+        onClick={() =>
+          clueIdx ? handleClickPrompt(clueIdx.i, clueIdx.j) : null
+        }
       />
       {board && (
         <BoardComponent
