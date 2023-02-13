@@ -23,10 +23,10 @@ export default function Preview({
           title="Game over!"
           buttonContent={<Link to="/">Home</Link>}
         >
-          <p className="text-sm text-gray-500">The final answer was:</p>
+          <p className="text-gray-500">The final answer was:</p>
           <div>
-            <p className="text-sm text-gray-500">{finalClue?.clue}</p>
-            <p className="text-sm text-gray-500">
+            <p className="text-gray-500">{finalClue?.clue}</p>
+            <p className="text-gray-500">
               <strong>{finalClue?.answer}</strong>
             </p>
           </div>
@@ -41,7 +41,7 @@ export default function Preview({
           title="Play Final &rarr;"
           buttonContent="Start"
         >
-          <p className="text-sm text-gray-500">
+          <p className="text-gray-500">
             Double round done! Click for Final prompt
           </p>
         </Modal>
@@ -54,7 +54,7 @@ export default function Preview({
           title="Play &rarr;"
           buttonContent="Start"
         >
-          <p className="text-sm text-gray-500">Click to play</p>
+          <p className="text-gray-500">Click to play</p>
         </Modal>
       );
     case 1:
@@ -65,7 +65,7 @@ export default function Preview({
           title="Play Double &rarr;"
           buttonContent="Start"
         >
-          <p className="text-sm text-gray-500">
+          <p className="text-gray-500">
             Single round done! Click to play double
           </p>
         </Modal>

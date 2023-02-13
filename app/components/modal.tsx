@@ -1,7 +1,8 @@
-import React from "react";
+import * as React from "react";
+
 export default function Modal(props: {
   buttonContent: React.ReactNode;
-  title: string;
+  title: React.ReactNode;
   isOpen: boolean;
   onClick?: () => void;
   children?: React.ReactNode;

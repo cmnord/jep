@@ -1,9 +1,7 @@
-import React from "react";
+import * as React from "react";
 import classNames from "classnames";
 
 import { Clue } from "~/models/clue.server";
-
-// import styles from "../styles/Prompt.module.css";
 
 interface Props {
   clue?: Clue;

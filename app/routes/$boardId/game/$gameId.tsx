@@ -21,10 +21,7 @@ export default function PlayGame() {
   const data = useLoaderData<typeof loader>();
 
   return (
-    <div>
-      <h1>
-        Playing on board {data.boardId} w/ game {data.gameId}
-      </h1>
+    <div className="bg-black">
       <Game game={data.game} />
     </div>
   );
