@@ -5,10 +5,11 @@ import {
   Meta,
   Outlet,
   Scripts,
+  Link,
   ScrollRestoration,
 } from "@remix-run/react";
 
-import Link from "~/components/link";
+import Anchor from "~/components/link";
 
 import styles from "./tailwind.css";
 import globalStylesheet from "./styles.css";
@@ -39,15 +40,20 @@ export default function App() {
         <Links />
       </head>
       <body className="flex flex-col min-h-screen">
-        <nav className="p-6 bg-blue-900">
-          <h1 className="text-2xl font-bold text-white">Jep!</h1>
+        <nav className="p-6 bg-blue-1000">
+          <Link to="/">
+            <h1 className="text-2xl font-bold text-white font-korinna text-shadow-1">
+              Jep!
+            </h1>
+          </Link>
         </nav>
         <Outlet />
         <ScrollRestoration />
         <Scripts />
         <LiveReload />
         <footer className="mt-auto p-6 text-center text-sm text-gray-500">
-          Made with &lt;3 by <Link to="https://github.com/cmnord">cmnord</Link>
+          Made with &lt;3 by{" "}
+          <Anchor to="https://github.com/cmnord">cmnord</Anchor>
         </footer>
       </body>
     </html>

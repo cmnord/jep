@@ -6,18 +6,30 @@
   text-shadow: 3px 3px black;
 }
 
-.font-impact {
-  font-family: "Impact";
-}
-
 .border-b-12 {
   border-bottom-width: 12px;
+}
+
+.bg-blue-1000 {
+  background-color: #071277;
+}
+
+.text-yellow-1000 {
+  color: #d69f4c;
 }
 
 @font-face {
   font-family: "Korinna-Agency";
   src: url("../public/fonts/Korinna-Agency.ttf.woff") format("woff"),
     url("../public/fonts/Korinna-Agency.ttf.eot") format("eot");
+}
+
+.font-impact {
+  font-family: "Impact";
+}
+
+.font-korinna {
+  font-family: "Korinna-Agency", "Times New Roman", Times, serif;
 }
 
 .prompt {
@@ -34,15 +46,12 @@
   align-items: center;
   align-items: center;
   text-align: center;
-  color: yellow;
   transition: all 0.5s;
   transition-property: top, left;
   overflow: hidden;
   cursor: pointer;
   color: white;
-  font-family: "Korinna-Agency", "Times New Roman", Times, serif;
   text-transform: uppercase;
-  text-shadow: 4px 4px black;
 }
 
 .isActive {

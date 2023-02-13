@@ -113,7 +113,7 @@ export default function Prompt(props: Props) {
 
   return (
     <div
-      className={classNames("prompt", {
+      className={classNames("prompt font-korinna text-shadow-3", {
         isActive: props.clue !== undefined,
       })}
       onClick={handleClick}
