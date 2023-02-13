@@ -49,19 +49,15 @@ export default function GameComponent({
   const getActiveClue = (i: number, j: number) => {
     if (board) {
       const category = board.categories[j];
-      return board.clues[category][i];
+      return category.clues[i];
     }
   };
 
   const clue = clueIdx ? getActiveClue(clueIdx.i, clueIdx.j) : undefined;
 
-  let finalClue: Clue | undefined;
   const finalBoard = game.boards[game.boards.length - 1];
-  for (const category in finalBoard.clues) {
-    const clues = finalBoard.clues[category];
-    finalClue = clues[clues.length - 1];
-    break;
-  }
+  const clues = finalBoard.categories[finalBoard.categories.length - 1].clues;
+  const finalClue: Clue | undefined = clues[clues.length - 1];
 
   const handleClickClue = (i: number, j: number) => {
     const boardState = gameState.get(round);
@@ -112,14 +108,16 @@ export default function GameComponent({
           clueIdx ? handleClickPrompt(clueIdx.i, clueIdx.j) : null
         }
       />
-      {board && (
-        <BoardComponent
-          board={board}
-          roundMultiplier={round + 1}
-          boardState={gameState.get(round)}
-          onClickClue={handleClickClue}
-        />
-      )}
+      <div className="bg-black">
+        {board && (
+          <BoardComponent
+            board={board}
+            roundMultiplier={round + 1}
+            boardState={gameState.get(round)}
+            onClickClue={handleClickClue}
+          />
+        )}
+      </div>
     </>
   );
 }

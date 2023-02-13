@@ -133,8 +133,8 @@ export default function BoardComponent({
   onClickClue: (categoryIdx: number, clueIdx: number) => void;
 }) {
   const clueRows = new Map<number, Clue[]>();
-  for (const category in board.clues) {
-    const clues = board.clues[category];
+  for (const category of board.categories) {
+    const clues = category.clues;
     for (let i = 0; i < clues.length; i++) {
       const clue = clues[i];
       const clueValue = (i + 1) * 200 * roundMultiplier;
@@ -156,7 +156,7 @@ export default function BoardComponent({
       <table className="bg-black text-white border-spacing-3 table-fixed">
         <thead>
           <tr>
-            {board.categories.map((category) => (
+            {board.categoryNames.map((category) => (
               <Category key={category} category={category} />
             ))}
           </tr>

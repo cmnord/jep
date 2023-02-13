@@ -165,44 +165,48 @@ export async function fetchRandomCategories() {
 }
 
 export async function fetchRandomGame({
-  categories,
+  categoryNames,
 }: {
-  categories: string[];
+  categoryNames: string[];
 }): Promise<Game> {
   const game: Game = {
     boards: [
       {
-        categories: categories.slice(0, NUM_CATEGORIES),
-        clues: {},
+        categoryNames: categoryNames.slice(0, NUM_CATEGORIES),
+        categories: [],
       },
       {
-        categories: categories.slice(NUM_CATEGORIES, NUM_CATEGORIES * 2),
-        clues: {},
+        categoryNames: categoryNames.slice(NUM_CATEGORIES, NUM_CATEGORIES * 2),
+        categories: [],
       },
       {
-        categories: categories.slice(NUM_CATEGORIES * 2),
-        clues: {},
+        categoryNames: categoryNames.slice(NUM_CATEGORIES * 2),
+        categories: [],
       },
     ],
   };
 
-  for (let j = 0; j < categories.length; j++) {
-    const category = categories[j];
+  for (let j = 0; j < categoryNames.length; j++) {
+    const categoryName = categoryNames[j];
     // Fetch one difficult clue for FJ.
-    const limit = j === categories.length ? 1 : NUM_CLUES_PER_CATEGORY;
-    const difficulty = j === categories.length ? 5 : undefined;
+    const limit = j === categoryNames.length ? 1 : NUM_CLUES_PER_CATEGORY;
+    const difficulty = j === categoryNames.length ? 5 : undefined;
     const cluebaseClues = await fetchRandomClues({
-      category: category.toLowerCase(),
+      category: categoryName.toLowerCase(),
       limit,
       difficulty,
     });
     const clues = cluebaseClues.map(cluebaseResponseToClue);
+    const category = {
+      name: categoryName,
+      clues,
+    };
     if (j < NUM_CATEGORIES) {
-      game.boards[0].clues[category] = clues;
+      game.boards[0].categories.push(category);
     } else if (j < NUM_CATEGORIES * 2) {
-      game.boards[1].clues[category] = clues;
+      game.boards[1].categories.push(category);
     } else {
-      game.boards[2].clues[category] = clues;
+      game.boards[2].categories.push(category);
     }
   }
 

@@ -23,8 +23,8 @@ export async function loader({ request, params }: LoaderArgs) {
     });
   }
 
-  const categories = categoryStr.split(",");
-  const game = await fetchRandomGame({ categories });
+  const categoryNames = categoryStr.split(",");
+  const game = await fetchRandomGame({ categoryNames });
   cache.set(categoryStr, game, 60 * 60 * 24);
 
   return json({

@@ -8,7 +8,7 @@ export async function loader({ params }: LoaderArgs) {
   const boardId = params.boardId;
   const gameId = params.gameId;
 
-  const game = await getMockGame("mini.jep.json");
+  const game = await getMockGame("mock.jep.json");
 
   return json({
     boardId,
@@ -20,9 +20,5 @@ export async function loader({ params }: LoaderArgs) {
 export default function PlayGame() {
   const data = useLoaderData<typeof loader>();
 
-  return (
-    <div className="bg-black">
-      <Game game={data.game} />
-    </div>
-  );
+  return <Game game={data.game} />;
 }

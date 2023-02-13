@@ -15,7 +15,7 @@ export default class BoardState {
 
     let j = 0;
     for (const category of board.categories) {
-      const clues = board.clues[category];
+      const clues = category.clues;
       for (let i = 0; i < clues.length; i++) {
         const clueState = new ClueState();
         const clueRow = this.state[i];

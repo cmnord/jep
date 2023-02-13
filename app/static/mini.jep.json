@@ -1,16 +1,19 @@
 {
   "boards": [
     {
-      "categories": ["Dairy Products"],
-      "clues": {
-        "Dairy Products": [
-          {
-            "clue": "Greek-style this, like oikos, has become popular with its lush texture",
-            "answer": "yogurt",
-            "value": 1000
-          }
-        ]
-      }
+      "categoryNames": ["Dairy Products"],
+      "categories": [
+        {
+          "name": "Dairy Products",
+          "clues": [
+            {
+              "clue": "Greek-style this, like oikos, has become popular with its lush texture",
+              "answer": "yogurt",
+              "value": 1000
+            }
+          ]
+        }
+      ]
     }
   ]
 }
