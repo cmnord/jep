@@ -104,7 +104,7 @@ export default function Prompt({
       case State.Answer:
         return (
           <div>
-            <p>{clue?.clue}</p>
+            <p className="mb-8">{clue?.clue}</p>
             <p
               className={classNames("text-cyan-300", {
                 "opacity-0": state === State.ShowClue,
@@ -143,7 +143,7 @@ export default function Prompt({
         tabIndex={0}
       >
         <div className="p-4 flex flex-grow items-center">
-          <div className="text-white uppercase text-center text-4xl md:text-5xl text-shadow-3 font-korinna">
+          <div className="text-white uppercase text-center text-4xl md:text-5xl lg:text-7xl leading-relaxed text-shadow-3 font-korinna">
             {renderContent()}
           </div>
         </div>
