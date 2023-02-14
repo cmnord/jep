@@ -1,6 +1,7 @@
 // https://glitch.com/~jarchive-json
 import { fetch } from "@remix-run/node";
 import JSSoup, { SoupTag } from "jssoup";
+import { Board, Game } from "./convert.server";
 
 export class SoupGame {
   private jArchive_Board_URL?: string;
@@ -82,10 +83,8 @@ export class SoupGame {
 
   jsonify() {
     if (this.j && this.dj && this.fj) {
-      const jsonData = {
-        jeopardy: this.j.jsonify(),
-        "double jeopardy": this.dj.jsonify(),
-        "final jeopardy": this.fj.jsonify(),
+      const jsonData: Game = {
+        boards: [this.j.jsonify(), this.dj.jsonify(), this.fj.jsonify()],
       };
       return jsonData;
     }
@@ -93,24 +92,36 @@ export class SoupGame {
 }
 
 class FinalSoup {
-  private category?: string;
-  private clue?: string;
+  private category: string;
+  private clue: string;
   private answer?: string;
 
   constructor(roundSoup: JSSoup) {
     // clueSoup = roundSoup.find_all('td', class_='clue')
-    this.category = roundSoup.find<SoupTag>(undefined, {
+    const categoryNameSoup = roundSoup.find<SoupTag>(undefined, {
       class: "category_name",
     })?.text;
-    this.clue = roundSoup.find<SoupTag>(undefined, {
+    if (!categoryNameSoup) {
+      throw new Error("could not find class category_name on page");
+    }
+    this.category = categoryNameSoup;
+    const clueTextSoup = roundSoup.find<SoupTag>(undefined, {
       class: "clue_text",
     })?.text;
+    if (!clueTextSoup) {
+      throw new Error("could not find class clue_text on page");
+    }
+    this.clue = clueTextSoup;
   }
 
   addAnswer(answerSoup: JSSoup) {
-    this.answer = answerSoup.find<SoupTag>(undefined, {
+    const correctResponseSoup = answerSoup.find<SoupTag>(undefined, {
       class: "correct_response",
     })?.text;
+    if (!correctResponseSoup) {
+      throw new Error("could not find class correct_response on page");
+    }
+    this.answer = correctResponseSoup;
   }
 
   printRound() {
@@ -121,10 +132,21 @@ class FinalSoup {
   }
 
   jsonify() {
-    const jsonData = {
-      category: this.category,
-      clue: this.clue,
-      answer: this.answer,
+    const jsonData: Board = {
+      categoryNames: [this.category],
+      categories: [
+        {
+          name: this.category,
+          clues: [
+            {
+              clue: this.clue,
+              value: 0,
+              answer: this.answer!,
+              isDailyDouble: true,
+            },
+          ],
+        },
+      ],
     };
     return jsonData;
   }
@@ -158,11 +180,13 @@ class SoupRound {
   }
 
   parseAnswers(answerSoup: JSSoup) {
-    answerSoup
-      .findAll<SoupTag>("td", { class: "clue" })
-      .forEach((answer, i) => {
+    const soupClues = answerSoup.findAll<SoupTag>("td", { class: "clue" });
+
+    soupClues.forEach((answer, i) => {
+      if (i < this.clues.length) {
         this.clues[i].addAnswer(answer);
-      });
+      }
+    });
   }
 
   printRound() {
@@ -177,44 +201,65 @@ class SoupRound {
   }
 
   getCategories() {
-    const categories = new Set<string>();
+    const categories = new Map<string, number>();
+
+    let numCategories = 0;
     for (const clue of this.clues) {
       if (!categories.has(clue.category)) {
-        categories.add(clue.category);
+        categories.set(clue.category, numCategories);
+        numCategories++;
       }
     }
+
     return categories;
   }
 
-  jsonify() {
-    const jsonData = [];
+  jsonify(): Board {
+    const categories = this.getCategories();
+
+    const jsonData: Board = {
+      categoryNames: this.categories,
+      categories: this.categories.map((c) => ({
+        name: c,
+        clues: [],
+      })),
+    };
+
     for (const clue of this.clues) {
-      const clueDict = {
-        category: clue.category,
-        value: clue.value,
-        clue: clue.clue,
-        answer: clue.answer,
-        order: clue.order,
-      };
-      jsonData.push(clueDict);
+      const categoryIdx = categories.get(clue.category);
+      if (categoryIdx) {
+        const clueDict = {
+          category: clue.category,
+          value: clue.value,
+          clue: clue.clue,
+          answer: clue.answer!,
+          order: clue.order,
+        };
+        jsonData.categories[categoryIdx].clues.push(clueDict);
+      }
     }
     return jsonData;
   }
 }
 
 class SoupClue {
-  clue?: string;
+  clue: string;
   category: string;
-  value: number | string;
+  value: number;
   order: number;
   answer?: string;
+  isDailyDouble: boolean;
 
   constructor(clueSoup: JSSoup, category: string) {
     // Identify Clue Text and Category
     try {
-      this.clue = clueSoup.find<SoupTag>(undefined, {
+      const soupText = clueSoup.find<SoupTag>(undefined, {
         class: "clue_text",
       })?.text;
+      if (!soupText) {
+        throw new Error("could not find class clue_text on page");
+      }
+      this.clue = soupText;
     } catch (error: unknown) {
       // AttributeError
       this.clue = "Unrevealed";
@@ -227,9 +272,11 @@ class SoupClue {
         .find<SoupTag>(undefined, { class: "clue_value" })
         ?.text.slice(1);
       this.value = parseInt(valueStr ?? "");
+      this.isDailyDouble = false;
     } catch (error: unknown) {
       // AttributeError
-      this.value = "Daily Double";
+      this.value = 0;
+      this.isDailyDouble = true;
     }
 
     // Find Order of Clue in Round
@@ -246,9 +293,13 @@ class SoupClue {
 
   addAnswer(answerSoup: JSSoup) {
     try {
-      this.answer = answerSoup.find<SoupTag>(undefined, {
+      const soupResult = answerSoup.find<SoupTag>(undefined, {
         class: "correct_response",
       })?.text;
+      if (!soupResult) {
+        throw new Error("could not find class correct_response on page");
+      }
+      this.answer = soupResult;
     } catch (error: unknown) {
       // AttributeError
       this.answer = "Mystery";
