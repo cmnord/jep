@@ -47,10 +47,10 @@ function Fade({
 
 export default function Prompt({
   clue,
-  onClick,
+  onClose,
 }: {
   clue?: Clue;
-  onClick: () => void;
+  onClose: () => void;
 }) {
   const getInitialState = () => {
     if (clue?.isDailyDouble) {
@@ -90,15 +90,8 @@ export default function Prompt({
       case State.ShowClue:
         return setState(State.Answer);
       case State.Answer:
-        return onClick();
+        return onClose();
     }
-  };
-
-  const handleClickKeyboard = (e: React.KeyboardEvent<HTMLButtonElement>) => {
-    if (e.key !== "Enter") {
-      return;
-    }
-    handleClick();
   };
 
   const renderContent = () => {
@@ -145,8 +138,8 @@ export default function Prompt({
           "h-screen w-screen bg-blue-1000 flex flex-col justify-center items-center"
         )}
         onClick={handleClick}
-        onKeyDown={handleClickKeyboard}
         role="button"
+        autoFocus
         tabIndex={0}
       >
         <div className="p-4 flex flex-grow items-center">

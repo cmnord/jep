@@ -5,8 +5,6 @@ import { Board } from "~/models/board.server";
 import { Clue } from "~/models/clue.server";
 import BoardState from "~/utils/board-state";
 
-const NUM_CLUES_PER_CATEGORY = 5;
-
 function Category({ category }: { category: string }) {
   const words = category.split(" ");
   const numWords = words.length;
@@ -27,42 +25,34 @@ function Category({ category }: { category: string }) {
   );
 }
 
+interface SharedProps {
+  roundMultiplier: number;
+  onClickClue: (categoryIdx: number, clueIdx: number) => void;
+  onFocusClue: (i: number, j: number) => void;
+}
+
 function Clue({
   clue,
   i,
   j,
   roundMultiplier,
-  isActive,
   isAnswered,
-  onClick,
+  onClickClue,
+  onFocusClue,
+  onKeyDownClue,
 }: {
   clue: Clue;
   i: number;
   j: number;
-  roundMultiplier: number;
-  isActive: boolean;
   isAnswered: boolean;
-  onClick: (categoryIdx: number, clueIdx: number) => void;
-}) {
-  const onClickKeyboard = (
-    e: React.KeyboardEvent<HTMLDivElement>,
-    i: number,
-    j: number
-  ) => {
-    if (e.key !== "Enter") {
-      return;
-    }
-    onClick(i, j);
-  };
-
+  onKeyDownClue: (e: React.KeyboardEvent, i: number, j: number) => void;
+} & SharedProps) {
   const clueValue = (i + 1) * 200 * roundMultiplier;
-  const tabIndex = i * NUM_CLUES_PER_CATEGORY + j + 1;
 
   const clueText = isAnswered ? (
-    <div className="opacity-0 hover:opacity-100 transition">
+    <div>
       {clue.isDailyDouble ? <p>DAILY DOUBLE</p> : null}
-      <p>{clue.clue}</p>
-      <p className="text-cyan-300 mt-4">{clue.answer}</p>
+      <p>{clue.answer}</p>
     </div>
   ) : (
     <div className="text-5xl text-yellow-1000 text-shadow-3 font-impact">
@@ -71,14 +61,18 @@ function Clue({
   );
   return (
     <td
+      onFocus={() => onFocusClue(i, j)}
+      onKeyDown={(e) => onKeyDownClue(e, i, j)}
       className={classNames(
         "px-5 py-4 bg-blue-1000 hover:bg-blue-700 focus:bg-blue-700 transition-colors border-black border-8",
-        { isActive }
+        {
+          "text-blue-1000 hover:text-cyan-300 focus:text-cyan-300 transition":
+            isAnswered,
+        }
       )}
-      onClick={() => onClick(i, j)}
-      onKeyDown={(e) => onClickKeyboard(e, i, j)}
+      onClick={() => onClickClue(i, j)}
       role="button"
-      tabIndex={tabIndex}
+      tabIndex={0}
     >
       <div className="flex justify-center items-center">{clueText}</div>
     </td>
@@ -91,19 +85,18 @@ function ClueRow({
   boardState,
   roundMultiplier,
   onClickClue,
+  onFocusClue,
+  onKeyDownClue,
 }: {
   clues: Clue[];
   i: number;
-  roundMultiplier: number;
-  boardState?: BoardState;
-  onClickClue: (categoryIdx: number, clueIdx: number) => void;
-}) {
+  boardState: BoardState;
+  onKeyDownClue: (e: React.KeyboardEvent, i: number, j: number) => void;
+} & SharedProps) {
   return (
     <tr key={`category-${i}`}>
       {clues.map((clue, j) => {
-        const isActive = Boolean(boardState?.get(i, j)?.isActive);
-        const isAnswered =
-          Boolean(boardState?.get(i, j)?.isAnswered) && !isActive;
+        const isAnswered = Boolean(boardState.get(i, j)?.isAnswered);
         return (
           <Clue
             key={`clue-${i}-${j}`}
@@ -111,27 +104,30 @@ function ClueRow({
             i={i}
             j={j}
             roundMultiplier={roundMultiplier}
-            isActive={isActive}
             isAnswered={isAnswered}
-            onClick={onClickClue}
+            onClickClue={onClickClue}
+            onFocusClue={onFocusClue}
+            onKeyDownClue={onKeyDownClue}
           />
         );
       })}
     </tr>
   );
 }
+
 /** BoardComponent is purely presentational and renders the board. */
 export default function BoardComponent({
   board,
   roundMultiplier,
   boardState,
   onClickClue,
+  onFocusClue,
 }: {
   board: Board;
-  roundMultiplier: number;
-  boardState?: BoardState;
-  onClickClue: (categoryIdx: number, clueIdx: number) => void;
-}) {
+  boardState: BoardState;
+} & SharedProps) {
+  const tbodyRef = React.useRef<HTMLTableSectionElement | null>(null);
+
   const clueRows = new Map<number, Clue[]>();
   for (const category of board.categories) {
     const clues = category.clues;
@@ -151,6 +147,47 @@ export default function BoardComponent({
     (a, b) => a[0] - b[0]
   );
 
+  const handleKeyDown = (event: React.KeyboardEvent, i: number, j: number) => {
+    event.stopPropagation();
+    if (event.key === "Enter") {
+      return onClickClue(i, j);
+    }
+
+    const currentRow = tbodyRef.current?.children.item(i);
+    switch (event.key) {
+      case "w":
+      case "ArrowUp":
+        const upElt = currentRow?.previousElementSibling?.children.item(j);
+        if (upElt) {
+          (upElt as HTMLElement).focus();
+        }
+        break;
+      case "s":
+      case "ArrowDown":
+        const downElt = currentRow?.nextElementSibling?.children.item(j);
+        if (downElt) {
+          (downElt as HTMLElement).focus();
+        }
+        break;
+      case "a":
+      case "ArrowLeft":
+        const leftElt = currentRow?.children.item(j - 1);
+        if (leftElt) {
+          (leftElt as HTMLElement).focus();
+        }
+        break;
+      case "d":
+      case "ArrowRight":
+        const rightElt = currentRow?.children.item(j + 1);
+        if (rightElt) {
+          (rightElt as HTMLElement).focus();
+        }
+        break;
+      default:
+        break;
+    }
+  };
+
   return (
     <div className="w-full overflow-scroll md:flex md:flex-col md:items-center">
       <table className="bg-black text-white border-spacing-3 table-fixed">
@@ -161,7 +198,7 @@ export default function BoardComponent({
             ))}
           </tr>
         </thead>
-        <tbody>
+        <tbody ref={tbodyRef}>
           {sortedClueRows.map(([value, clues], i) => (
             <ClueRow
               key={value}
@@ -170,6 +207,8 @@ export default function BoardComponent({
               roundMultiplier={roundMultiplier}
               boardState={boardState}
               onClickClue={onClickClue}
+              onFocusClue={onFocusClue}
+              onKeyDownClue={handleKeyDown}
             />
           ))}
         </tbody>

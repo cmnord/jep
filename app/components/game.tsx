@@ -1,13 +1,16 @@
 import * as React from "react";
 
-import { Game } from "~/models/game.server";
 import BoardComponent from "~/components/board";
-import ClueState from "~/utils/clue-state";
-import BoardState from "~/utils/board-state";
+import ClueList from "~/components/clue-list";
 import Prompt from "~/components/prompt";
-import { Board } from "~/models/board.server";
 import Preview from "~/components/preview";
+
+import { Board } from "~/models/board.server";
 import { Clue } from "~/models/clue.server";
+import { Game } from "~/models/game.server";
+
+import BoardState from "~/utils/board-state";
+import ClueState from "~/utils/clue-state";
 
 class GameState {
   boardStates: BoardState[];
@@ -38,7 +41,14 @@ export default function GameComponent({
   errorMsg?: string;
 }) {
   const [gameState, setGameState] = React.useState(new GameState(game));
-  const [clueIdx, setClueIdx] = React.useState<{ i: number; j: number }>();
+  const [activeClue, setActiveClue] = React.useState<{
+    i: number;
+    j: number;
+  }>();
+  const [focusedClue, setFocusedClue] = React.useState<{
+    i: number;
+    j: number;
+  }>();
 
   const [round, setRound] = React.useState(0);
 
@@ -53,7 +63,9 @@ export default function GameComponent({
     }
   };
 
-  const clue = clueIdx ? getActiveClue(clueIdx.i, clueIdx.j) : undefined;
+  const clue = activeClue
+    ? getActiveClue(activeClue.i, activeClue.j)
+    : undefined;
 
   const finalBoard = game.boards[game.boards.length - 1];
   const clues = finalBoard.categories[finalBoard.categories.length - 1].clues;
@@ -61,17 +73,14 @@ export default function GameComponent({
 
   const handleClickClue = (i: number, j: number) => {
     const boardState = gameState.get(round);
-    if (!boardState || boardState.get(i, j)?.isAnswered) {
+    if (boardState.get(i, j)?.isAnswered) {
       return;
     }
-    // not yet answered
-    const newClueState = new ClueState({
-      isActive: true,
-      isAnswered: false,
-    });
-    const newBoardState = boardState.set(i, j, newClueState);
-    setGameState((gs) => gs.set(round, newBoardState));
-    setClueIdx({ i, j });
+    setActiveClue({ i, j });
+  };
+
+  const handleFocusClue = (i: number, j: number) => {
+    setFocusedClue({ i, j });
   };
 
   if (errorMsg !== undefined) {
@@ -81,7 +90,6 @@ export default function GameComponent({
   const handleClickPrompt = (i: number, j: number) => {
     const newClueState = new ClueState({
       isAnswered: true,
-      isActive: false,
     });
     const newBoardState = gameState.get(round).set(i, j, newClueState);
     setGameState((gs) => gs.set(round, newBoardState));
@@ -90,7 +98,7 @@ export default function GameComponent({
       setRound((r) => r + 1);
       setShowPreview(true);
     }
-    setClueIdx(undefined);
+    setActiveClue(undefined);
   };
 
   return (
@@ -102,12 +110,6 @@ export default function GameComponent({
         onClose={() => setShowPreview(false)}
         finalClue={finalClue}
       />
-      <Prompt
-        clue={clue}
-        onClick={() =>
-          clueIdx ? handleClickPrompt(clueIdx.i, clueIdx.j) : null
-        }
-      />
       <div className="bg-black">
         {board && (
           <BoardComponent
@@ -115,9 +117,16 @@ export default function GameComponent({
             roundMultiplier={round + 1}
             boardState={gameState.get(round)}
             onClickClue={handleClickClue}
+            onFocusClue={handleFocusClue}
           />
         )}
       </div>
+      <Prompt
+        clue={clue}
+        onClose={() =>
+          activeClue && handleClickPrompt(activeClue.i, activeClue.j)
+        }
+      />
     </>
   );
 }

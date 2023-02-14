@@ -1,7 +1,8 @@
-import { Board } from "~/models/board.server";
 import fs from "fs";
 import path from "path";
-import { Clue } from "./clue.server";
+
+import { Board } from "~/models/board.server";
+import { Clue } from "~/models/clue.server";
 
 export interface Game {
   boards: Board[];

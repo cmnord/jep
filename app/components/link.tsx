@@ -9,7 +9,7 @@ export default function StyledLink({
 }) {
   return (
     <Link
-      className="text-blue-600 hover:text-blue-500 transition-colors visited:text-purple-700"
+      className="text-blue-600 hover:text-blue-500 underline transition-colors visited:text-purple-700"
       to={to}
     >
       {children}
