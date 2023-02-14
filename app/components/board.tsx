@@ -122,8 +122,10 @@ export default function BoardComponent({
   boardState,
   onClickClue,
   onFocusClue,
+  focusedClueIdx,
 }: {
   board: Board;
+  focusedClueIdx?: { i: number; j: number };
   boardState: BoardState;
 } & SharedProps) {
   const tbodyRef = React.useRef<HTMLTableSectionElement | null>(null);
@@ -142,6 +144,25 @@ export default function BoardComponent({
       }
     }
   }
+
+  function focusCell(i: number, j: number) {
+    const row = tbodyRef.current?.children.item(i);
+    if (!row) {
+      return;
+    }
+    const element = row?.children.item(j);
+    if (!element) {
+      return;
+    }
+    (element as HTMLElement).focus();
+  }
+
+  React.useEffect(() => {
+    if (focusedClueIdx) {
+      const { i, j } = focusedClueIdx;
+      focusCell(i, j);
+    }
+  }, [focusedClueIdx]);
 
   const sortedClueRows = Array.from(clueRows.entries()).sort(
     (a, b) => a[0] - b[0]
@@ -171,20 +192,10 @@ export default function BoardComponent({
         break;
       case "a":
       case "ArrowLeft":
-        const leftElt = currentRow?.children.item(j - 1);
-        if (leftElt) {
-          (leftElt as HTMLElement).focus();
-        }
-        break;
+        return focusCell(i, j - 1);
       case "d":
       case "ArrowRight":
-        const rightElt = currentRow?.children.item(j + 1);
-        if (rightElt) {
-          (rightElt as HTMLElement).focus();
-        }
-        break;
-      default:
-        break;
+        return focusCell(i, j + 1);
     }
   };
 

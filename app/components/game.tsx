@@ -116,10 +116,20 @@ export default function GameComponent({
             board={board}
             roundMultiplier={round + 1}
             boardState={gameState.get(round)}
+            focusedClueIdx={focusedClue}
             onClickClue={handleClickClue}
             onFocusClue={handleFocusClue}
           />
         )}
+      </div>
+      <div className="p-12">
+        <ClueList
+          board={board}
+          roundMultiplier={round + 1}
+          boardState={gameState.get(round)}
+          focusedClueIdx={focusedClue}
+          onClickClue={handleFocusClue}
+        />
       </div>
       <Prompt
         clue={clue}
