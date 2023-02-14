@@ -49,7 +49,7 @@ function Clue({
   const clueValue = (i + 1) * 200 * roundMultiplier;
 
   const clueText = isAnswered ? (
-    <div>
+    <div className="uppercase font-korinna">
       {clue.isDailyDouble ? <p>DAILY DOUBLE</p> : null}
       <p>{clue.answer}</p>
     </div>
@@ -65,7 +65,7 @@ function Clue({
       className={classNames(
         "px-5 py-4 bg-blue-1000 hover:bg-blue-700 focus:bg-blue-700 transition-colors border-black border-8",
         {
-          "text-blue-1000 hover:text-cyan-300 focus:text-cyan-300 transition":
+          "text-blue-1000 hover:text-white focus:text-white hover:text-shadow-1 transition":
             isAnswered,
         }
       )}

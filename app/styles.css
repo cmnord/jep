@@ -2,6 +2,10 @@
   text-shadow: 1px 1px black;
 }
 
+.hover\:text-shadow-1:hover {
+  text-shadow: 1px 1px black;
+}
+
 .text-shadow-3 {
   text-shadow: 3px 3px black;
 }
