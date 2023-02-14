@@ -4,6 +4,7 @@ import { Form, Link, useTransition } from "@remix-run/react";
 import { fetchRandomCategories } from "~/models/cluebase.server";
 import { makeGameId } from "~/utils/utils";
 import Anchor from "~/components/link";
+import Button from "~/components/button";
 
 export async function action({ request }: ActionArgs) {
   const categories = await fetchRandomCategories();
@@ -26,22 +27,19 @@ export default function Index() {
         Visit the J! Archive home page itself to find episode dates.
       </p>
       <h2 className="text-2xl font-semibold mb-4">Games</h2>
-      <div className="flex gap-4 flex-wrap">
-        <button className="inline-flex w-full justify-center rounded-md border border-transparent border-blue-600 px-4 py-2 text-base font-medium text-blue-600 shadow-sm hover:text-blue-700 hover:border-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:w-auto sm:text-sm">
+      <div className="flex flex-col gap-4 flex-wrap items-start">
+        <Button>
           <Link to={"/1/play"}>Play an example game</Link>
-        </button>
-        <button className="inline-flex w-full justify-center rounded-md border border-transparent border-blue-600 px-4 py-2 text-base font-medium text-blue-600 shadow-sm hover:text-blue-700 hover:border-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:w-auto sm:text-sm">
+        </Button>
+        <Button>
           <Link to={"/game/mock"}>Play a mock game</Link>
-        </button>
+        </Button>
         <Form method="post">
-          <button
-            className="inline-flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:w-auto sm:text-sm"
-            type="submit"
-          >
+          <Button type="primary" htmlType="submit">
             {transition.state === "loading"
               ? "Loading..."
               : "Play a random game from Cluebase"}
-          </button>
+          </Button>
         </Form>
       </div>
     </div>

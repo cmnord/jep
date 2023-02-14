@@ -5,10 +5,7 @@ import fs from "fs";
 import GameComponent from "~/components/game";
 import { Convert } from "~/models/convert.server";
 
-export async function loader({ params }: LoaderArgs) {
-  const boardId = params.boardId;
-  const gameId = params.gameId;
-
+export async function loader() {
   // Find the absolute path of the json directory
   // Note: Vercel doesn't include the json directory when using process.cwd() or
   // path.join(). The workaround is to use __dirname and concatenate the json
@@ -22,11 +19,7 @@ export async function loader({ params }: LoaderArgs) {
 
   const game = Convert.toGame(fileContents);
 
-  return json({
-    boardId,
-    gameId,
-    game,
-  });
+  return json({ game });
 }
 
 export default function PlayGame() {
