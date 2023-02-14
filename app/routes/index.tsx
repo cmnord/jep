@@ -30,6 +30,9 @@ export default function Index() {
         <button className="inline-flex w-full justify-center rounded-md border border-transparent border-blue-600 px-4 py-2 text-base font-medium text-blue-600 shadow-sm hover:text-blue-700 hover:border-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:w-auto sm:text-sm">
           <Link to={"/1/play"}>Play an example game</Link>
         </button>
+        <button className="inline-flex w-full justify-center rounded-md border border-transparent border-blue-600 px-4 py-2 text-base font-medium text-blue-600 shadow-sm hover:text-blue-700 hover:border-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:w-auto sm:text-sm">
+          <Link to={"/game/mock"}>Play a mock game</Link>
+        </button>
         <Form method="post">
           <button
             className="inline-flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:w-auto sm:text-sm"
@@ -37,7 +40,7 @@ export default function Index() {
           >
             {transition.state === "loading"
               ? "Loading..."
-              : "Play a random game"}
+              : "Play a random game from Cluebase"}
           </button>
         </Form>
       </div>
