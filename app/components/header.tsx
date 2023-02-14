@@ -4,7 +4,7 @@ import * as React from "react";
 import Anchor from "./link";
 import Modal from "./modal";
 
-const GITHUB_URL = "https://github.com/cmnord/jep-remix";
+const GITHUB_URL = "https://github.com/cmnord/jep";
 
 export default function Header() {
   const [showModal, setShowModal] = React.useState(false);
