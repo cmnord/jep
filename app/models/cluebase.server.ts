@@ -193,11 +193,16 @@ export async function fetchRandomGame({
       limit,
       difficulty,
     });
-    const clues = cluebaseClues.map(cluebaseResponseToClue);
+
+    const clues = cluebaseClues
+      .map(cluebaseResponseToClue)
+      .sort((a, b) => a.value - b.value);
+
     const category = {
       name: categoryName,
       clues,
     };
+
     if (j < NUM_CATEGORIES) {
       game.boards[0].categories.push(category);
     } else if (j < NUM_CATEGORIES * 2) {
