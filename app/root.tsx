@@ -10,6 +10,7 @@ import {
 
 import Link from "~/components/link";
 import Header from "~/components/header";
+import ErrorComponent from "~/components/error";
 
 import styles from "./tailwind.css";
 import globalStylesheet from "./styles.css";
@@ -42,6 +43,29 @@ export default function App() {
       <body className="flex flex-col min-h-screen">
         <Header />
         <Outlet />
+        <ScrollRestoration />
+        <Scripts />
+        <LiveReload />
+        <footer className="mt-auto p-6 text-center text-sm text-gray-500">
+          Made with &lt;3 by <Link to="https://github.com/cmnord">cmnord</Link>
+        </footer>
+      </body>
+    </html>
+  );
+}
+
+export function ErrorBoundary({ error }: { error: Error }) {
+  console.error(error);
+  return (
+    <html>
+      <head>
+        <title>Oh no!</title>
+        <Meta />
+        <Links />
+      </head>
+      <body className="flex flex-col min-h-screen">
+        <Header />
+        <ErrorComponent error={error} />
         <ScrollRestoration />
         <Scripts />
         <LiveReload />
