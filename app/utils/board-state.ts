@@ -1,4 +1,4 @@
-import { Board } from "~/models/board.server";
+import { Board } from "~/models/convert.server";
 import ClueState from "./clue-state";
 
 export default class BoardState {

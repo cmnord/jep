@@ -1,8 +1,7 @@
 import classNames from "classnames";
 import * as React from "react";
 
-import { Board } from "~/models/board.server";
-import { Clue } from "~/models/clue.server";
+import { Board, Clue } from "~/models/convert.server";
 import BoardState from "~/utils/board-state";
 
 function Category({ category }: { category: string }) {

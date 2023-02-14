@@ -1,6 +1,6 @@
 import classNames from "classnames";
-import { Board } from "~/models/board.server";
-import { Clue } from "~/models/clue.server";
+import { Board, Clue } from "~/models/convert.server";
+
 import BoardState from "~/utils/board-state";
 import ClueState from "~/utils/clue-state";
 

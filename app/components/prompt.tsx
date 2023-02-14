@@ -1,7 +1,6 @@
 import * as React from "react";
 import classNames from "classnames";
-
-import { Clue } from "~/models/clue.server";
+import { Clue } from "~/models/convert.server";
 
 /** MS_PER_CHARACTER is a heuristic value to scale the amount of time per clue by
  * its length.
@@ -47,18 +46,22 @@ function Fade({
 
 export default function Prompt({
   clue,
+  category,
   onClose,
 }: {
   clue?: Clue;
+  category?: string;
   onClose: () => void;
 }) {
   const getInitialState = () => {
     if (clue?.isDailyDouble) {
       return State.DailyDouble;
     }
+    /* TODO: final
     if (clue?.isFinal) {
       return State.Final;
     }
+    */
     return State.ShowClue;
   };
 
@@ -99,7 +102,7 @@ export default function Prompt({
       case State.DailyDouble:
         return <span>Daily Double</span>;
       case State.Final:
-        return <span>{clue?.category}</span>;
+        return <span>{category}</span>;
       case State.ShowClue:
       case State.Answer:
         return (

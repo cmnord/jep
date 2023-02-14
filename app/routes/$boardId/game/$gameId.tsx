@@ -1,14 +1,19 @@
 import { json, LoaderArgs } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
+import fs from "fs";
+import path from "path";
 
 import Game from "~/components/game";
-import { getMockGame } from "~/models/game.server";
+import { Convert } from "~/models/convert.server";
 
 export async function loader({ params }: LoaderArgs) {
   const boardId = params.boardId;
   const gameId = params.gameId;
 
-  const game = await getMockGame("mock.jep.json");
+  const fullPath = path.resolve(__dirname, "../app/static/mock.jep.json");
+  const file = await fs.promises.readFile(fullPath);
+
+  const game = Convert.toGame(file.toString());
 
   return json({
     boardId,

@@ -1,5 +1,6 @@
 import { Link } from "@remix-run/react";
-import { Clue } from "~/models/clue.server";
+import { Clue } from "~/models/convert.server";
+
 import Modal from "./modal";
 
 export default function Preview({

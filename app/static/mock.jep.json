@@ -146,7 +146,8 @@
             {
               "clue": "In 1774 the Government of New York enacted a law to widen this creek into a canal, to keep the watercourse in good condition",
               "answer": "The Gowanus Canal",
-              "value": 600
+              "value": 600,
+              "isDailyDouble": true
             },
             {
               "clue": "The coldest month on record in the city is this monrth in 1857, with a mean temperature of 19.6 °F",

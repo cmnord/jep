@@ -4,7 +4,7 @@ import { useLoaderData } from "@remix-run/react";
 import GameComponent from "~/components/game";
 import { fetchRandomGame } from "~/models/cluebase.server";
 import { cache } from "~/models/cache.server";
-import { Game } from "~/models/game.server";
+import { Game } from "~/models/convert.server";
 
 export async function loader({ request, params }: LoaderArgs) {
   const gameId = params.gameId;

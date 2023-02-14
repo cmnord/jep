@@ -1,7 +1,6 @@
 // https://cluebase.readthedocs.io/en/latest/#id3
 
-import { Clue } from "./clue.server";
-import { Game } from "./game.server";
+import { Clue, Game } from "./convert.server";
 
 /* Constants */
 
@@ -49,12 +48,10 @@ const CLUEBASE_URL = "http://cluebase.lukelav.in";
 /* Helpers */
 
 const cluebaseResponseToClue = (clue: CluebaseClue): Clue => ({
-  category: clue.category,
   clue: clue.clue,
   answer: clue.response,
   value: clue.value,
   isDailyDouble: clue.daily_double,
-  isFinal: false, // No FJ round clues
 });
 
 /* Reads */

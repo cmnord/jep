@@ -5,10 +5,7 @@ import ClueList from "~/components/clue-list";
 import Prompt from "~/components/prompt";
 import Preview from "~/components/preview";
 
-import { Board } from "~/models/board.server";
-import { Clue } from "~/models/clue.server";
-import { Game } from "~/models/game.server";
-
+import { Board, Clue, Game } from "~/models/convert.server";
 import BoardState from "~/utils/board-state";
 import ClueState from "~/utils/clue-state";
 
@@ -56,16 +53,15 @@ export default function GameComponent({
 
   const board: Board | undefined = game.boards[round];
 
-  const getActiveClue = (i: number, j: number) => {
-    if (board) {
-      const category = board.categories[j];
-      return category.clues[i];
+  const getActiveClue = () => {
+    if (board && activeClue) {
+      const category = board.categories[activeClue.i];
+      return { clue: category.clues[activeClue.j], category: category.name };
     }
+    return { clue: undefined, category: undefined };
   };
 
-  const clue = activeClue
-    ? getActiveClue(activeClue.i, activeClue.j)
-    : undefined;
+  const { clue, category } = getActiveClue();
 
   const finalBoard = game.boards[game.boards.length - 1];
   const clues = finalBoard.categories[finalBoard.categories.length - 1].clues;
@@ -132,6 +128,7 @@ export default function GameComponent({
         />
       </div>
       <Prompt
+        category={category}
         clue={clue}
         onClose={() =>
           activeClue && handleClickPrompt(activeClue.i, activeClue.j)
