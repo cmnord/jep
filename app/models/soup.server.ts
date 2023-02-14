@@ -6,20 +6,25 @@ import { Board, Game } from "./convert.server";
 export class SoupGame {
   private jArchive_Board_URL?: string;
   private jArchive_Responses_URL?: string;
-  private gameDate: string;
+  private airDateMs: number;
 
   private j?: SoupRound;
   private dj?: SoupRound;
   private fj?: FinalSoup;
 
-  constructor(month: string, day: string, year: string) {
-    this.gameDate = `${year}-${month}-${day}`;
+  constructor(airDateMs: number) {
+    this.airDateMs = airDateMs;
     this.parseGame();
   }
 
   async parseGame() {
+    const airDate = new Date(this.airDateMs);
+    const month = airDate.getMonth().toString().padStart(2, "0");
+    const day = airDate.getDate().toString().padStart(2, "0");
+    const gameDate = `${airDate.getFullYear()}-${month}-${day}`;
+
     const jArchive_Query =
-      "http://www.j-archive.com/search.php?search=date%3A" + this.gameDate;
+      "http://www.j-archive.com/search.php?search=date%3A" + gameDate;
     const res = await fetch(jArchive_Query);
     this.jArchive_Board_URL = res.url;
     const gameID = this.jArchive_Board_URL.split("game_id=")[1];
@@ -84,6 +89,7 @@ export class SoupGame {
   jsonify() {
     if (this.j && this.dj && this.fj) {
       const jsonData: Game = {
+        airDateMs: this.airDateMs,
         boards: [this.j.jsonify(), this.dj.jsonify(), this.fj.jsonify()],
       };
       return jsonData;
@@ -227,7 +233,7 @@ class SoupRound {
 
     for (const clue of this.clues) {
       const categoryIdx = categories.get(clue.category);
-      if (categoryIdx) {
+      if (categoryIdx !== undefined) {
         const clueDict = {
           category: clue.category,
           value: clue.value,

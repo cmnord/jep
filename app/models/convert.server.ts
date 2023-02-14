@@ -8,6 +8,7 @@
 // match the expected interface, even if the JSON is valid.
 
 export interface Game {
+  airDateMs: number;
   boards: Board[];
 }
 
