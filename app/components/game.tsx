@@ -51,7 +51,7 @@ export default function GameComponent({
 
   const [showPreview, setShowPreview] = React.useState(true);
 
-  const board: Board | undefined = game.boards[round];
+  const board = round < game.boards.length ? game.boards[round] : undefined;
 
   const getActiveClue = () => {
     if (board && activeClue) {
@@ -119,13 +119,15 @@ export default function GameComponent({
         )}
       </div>
       <div className="p-12">
-        <ClueList
-          board={board}
-          roundMultiplier={round + 1}
-          boardState={gameState.get(round)}
-          focusedClueIdx={focusedClue}
-          onClickClue={handleFocusClue}
-        />
+        {board && (
+          <ClueList
+            board={board}
+            roundMultiplier={round + 1}
+            boardState={gameState.get(round)}
+            focusedClueIdx={focusedClue}
+            onClickClue={handleFocusClue}
+          />
+        )}
       </div>
       <Prompt
         category={category}
