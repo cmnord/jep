@@ -10,7 +10,7 @@ export async function loader({ params }: LoaderArgs) {
   const boardId = params.boardId;
   const gameId = params.gameId;
 
-  const fullPath = path.resolve(__dirname, "../app/static/mock.jep.json");
+  const fullPath = path.join(process.cwd(), "app/static/mock.jep.json");
   const file = await fs.promises.readFile(fullPath);
 
   const game = Convert.toGame(file.toString());
