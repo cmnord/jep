@@ -55,8 +55,8 @@ export default function GameComponent({
 
   const getActiveClue = () => {
     if (board && activeClue) {
-      const category = board.categories[activeClue.i];
-      return { clue: category.clues[activeClue.j], category: category.name };
+      const category = board.categories[activeClue.j];
+      return { clue: category.clues[activeClue.i], category: category.name };
     }
     return { clue: undefined, category: undefined };
   };

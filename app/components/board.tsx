@@ -26,7 +26,7 @@ function Category({ category }: { category: string }) {
 
 interface SharedProps {
   roundMultiplier: number;
-  onClickClue: (categoryIdx: number, clueIdx: number) => void;
+  onClickClue: (i: number, j: number) => void;
   onFocusClue: (i: number, j: number) => void;
 }
 
