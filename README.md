@@ -12,6 +12,14 @@ installed:
 npm install
 ```
 
+Set environment variables:
+
+```sh
+cp .env.example .env
+vim .env # add secrets to .env
+source .env
+```
+
 Afterwards, start the Remix development server like so:
 
 ```sh
@@ -22,6 +30,7 @@ Open up [http://localhost:3000](http://localhost:3000) and you should be ready t
 
 ## Thanks
 
+- [Making a Basic React + Firebase App](https://paper.dropbox.com/doc/Making-a-Basic-React-Firebase-App--Bys208PiI1n34J9lnkc7lzRxAg-oepkAUyjqbd7Ts0hIB8U4) by [jynnie](https://github.com/jynnie)
 - [jeopardy-remixable-app on Glitch](https://jeopardy-remixable-app.glitch.me)
   ([source](https://glitch.com/~jeopardy-remixable-app))
 - [jarchive-json on Glitch](https://jarchive-json.glitch.me)

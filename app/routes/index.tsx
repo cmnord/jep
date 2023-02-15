@@ -1,32 +1,19 @@
-import { ActionArgs, redirect } from "@remix-run/node";
-import { Form, Link, useTransition } from "@remix-run/react";
-import * as React from "react";
+import { json } from "@remix-run/node";
+import { Link, useLoaderData } from "@remix-run/react";
 
-import { fetchRandomCategories } from "~/models/cluebase.server";
-import { makeGameId } from "~/utils/utils";
 import Anchor from "~/components/link";
 import Button from "~/components/button";
+import { getAllGames } from "~/models/game.server";
+import { DefaultErrorBoundary } from "~/components/error";
 
-export async function action({ request }: ActionArgs) {
-  const categories = await fetchRandomCategories();
-  const gameId = makeGameId();
+export async function loader() {
+  const games = await getAllGames();
 
-  const url = new URL(request.url);
-  url.pathname = "/game/" + gameId;
-  url.searchParams.set("categories", categories.toString());
-
-  return redirect(url.toString());
+  return json({ games });
 }
 
 export default function Index() {
-  const transition = useTransition();
-
-  // YYYY-MM-DD format
-  const [date, setDate] = React.useState("");
-
-  const handleChangeDate = (d: string) => {
-    setDate(d);
-  };
+  const data = useLoaderData<typeof loader>();
 
   return (
     <div className="p-12">
@@ -39,36 +26,10 @@ export default function Index() {
         <Button>
           <Link to={"/game/mock"}>Play a mock game</Link>
         </Button>
-        <Form method="post" className="flex flex-col gap-4 items-start w-full">
-          <Button type="primary" htmlType="submit">
-            {transition.state === "loading"
-              ? "Loading..."
-              : "Play a random game from Cluebase"}
-          </Button>
-        </Form>
-        <div className="flex gap-4">
-          <div className="relative max-w-sm">
-            <input
-              value={date}
-              onChange={(e) => handleChangeDate(e.target.value)}
-              name="date"
-              type="date"
-              className={
-                "block w-full rounded-md border px-4 py-2 text-base font-medium shadow-sm transition-colors " +
-                "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 " +
-                "sm:w-auto sm:text-sm " +
-                "border-blue-600 text-slate-600 hover:text-slate-700 hover:border-blue-700"
-              }
-              placeholder="Select date"
-            />
-          </div>
-          <Link to={`/${date}/play`}>
-            <Button disabled={date === ""}>
-              Play a game from {date ? date : "a specific air date"}
-            </Button>
-          </Link>
-        </div>
       </div>
+      <div>{JSON.stringify(data.games)}</div>
     </div>
   );
 }
+
+export { DefaultErrorBoundary as ErrorBoundary };
