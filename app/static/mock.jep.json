@@ -1,4 +1,9 @@
 {
+  "title": "Mock Game",
+  "author": "Patrick Weaver",
+  "version": "1.0.0",
+  "copyright": "(c) Patrick Weaver",
+  "note": "",
   "boards": [
     {
       "categoryNames": [

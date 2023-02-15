@@ -8,7 +8,11 @@
 // match the expected interface, even if the JSON is valid.
 
 export interface Game {
-  airDateMs: number;
+  title: string;
+  author: string;
+  version: string;
+  copyright: string;
+  note: string;
   boards: Board[];
 }
 
@@ -224,7 +228,17 @@ function r(name: string) {
 }
 
 const typeMap: any = {
-  Game: o([{ json: "boards", js: "boards", typ: a(r("Board")) }], false),
+  Game: o(
+    [
+      { json: "title", js: "title", typ: "" },
+      { json: "author", js: "author", typ: "" },
+      { json: "version", js: "version", typ: "" },
+      { json: "copyright", js: "copyright", typ: "" },
+      { json: "note", js: "note", typ: "" },
+      { json: "boards", js: "boards", typ: a(r("Board")) },
+    ],
+    false
+  ),
   Board: o(
     [
       { json: "categoryNames", js: "categoryNames", typ: a("") },

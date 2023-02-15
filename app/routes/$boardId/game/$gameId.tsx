@@ -15,7 +15,6 @@ export async function loader({ params }: LoaderArgs) {
 
   const cachedGame: Game | undefined = cache.get(cacheKey);
   if (cachedGame) {
-    console.log("hit cache!!! :D");
     return json({
       gameId,
       game: cachedGame,

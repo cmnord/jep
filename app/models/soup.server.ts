@@ -86,13 +86,17 @@ export class SoupGame {
     }
   }
 
-  jsonify() {
+  jsonify(): Game | undefined {
     if (this.j && this.dj && this.fj) {
-      const jsonData: Game = {
-        airDateMs: this.airDateMs,
+      // TODO: set properties
+      return {
+        title: "",
+        author: "",
+        version: "",
+        copyright: "",
+        note: "",
         boards: [this.j.jsonify(), this.dj.jsonify(), this.fj.jsonify()],
       };
-      return jsonData;
     }
   }
 }

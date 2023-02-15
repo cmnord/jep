@@ -166,7 +166,13 @@ export async function fetchRandomGame({
 }: {
   categoryNames: string[];
 }): Promise<Game> {
+  // TODO: set properties
   const game: Game = {
+    title: "",
+    author: "",
+    version: "",
+    copyright: "",
+    note: "",
     boards: [
       {
         categoryNames: categoryNames.slice(0, NUM_CATEGORIES),
