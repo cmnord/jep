@@ -1,4 +1,4 @@
-export default function Error({ error }: { error: Error }) {
+export function DefaultErrorBoundary({ error }: { error: Error }) {
   const stack = error.stack ? error.stack.split("\n") : [];
 
   return (

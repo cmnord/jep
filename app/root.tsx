@@ -10,7 +10,7 @@ import {
 
 import Link from "~/components/link";
 import Header from "~/components/header";
-import ErrorComponent from "~/components/error";
+import { DefaultErrorBoundary } from "~/components/error";
 
 import styles from "./tailwind.css";
 import globalStylesheet from "./styles.css";
@@ -65,7 +65,7 @@ export function ErrorBoundary({ error }: { error: Error }) {
       </head>
       <body className="flex flex-col min-h-screen">
         <Header />
-        <ErrorComponent error={error} />
+        <DefaultErrorBoundary error={error} />
         <ScrollRestoration />
         <Scripts />
         <LiveReload />
