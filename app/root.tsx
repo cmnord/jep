@@ -8,7 +8,7 @@ import {
   ScrollRestoration,
 } from "@remix-run/react";
 
-import Link from "~/components/link";
+import Link, { Anchor } from "~/components/link";
 import Header from "~/components/header";
 import { DefaultErrorBoundary } from "~/components/error";
 
@@ -47,7 +47,8 @@ export default function App() {
         <Scripts />
         <LiveReload />
         <footer className="mt-auto p-6 text-center text-sm text-gray-500">
-          Made with &lt;3 by <Link to="https://github.com/cmnord">cmnord</Link>
+          Made with &lt;3 by{" "}
+          <Anchor href="https://github.com/cmnord">cmnord</Anchor>
         </footer>
       </body>
     </html>

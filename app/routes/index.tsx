@@ -1,7 +1,7 @@
 import { json } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 
-import Anchor from "~/components/link";
+import { Anchor } from "~/components/link";
 import Button from "~/components/button";
 import { getAllGames } from "~/models/game.server";
 import { DefaultErrorBoundary } from "~/components/error";
@@ -17,7 +17,7 @@ export default function Index() {
 
   return (
     <div className="p-12">
-      <Anchor to="https://j-archive.com">J! Archive &rarr;</Anchor>
+      <Anchor href="https://j-archive.com">J! Archive &rarr;</Anchor>
       <p className="mb-4">
         Visit the J! Archive home page itself to find episode dates.
       </p>

@@ -1,8 +1,8 @@
 import { Link } from "@remix-run/react";
 import * as React from "react";
 
-import Anchor from "./link";
-import Modal from "./modal";
+import { Anchor } from "~/components/link";
+import Modal from "~/components/modal";
 
 const GITHUB_URL = "https://github.com/cmnord/jep";
 
@@ -48,7 +48,7 @@ export default function Header() {
             <p className="text-gray-500">
               This website is open to contributions from developers of any level
               or experience. For more information or to report any issues, check
-              out the project on <Anchor to={GITHUB_URL}>GitHub</Anchor>.
+              out the project on <Anchor href={GITHUB_URL}>GitHub</Anchor>.
             </p>
           </div>
         </Modal>
