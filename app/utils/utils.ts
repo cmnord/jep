@@ -4,10 +4,10 @@ const gameWords =
     " "
   );
 
-export function makeGameId() {
-  const gid = 1; // autoincrementing ID
+export function makeRoomId() {
+  const rid = 1; // autoincrementing ID
   const word = gameWords[Math.floor(Math.random() * gameWords.length)];
-  return gid + "-" + word;
+  return rid + "-" + word;
 }
 
 type RecursivelyReplaceUndefinedWithFalse<T> = T extends undefined

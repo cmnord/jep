@@ -14,6 +14,20 @@ export type Game = {
 
 /* Reads */
 
+export async function getGame(gameId: string): Promise<Game> {
+  const dbRef = ref(db, "games/" + gameId);
+  const snapshot = await get(dbRef);
+
+  if (!snapshot.exists()) {
+    throw new Response("game not found", { status: 404 });
+  }
+
+  const json = snapshot.val();
+  delete json.id;
+  const game = Convert.toGame(JSON.stringify(json));
+  return { id: gameId, ...game };
+}
+
 export async function getAllGames() {
   const games: Game[] = [];
 
