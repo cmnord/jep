@@ -53,7 +53,7 @@ export default function Header() {
           </div>
         </Modal>
         {/* Heroicon name: outline/information-circle */}
-        <button onClick={() => setShowModal(true)}>
+        <button onClick={() => setShowModal(true)} title="About">
           <svg
             className="h-6 w-6 text-white"
             xmlns="http://www.w3.org/2000/svg"
@@ -61,7 +61,10 @@ export default function Header() {
             viewBox="0 0 24 24"
             strokeWidth={1.5}
             stroke="currentColor"
+            role="img"
+            aria-labelledby="info-title"
           >
+            <title id="info-title">Information icon</title>
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
