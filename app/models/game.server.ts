@@ -1,8 +1,9 @@
 import { readFile } from "fs/promises";
-import { get, ref } from "firebase/database";
+import { get, push, ref, set } from "firebase/database";
 
 import { db } from "~/firebase.server";
 import { Convert, Game } from "~/models/convert.server";
+import { undefinedToFalse } from "~/utils/utils";
 
 /* Reads */
 
@@ -38,10 +39,15 @@ export async function getMockGame() {
 
 /* Writes */
 
-export async function uploadGame(
-  data: AsyncIterable<Uint8Array>,
-  filename: string
-) {
-  console.log("TODO: upload new file", filename, data);
-  throw new Error("unimplemented");
+export async function uploadGame(game: Game) {
+  const gamesRef = ref(db, "games");
+  const newGameRef = push(gamesRef);
+
+  const gameWithoutUndefined = undefinedToFalse(game);
+
+  await set(newGameRef, {
+    createdAt: new Date(),
+    ...gameWithoutUndefined,
+  });
+  return newGameRef.key;
 }
