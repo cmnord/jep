@@ -18,11 +18,11 @@ import {
   ErrorMessage,
   SuccessMessage,
 } from "~/components/error";
+import GameCard from "~/components/game-card";
 import Upload from "~/components/upload";
 
 import { getAllGames } from "~/models/game.server";
 import { uploadHandler } from "~/models/file-upload-handler.server";
-import { Game } from "~/models/convert.server";
 
 export async function loader() {
   const games = await getAllGames();
@@ -50,24 +50,11 @@ export async function action({ request }: ActionArgs) {
   return json({ errorMsg, fileName });
 }
 
-function GameItem({ game }: { game: Game }) {
-  const numRounds = game.boards.length;
-  return (
-    <div className="flex flex-col p-2 border-2">
-      <p>
-        {game.title} | {numRounds} {numRounds > 1 ? "rounds" : "round"}
-      </p>
-      <p>{game.author}</p>
-    </div>
-  );
-}
-
 export default function Index() {
   const data = useLoaderData<typeof loader>();
 
   const submit = useSubmit();
   const formRef = React.useRef<HTMLFormElement | null>(null);
-
   const actionData = useActionData<typeof action>();
 
   return (
@@ -91,11 +78,9 @@ export default function Index() {
           ) : null}
         </div>
       </div>
-      <div>
+      <div className="flex flex-wrap gap-4 mb-4">
         {data.games.map((game, i) => (
-          <Link to={`/${game.id}/play`}>
-            <GameItem key={`game-${i}`} game={game} />
-          </Link>
+          <GameCard key={`game-${i}`} game={game} />
         ))}
       </div>
       <Form method="post" encType="multipart/form-data" ref={formRef}>
