@@ -21,6 +21,7 @@ import Upload from "~/components/upload";
 
 import { getAllGames } from "~/models/game.server";
 import { getSessionFormState } from "~/session.server";
+import { useDebounce } from "~/utils/use-debounce";
 
 export async function loader({ request }: LoaderArgs) {
   const url = new URL(request.url);
@@ -44,6 +45,10 @@ export default function Index() {
   );
 
   const submit = useSubmit();
+
+  const initialSearch = params.get("q") ?? undefined;
+  const [search, setSearch] = React.useState(initialSearch);
+  const debouncedSearch = useDebounce(search, 500);
 
   React.useEffect(() => {
     if (fetcher.state === "submitting") {
@@ -73,11 +78,24 @@ export default function Index() {
     };
   }, [data]);
 
+  React.useEffect(() => {
+    if (debouncedSearch) {
+      fetcher.load("/?q=" + debouncedSearch);
+    }
+  }, [debouncedSearch]);
+
   return (
     <div className="p-12">
       <h2 className="text-2xl font-semibold mb-4">Games</h2>
       <Form method="get">
-        <Search name="q" defaultValue={params.get("q") ?? undefined} />
+        <div className="flex">
+          <Search
+            name="q"
+            onChange={(s) => setSearch(s)}
+            defaultValue={initialSearch}
+            loading={fetcher.state === "loading"}
+          />
+        </div>
       </Form>
       <div className="flex flex-col gap-4 items-start mb-4">
         <Button>
