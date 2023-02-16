@@ -1,15 +1,5 @@
-import {
-  ActionArgs,
-  json,
-  unstable_parseMultipartFormData,
-} from "@remix-run/node";
-import {
-  Form,
-  Link,
-  useLoaderData,
-  useSubmit,
-  useActionData,
-} from "@remix-run/react";
+import { json, LoaderArgs } from "@remix-run/node";
+import { Link, useLoaderData, useSubmit, useFetcher } from "@remix-run/react";
 import * as React from "react";
 
 import Button from "~/components/button";
@@ -22,40 +12,55 @@ import GameCard from "~/components/game-card";
 import Upload from "~/components/upload";
 
 import { getAllGames } from "~/models/game.server";
-import { uploadHandler } from "~/models/file-upload-handler.server";
+import { getSessionFormState } from "~/session.server";
 
-export async function loader() {
+export async function loader({ request }: LoaderArgs) {
   const games = await getAllGames();
 
-  return json({ games });
-}
+  const [formState, headers] = await getSessionFormState(request);
 
-export async function action({ request }: ActionArgs) {
-  let fileName: string | undefined;
-  let errorMsg: string | undefined;
-
-  try {
-    const formData = await unstable_parseMultipartFormData(
-      request,
-      uploadHandler
-    );
-    // formData.get will return the type our upload handler returns.
-    fileName = formData.get("upload")?.toString();
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      errorMsg = error.message;
-    }
-  }
-
-  return json({ errorMsg, fileName });
+  return json({ games, formState }, { headers });
 }
 
 export default function Index() {
   const data = useLoaderData<typeof loader>();
+  const fetcher = useFetcher();
+  const formRef = React.useRef<HTMLFormElement | null>(null);
+  // The success and error messages are now shown even if JavaScript is not available.
+  const [error, setError] = React.useState(data.formState.error);
+  const [showSuccessMsg, setShowSuccessMsg] = React.useState(
+    data.formState.success
+  );
 
   const submit = useSubmit();
-  const formRef = React.useRef<HTMLFormElement | null>(null);
-  const actionData = useActionData<typeof action>();
+
+  React.useEffect(() => {
+    if (fetcher.state === "submitting") {
+      // JavaScript to clean messages when submitting
+      setShowSuccessMsg(false);
+      setError("");
+    }
+  }, [fetcher.state]);
+
+  React.useEffect(() => {
+    let timeout: number;
+    if (data.formState.success) {
+      // Use JavaScript to reset form
+      formRef.current?.reset();
+      setShowSuccessMsg(true);
+      setError("");
+      timeout = window.setTimeout(() => {
+        // Use JavaScript to hide success message after timeout
+        setShowSuccessMsg(false);
+      }, 5000);
+    } else if (data.formState.error) {
+      setShowSuccessMsg(false);
+      setError(data.formState.error);
+    }
+    return () => {
+      if (timeout) window.clearTimeout(timeout);
+    };
+  }, [data]);
 
   return (
     <div className="p-12">
@@ -64,28 +69,23 @@ export default function Index() {
         <Button>
           <Link to={"/game/mock"}>Play a mock game</Link>
         </Button>
-
-        {actionData?.errorMsg ? (
-          <ErrorMessage
-            error={new Error("Error uploading file: " + actionData.errorMsg)}
-          />
-        ) : null}
-        <div>
-          {actionData?.fileName ? (
-            <SuccessMessage
-              message={"File Uploaded: " + actionData?.fileName}
-            />
-          ) : null}
-        </div>
       </div>
       <div className="flex flex-wrap gap-4 mb-4">
         {data.games.map((game, i) => (
           <GameCard key={`game-${i}`} game={game} />
         ))}
       </div>
-      <Form method="post" encType="multipart/form-data" ref={formRef}>
+      <fetcher.Form
+        method="post"
+        action="/upload"
+        encType="multipart/form-data"
+        ref={formRef}
+        replace
+      >
         <Upload onChange={() => submit(formRef.current)} />
-      </Form>
+      </fetcher.Form>
+      {error && <ErrorMessage error={new Error(error)} />}
+      {showSuccessMsg && <SuccessMessage message={"File Uploaded"} />}
     </div>
   );
 }
