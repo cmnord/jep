@@ -16,6 +16,7 @@ import {
   SuccessMessage,
 } from "~/components/error";
 import GameCard from "~/components/game-card";
+import Search from "~/components/search";
 import Upload from "~/components/upload";
 
 import { getAllGames } from "~/models/game.server";
@@ -76,14 +77,9 @@ export default function Index() {
     <div className="p-12">
       <h2 className="text-2xl font-semibold mb-4">Games</h2>
       <Form method="get">
-        <input
-          type="text"
-          name="q"
-          placeholder="Search games..."
-          defaultValue={params.get("q") ?? undefined}
-        />
+        <Search name="q" defaultValue={params.get("q") ?? undefined} />
       </Form>
-      <div className="flex flex-col gap-4 items-start">
+      <div className="flex flex-col gap-4 items-start mb-4">
         <Button>
           <Link to={"/game/mock"}>Play a mock game</Link>
         </Button>
