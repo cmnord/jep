@@ -15,3 +15,11 @@ export function DefaultErrorBoundary({ error }: { error: Error }) {
     </div>
   );
 }
+
+export function ErrorMessage({ error }: { error: Error }) {
+  return (
+    <div className="bg-red-100 rounded-md p-3">
+      <p className="text-sm text-red-500">{error.message}</p>
+    </div>
+  );
+}
