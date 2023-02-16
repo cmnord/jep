@@ -14,7 +14,7 @@ export async function getAllGames() {
 
   if (snapshot.exists()) {
     snapshot.forEach((child) => {
-      const json = child.toJSON();
+      const json = child.val();
       const game = Convert.toGame(JSON.stringify(json));
       games.push(game);
     });
