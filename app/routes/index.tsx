@@ -1,5 +1,12 @@
 import { json, LoaderArgs } from "@remix-run/node";
-import { Link, useLoaderData, useSubmit, useFetcher } from "@remix-run/react";
+import {
+  Link,
+  useLoaderData,
+  useSubmit,
+  useFetcher,
+  Form,
+  useSearchParams,
+} from "@remix-run/react";
 import * as React from "react";
 
 import Button from "~/components/button";
@@ -15,7 +22,9 @@ import { getAllGames } from "~/models/game.server";
 import { getSessionFormState } from "~/session.server";
 
 export async function loader({ request }: LoaderArgs) {
-  const games = await getAllGames();
+  const url = new URL(request.url);
+  const search = new URLSearchParams(url.search);
+  const games = await getAllGames(search.get("q"));
 
   const [formState, headers] = await getSessionFormState(request);
 
@@ -24,6 +33,7 @@ export async function loader({ request }: LoaderArgs) {
 
 export default function Index() {
   const data = useLoaderData<typeof loader>();
+  const [params] = useSearchParams();
   const fetcher = useFetcher();
   const formRef = React.useRef<HTMLFormElement | null>(null);
   // The success and error messages are now shown even if JavaScript is not available.
@@ -65,6 +75,14 @@ export default function Index() {
   return (
     <div className="p-12">
       <h2 className="text-2xl font-semibold mb-4">Games</h2>
+      <Form method="get">
+        <input
+          type="text"
+          name="q"
+          placeholder="Search games..."
+          defaultValue={params.get("q") ?? undefined}
+        />
+      </Form>
       <div className="flex flex-col gap-4 items-start">
         <Button>
           <Link to={"/game/mock"}>Play a mock game</Link>
