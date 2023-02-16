@@ -1,4 +1,4 @@
-import { useDebounce } from "~/utils/use-debounce";
+import { useDebounce, useDebounceEnd } from "~/utils/use-debounce";
 
 function LoadingSpinner() {
   return (
@@ -36,7 +36,7 @@ export default function Search({
   onChange: (value: string) => void;
   loading: boolean;
 }) {
-  const debouncedLoading = useDebounce(loading, 500);
+  const debouncedLoading = useDebounceEnd(loading, 100);
 
   return (
     <div className="mb-4 md:w-96">

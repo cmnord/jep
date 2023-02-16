@@ -79,8 +79,8 @@ export default function Index() {
   }, [data]);
 
   React.useEffect(() => {
-    if (debouncedSearch) {
-      fetcher.load("/?q=" + debouncedSearch);
+    if (debouncedSearch !== undefined) {
+      fetcher.load("/?index&q=" + debouncedSearch);
     }
   }, [debouncedSearch]);
 

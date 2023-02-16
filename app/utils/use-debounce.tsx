@@ -23,3 +23,21 @@ export function useDebounce<T>(value: T, delayMs: number) {
 
   return debouncedValue;
 }
+
+/** useDebounceEnd only debounces the value when it goes from truthy to falsy. */
+export function useDebounceEnd<T>(value: T, delayMs: number) {
+  const [debouncedValue, setDebouncedValue] = React.useState(value);
+
+  React.useEffect(() => {
+    if (Boolean(value)) {
+      // Set value to true right away
+      setDebouncedValue(value);
+    } else {
+      // Delay setting value to false
+      const handler = setTimeout(() => setDebouncedValue(value), delayMs);
+      return () => clearTimeout(handler);
+    }
+  }, [value, delayMs]);
+
+  return debouncedValue;
+}
