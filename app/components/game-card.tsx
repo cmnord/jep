@@ -6,7 +6,7 @@ export default function GameCard({ game }: { game: Game }) {
   const numRounds = game.boards.length;
   return (
     <Link to={`/${game.id}/play`}>
-      <div
+      <button
         className={
           "flex items-center py-4 border-gray-200 border-2 rounded-lg group transition-colors " +
           "hover:border-blue-500 hover:shadow-sm"
@@ -41,7 +41,7 @@ export default function GameCard({ game }: { game: Game }) {
             />
           </svg>
         </div>
-      </div>
+      </button>
     </Link>
   );
 }

@@ -1,5 +1,12 @@
 import { json, LoaderArgs } from "@remix-run/node";
-import { Link, useLoaderData, useSubmit, useFetcher } from "@remix-run/react";
+import {
+  Link,
+  useLoaderData,
+  useSubmit,
+  useFetcher,
+  Form,
+  useSearchParams,
+} from "@remix-run/react";
 import * as React from "react";
 
 import Button from "~/components/button";
@@ -9,13 +16,17 @@ import {
   SuccessMessage,
 } from "~/components/error";
 import GameCard from "~/components/game-card";
+import Search from "~/components/search";
 import Upload from "~/components/upload";
 
 import { getAllGames } from "~/models/game.server";
 import { getSessionFormState } from "~/session.server";
+import { useDebounce } from "~/utils/use-debounce";
 
 export async function loader({ request }: LoaderArgs) {
-  const games = await getAllGames();
+  const url = new URL(request.url);
+  const search = new URLSearchParams(url.search);
+  const games = await getAllGames(search.get("q"));
 
   const [formState, headers] = await getSessionFormState(request);
 
@@ -24,6 +35,7 @@ export async function loader({ request }: LoaderArgs) {
 
 export default function Index() {
   const data = useLoaderData<typeof loader>();
+  const [params] = useSearchParams();
   const fetcher = useFetcher();
   const formRef = React.useRef<HTMLFormElement | null>(null);
   // The success and error messages are now shown even if JavaScript is not available.
@@ -33,6 +45,10 @@ export default function Index() {
   );
 
   const submit = useSubmit();
+
+  const initialSearch = params.get("q") ?? undefined;
+  const [search, setSearch] = React.useState(initialSearch);
+  const debouncedSearch = useDebounce(search, 500);
 
   React.useEffect(() => {
     if (fetcher.state === "submitting") {
@@ -62,10 +78,26 @@ export default function Index() {
     };
   }, [data]);
 
+  React.useEffect(() => {
+    if (debouncedSearch !== undefined) {
+      fetcher.load("/?index&q=" + debouncedSearch);
+    }
+  }, [debouncedSearch]);
+
   return (
     <div className="p-12">
       <h2 className="text-2xl font-semibold mb-4">Games</h2>
-      <div className="flex flex-col gap-4 items-start">
+      <Form method="get">
+        <div className="flex">
+          <Search
+            name="q"
+            onChange={(s) => setSearch(s)}
+            defaultValue={initialSearch}
+            loading={fetcher.state === "loading"}
+          />
+        </div>
+      </Form>
+      <div className="flex flex-col gap-4 items-start mb-4">
         <Button>
           <Link to={"/game/mock"}>Play a mock game</Link>
         </Button>

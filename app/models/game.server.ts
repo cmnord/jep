@@ -12,8 +12,20 @@ export type Game = {
   id: string;
 } & ConvertedGame;
 
+function matchesSearch(game: Game, casedSearch: string | null) {
+  if (casedSearch === null) {
+    return true;
+  }
+  const search = casedSearch.toLowerCase();
+  return (
+    game.title.toLowerCase().includes(search) ||
+    game.author.toLowerCase().includes(search)
+  );
+}
+
 /* Reads */
 
+/** getGame gets all games from Firebase, then filters them in memory. */
 export async function getGame(gameId: string): Promise<Game> {
   const dbRef = ref(db, "games/" + gameId);
   const snapshot = await get(dbRef);
@@ -28,7 +40,7 @@ export async function getGame(gameId: string): Promise<Game> {
   return { id: gameId, ...game };
 }
 
-export async function getAllGames() {
+export async function getAllGames(search: string | null) {
   const games: Game[] = [];
 
   const dbRef = ref(db, "games");
@@ -39,8 +51,11 @@ export async function getAllGames() {
       const json = child.val();
       const id = json.id;
       delete json.id;
-      const game = Convert.toGame(JSON.stringify(json));
-      games.push({ id, ...game });
+      const gameWithoutId = Convert.toGame(JSON.stringify(json));
+      const game = { id, ...gameWithoutId };
+      if (matchesSearch(game, search)) {
+        games.push(game);
+      }
     });
   }
 
