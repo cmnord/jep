@@ -1,4 +1,5 @@
 import { DefaultErrorBoundary } from "~/components/error";
+import Link from "~/components/link";
 
 export default function Upload({ onChange }: { onChange?: () => void }) {
   // TODO: drag and drop with react-dropzone
@@ -44,7 +45,11 @@ export default function Upload({ onChange }: { onChange?: () => void }) {
           />
         </div>
       </label>
-      {/* TODO: help with format */}
+      <Link to="/help">
+        <p id="upload_help" className="mt-1 text-sm">
+          File format help
+        </p>
+      </Link>
     </div>
   );
 }
