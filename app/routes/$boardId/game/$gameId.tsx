@@ -4,7 +4,7 @@ import { useLoaderData } from "@remix-run/react";
 import GameComponent from "~/components/game";
 import { SoupGame } from "~/models/soup.server";
 import { cache } from "~/models/cache.server";
-import { Game } from "~/models/convert.server";
+import { Game } from "~/models/game.server";
 
 export async function loader({ params }: LoaderArgs) {
   const boardId = params.boardId;

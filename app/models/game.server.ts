@@ -2,8 +2,15 @@ import { readFile } from "fs/promises";
 import { get, push, ref, set } from "firebase/database";
 
 import { db } from "~/firebase.server";
-import { Convert, Game } from "~/models/convert.server";
+import { Convert, Game as ConvertedGame } from "~/models/convert.server";
 import { undefinedToFalse } from "~/utils/utils";
+
+/** Game is the representation of a game we share with the server. The server
+ * sets the ID.
+ */
+export type Game = {
+  id: string;
+} & ConvertedGame;
 
 /* Reads */
 
@@ -16,15 +23,17 @@ export async function getAllGames() {
   if (snapshot.exists()) {
     snapshot.forEach((child) => {
       const json = child.val();
+      const id = json.id;
+      delete json.id;
       const game = Convert.toGame(JSON.stringify(json));
-      games.push(game);
+      games.push({ id, ...game });
     });
   }
 
   return games;
 }
 
-export async function getMockGame() {
+export async function getMockGame(): Promise<Game> {
   // Find the absolute path of the json directory
   // Note: Vercel doesn't include the json directory when using process.cwd() or
   // path.join(). The workaround is to use __dirname and concatenate the json
@@ -34,20 +43,26 @@ export async function getMockGame() {
   const fileContents = await readFile(jsonDirectory + "/mock.jep.json", "utf8");
 
   const game = Convert.toGame(fileContents);
-  return game;
+  return { id: "mock", ...game };
 }
 
 /* Writes */
 
-export async function uploadGame(game: Game) {
+export async function uploadGame(game: ConvertedGame) {
   const gamesRef = ref(db, "games");
   const newGameRef = push(gamesRef);
+
+  const id = newGameRef.key;
+  if (!id) {
+    throw new Error("new game ref does not have an ID");
+  }
 
   const gameWithoutUndefined = undefinedToFalse(game);
 
   await set(newGameRef, {
     createdAt: new Date(),
+    id,
     ...gameWithoutUndefined,
   });
-  return newGameRef.key;
+  return id;
 }

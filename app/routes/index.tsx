@@ -12,9 +12,12 @@ import {
 } from "@remix-run/react";
 import * as React from "react";
 
-import { Anchor } from "~/components/link";
 import Button from "~/components/button";
-import { DefaultErrorBoundary, ErrorMessage } from "~/components/error";
+import {
+  DefaultErrorBoundary,
+  ErrorMessage,
+  SuccessMessage,
+} from "~/components/error";
 import Upload from "~/components/upload";
 
 import { getAllGames } from "~/models/game.server";
@@ -81,14 +84,18 @@ export default function Index() {
           />
         ) : null}
         <div>
-          {actionData?.fileName
-            ? `File Uploaded: ${actionData?.fileName}`
-            : null}
+          {actionData?.fileName ? (
+            <SuccessMessage
+              message={"File Uploaded: " + actionData?.fileName}
+            />
+          ) : null}
         </div>
       </div>
       <div>
         {data.games.map((game, i) => (
-          <GameItem key={`game-${i}`} game={game} />
+          <Link to={`/${game.id}/play`}>
+            <GameItem key={`game-${i}`} game={game} />
+          </Link>
         ))}
       </div>
       <Form method="post" encType="multipart/form-data" ref={formRef}>

@@ -1,6 +1,7 @@
 // https://cluebase.readthedocs.io/en/latest/#id3
 
-import { Clue, Game } from "./convert.server";
+import { Clue } from "./convert.server";
+import { Game } from "./game.server";
 
 /* Constants */
 
@@ -168,6 +169,7 @@ export async function fetchRandomGame({
 }): Promise<Game> {
   // TODO: set properties
   const game: Game = {
+    id: "",
     title: "",
     author: "",
     version: "",

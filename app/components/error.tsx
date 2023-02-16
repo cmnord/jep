@@ -23,3 +23,11 @@ export function ErrorMessage({ error }: { error: Error }) {
     </div>
   );
 }
+
+export function SuccessMessage({ message }: { message: string }) {
+  return (
+    <div className="bg-green-100 rounded-md p-3">
+      <p className="text-sm text-green-500">{message}</p>
+    </div>
+  );
+}
