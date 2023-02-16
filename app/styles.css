@@ -93,6 +93,10 @@
   animation: showSweetAlert 0.3s;
 }
 
+.word-spacing-1 {
+  word-spacing: 1rem;
+}
+
 .timer {
   height: 4rem;
   width: 0%;
