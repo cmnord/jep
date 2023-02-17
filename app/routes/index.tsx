@@ -35,17 +35,18 @@ export async function loader({ request }: LoaderArgs) {
 
 export default function Index() {
   const data = useLoaderData<typeof loader>();
-  const [params] = useSearchParams();
   const fetcher = useFetcher();
-  const formRef = React.useRef<HTMLFormElement | null>(null);
+
+  const uploadFormRef = React.useRef<HTMLFormElement | null>(null);
   // The success and error messages are now shown even if JavaScript is not available.
   const [error, setError] = React.useState(data.formState.error);
   const [showSuccessMsg, setShowSuccessMsg] = React.useState(
     data.formState.success
   );
-
   const submit = useSubmit();
 
+  const [params] = useSearchParams();
+  const searchFormRef = React.useRef<HTMLFormElement | null>(null);
   const initialSearch = params.get("q") ?? undefined;
   const [search, setSearch] = React.useState(initialSearch);
   const debouncedSearch = useDebounce(search, 500);
@@ -62,7 +63,7 @@ export default function Index() {
     let timeout: number;
     if (data.formState.success) {
       // Use JavaScript to reset form
-      formRef.current?.reset();
+      uploadFormRef.current?.reset();
       setShowSuccessMsg(true);
       setError("");
       timeout = window.setTimeout(() => {
@@ -80,14 +81,14 @@ export default function Index() {
 
   React.useEffect(() => {
     if (debouncedSearch !== undefined) {
-      fetcher.load("/?index&q=" + debouncedSearch);
+      submit(searchFormRef.current);
     }
   }, [debouncedSearch]);
 
   return (
     <main className="max-w-screen-md px-4 pt-8 pb-16 md:pt-16 mx-auto">
       <h2 className="text-2xl font-semibold mb-4">Games</h2>
-      <Form method="get">
+      <Form method="get" ref={searchFormRef}>
         <div className="flex">
           <Search
             name="q"
@@ -111,10 +112,10 @@ export default function Index() {
         method="post"
         action="/upload"
         encType="multipart/form-data"
-        ref={formRef}
+        ref={uploadFormRef}
         replace
       >
-        <Upload onChange={() => submit(formRef.current)} />
+        <Upload onChange={() => submit(uploadFormRef.current)} />
       </fetcher.Form>
       {error && <ErrorMessage error={new Error(error)} />}
       {showSuccessMsg && <SuccessMessage message={"File Uploaded"} />}
