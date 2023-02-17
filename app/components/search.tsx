@@ -39,7 +39,7 @@ export default function Search({
   const debouncedLoading = useDebounceEnd(loading, 100);
 
   return (
-    <div className="mb-4 md:w-96">
+    <div className="mb-4">
       <label
         htmlFor={name}
         className="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white"

@@ -89,21 +89,19 @@ export default function Index() {
     <main className="max-w-screen-md px-4 pt-8 pb-16 md:pt-16 mx-auto">
       <h2 className="text-2xl font-semibold mb-4">Games</h2>
       <Form method="get" ref={searchFormRef}>
-        <div className="flex">
-          <Search
-            name="q"
-            onChange={(s) => setSearch(s)}
-            defaultValue={initialSearch}
-            loading={fetcher.state === "loading"}
-          />
-        </div>
+        <Search
+          name="q"
+          onChange={(s) => setSearch(s)}
+          defaultValue={initialSearch}
+          loading={fetcher.state === "loading"}
+        />
       </Form>
       <div className="flex flex-col gap-4 items-start mb-4">
         <Button>
           <Link to={"/game/mock"}>Play a mock game</Link>
         </Button>
       </div>
-      <div className="flex flex-wrap gap-4 mb-4">
+      <div className="flex flex-wrap sm:grid sm:grid-cols-2 gap-4 mb-4">
         {data.games.map((game, i) => (
           <GameCard key={`game-${i}`} game={game} />
         ))}
