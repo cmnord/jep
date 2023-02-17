@@ -4,8 +4,12 @@ export default function Code({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function CodeBlock({ children }: { children: React.ReactNode }) {
+export function CodeBlock({ text }: { text: string }) {
   return (
-    <pre className="p-4 mb-4 bg-gray-200 rounded-md text-sm">{children}</pre>
+    <pre>
+      <code className="block overflow-auto p-4 mb-4 bg-gray-200 rounded-md text-sm">
+        {text}
+      </code>
+    </pre>
   );
 }

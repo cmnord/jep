@@ -85,7 +85,7 @@ export default function Index() {
   }, [debouncedSearch]);
 
   return (
-    <div className="p-12">
+    <main className="max-w-screen-md px-4 pt-8 pb-16 md:pt-16 mx-auto">
       <h2 className="text-2xl font-semibold mb-4">Games</h2>
       <Form method="get">
         <div className="flex">
@@ -118,7 +118,7 @@ export default function Index() {
       </fetcher.Form>
       {error && <ErrorMessage error={new Error(error)} />}
       {showSuccessMsg && <SuccessMessage message={"File Uploaded"} />}
-    </div>
+    </main>
   );
 }
 

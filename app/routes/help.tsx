@@ -2,13 +2,14 @@ import Code, { CodeBlock } from "~/components/code";
 
 export default function Help() {
   return (
-    <div className="p-12">
-      <h2 className="text-2xl font-semibold mb-4">.jep.json file format</h2>
-      <p className="mb-4">
-        A <Code>.jep.json</Code> file has the following format:
-      </p>
-      <CodeBlock>
-        {`{
+    <div className="max-w-full">
+      <main className="max-w-screen-md px-4 pt-8 pb-16 md:pt-16 mx-auto">
+        <h2 className="text-2xl font-semibold mb-4">.jep.json file format</h2>
+        <p className="mb-4">
+          A <Code>.jep.json</Code> file has the following format:
+        </p>
+        <CodeBlock
+          text={`{
   "title": "Your Title",
   "author": "Author Name",
   "version": "1.0.0", // version number in semver
@@ -16,12 +17,13 @@ export default function Help() {
   "note": "any note",
   "boards": [ ... board objects ]
 }`}
-      </CodeBlock>
-      <p className="mb-4">
-        A game is a series of "boards". Each board looks like so:
-      </p>
-      <CodeBlock>
-        {`{
+        />
+        <p className="mb-4">
+          A game is a series of "boards". Each board looks like so:
+        </p>
+
+        <CodeBlock
+          text={`{
   "categoryNames": [
     "Category #1",
     "Category #2"
@@ -44,10 +46,10 @@ export default function Help() {
     }
   ]
 }`}
-      </CodeBlock>
-      <p className="mb-4">In summary:</p>
-      <CodeBlock>
-        {`interface Game {
+        />
+        <p className="mb-4">In summary:</p>
+        <CodeBlock
+          text={`interface Game {
   title: string;
   author: string;
   version: string;
@@ -72,7 +74,8 @@ interface Clue {
   value: number;
   isDailyDouble?: boolean;
 }`}
-      </CodeBlock>
+        />
+      </main>
     </div>
   );
 }
