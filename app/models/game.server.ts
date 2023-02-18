@@ -25,7 +25,6 @@ function matchesSearch(game: Game, casedSearch: string | null) {
 
 /* Reads */
 
-/** getGame gets all games from Firebase, then filters them in memory. */
 export async function getGame(gameId: string): Promise<Game> {
   const dbRef = ref(db, "games/" + gameId);
   const snapshot = await get(dbRef);
@@ -40,6 +39,7 @@ export async function getGame(gameId: string): Promise<Game> {
   return { id: gameId, ...game };
 }
 
+/** getAllGames gets all games from Firebase, then filters them in memory. */
 export async function getAllGames(search: string | null) {
   const games: Game[] = [];
 
