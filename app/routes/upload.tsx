@@ -4,7 +4,7 @@ import {
   unstable_parseMultipartFormData,
 } from "@remix-run/node";
 
-import { uploadHandler } from "~/models/file-upload-handler.server";
+import { uploadHandler } from "~/file-upload-handler.server";
 import { flashFormState } from "~/session.server";
 
 export async function action({ request }: ActionArgs) {
