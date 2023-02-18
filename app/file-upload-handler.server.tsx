@@ -5,7 +5,7 @@ import {
 } from "@remix-run/node";
 import * as stream from "stream";
 
-import { uploadGame } from "~/models/game.server";
+import { createGame } from "~/models/game.server";
 import { Convert } from "./models/convert.server";
 
 function streamToString(readable: stream.Readable): Promise<string> {
@@ -31,7 +31,7 @@ const customUploadHandler: UploadHandler = async ({
   const jsonString = await streamToString(byteStream);
 
   const game = Convert.toGame(jsonString);
-  const gameId = await uploadGame(game);
+  const gameId = await createGame(game);
 
   return gameId;
 };

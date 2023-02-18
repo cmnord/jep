@@ -1,5 +1,6 @@
 import { readFile } from "fs/promises";
 import { get, push, ref, set } from "firebase/database";
+import { v4 as uuid } from "uuid";
 
 import { db } from "~/firebase.server";
 import { Convert, Game as ConvertedGame } from "~/models/convert.server";
@@ -26,7 +27,7 @@ function matchesSearch(game: Game, casedSearch: string | null) {
 /* Reads */
 
 export async function getGame(gameId: string): Promise<Game> {
-  const dbRef = ref(db, "games/" + gameId);
+  const dbRef = ref(db, "game/" + gameId);
   const snapshot = await get(dbRef);
 
   if (!snapshot.exists()) {
@@ -43,7 +44,7 @@ export async function getGame(gameId: string): Promise<Game> {
 export async function getAllGames(search: string | null) {
   const games: Game[] = [];
 
-  const dbRef = ref(db, "games");
+  const dbRef = ref(db, "game");
   const snapshot = await get(dbRef);
 
   if (snapshot.exists()) {
@@ -77,21 +78,17 @@ export async function getMockGame(): Promise<Game> {
 
 /* Writes */
 
-export async function uploadGame(game: ConvertedGame) {
-  const gamesRef = ref(db, "games");
-  const newGameRef = push(gamesRef);
-
-  const id = newGameRef.key;
-  if (!id) {
-    throw new Error("new game ref does not have an ID");
-  }
-
+export async function createGame(game: ConvertedGame) {
   const gameWithoutUndefined = undefinedToFalse(game);
+
+  const gameId = uuid();
+  const newGameRef = ref(db, "game/" + gameId);
 
   await set(newGameRef, {
     createdAt: new Date(),
-    id,
+    id: gameId,
     ...gameWithoutUndefined,
   });
-  return id;
+
+  return gameId;
 }
