@@ -31,7 +31,10 @@ export async function action({ request }: ActionArgs) {
       return redirect("/", { headers });
     }
 
-    const formState = { success: false, error: "Error uploading game" };
+    const formState = {
+      success: false,
+      error: "Error uploading game: " + JSON.stringify(error),
+    };
     const headers = await flashFormState(request, formState);
     return redirect("/", { headers });
   }

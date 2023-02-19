@@ -1,7 +1,6 @@
 // https://cluebase.readthedocs.io/en/latest/#id3
 
-import { Clue } from "./convert.server";
-import { Game } from "./game.server";
+import { Game, Clue } from "./convert.server";
 
 /* Constants */
 
@@ -52,7 +51,6 @@ const cluebaseResponseToClue = (clue: CluebaseClue): Clue => ({
   clue: clue.clue,
   answer: clue.response,
   value: clue.value,
-  isDailyDouble: clue.daily_double,
 });
 
 /* Reads */
@@ -169,10 +167,8 @@ export async function fetchRandomGame({
 }): Promise<Game> {
   // TODO: set properties
   const game: Game = {
-    id: "",
     title: "",
     author: "",
-    version: "",
     copyright: "",
     note: "",
     boards: [

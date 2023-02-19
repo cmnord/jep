@@ -10,7 +10,6 @@
 export interface Game {
   title: string;
   author: string;
-  version: string;
   copyright: string;
   note: string;
   boards: Board[];
@@ -30,7 +29,6 @@ export interface Clue {
   clue: string;
   answer: string;
   value: number;
-  isDailyDouble?: boolean;
 }
 
 // Converts JSON strings to/from your types
@@ -232,7 +230,6 @@ const typeMap: any = {
     [
       { json: "title", js: "title", typ: "" },
       { json: "author", js: "author", typ: "" },
-      { json: "version", js: "version", typ: "" },
       { json: "copyright", js: "copyright", typ: "" },
       { json: "note", js: "note", typ: "" },
       { json: "boards", js: "boards", typ: a(r("Board")) },
@@ -258,7 +255,6 @@ const typeMap: any = {
       { json: "clue", js: "clue", typ: "" },
       { json: "answer", js: "answer", typ: "" },
       { json: "value", js: "value", typ: 0 },
-      { json: "isDailyDouble", js: "isDailyDouble", typ: u(undefined, true) },
     ],
     false
   ),

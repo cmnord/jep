@@ -9,26 +9,3 @@ export function makeRoomId() {
   const word = gameWords[Math.floor(Math.random() * gameWords.length)];
   return rid + "-" + word;
 }
-
-type RecursivelyReplaceUndefinedWithFalse<T> = T extends undefined
-  ? false
-  : T extends (infer U)[]
-  ? RecursivelyReplaceUndefinedWithFalse<U>[]
-  : T extends Record<string, unknown>
-  ? { [K in keyof T]: RecursivelyReplaceUndefinedWithFalse<T[K]> }
-  : T;
-
-export function undefinedToFalse<T>(
-  obj: T
-): RecursivelyReplaceUndefinedWithFalse<T> {
-  if (obj === undefined || obj === false) {
-    return false as any;
-  }
-
-  if ((obj as any).constructor.name === "Object" || Array.isArray(obj)) {
-    for (const key in obj) {
-      obj[key] = undefinedToFalse(obj[key]) as any;
-    }
-  }
-  return obj as any;
-}
