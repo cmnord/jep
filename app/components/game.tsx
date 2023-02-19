@@ -5,8 +5,7 @@ import ClueList from "~/components/clue-list";
 import Prompt from "~/components/prompt";
 import Preview from "~/components/preview";
 
-import { Clue } from "~/models/convert.server";
-import { Game } from "~/models/game.server";
+import { Game, Clue } from "~/models/convert.server";
 import BoardState from "~/utils/board-state";
 import ClueState from "~/utils/clue-state";
 

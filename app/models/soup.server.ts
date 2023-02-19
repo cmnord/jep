@@ -1,8 +1,7 @@
 // https://glitch.com/~jarchive-json
 import { fetch } from "@remix-run/node";
 import JSSoup, { SoupTag } from "jssoup";
-import { Board } from "./convert.server";
-import { Game } from "./game.server";
+import { Game, Board } from "./convert.server";
 
 export class SoupGame {
   private jArchive_Board_URL?: string;
@@ -91,10 +90,8 @@ export class SoupGame {
     if (this.j && this.dj && this.fj) {
       // TODO: set properties
       return {
-        id: "",
         title: "",
         author: "",
-        version: "",
         copyright: "",
         note: "",
         boards: [this.j.jsonify(), this.dj.jsonify(), this.fj.jsonify()],
@@ -154,7 +151,6 @@ class FinalSoup {
               clue: this.clue,
               value: 0,
               answer: this.answer!,
-              isDailyDouble: true,
             },
           ],
         },

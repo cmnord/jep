@@ -9,7 +9,10 @@ export async function loader({ params }: LoaderArgs) {
   const roomId = params.roomId;
 
   if (!gameId) {
-    throw new Error("gameId not found in URL params");
+    throw new Response("game ID not found in URL params", { status: 404 });
+  }
+  if (!roomId) {
+    throw new Response("room ID not found in URL params", { status: 404 });
   }
 
   const game = await getGame(gameId);

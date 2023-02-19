@@ -48,9 +48,9 @@ function Clue({
 } & SharedProps) {
   const clueValue = (i + 1) * 200 * roundMultiplier;
 
+  // TODO: daily double / wagerable text
   const clueText = isAnswered ? (
     <div className="uppercase font-korinna">
-      {clue.isDailyDouble ? <p>DAILY DOUBLE</p> : null}
       <p>{clue.answer}</p>
     </div>
   ) : (

@@ -20,6 +20,15 @@ vim .env # add secrets to .env
 source .env
 ```
 
+Link supabase project:
+
+```ts
+npx supabase init
+npx supabase start
+npx supabase link --project-ref $SUPABASE_PROJECT_REF --password $SUPABASE_DB_PASS
+WORD
+```
+
 Afterwards, start the Remix development server like so:
 
 ```sh

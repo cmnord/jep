@@ -12,7 +12,6 @@ export default function Help() {
           text={`{
   "title": "Your Title",
   "author": "Author Name",
-  "version": "1.0.0", // version number in semver
   "copyright": "(c) Copyright Holder",
   "note": "any note",
   "boards": [ ... board objects ]
@@ -52,7 +51,6 @@ export default function Help() {
           text={`interface Game {
   title: string;
   author: string;
-  version: string;
   copyright: string;
   note: string;
   boards: Board[];
@@ -72,7 +70,6 @@ interface Clue {
   clue: string;
   answer: string;
   value: number;
-  isDailyDouble?: boolean;
 }`}
         />
       </main>
