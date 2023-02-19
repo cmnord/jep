@@ -4,6 +4,8 @@ import { useLoaderData } from "@remix-run/react";
 import GameComponent from "~/components/game";
 import { getGame } from "~/models/game.server";
 import { getRoom } from "~/models/room.server";
+import { useGame } from "~/utils/use-game";
+import { GameContext } from "~/utils/use-game-context";
 
 export async function loader({ params }: LoaderArgs) {
   const gameId = params.gameId;
@@ -25,5 +27,11 @@ export async function loader({ params }: LoaderArgs) {
 export default function PlayGame() {
   const data = useLoaderData<typeof loader>();
 
-  return <GameComponent game={data.game} />;
+  const game = useGame(data.game);
+
+  return (
+    <GameContext.Provider value={game}>
+      <GameComponent game={data.game} />
+    </GameContext.Provider>
+  );
 }

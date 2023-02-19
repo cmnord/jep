@@ -1,8 +1,8 @@
 import classNames from "classnames";
 import * as React from "react";
 
-import { Board, Clue } from "~/models/convert.server";
-import BoardState from "~/utils/board-state";
+import { Clue } from "~/models/convert.server";
+import { useGameContext } from "~/utils/use-game-context";
 
 function Category({ category }: { category: string }) {
   const words = category.split(" ");
@@ -24,32 +24,26 @@ function Category({ category }: { category: string }) {
   );
 }
 
-interface SharedProps {
-  roundMultiplier: number;
-  onClickClue: (i: number, j: number) => void;
-  onFocusClue: (i: number, j: number) => void;
-}
-
 function Clue({
   clue,
   i,
   j,
-  roundMultiplier,
-  isAnswered,
-  onClickClue,
   onFocusClue,
   onKeyDownClue,
 }: {
   clue: Clue;
   i: number;
   j: number;
-  isAnswered: boolean;
+  onFocusClue: (i: number, j: number) => void;
   onKeyDownClue: (e: React.KeyboardEvent, i: number, j: number) => void;
-} & SharedProps) {
+}) {
+  const { round, isAnswered, onClickClue } = useGameContext();
+  const roundMultiplier = round + 1;
+
   const clueValue = (i + 1) * 200 * roundMultiplier;
 
   // TODO: daily double / wagerable text
-  const clueText = isAnswered ? (
+  const clueText = isAnswered(i, j) ? (
     <div className="uppercase font-korinna">
       <p>{clue.answer}</p>
     </div>
@@ -66,7 +60,7 @@ function Clue({
         "px-5 py-4 bg-blue-1000 hover:bg-blue-700 focus:bg-blue-700 transition-colors border-black border-8",
         {
           "text-blue-1000 hover:text-white focus:text-white hover:text-shadow-1 transition":
-            isAnswered,
+            isAnswered(i, j),
         }
       )}
       onClick={() => onClickClue(i, j)}
@@ -81,30 +75,23 @@ function Clue({
 function ClueRow({
   clues,
   i,
-  boardState,
-  roundMultiplier,
-  onClickClue,
   onFocusClue,
   onKeyDownClue,
 }: {
   clues: Clue[];
   i: number;
-  boardState: BoardState;
+  onFocusClue: (i: number, j: number) => void;
   onKeyDownClue: (e: React.KeyboardEvent, i: number, j: number) => void;
-} & SharedProps) {
+}) {
   return (
     <tr key={`category-${i}`}>
       {clues.map((clue, j) => {
-        const isAnswered = Boolean(boardState.get(i, j)?.isAnswered);
         return (
           <Clue
             key={`clue-${i}-${j}`}
             clue={clue}
             i={i}
             j={j}
-            roundMultiplier={roundMultiplier}
-            isAnswered={isAnswered}
-            onClickClue={onClickClue}
             onFocusClue={onFocusClue}
             onKeyDownClue={onKeyDownClue}
           />
@@ -116,17 +103,15 @@ function ClueRow({
 
 /** BoardComponent is purely presentational and renders the board. */
 export default function BoardComponent({
-  board,
-  roundMultiplier,
-  boardState,
-  onClickClue,
-  onFocusClue,
   focusedClueIdx,
+  onFocusClue,
 }: {
-  board: Board;
-  focusedClueIdx?: { i: number; j: number };
-  boardState: BoardState;
-} & SharedProps) {
+  focusedClueIdx?: [number, number];
+  onFocusClue: (i: number, j: number) => void;
+}) {
+  const { board, onClickClue, round } = useGameContext();
+  const roundMultiplier = round + 1;
+
   const tbodyRef = React.useRef<HTMLTableSectionElement | null>(null);
 
   const clueRows = new Map<number, Clue[]>();
@@ -158,7 +143,7 @@ export default function BoardComponent({
 
   React.useEffect(() => {
     if (focusedClueIdx) {
-      const { i, j } = focusedClueIdx;
+      const [i, j] = focusedClueIdx;
       focusCell(i, j);
     }
   }, [focusedClueIdx]);
@@ -214,9 +199,6 @@ export default function BoardComponent({
               key={value}
               clues={clues}
               i={i}
-              roundMultiplier={roundMultiplier}
-              boardState={boardState}
-              onClickClue={onClickClue}
               onFocusClue={onFocusClue}
               onKeyDownClue={handleKeyDown}
             />

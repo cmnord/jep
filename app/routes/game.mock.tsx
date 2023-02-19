@@ -3,6 +3,8 @@ import { useLoaderData } from "@remix-run/react";
 
 import GameComponent from "~/components/game";
 import { getMockGame } from "~/models/game.server";
+import { useGame } from "~/utils/use-game";
+import { GameContext } from "~/utils/use-game-context";
 
 export async function loader() {
   const game = await getMockGame();
@@ -13,5 +15,11 @@ export async function loader() {
 export default function PlayGame() {
   const data = useLoaderData<typeof loader>();
 
-  return <GameComponent game={data.game} />;
+  const game = useGame(data.game);
+
+  return (
+    <GameContext.Provider value={game}>
+      <GameComponent game={data.game} />;
+    </GameContext.Provider>
+  );
 }

@@ -2,20 +2,21 @@ import { Link } from "@remix-run/react";
 import { Clue } from "~/models/convert.server";
 
 import Modal from "./modal";
+import { useGameContext } from "~/utils/use-game-context";
 
 export default function Preview({
-  round,
   numRounds,
   isOpen,
   onClose,
   finalClue,
 }: {
-  round: number;
   numRounds: number;
   isOpen: boolean;
   onClose: () => void;
   finalClue?: Clue;
 }) {
+  const { round } = useGameContext();
+
   switch (round) {
     case numRounds:
       return (

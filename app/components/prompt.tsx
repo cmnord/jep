@@ -1,12 +1,14 @@
 import * as React from "react";
 import classNames from "classnames";
 import { Clue } from "~/models/convert.server";
+import { useGameContext } from "~/utils/use-game-context";
 
 /** MS_PER_CHARACTER is a heuristic value to scale the amount of time per clue by
  * its length.
  */
 const MS_PER_CHARACTER = 50;
 
+// TODO: wagers
 enum State {
   DailyDouble,
   Final,
@@ -44,29 +46,10 @@ function Fade({
   ) : null;
 }
 
-export default function Prompt({
-  clue,
-  category,
-  onClose,
-}: {
-  clue?: Clue;
-  category?: string;
-  onClose: () => void;
-}) {
-  const getInitialState = () => {
-    if (clue?.isDailyDouble) {
-      return State.DailyDouble;
-    }
-    /* TODO: final
-    if (clue?.isFinal) {
-      return State.Final;
-    }
-    */
-    return State.ShowClue;
-  };
+export default function Prompt({ onClose }: { onClose: () => void }) {
+  const { clue, category } = useGameContext();
 
-  const initialState = getInitialState();
-  const [state, setState] = React.useState(initialState);
+  const [state, setState] = React.useState(State.ShowClue);
   const now = Date.now();
   const [start, setStart] = React.useState(now);
   const [progress, setProgress] = React.useState(now);
@@ -75,7 +58,7 @@ export default function Prompt({
     const newNow = Date.now();
     setStart(newNow);
     setProgress(newNow);
-    setState(getInitialState());
+    setState(State.ShowClue);
     if (clue) {
       const interval = setInterval(() => {
         setProgress(Date.now());
