@@ -7,13 +7,13 @@ import { getRoom } from "~/models/room.server";
 
 export async function loader({ params }: LoaderArgs) {
   const gameId = params.gameId;
-  const roomNameAndId = params.roomId;
+  const roomNameAndId = params.roomName;
 
   if (!gameId) {
     throw new Response("game ID not found in URL params", { status: 404 });
   }
   if (!roomNameAndId) {
-    throw new Response("room ID not found in URL params", { status: 404 });
+    throw new Response("room name not found in URL params", { status: 404 });
   }
 
   const game = await getGame(gameId);
