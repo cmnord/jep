@@ -88,7 +88,7 @@ export async function getGame(gameId: string): Promise<Game> {
   return dbGameToGame(gameAndClues, gameAndClues.clues);
 }
 
-/** getAllGames gets all games from Firebase, then filters them in memory. */
+/** getAllGames gets all games from the database, then filters them in memory. */
 export async function getAllGames(search: string | null): Promise<Game[]> {
   const { data, error } = await client
     .from<"games", GameTable>("games")
