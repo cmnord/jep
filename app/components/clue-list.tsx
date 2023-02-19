@@ -1,41 +1,39 @@
 import classNames from "classnames";
-import { Board, Clue } from "~/models/convert.server";
+import { Clue } from "~/models/convert.server";
 
-import BoardState from "~/utils/board-state";
-import ClueState from "~/utils/clue-state";
+import { useGameContext } from "~/utils/use-game-context";
 
 function ClueItem({
   clue,
-  state,
-  roundMultiplier,
   idx,
   focusedClueIdx,
-  onClick,
+  onFocusClue,
 }: {
   clue: Clue;
-  state?: ClueState;
-  roundMultiplier: number;
-  idx: { i: number; j: number };
-  focusedClueIdx?: { i: number; j: number };
-  onClick: (i: number, j: number) => void;
+  idx: [number, number];
+  focusedClueIdx?: [number, number];
+  onFocusClue: (i: number, j: number) => void;
 }) {
+  const { round, isAnswered } = useGameContext();
+
+  const [i, j] = idx;
   const isFocused =
-    focusedClueIdx && focusedClueIdx.i === idx.i && focusedClueIdx.j === idx.j;
-  const isAnswered = state?.isAnswered ?? false;
-  const isHalfFocused = focusedClueIdx && focusedClueIdx.i === idx.i;
+    focusedClueIdx && focusedClueIdx[0] === i && focusedClueIdx[1] === j;
+  const isHalfFocused = focusedClueIdx && focusedClueIdx[0] === i;
+  const roundMultiplier = round + 1;
 
   const value = clue.value * roundMultiplier;
-  const text = isAnswered ? clue.clue : "?";
+  const text = isAnswered(i, j) ? clue.clue : "?";
 
   return (
     <button
       className={classNames("flex py-1 border-l-8 w-full", {
-        "text-gray-500": isAnswered,
+        "text-gray-500": isAnswered(i, j),
         "bg-blue-300": isFocused,
         "border-l-blue-300": isHalfFocused,
         "border-l-transparent": !isHalfFocused,
       })}
-      onClick={() => onClick(idx.i, idx.j)}
+      onClick={() => onFocusClue(i, j)}
     >
       <div className="ml-1 font-bold leading-5">{value}</div>
       <div className="ml-3 break-words text-left">{text}</div>
@@ -44,18 +42,13 @@ function ClueItem({
 }
 
 export default function ClueList({
-  board,
-  roundMultiplier,
-  boardState,
   focusedClueIdx,
-  onClickClue,
+  onFocusClue,
 }: {
-  board: Board;
-  roundMultiplier: number;
-  boardState: BoardState;
-  focusedClueIdx?: { i: number; j: number };
-  onClickClue: (i: number, j: number) => void;
+  focusedClueIdx?: [number, number];
+  onFocusClue: (i: number, j: number) => void;
 }) {
+  const { board } = useGameContext();
   return (
     <div className="relative flex flex-wrap px-0 py-6">
       {board.categories.map((category, j) => (
@@ -66,16 +59,13 @@ export default function ClueList({
           <div className="font-bold text-lg">{category.name}</div>
           <div className="relative sm:basis-96 grow overflow-y-auto border-t-gray-300 border-t-2 mt-2 pr-3">
             {category.clues.map((clue, i) => {
-              const state = boardState.get(i, j);
               return (
                 <ClueItem
                   key={`clue-${i}-${j}`}
                   clue={clue}
-                  state={state}
-                  roundMultiplier={roundMultiplier}
-                  idx={{ i, j }}
+                  idx={[i, j]}
                   focusedClueIdx={focusedClueIdx}
-                  onClick={onClickClue}
+                  onFocusClue={onFocusClue}
                 />
               );
             })}
