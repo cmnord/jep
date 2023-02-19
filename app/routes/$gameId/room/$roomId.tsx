@@ -3,30 +3,27 @@ import { useLoaderData } from "@remix-run/react";
 
 import GameComponent from "~/components/game";
 import { getGame } from "~/models/game.server";
+import { getRoom } from "~/models/room.server";
 
 export async function loader({ params }: LoaderArgs) {
   const gameId = params.gameId;
-  const roomId = params.roomId;
+  const roomNameAndId = params.roomId;
 
   if (!gameId) {
     throw new Response("game ID not found in URL params", { status: 404 });
   }
-  if (!roomId) {
+  if (!roomNameAndId) {
     throw new Response("room ID not found in URL params", { status: 404 });
   }
 
   const game = await getGame(gameId);
+  const room = await getRoom(roomNameAndId);
 
-  return json({ roomId, game });
+  return json({ room, game });
 }
 
 export default function PlayGame() {
   const data = useLoaderData<typeof loader>();
 
-  return (
-    <div>
-      <p>playing in room {data.roomId}</p>
-      <GameComponent game={data.game} />
-    </div>
-  );
+  return <GameComponent game={data.game} />;
 }

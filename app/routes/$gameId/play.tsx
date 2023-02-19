@@ -1,15 +1,14 @@
 import { LoaderArgs, redirect } from "@remix-run/node";
+import { createRoom } from "~/models/room.server";
 
-import { makeRoomId } from "~/utils/utils";
-
-export function loader({ params }: LoaderArgs) {
+export async function loader({ params }: LoaderArgs) {
   const gameId = params.gameId;
 
   if (!gameId) {
     throw new Response("game ID not found", { status: 404 });
   }
 
-  const roomId = makeRoomId();
+  const roomName = await createRoom(gameId);
 
-  return redirect("/" + gameId + "/room/" + roomId);
+  return redirect("/" + gameId + "/room/" + roomName);
 }

@@ -89,6 +89,23 @@ export interface Database {
           title?: string
         }
       }
+      rooms: {
+        Row: {
+          game_id: string
+          id: number
+          name: string
+        }
+        Insert: {
+          game_id: string
+          id?: number
+          name: string
+        }
+        Update: {
+          game_id?: string
+          id?: number
+          name?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never
