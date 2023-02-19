@@ -4,8 +4,6 @@ const gameWords =
     " "
   );
 
-export function makeRoomId() {
-  const rid = 1; // autoincrementing ID
-  const word = gameWords[Math.floor(Math.random() * gameWords.length)];
-  return rid + "-" + word;
+export function getRandomWord() {
+  return gameWords[Math.floor(Math.random() * gameWords.length)];
 }
