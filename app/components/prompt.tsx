@@ -2,6 +2,7 @@ import * as React from "react";
 import classNames from "classnames";
 import { Clue } from "~/models/convert.server";
 import { useGameContext } from "~/utils/use-game-context";
+import { GameState } from "~/utils/use-game";
 
 /** MS_PER_CHARACTER is a heuristic value to scale the amount of time per clue by
  * its length.
@@ -47,7 +48,7 @@ function Fade({
 }
 
 export default function Prompt({ onClose }: { onClose: () => void }) {
-  const { clue, category } = useGameContext();
+  const { type, clue, category } = useGameContext();
 
   const [state, setState] = React.useState(State.ShowClue);
   const now = Date.now();
@@ -118,7 +119,7 @@ export default function Prompt({ onClose }: { onClose: () => void }) {
   const width = calculateWidth();
 
   return (
-    <Fade show={clue !== undefined}>
+    <Fade show={type === GameState.Prompt}>
       <button
         className={classNames(
           "h-screen w-screen bg-blue-1000 flex flex-col justify-center items-center"

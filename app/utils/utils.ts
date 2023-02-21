@@ -7,3 +7,9 @@ const gameWords =
 export function getRandomWord() {
   return gameWords[Math.floor(Math.random() * gameWords.length)];
 }
+
+export function generateGrid<T>(n: number, m: number, defaultFill: T) {
+  return Array.from({ length: n }, () =>
+    Array.from({ length: m }, () => defaultFill)
+  );
+}

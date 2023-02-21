@@ -1,101 +1,151 @@
 import * as React from "react";
-import { Clue, Game } from "~/models/convert.server";
 
-import { useMatrix } from "./use-matrix";
+import { Game, Clue } from "~/models/convert.server";
+import { generateGrid } from "./utils";
 
-export function useGame(game: Game) {
-  const [round, setRound] = React.useState(0);
-  const [board, setBoard] = React.useState(game.boards[round]);
-  const [numAnswered, setNumAnswered] = React.useState(0);
+export enum GameState {
+  Preview = "Preview",
+  Open = "Open",
+  Prompt = "Prompt",
+}
 
-  React.useEffect(() => {
-    if (round < game.boards.length) {
-      setBoard(game.boards[round]);
-      setNumAnswered(0);
-    }
-  }, [round]);
+interface State {
+  type: GameState;
+  activeClue?: [number, number];
+  game: Game;
+  isAnswered: boolean[][];
+  numAnswered: number;
+  numCluesInBoard: number;
+  round: number;
+}
 
-  const [numCluesInBoard, setNumCluesInBoard] = React.useState(
-    board.categories.reduce(
-      (acc, category) => (acc += category.clues.length),
-      0
-    )
+function createInitialState(game: Game, round: number) {
+  const board = game.boards[round];
+
+  const numCluesInBoard = board.categories.reduce(
+    (acc, category) => (acc += category.clues.length),
+    0
   );
-
-  const {
-    get: isAnswered,
-    set: setIsAnswered,
-    resize: resizeIsAnswered,
-  } = useMatrix(
-    board.categories[0].clues.length,
-    board.categories.length,
-    false
-  );
-
-  React.useEffect(() => {
-    const numClues = board.categories.reduce(
-      (acc, category) => (acc += category.clues.length),
-      0
-    );
-    setNumCluesInBoard(numClues);
-    resizeIsAnswered(
-      board.categories[0].clues.length,
-      board.categories.length,
-      false
-    );
-  }, [board]);
-
-  const [clue, setClue] = React.useState<Clue | undefined>();
-  const [category, setCategory] = React.useState<string | undefined>();
-  const [activeClueIdx, setActiveClue] = React.useState<[number, number]>();
-
-  React.useEffect(() => {
-    if (activeClueIdx) {
-      const [i, j] = activeClueIdx;
-      setClue(board.categories[j].clues[i]);
-      setCategory(board.categories[j].name);
-    } else {
-      setClue(undefined);
-    }
-  }, [activeClueIdx, board]);
-
-  const answerClue = () => {
-    if (!activeClueIdx) {
-      return;
-    }
-    const [i, j] = activeClueIdx;
-    console.log("answering clue");
-    setIsAnswered(i, j, true);
-    const newNumAnswered = numAnswered + 1;
-    setNumAnswered(newNumAnswered);
-    let roundChanged = false;
-
-    console.log("answered", newNumAnswered, "vs total", numCluesInBoard);
-    if (newNumAnswered === numCluesInBoard) {
-      setRound((r) => r + 1);
-      roundChanged = true;
-    }
-
-    setActiveClue(undefined);
-
-    return roundChanged;
-  };
-
-  const onClickClue = (i: number, j: number) => {
-    if (isAnswered(i, j)) {
-      return;
-    }
-    console.log("active clue is ", i, j);
-    setActiveClue([i, j]);
-  };
+  const n = board.categories[0].clues.length;
+  const m = board.categories.length;
 
   return {
+    type: GameState.Preview,
+    game,
+    isAnswered: generateGrid(n, m, false),
+    numAnswered: 0,
+    numCluesInBoard,
     round,
-    isAnswered,
-    answerClue,
+  };
+}
+
+enum ActionType {
+  DismissPreview = "DismissPreview",
+  ClickClue = "ClickClue",
+  AnswerClue = "AnswerClue",
+}
+
+interface Action {
+  type: ActionType;
+  payload?: unknown;
+}
+
+interface IndexedAction extends Action {
+  type: ActionType;
+  payload: [number, number];
+}
+
+function isIndexedAction(action: Action): action is IndexedAction {
+  return action.type === ActionType.ClickClue;
+}
+
+/** gameReducer is the state machine which implements the game. */
+function gameReducer(state: State, action: Action): State {
+  switch (action.type) {
+    case ActionType.DismissPreview:
+      const nextState = { ...state };
+
+      nextState.type = GameState.Open;
+
+      return nextState;
+    case ActionType.ClickClue: {
+      if (isIndexedAction(action)) {
+        const [i, j] = action.payload;
+        if (state.isAnswered[i][j]) {
+          return state;
+        }
+
+        const nextState = { ...state };
+        nextState.type = GameState.Prompt;
+        nextState.activeClue = [i, j];
+
+        return nextState;
+      }
+      throw new Error("ClickClue action must have an associated index");
+    }
+    case ActionType.AnswerClue: {
+      const newNumAnswered = state.numAnswered + 1;
+
+      if (newNumAnswered === state.numCluesInBoard) {
+        const newRound = state.round++;
+        const nextState = createInitialState(state.game, newRound);
+        return nextState;
+      }
+
+      const nextState = { ...state };
+      const activeClue = state.activeClue;
+      if (!activeClue) {
+        throw new Error("cannot answer clue if no clue was active");
+      }
+      const [i, j] = activeClue;
+      nextState.isAnswered[i][j] = true;
+      nextState.activeClue = undefined;
+      nextState.type = GameState.Open;
+      nextState.numAnswered = newNumAnswered;
+
+      return nextState;
+    }
+  }
+}
+
+/** useGame provides all the state variables associated with a game and methods
+ * to change them. */
+export function useGame(game: Game) {
+  const [state, dispatch] = React.useReducer(gameReducer, game, () =>
+    createInitialState(game, 0)
+  );
+
+  const board = game.boards[state.round];
+
+  let clue: Clue | undefined;
+  let category: string | undefined;
+  if (state.activeClue) {
+    const [i, j] = state.activeClue;
+    clue = state.activeClue ? board.categories[j].clues[i] : undefined;
+    category = state.activeClue ? board.categoryNames[j] : undefined;
+  }
+
+  const onClickClue = (i: number, j: number) => {
+    dispatch({ type: ActionType.ClickClue, payload: [i, j] });
+  };
+
+  const onClosePreview = () => dispatch({ type: ActionType.DismissPreview });
+
+  const onClosePrompt = () => {
+    dispatch({ type: ActionType.AnswerClue });
+  };
+
+  const isAnswered = (i: number, j: number) => state.isAnswered[i][j];
+
+  return {
+    type: state.type,
     board,
-    clue,
     category,
+    clue,
+    isAnswered,
     onClickClue,
+    onClosePreview,
+    onClosePrompt,
+    round: state.round,
   };
 }

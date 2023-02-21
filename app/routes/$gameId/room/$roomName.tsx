@@ -27,10 +27,10 @@ export async function loader({ params }: LoaderArgs) {
 export default function PlayGame() {
   const data = useLoaderData<typeof loader>();
 
-  const game = useGame(data.game);
+  const gameReducer = useGame(data.game);
 
   return (
-    <GameContext.Provider value={game}>
+    <GameContext.Provider value={gameReducer}>
       <GameComponent game={data.game} />
     </GameContext.Provider>
   );

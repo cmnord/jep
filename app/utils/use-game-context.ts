@@ -1,14 +1,16 @@
 import * as React from "react";
-import { useGame } from "./use-game";
+import { GameState, useGame } from "./use-game";
 
 export const GameContext = React.createContext<ReturnType<typeof useGame>>({
-  round: 0,
-  isAnswered: () => false,
-  answerClue: () => false,
+  type: GameState.Preview,
   board: { categories: [], categoryNames: [] },
-  clue: undefined,
-  onClickClue: () => null,
   category: undefined,
+  clue: undefined,
+  isAnswered: () => false,
+  onClickClue: () => null,
+  onClosePreview: () => null,
+  onClosePrompt: () => null,
+  round: 0,
 });
 
 export function useGameContext() {

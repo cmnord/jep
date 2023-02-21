@@ -7,6 +7,7 @@ import Preview from "~/components/preview";
 
 import { Game, Clue } from "~/models/convert.server";
 import { useGameContext } from "~/utils/use-game-context";
+import { GameState } from "~/utils/use-game";
 
 /** GameComponent maintains the game state. */
 export default function GameComponent({
@@ -16,9 +17,8 @@ export default function GameComponent({
   game: Game;
   errorMsg?: string;
 }) {
-  const { board, answerClue } = useGameContext();
+  const { type, board, onClosePreview, onClosePrompt } = useGameContext();
 
-  const [showPreview, setShowPreview] = React.useState(true);
   const [focusedClueIdx, setFocusedClue] = React.useState<[number, number]>();
 
   const finalBoard = game.boards[game.boards.length - 1];
@@ -30,14 +30,6 @@ export default function GameComponent({
     return <div>Error :({errorMsg}</div>;
   }
 
-  const handleClickPrompt = () => {
-    const roundChanged = answerClue();
-
-    if (roundChanged) {
-      setShowPreview(true);
-    }
-  };
-
   const onFocusClue = (i: number, j: number) => {
     setFocusedClue([i, j]);
   };
@@ -46,8 +38,8 @@ export default function GameComponent({
     <>
       <Preview
         numRounds={game.boards.length}
-        isOpen={showPreview}
-        onClose={() => setShowPreview(false)}
+        isOpen={type === GameState.Preview}
+        onClose={onClosePreview}
         finalClue={finalClue}
       />
       <div className="bg-black">
@@ -63,7 +55,7 @@ export default function GameComponent({
           <ClueList focusedClueIdx={focusedClueIdx} onFocusClue={onFocusClue} />
         )}
       </div>
-      <Prompt onClose={handleClickPrompt} />
+      <Prompt onClose={onClosePrompt} />
     </>
   );
 }
