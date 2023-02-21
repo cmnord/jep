@@ -1,7 +1,7 @@
 import * as React from "react";
 
 import { Game, Clue } from "~/models/convert.server";
-import { generateGrid } from "./utils";
+import { generateGrid } from "~/utils/utils";
 
 export enum GameState {
   Preview = "Preview",

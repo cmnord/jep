@@ -1,4 +1,5 @@
 import { LoaderArgs, redirect } from "@remix-run/node";
+
 import { createRoom } from "~/models/room.server";
 
 export async function loader({ params }: LoaderArgs) {

@@ -1,6 +1,6 @@
 import * as React from "react";
 import classNames from "classnames";
-import { Clue } from "~/models/convert.server";
+
 import { useGameContext } from "~/utils/use-game-context";
 import { GameState } from "~/utils/use-game";
 

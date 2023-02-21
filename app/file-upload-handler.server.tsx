@@ -6,7 +6,7 @@ import {
 import * as stream from "stream";
 
 import { createGame } from "~/models/game.server";
-import { Convert } from "./models/convert.server";
+import { Convert } from "~/models/convert.server";
 
 function streamToString(readable: stream.Readable): Promise<string> {
   const chunks: Buffer[] = [];

@@ -1,7 +1,7 @@
 import { Link } from "@remix-run/react";
-import { Clue } from "~/models/convert.server";
 
-import Modal from "./modal";
+import Modal from "~/components/modal";
+import { Clue } from "~/models/convert.server";
 import { useGameContext } from "~/utils/use-game-context";
 
 export default function Preview({

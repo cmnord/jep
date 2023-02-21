@@ -25,8 +25,7 @@ Link supabase project:
 ```ts
 npx supabase init
 npx supabase start
-npx supabase link --project-ref $SUPABASE_PROJECT_REF --password $SUPABASE_DB_PASS
-WORD
+npx supabase link --project-ref $SUPABASE_PROJECT_REF --password $SUPABASE_DB_PASSWORD
 ```
 
 Afterwards, start the Remix development server like so:
@@ -36,6 +35,13 @@ npm run dev
 ```
 
 Open up [http://localhost:3000](http://localhost:3000) and you should be ready to go!
+
+## Tools used
+
+- Web framework: [Remix](https://remix.run/)
+- CSS framework: [Tailwind CSS](https://tailwindcss.com/)
+- Hosting, deployment: [Vercel](https://vercel.com)
+- Database: [Supabase](https://supabase.com/)
 
 ## Thanks
 
