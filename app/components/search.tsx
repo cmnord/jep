@@ -56,7 +56,10 @@ export default function Search({
             strokeWidth={1.5}
             stroke="currentColor"
             className="w-5 h-5"
+            role="img"
+            aria-labelledby="search-title"
           >
+            <title id="search-title">Search</title>
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
