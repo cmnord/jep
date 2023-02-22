@@ -3,7 +3,7 @@ import { useLoaderData } from "@remix-run/react";
 
 import GameComponent from "~/components/game";
 import { getGame } from "~/models/game.server";
-import { RoomEventType } from "~/models/room-event";
+import { isJoinEvent, RoomEventType } from "~/models/room-event";
 import { createRoomEvent, getRoomEvents } from "~/models/room-event.server";
 import { getRoom } from "~/models/room.server";
 import { getOrCreateUserSession } from "~/session.server";
@@ -29,8 +29,16 @@ export async function loader({ request, params }: LoaderArgs) {
   const headers = new Headers();
   const userId = await getOrCreateUserSession(request, headers);
 
-  await createRoomEvent(room.id, RoomEventType.Join, { userId });
   const roomEvents = await getRoomEvents(room.id);
+  const userInRoom = roomEvents.find(
+    (e) => isJoinEvent(e) && e.payload.userId === userId
+  );
+  if (!userInRoom) {
+    const joinEvent = await createRoomEvent(room.id, RoomEventType.Join, {
+      userId,
+    });
+    roomEvents.push(joinEvent);
+  }
 
   const { SUPABASE_URL, SUPABASE_ANON_KEY } = process.env;
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
