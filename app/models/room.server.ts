@@ -28,12 +28,12 @@ export async function getRoom(nameAndId: string): Promise<Room | null> {
 
 /* Writes */
 
-export async function createRoom(gameId: string, userId: string) {
+export async function createRoom(gameId: string) {
   const word = getRandomWord();
 
   const { data, error } = await db
     .from<"rooms", RoomTable>("rooms")
-    .insert({ name: word, game_id: gameId })
+    .insert<RoomTable["Insert"]>({ name: word, game_id: gameId })
     .select();
 
   if (error !== null) {

@@ -1,13 +1,12 @@
 import { json, LoaderArgs } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
-import { createClient } from "@supabase/supabase-js";
-import * as React from "react";
 
 import GameComponent from "~/components/game";
 import { getGame } from "~/models/game.server";
+import { RoomEventType } from "~/models/room-event";
+import { createRoomEvent, getRoomEvents } from "~/models/room-event.server";
 import { getRoom } from "~/models/room.server";
 import { getOrCreateUserSession } from "~/session.server";
-import { useDebounce } from "~/utils/use-debounce";
 import { useGame } from "~/utils/use-game";
 import { GameContext } from "~/utils/use-game-context";
 
@@ -30,6 +29,9 @@ export async function loader({ request, params }: LoaderArgs) {
   const headers = new Headers();
   const userId = await getOrCreateUserSession(request, headers);
 
+  await createRoomEvent(room.id, RoomEventType.Join, { userId });
+  const roomEvents = await getRoomEvents(room.id);
+
   const { SUPABASE_URL, SUPABASE_ANON_KEY } = process.env;
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
     throw new Error(
@@ -38,75 +40,23 @@ export async function loader({ request, params }: LoaderArgs) {
   }
   const env = { SUPABASE_URL, SUPABASE_ANON_KEY };
 
-  return json({ room, game, userId, env }, { headers });
-}
-
-interface PresenceKey {
-  userId: string;
+  return json({ room, game, roomEvents, userId, env }, { headers });
 }
 
 export default function PlayGame() {
   const data = useLoaderData<typeof loader>();
 
-  const gameReducer = useGame(data.game);
-
-  const [players, setPlayers] = React.useState(new Set<string>());
-  const debouncedPlayers = useDebounce(players, 1000);
-
-  const client = createClient(
+  const gameReducer = useGame(
+    data.game,
+    data.roomEvents,
+    data.room.id,
     data.env.SUPABASE_URL,
-    data.env.SUPABASE_ANON_KEY,
-    {
-      realtime: {
-        params: {
-          eventsPerSecond: 1,
-        },
-      },
-    }
+    data.env.SUPABASE_ANON_KEY
   );
-
-  React.useEffect(() => {
-    const channel = client
-      .channel(`game:${data.game.id}:room:${data.room.id}`, {
-        config: {
-          presence: { key: data.userId },
-        },
-      })
-      .on("presence", { event: "sync" }, () => {
-        console.log("sync");
-        const presenceState = channel.presenceState();
-        for (const key in presenceState) {
-          const userId = key;
-          if (!players.has(userId)) {
-            setPlayers((prev) => new Set(prev).add(userId));
-          }
-        }
-      })
-      .on<PresenceKey>("presence", { event: "leave" }, (payload) => {
-        setPlayers((prev) => {
-          const newPlayers = new Set(prev);
-          payload.leftPresences.forEach((p) => newPlayers.delete(p.userId));
-          return newPlayers;
-        });
-      })
-      .subscribe(async (status) => {
-        if (status === "SUBSCRIBED") {
-          const msg: PresenceKey = { userId: data.userId };
-          await channel.track(msg);
-        }
-      });
-    return () => {
-      channel.unsubscribe();
-    };
-  }, [client, players, setPlayers]);
 
   return (
     <GameContext.Provider value={gameReducer}>
-      <GameComponent
-        game={data.game}
-        players={debouncedPlayers}
-        userId={data.userId}
-      />
+      <GameComponent game={data.game} userId={data.userId} />
     </GameContext.Provider>
   );
 }

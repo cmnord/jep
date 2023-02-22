@@ -126,7 +126,12 @@ export async function getMockGame(): Promise<Game> {
 export async function createGame(inputGame: ConvertedGame) {
   const { data: gameData, error: gameErr } = await db
     .from<"games", GameTable>("games")
-    .insert(inputGame)
+    .insert<GameTable["Insert"]>({
+      author: inputGame.author,
+      copyright: inputGame.copyright,
+      note: inputGame.note,
+      title: inputGame.title,
+    })
     .select();
 
   if (gameErr !== null) {
@@ -155,7 +160,7 @@ export async function createGame(inputGame: ConvertedGame) {
 
   const { data: cluesData, error: cluesErr } = await db
     .from<"clues", ClueTable>("clues")
-    .insert(clues)
+    .insert<ClueTable["Insert"]>(clues)
     .select();
 
   if (cluesErr !== null) {

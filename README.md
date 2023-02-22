@@ -36,6 +36,12 @@ npm run dev
 
 Open up [http://localhost:3000](http://localhost:3000) and you should be ready to go!
 
+To modify the database schema in Supabase, run:
+
+```sh
+npx supabase gen types typescript --linked > app/models/database.types.ts
+```
+
 ## Tools used
 
 - Web framework: [Remix](https://remix.run/)

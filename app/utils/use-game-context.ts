@@ -10,6 +10,7 @@ export const GameContext = React.createContext<ReturnType<typeof useGame>>({
   onClickClue: () => null,
   onClosePreview: () => null,
   onClosePrompt: () => null,
+  players: new Set(),
   round: 0,
 });
 

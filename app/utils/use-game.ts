@@ -1,6 +1,9 @@
+import { createClient } from "@supabase/supabase-js";
 import * as React from "react";
 
 import { Game, Clue } from "~/models/convert.server";
+import { isJoinEvent, RoomEventType } from "~/models/room-event";
+import { RoomEvent } from "~/models/room-event.server";
 import { generateGrid } from "~/utils/utils";
 
 export enum GameState {
@@ -16,11 +19,15 @@ interface State {
   isAnswered: boolean[][];
   numAnswered: number;
   numCluesInBoard: number;
+  players: Set<string>;
   round: number;
 }
 
-function createInitialState(game: Game, round: number) {
-  const board = game.boards[round];
+function createInitialState(
+  arg: { game: Game; serverRoomEvents: RoomEvent[] },
+  round: number
+): State {
+  const board = arg.game.boards[round];
 
   const numCluesInBoard = board.categories.reduce(
     (acc, category) => (acc += category.clues.length),
@@ -31,10 +38,13 @@ function createInitialState(game: Game, round: number) {
 
   return {
     type: GameState.Preview,
-    game,
+    game: arg.game,
     isAnswered: generateGrid(n, m, false),
     numAnswered: 0,
     numCluesInBoard,
+    players: new Set(
+      arg.serverRoomEvents.filter(isJoinEvent).map((e) => e.payload.userId)
+    ),
     round,
   };
 }
@@ -43,6 +53,7 @@ enum ActionType {
   DismissPreview = "DismissPreview",
   ClickClue = "ClickClue",
   AnswerClue = "AnswerClue",
+  PlayerJoin = "PlayerJoin",
 }
 
 interface Action {
@@ -51,12 +62,21 @@ interface Action {
 }
 
 interface IndexedAction extends Action {
-  type: ActionType;
+  type: ActionType.ClickClue;
   payload: [number, number];
+}
+
+interface PlayerJoinAction extends Action {
+  type: ActionType.PlayerJoin;
+  payload: string;
 }
 
 function isIndexedAction(action: Action): action is IndexedAction {
   return action.type === ActionType.ClickClue;
+}
+
+function isPlayerJoinAction(action: Action): action is PlayerJoinAction {
+  return action.type === ActionType.PlayerJoin;
 }
 
 /** gameReducer is the state machine which implements the game. */
@@ -88,7 +108,10 @@ function gameReducer(state: State, action: Action): State {
 
       if (newNumAnswered === state.numCluesInBoard) {
         const newRound = state.round++;
-        const nextState = createInitialState(state.game, newRound);
+        const nextState = createInitialState(
+          { game: state.game, serverRoomEvents: [] },
+          newRound
+        );
         return nextState;
       }
 
@@ -105,15 +128,90 @@ function gameReducer(state: State, action: Action): State {
 
       return nextState;
     }
+    case ActionType.PlayerJoin: {
+      if (isPlayerJoinAction(action)) {
+        const nextState = { ...state };
+        nextState.players.add(action.payload);
+        return nextState;
+      }
+      throw new Error("PlayerJoin action must have an associated userId");
+    }
+  }
+}
+
+/** processRoomEvent dispatches the appropriate Action to the reducer based on
+ * the room event. */
+function processRoomEvent(
+  roomEvent: RoomEvent,
+  dispatch: React.Dispatch<Action>
+) {
+  switch (roomEvent.type) {
+    case RoomEventType.Join:
+      if (isJoinEvent(roomEvent)) {
+        dispatch({
+          type: ActionType.PlayerJoin,
+          payload: roomEvent.payload.userId,
+        });
+      }
   }
 }
 
 /** useGame provides all the state variables associated with a game and methods
  * to change them. */
-export function useGame(game: Game) {
-  const [state, dispatch] = React.useReducer(gameReducer, game, () =>
-    createInitialState(game, 0)
+export function useGame(
+  game: Game,
+  serverRoomEvents: RoomEvent[],
+  roomId: number,
+  SUPABASE_URL: string,
+  SUPABASE_ANON_KEY: string
+) {
+  const [roomEvents, setRoomEvents] = React.useState(serverRoomEvents);
+
+  const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    realtime: {
+      params: {
+        eventsPerSecond: 1,
+      },
+    },
+  });
+
+  // TODO: spectator, points, names
+
+  React.useEffect(() => {
+    setRoomEvents(serverRoomEvents);
+  }, [serverRoomEvents]);
+
+  const [state, dispatch] = React.useReducer(
+    gameReducer,
+    { game, serverRoomEvents },
+    () => createInitialState({ game, serverRoomEvents }, 0)
   );
+
+  React.useEffect(() => {
+    const channel = client
+      .channel(`room:${roomId}`)
+      .on<RoomEvent>(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "room_events",
+          filter: "room_id=eq." + roomId,
+        },
+        (payload) => {
+          const newEvent: RoomEvent = payload.new;
+          // Only process events we haven't seen yet
+          if (!roomEvents.find((re) => re.id === newEvent.id)) {
+            setRoomEvents((prev) => [...prev, newEvent]);
+            processRoomEvent(newEvent, dispatch);
+          }
+        }
+      )
+      .subscribe();
+    return () => {
+      channel.unsubscribe();
+    };
+  }, [client, roomEvents, setRoomEvents]);
 
   const board = game.boards[state.round];
 
@@ -146,6 +244,7 @@ export function useGame(game: Game) {
     onClickClue,
     onClosePreview,
     onClosePrompt,
+    players: state.players,
     round: state.round,
   };
 }

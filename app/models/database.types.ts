@@ -89,6 +89,29 @@ export interface Database {
           title?: string
         }
       }
+      room_events: {
+        Row: {
+          id: number
+          payload: Json | null
+          room_id: number
+          ts: string
+          type: string
+        }
+        Insert: {
+          id?: number
+          payload?: Json | null
+          room_id: number
+          ts?: string
+          type: string
+        }
+        Update: {
+          id?: number
+          payload?: Json | null
+          room_id?: number
+          ts?: string
+          type?: string
+        }
+      }
       rooms: {
         Row: {
           game_id: string

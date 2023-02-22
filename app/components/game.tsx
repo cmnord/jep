@@ -13,15 +13,14 @@ import { GameState } from "~/utils/use-game";
 export default function GameComponent({
   game,
   errorMsg,
-  players = new Set(),
   userId,
 }: {
   game: Game;
   errorMsg?: string;
-  players: Set<string>;
   userId: string;
 }) {
-  const { type, board, onClosePreview, onClosePrompt } = useGameContext();
+  const { type, board, players, onClosePreview, onClosePrompt } =
+    useGameContext();
 
   const [focusedClueIdx, setFocusedClue] = React.useState<[number, number]>();
 
