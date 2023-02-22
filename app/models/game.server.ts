@@ -103,9 +103,9 @@ export async function getAllGames(search: string | null): Promise<Game[]> {
     throw error;
   }
 
-  data.filter((game) => matchesSearch(game, search));
-
-  return data.map((gac) => dbGameToGame(gac, gac.clues));
+  return data
+    .filter((game) => matchesSearch(game, search))
+    .map((gac) => dbGameToGame(gac, gac.clues));
 }
 
 export async function getMockGame(): Promise<Game> {
