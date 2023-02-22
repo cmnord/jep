@@ -101,6 +101,11 @@ export default function Index() {
           <Button>Play a mock game</Button>
         </Link>
       </div>
+      {data.games.length === 0 && (
+        <p className="text-sm text-gray-500">
+          No games found for search "{debouncedSearch}"
+        </p>
+      )}
       <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4 mb-4">
         {data.games.map((game, i) => (
           <GameCard key={`game-${i}`} game={game} />
