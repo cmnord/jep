@@ -60,9 +60,10 @@ export default function Preview({
           buttonContent="Start"
         >
           <p className="text-gray-500 mb-4">Click to play</p>
-          <p className="flex gap-2 mb-4">
-            You are: <Player userId={userId} />
-          </p>
+          <div className="flex gap-2 mb-4">
+            <p>You are: </p>
+            <Player userId={userId} />
+          </div>
           <Players players={players} />
         </Modal>
       );
