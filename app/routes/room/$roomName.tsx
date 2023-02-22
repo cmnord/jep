@@ -12,24 +12,19 @@ import { useGame } from "~/utils/use-game";
 import { GameContext } from "~/utils/use-game-context";
 
 export async function loader({ request, params }: LoaderArgs) {
-  const gameId = params.gameId;
   const roomNameAndId = params.roomName;
-
-  if (!gameId) {
-    throw new Response("game ID not found in URL params", { status: 404 });
-  }
   if (!roomNameAndId) {
     throw new Response("room name not found in URL params", { status: 404 });
   }
 
-  const game = await getGame(gameId);
   const room = await getRoom(roomNameAndId);
-
-  if (!game) {
-    throw new Response("game not found", { status: 404 });
-  }
   if (!room) {
     throw new Response("room not found", { status: 404 });
+  }
+
+  const game = await getGame(room.game_id);
+  if (!game) {
+    throw new Response("game not found", { status: 404 });
   }
 
   const headers = new Headers();

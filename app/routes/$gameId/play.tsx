@@ -1,5 +1,4 @@
 import { LoaderArgs, redirect } from "@remix-run/node";
-import { v4 as uuid } from "uuid";
 
 import { createRoom } from "~/models/room.server";
 import { getOrCreateUserSession } from "~/session.server";
@@ -16,5 +15,5 @@ export async function loader({ request, params }: LoaderArgs) {
 
   const roomName = await createRoom(gameId, userId);
 
-  return redirect("/" + gameId + "/room/" + roomName, { headers });
+  return redirect("/room/" + roomName, { headers });
 }
