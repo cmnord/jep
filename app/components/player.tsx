@@ -1,3 +1,5 @@
+import { Player } from "~/utils/use-game";
+
 const SATURATION = 60;
 const LIGHTNESS = 65;
 
@@ -28,24 +30,24 @@ function stringToHslColor(str: string) {
   return `hsl(${h}, ${SATURATION}%, ${LIGHTNESS}%)`;
 }
 
-export function Player({ userId }: { userId: string }) {
-  const color = stringToHslColor(userId);
+export function PlayerIcon({ player }: { player: Player }) {
+  const color = stringToHslColor(player.userId);
   return (
     <div
-      className="rounded-full w-6 h-6 text-white flex items-center justify-center"
+      className="rounded-full px-3 py-1 text-white text-sm flex items-center justify-center"
       style={{ backgroundColor: color }}
-      title={userId}
+      title={player.name}
     >
-      {userId[0].toUpperCase()}
+      {player.name}
     </div>
   );
 }
 
-export default function Players({ players }: { players: Set<string> }) {
+export default function Players({ players }: { players: Set<Player> }) {
   return (
     <div className="flex flex-wrap gap-2">
-      {Array.from(players.keys()).map((userId) => (
-        <Player key={userId} userId={userId} />
+      {Array.from(players.keys()).map((p) => (
+        <PlayerIcon key={p.userId} player={p} />
       ))}
     </div>
   );

@@ -9,12 +9,13 @@ export function isJoinEvent(re: RoomEvent): re is {
   ts: string;
   room_id: number;
   type: RoomEventType.Join;
-  payload: { userId: string };
+  payload: { userId: string; name: string };
 } {
   return (
     re.type === RoomEventType.Join &&
     re.payload !== null &&
     typeof re.payload === "object" &&
-    "userId" in re.payload
+    "userId" in re.payload &&
+    "name" in re.payload
   );
 }

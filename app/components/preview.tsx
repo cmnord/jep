@@ -3,7 +3,7 @@ import { Link } from "@remix-run/react";
 import Modal from "~/components/modal";
 import { Clue } from "~/models/convert.server";
 import { useGameContext } from "~/utils/use-game-context";
-import Players, { Player } from "./player";
+import Players, { PlayerIcon } from "./player";
 
 export default function Preview({
   numRounds,
@@ -17,10 +17,14 @@ export default function Preview({
   isOpen: boolean;
   onClose: () => void;
   finalClue?: Clue;
-  players: Set<string>;
+  players: Set<{ userId: string; name: string }>;
   userId: string;
 }) {
   const { round } = useGameContext();
+
+  const player = Array.from(players.keys()).find(
+    (p) => p.userId === userId
+  ) ?? { userId, name: "You" };
 
   switch (round) {
     case numRounds:
@@ -62,7 +66,7 @@ export default function Preview({
           <p className="text-gray-500 mb-4">Click to play</p>
           <div className="flex gap-2 mb-4">
             <p>You are: </p>
-            <Player userId={userId} />
+            <PlayerIcon player={player} />
           </div>
           <Players players={players} />
         </Modal>

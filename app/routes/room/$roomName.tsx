@@ -9,6 +9,7 @@ import { getRoom } from "~/models/room.server";
 import { getOrCreateUserSession } from "~/session.server";
 import { useGame } from "~/utils/use-game";
 import { GameContext } from "~/utils/use-game-context";
+import { getRandomName } from "~/utils/name";
 
 export async function loader({ request, params }: LoaderArgs) {
   const roomNameAndId = params.roomName;
@@ -36,6 +37,7 @@ export async function loader({ request, params }: LoaderArgs) {
   if (!userInRoom) {
     const joinEvent = await createRoomEvent(room.id, RoomEventType.Join, {
       userId,
+      name: getRandomName(),
     });
     roomEvents.push(joinEvent);
   }

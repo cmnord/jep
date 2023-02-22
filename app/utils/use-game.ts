@@ -12,6 +12,11 @@ export enum GameState {
   Prompt = "Prompt",
 }
 
+export interface Player {
+  userId: string;
+  name: string;
+}
+
 interface State {
   type: GameState;
   activeClue?: [number, number];
@@ -19,7 +24,7 @@ interface State {
   isAnswered: boolean[][];
   numAnswered: number;
   numCluesInBoard: number;
-  players: Set<string>;
+  players: Set<Player>;
   round: number;
 }
 
@@ -43,7 +48,7 @@ function createInitialState(
     numAnswered: 0,
     numCluesInBoard,
     players: new Set(
-      arg.serverRoomEvents.filter(isJoinEvent).map((e) => e.payload.userId)
+      arg.serverRoomEvents.filter(isJoinEvent).map((e) => e.payload)
     ),
     round,
   };
@@ -68,7 +73,7 @@ interface IndexedAction extends Action {
 
 interface PlayerJoinAction extends Action {
   type: ActionType.PlayerJoin;
-  payload: string;
+  payload: Player;
 }
 
 function isIndexedAction(action: Action): action is IndexedAction {
@@ -150,7 +155,10 @@ function processRoomEvent(
       if (isJoinEvent(roomEvent)) {
         dispatch({
           type: ActionType.PlayerJoin,
-          payload: roomEvent.payload.userId,
+          payload: {
+            userId: roomEvent.payload.userId,
+            name: roomEvent.payload.name,
+          },
         });
       }
   }
