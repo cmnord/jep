@@ -124,18 +124,9 @@ export async function getMockGame(): Promise<Game> {
 /* Writes */
 
 export async function createGame(inputGame: ConvertedGame) {
-  const now = new Date();
-
   const { data: gameData, error: gameErr } = await db
     .from<"games", GameTable>("games")
-    .insert({
-      author: inputGame.author,
-      copyright: inputGame.copyright,
-      created_at: now.toISOString(),
-      id: uuid(),
-      note: inputGame.note,
-      title: inputGame.title,
-    })
+    .insert(inputGame)
     .select();
 
   if (gameErr !== null) {

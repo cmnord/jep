@@ -75,8 +75,8 @@ export interface Database {
         Insert: {
           author: string
           copyright?: string | null
-          created_at: string
-          id: string
+          created_at?: string
+          id?: string
           note?: string | null
           title: string
         }
