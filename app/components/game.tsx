@@ -8,6 +8,7 @@ import Preview from "~/components/preview";
 import { Game, Clue } from "~/models/convert.server";
 import { useGameContext } from "~/utils/use-game-context";
 import { GameState } from "~/utils/use-game";
+import Players from "./player";
 
 /** GameComponent maintains the game state. */
 export default function GameComponent({
@@ -56,6 +57,7 @@ export default function GameComponent({
         )}
       </div>
       <div className="p-12">
+        <Players players={players} userId={userId} />
         {board && (
           <ClueList focusedClueIdx={focusedClueIdx} onFocusClue={onFocusClue} />
         )}

@@ -22,10 +22,6 @@ export default function Preview({
 }) {
   const { round } = useGameContext();
 
-  const player = Array.from(players.keys()).find(
-    (p) => p.userId === userId
-  ) ?? { userId, name: "You" };
-
   switch (round) {
     case numRounds:
       return (
@@ -64,11 +60,7 @@ export default function Preview({
           buttonContent="Start"
         >
           <p className="text-gray-500 mb-4">Click to play</p>
-          <div className="flex gap-2 mb-4">
-            <p>You are: </p>
-            <PlayerIcon player={player} />
-          </div>
-          <Players players={players} />
+          <Players players={players} userId={userId} />
         </Modal>
       );
     case 1:

@@ -1,7 +1,7 @@
 import { Player } from "~/utils/use-game";
 
 const SATURATION = 60;
-const LIGHTNESS = 65;
+const LIGHTNESS = 85;
 
 const cyrb53 = (str: string, seed = 0) => {
   let h1 = 0xdeadbeef ^ seed,
@@ -34,8 +34,8 @@ export function PlayerIcon({ player }: { player: Player }) {
   const color = stringToHslColor(player.userId);
   return (
     <div
-      className="rounded-full px-3 py-1 text-white text-sm flex items-center justify-center"
-      style={{ backgroundColor: color }}
+      className="p-3 bg-blue-1000 bg-gradient-to-b from-blue-700 border-2 border-black text-white text-sm flex items-center justify-center font-mono shadow"
+      style={{ color: color }}
       title={player.name}
     >
       {player.name}
@@ -43,12 +43,28 @@ export function PlayerIcon({ player }: { player: Player }) {
   );
 }
 
-export default function Players({ players }: { players: Set<Player> }) {
+export default function Players({
+  players,
+  userId,
+}: {
+  players: Set<Player>;
+  userId: string;
+}) {
+  const player = Array.from(players.keys()).find(
+    (p) => p.userId === userId
+  ) ?? { userId, name: "You" };
+
   return (
-    <div className="flex flex-wrap gap-2">
-      {Array.from(players.keys()).map((p) => (
-        <PlayerIcon key={p.userId} player={p} />
-      ))}
+    <div>
+      <div className="flex gap-2 mb-4 items-center">
+        <p className="text-gray-500 text-sm">You are: </p>
+        <PlayerIcon player={player} />
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {Array.from(players.keys()).map((p) => (
+          <PlayerIcon key={p.userId} player={p} />
+        ))}
+      </div>
     </div>
   );
 }
