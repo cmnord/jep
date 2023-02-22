@@ -1,10 +1,10 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "./models/database.types";
 
-let client: SupabaseClient;
+let db: SupabaseClient;
 
 declare global {
-  var __client__: SupabaseClient;
+  var __db__: SupabaseClient;
 }
 
 // this is needed because in development we don't want to restart
@@ -12,15 +12,15 @@ declare global {
 // create a new cache with every change either.
 // in production we'll have a single cache.
 if (process.env.NODE_ENV === "production") {
-  client = initializeClient();
+  db = initializeDB();
 } else {
-  if (!global.__client__) {
-    global.__client__ = initializeClient();
+  if (!global.__db__) {
+    global.__db__ = initializeDB();
   }
-  client = global.__client__;
+  db = global.__db__;
 }
 
-function initializeClient() {
+function initializeDB() {
   const { SUPABASE_URL, SUPABASE_ANON_KEY } = process.env;
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
     throw new Error(
@@ -31,4 +31,4 @@ function initializeClient() {
   return createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY);
 }
 
-export { client };
+export { db };

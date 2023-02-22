@@ -1,7 +1,7 @@
 import { readFile } from "fs/promises";
 import { v4 as uuid } from "uuid";
 
-import { client } from "~/supabase.server";
+import { db } from "~/supabase.server";
 import { Board, Convert, Game as ConvertedGame } from "./convert.server";
 import { Database } from "./database.types";
 
@@ -73,14 +73,18 @@ function dbGameToGame(dbGame: DbGame, clues: DbClue[]): Game {
 
 /* Reads */
 
-export async function getGame(gameId: string): Promise<Game> {
-  const { data, error } = await client
+export async function getGame(gameId: string): Promise<Game | null> {
+  const { data, error } = await db
     .from<"games", GameTable>("games")
     .select<"*, clues ( * )", GameAndClues>("*, clues ( * )")
     .eq("id", gameId);
 
   if (error !== null) {
     throw error;
+  }
+
+  if (data.length === 0) {
+    return null;
   }
 
   const gameAndClues = data[0];
@@ -90,7 +94,7 @@ export async function getGame(gameId: string): Promise<Game> {
 
 /** getAllGames gets all games from the database, then filters them in memory. */
 export async function getAllGames(search: string | null): Promise<Game[]> {
-  const { data, error } = await client
+  const { data, error } = await db
     .from<"games", GameTable>("games")
     .select<"*, clues ( * )", GameAndClues>("*, clues ( * )");
   // TODO: filter with .or()
@@ -122,7 +126,7 @@ export async function getMockGame(): Promise<Game> {
 export async function createGame(inputGame: ConvertedGame) {
   const now = new Date();
 
-  const { data: gameData, error: gameErr } = await client
+  const { data: gameData, error: gameErr } = await db
     .from<"games", GameTable>("games")
     .insert({
       author: inputGame.author,
@@ -158,7 +162,7 @@ export async function createGame(inputGame: ConvertedGame) {
     }
   }
 
-  const { data: cluesData, error: cluesErr } = await client
+  const { data: cluesData, error: cluesErr } = await db
     .from<"clues", ClueTable>("clues")
     .insert(clues)
     .select();

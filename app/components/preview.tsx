@@ -3,17 +3,22 @@ import { Link } from "@remix-run/react";
 import Modal from "~/components/modal";
 import { Clue } from "~/models/convert.server";
 import { useGameContext } from "~/utils/use-game-context";
+import Players, { Player } from "./player";
 
 export default function Preview({
   numRounds,
   isOpen,
   onClose,
   finalClue,
+  players = new Set(),
+  userId,
 }: {
   numRounds: number;
   isOpen: boolean;
   onClose: () => void;
   finalClue?: Clue;
+  players: Set<string>;
+  userId: string;
 }) {
   const { round } = useGameContext();
 
@@ -54,7 +59,11 @@ export default function Preview({
           title="Play &rarr;"
           buttonContent="Start"
         >
-          <p className="text-gray-500">Click to play</p>
+          <p className="text-gray-500 mb-4">Click to play</p>
+          <p className="flex gap-2 mb-4">
+            You are: <Player userId={userId} />
+          </p>
+          <Players players={players} />
         </Modal>
       );
     case 1:

@@ -19,7 +19,11 @@ export default function PlayGame() {
 
   return (
     <GameContext.Provider value={gameReducer}>
-      <GameComponent game={data.game} />;
+      <GameComponent
+        game={data.game}
+        userId={"mock"}
+        players={new Set(["mock"])}
+      />
     </GameContext.Provider>
   );
 }

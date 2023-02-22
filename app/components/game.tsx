@@ -13,9 +13,13 @@ import { GameState } from "~/utils/use-game";
 export default function GameComponent({
   game,
   errorMsg,
+  players = new Set(),
+  userId,
 }: {
   game: Game;
   errorMsg?: string;
+  players: Set<string>;
+  userId: string;
 }) {
   const { type, board, onClosePreview, onClosePrompt } = useGameContext();
 
@@ -41,6 +45,8 @@ export default function GameComponent({
         isOpen={type === GameState.Preview}
         onClose={onClosePreview}
         finalClue={finalClue}
+        players={players}
+        userId={userId}
       />
       <div className="bg-black">
         {board && (

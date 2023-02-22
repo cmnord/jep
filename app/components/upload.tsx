@@ -37,7 +37,7 @@ export default function Upload({ onChange }: { onChange?: () => void }) {
           <p className="font-medium">Upload .jep.json file</p>
           <input
             type="file"
-            accept="application/json"
+            accept=".jep.json,application/json"
             name="upload"
             aria-describedby="upload_help"
             className="hidden"

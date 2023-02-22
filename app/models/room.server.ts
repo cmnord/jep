@@ -1,4 +1,4 @@
-import { client } from "~/supabase.server";
+import { db } from "~/supabase.server";
 import { getRandomWord } from "~/utils/utils";
 import { Database } from "~/models/database.types";
 
@@ -7,10 +7,10 @@ type Room = RoomTable["Row"];
 
 /* Reads */
 
-export async function getRoom(nameAndId: string): Promise<Room> {
+export async function getRoom(nameAndId: string): Promise<Room | null> {
   const id = nameAndId.split("-")[0];
 
-  const { data, error } = await client
+  const { data, error } = await db
     .from<"rooms", RoomTable>("rooms")
     .select("*")
     .eq("id", id);
@@ -19,15 +19,19 @@ export async function getRoom(nameAndId: string): Promise<Room> {
     throw error;
   }
 
+  if (data.length === 0) {
+    return null;
+  }
+
   return data[0];
 }
 
 /* Writes */
 
-export async function createRoom(gameId: string) {
+export async function createRoom(gameId: string, userId: string) {
   const word = getRandomWord();
 
-  const { data, error } = await client
+  const { data, error } = await db
     .from<"rooms", RoomTable>("rooms")
     .insert({ name: word, game_id: gameId })
     .select();
