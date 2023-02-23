@@ -1,6 +1,6 @@
 // https://cluebase.readthedocs.io/en/latest/#id3
 
-import { Game, Clue } from "./convert.server";
+import type { Game, Clue } from "~/models/convert.server";
 
 /* Constants */
 

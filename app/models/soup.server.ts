@@ -1,8 +1,9 @@
 // https://glitch.com/~jarchive-json
 import { fetch } from "@remix-run/node";
-import JSSoup, { SoupTag } from "jssoup";
+import JSSoup from "jssoup";
+import type { SoupTag } from "jssoup";
 
-import { Game, Board } from "~/models/convert.server";
+import type { Game, Board } from "~/models/convert.server";
 
 export class SoupGame {
   private jArchive_Board_URL?: string;

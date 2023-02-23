@@ -1,9 +1,9 @@
 import { readFile } from "fs/promises";
-import { v4 as uuid } from "uuid";
 
 import { db } from "~/supabase.server";
-import { Board, Convert, Game as ConvertedGame } from "./convert.server";
-import { Database } from "./database.types";
+import { Convert } from "~/models/convert.server";
+import type { Board, Game as ConvertedGame } from "~/models/convert.server";
+import type { Database } from "~/models/database.types";
 
 /* Types */
 

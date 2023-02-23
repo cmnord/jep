@@ -1,6 +1,6 @@
 import { db } from "~/supabase.server";
 import { getRandomWord } from "~/utils/utils";
-import { Database } from "~/models/database.types";
+import type { Database } from "~/models/database.types";
 
 type RoomTable = Database["public"]["Tables"]["rooms"];
 type Room = RoomTable["Row"];

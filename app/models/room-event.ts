@@ -1,5 +1,6 @@
-import { RoomEvent } from "~/models/room-event.server";
-import { Action, ActionType, GameState, State } from "~/utils/use-game";
+import type { RoomEvent } from "~/models/room-event.server";
+import type { Action, State } from "~/utils/use-game";
+import { ActionType, GameState } from "~/utils/use-game";
 
 export enum RoomEventType {
   Join = "join",

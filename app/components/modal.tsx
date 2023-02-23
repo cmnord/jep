@@ -1,7 +1,5 @@
 import * as React from "react";
 
-import Button from "~/components/button";
-
 function Title({ children }: { children: React.ReactNode }) {
   return (
     <h3

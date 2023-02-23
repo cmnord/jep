@@ -2,7 +2,7 @@ import { useFetcher } from "@remix-run/react";
 import classNames from "classnames";
 import * as React from "react";
 
-import { Clue } from "~/models/convert.server";
+import type { Clue } from "~/models/convert.server";
 import { useGameContext } from "~/utils/use-game-context";
 
 function Category({ category }: { category: string }) {
@@ -25,7 +25,7 @@ function Category({ category }: { category: string }) {
   );
 }
 
-function Clue({
+function ClueComponent({
   clue,
   i,
   j,
@@ -205,7 +205,7 @@ export default function BoardComponent({
           {sortedClueRows.map(([value, clues], i) => (
             <tr key={value}>
               {clues.map((clue, j) => (
-                <Clue
+                <ClueComponent
                   key={`clue-${i}-${j}`}
                   clue={clue}
                   i={i}

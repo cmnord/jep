@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { Clue } from "~/models/convert.server";
+import type { Clue } from "~/models/convert.server";
 
 import { useGameContext } from "~/utils/use-game-context";
 

@@ -1,9 +1,9 @@
 import { createClient } from "@supabase/supabase-js";
 import * as React from "react";
 
-import { Game, Clue, Board } from "~/models/convert.server";
+import type { Game, Clue } from "~/models/convert.server";
 import { applyRoomEventsToState, processRoomEvent } from "~/models/room-event";
-import { RoomEvent } from "~/models/room-event.server";
+import type { RoomEvent } from "~/models/room-event.server";
 import { generateGrid } from "~/utils/utils";
 
 export enum GameState {
@@ -220,7 +220,7 @@ export function useGame(
         processRoomEvent(re, dispatch);
       }
     }
-  }, [serverRoomEvents]);
+  }, [serverRoomEvents, seenRoomEvents]);
 
   React.useEffect(() => {
     const channel = client
@@ -246,7 +246,7 @@ export function useGame(
     return () => {
       channel.unsubscribe();
     };
-  }, [client, seenRoomEvents, setSeenRoomEvents]);
+  }, [client, seenRoomEvents, setSeenRoomEvents, roomId]);
 
   const board = game.boards[state.round];
 

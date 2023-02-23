@@ -1,5 +1,5 @@
 import { v4 as uuid } from "uuid";
-import { createCookie, createCookieSessionStorage } from "@remix-run/node";
+import { createCookieSessionStorage } from "@remix-run/node";
 
 interface FormState {
   success: boolean;

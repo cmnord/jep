@@ -3,8 +3,7 @@ import { Link, useFetcher } from "@remix-run/react";
 import Button from "~/components/button";
 import Modal from "~/components/modal";
 import Players from "~/components/player";
-import { Clue } from "~/models/convert.server";
-import { Player } from "~/utils/use-game";
+import type { Clue } from "~/models/convert.server";
 import { useGameContext } from "~/utils/use-game-context";
 
 function BeforeGamePreview({
@@ -66,7 +65,7 @@ export default function Preview({
   userId: string;
   roomName: string;
 }) {
-  const { round, boardControl } = useGameContext();
+  const { round } = useGameContext();
 
   switch (round) {
     case 0:

@@ -1,4 +1,5 @@
-import { json, LoaderArgs } from "@remix-run/node";
+import { json } from "@remix-run/node";
+import type { LoaderArgs } from "@remix-run/node";
 import {
   Link,
   useLoaderData,
@@ -83,7 +84,7 @@ export default function Index() {
     if (debouncedSearch !== undefined) {
       submit(searchFormRef.current);
     }
-  }, [debouncedSearch]);
+  }, [debouncedSearch, submit]);
 
   return (
     <main className="max-w-screen-md px-4 pt-8 pb-16 md:pt-16 mx-auto w-full sm:w-auto">

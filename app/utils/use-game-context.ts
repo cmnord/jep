@@ -1,5 +1,7 @@
 import * as React from "react";
-import { GameState, useGame } from "./use-game";
+
+import { GameState } from "./use-game";
+import type { useGame } from "./use-game";
 
 export const GameContext = React.createContext<ReturnType<typeof useGame>>({
   type: GameState.Preview,

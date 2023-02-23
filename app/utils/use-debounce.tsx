@@ -29,7 +29,7 @@ export function useDebounceEnd<T>(value: T, delayMs: number) {
   const [debouncedValue, setDebouncedValue] = React.useState(value);
 
   React.useEffect(() => {
-    if (Boolean(value)) {
+    if (value) {
       // Set value to true right away
       setDebouncedValue(value);
     } else {

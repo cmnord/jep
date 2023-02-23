@@ -1,6 +1,6 @@
 import { Link } from "@remix-run/react";
 
-import { Game } from "~/models/game.server";
+import type { Game } from "~/models/game.server";
 
 export default function GameCard({ game }: { game: Game }) {
   const numRounds = game.boards.length;

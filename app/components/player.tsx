@@ -133,7 +133,7 @@ export function EditablePlayerIcon({
         })}
         onClick={() => setEditing(false)}
       >
-        {/* Heroicon name: solid/check-circle*/}
+        {/* Heroicon name: solid/check-circle */}
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"

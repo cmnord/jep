@@ -1,8 +1,8 @@
 import {
   unstable_composeUploadHandlers,
   unstable_createMemoryUploadHandler,
-  UploadHandler,
 } from "@remix-run/node";
+import type { UploadHandler } from "@remix-run/node";
 import * as stream from "stream";
 
 import { createGame } from "~/models/game.server";
