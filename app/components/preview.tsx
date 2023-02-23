@@ -2,6 +2,7 @@ import { Link } from "@remix-run/react";
 
 import Modal from "~/components/modal";
 import { Clue } from "~/models/convert.server";
+import { Player } from "~/utils/use-game";
 import { useGameContext } from "~/utils/use-game-context";
 import Players from "./player";
 
@@ -10,7 +11,7 @@ export default function Preview({
   isOpen,
   onClose,
   finalClue,
-  players = new Set(),
+  players = new Map<string, Player>(),
   userId,
   roomName,
 }: {
@@ -18,7 +19,7 @@ export default function Preview({
   isOpen: boolean;
   onClose: () => void;
   finalClue?: Clue;
-  players: Set<{ userId: string; name: string }>;
+  players: Map<string, Player>;
   userId: string;
   roomName: string;
 }) {
