@@ -97,10 +97,11 @@
   word-spacing: 1rem;
 }
 
-.timer {
-  height: 4rem;
-  width: 0%;
-  background-color: white;
-  transition: width 1s linear;
-  align-self: flex-start;
+@keyframes growFromLeft {
+  0% {
+    width: 0;
+  }
+  100% {
+    width: 100%;
+  }
 }

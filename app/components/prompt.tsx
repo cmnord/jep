@@ -9,6 +9,9 @@ import { GameState } from "~/utils/use-game";
  */
 const MS_PER_CHARACTER = 50;
 
+/** LOCKOUT_MS applies a 500ms lockout if a contestant buzzes before the clue is read. */
+const LOCKOUT_MS = 500;
+
 // TODO: wagers
 enum State {
   DailyDouble,
@@ -47,29 +50,115 @@ function Fade({
   ) : null;
 }
 
+/** Lockout is a visual indicator that a contestant buzzed too early. */
+function Lockout({ active }: { active: boolean }) {
+  if (!active) {
+    return null;
+  }
+
+  return (
+    <div className="absolute left-0 top-0 w-full h-full bg-black bg-opacity-50">
+      <div
+        className={
+          "flex flex-col items-center justify-start pt-10 w-full h-full text-white font-bold " +
+          "text-6xl md:text-7xl lg:text-9xl"
+        }
+      >
+        LOCKOUT
+      </div>
+    </div>
+  );
+}
+
+function BuzzerLight({ active }: { active: boolean }) {
+  if (active) {
+    /* Heroicon name: solid/check-circle */
+    return (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        className="w-20 h-20 mb-4 text-green-600 rounded-full bg-green-200 shadow-glow-green-200"
+        role="img"
+        aria-labelledby="check-title"
+      >
+        <title id="check-title">OK to buzz!</title>
+        <path
+          fillRule="evenodd"
+          d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z"
+          clipRule="evenodd"
+        />
+      </svg>
+    );
+  }
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      className="w-20 h-20 mb-4 text-red-600 rounded-full bg-red-200 shadow-glow-red-200"
+      role="img"
+      aria-labelledby="x-title"
+    >
+      <title id="x-title">Do not buzz yet</title>
+      <path
+        fillRule="evenodd"
+        d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm-1.72 6.97a.75.75 0 10-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 101.06 1.06L12 13.06l1.72 1.72a.75.75 0 101.06-1.06L13.06 12l1.72-1.72a.75.75 0 10-1.06-1.06L12 10.94l-1.72-1.72z"
+        clipRule="evenodd"
+      />
+    </svg>
+  );
+}
+
 export default function Prompt({ onClose }: { onClose: () => void }) {
   const { type, clue, category } = useGameContext();
 
   const [state, setState] = React.useState(State.ShowClue);
-  const now = Date.now();
-  const [start, setStart] = React.useState(now);
-  const [progress, setProgress] = React.useState(now);
+
+  const [clueShownAt, setClueShownAt] = React.useState<number | undefined>();
+
+  const numCharactersInClue = clue?.clue.length ?? 0;
+  const clueDurationMs = MS_PER_CHARACTER * numCharactersInClue;
+
+  const [buzzable, setBuzzable] = React.useState(false);
+  const [lockout, setLockout] = React.useState(false);
 
   React.useEffect(() => {
-    const newNow = Date.now();
-    setStart(newNow);
-    setProgress(newNow);
-    setState(State.ShowClue);
     if (clue) {
-      const interval = setInterval(() => {
-        setProgress(Date.now());
-      }, 1000);
-      return () => clearInterval(interval);
+      setClueShownAt(Date.now());
+    } else {
+      setClueShownAt(undefined);
     }
-    return undefined;
+    setBuzzable(false);
   }, [clue]);
 
-  const handleClick = () => {
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setBuzzable(true);
+    }, clueDurationMs);
+    return () => clearTimeout(timer);
+  }, [clueDurationMs]);
+
+  React.useEffect(() => {
+    if (lockout) {
+      const lockoutTimer = setTimeout(() => {
+        setLockout(false);
+      }, LOCKOUT_MS);
+      return () => clearTimeout(lockoutTimer);
+    }
+  }, [lockout]);
+
+  const handleClick = (clickedAtMs: number) => {
+    if (clueShownAt === undefined) {
+      return;
+    }
+
+    const delta = clickedAtMs - clueShownAt;
+    if (delta < clueDurationMs) {
+      setLockout(true);
+      return;
+    }
+
     switch (state) {
       case State.DailyDouble:
       case State.Final:
@@ -104,37 +193,31 @@ export default function Prompt({ onClose }: { onClose: () => void }) {
     }
   };
 
-  const calculateWidth = () => {
-    const numCharactersInClue = clue?.clue.length ?? 0;
-    const clueDurationMS = MS_PER_CHARACTER * numCharactersInClue;
-    const diff = progress - start;
-    if (diff <= 0) {
-      return 0;
-    }
-    if (diff > clueDurationMS) {
-      return 100;
-    }
-    return (diff / clueDurationMS) * 100;
-  };
-  const width = calculateWidth();
-
   return (
     <Fade show={type === GameState.ReadClue}>
       <button
+        disabled={lockout}
         className={classNames(
           "h-screen w-screen bg-blue-1000 flex flex-col justify-center items-center"
         )}
-        onClick={handleClick}
-        role="button"
+        onClick={() => handleClick(Date.now())}
         autoFocus
-        tabIndex={0}
       >
         <div className="p-4 flex flex-grow items-center">
           <div className="text-white uppercase text-center text-4xl md:text-5xl lg:text-7xl text-shadow-3 font-korinna word-spacing-1">
             {renderContent()}
           </div>
         </div>
-        <div className="timer" style={{ width: `${width}%` }} />
+        <Lockout active={lockout} />
+        <BuzzerLight active={buzzable} />
+        <div
+          className="h-8 md:h-16 w-0 bg-white self-start"
+          style={{
+            animation: `${
+              clueDurationMs / 1000
+            }s linear 0s 1 growFromLeft forwards`,
+          }}
+        />
       </button>
     </Fade>
   );
