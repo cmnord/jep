@@ -4,10 +4,10 @@ import { GameState, useGame } from "./use-game";
 export const GameContext = React.createContext<ReturnType<typeof useGame>>({
   type: GameState.Preview,
   board: { categories: [], categoryNames: [] },
+  boardControl: undefined,
   category: undefined,
   clue: undefined,
   isAnswered: () => false,
-  onClickClue: () => null,
   onClosePrompt: () => null,
   players: new Map(),
   round: 0,

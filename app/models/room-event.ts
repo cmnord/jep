@@ -88,6 +88,10 @@ function applyRoomEventToState(roomEvent: RoomEvent, state: State) {
           userId: roomEvent.payload.userId,
           name: roomEvent.payload.name,
         });
+        // If this is the first player joining, give them board control.
+        if (state.players.size === 1) {
+          state.boardControl = roomEvent.payload.userId;
+        }
       }
       return state;
     }
@@ -104,7 +108,7 @@ function applyRoomEventToState(roomEvent: RoomEvent, state: State) {
       if (isRoundEvent(roomEvent)) {
         const actionRound = roomEvent.payload.round;
         if (actionRound === state.round) {
-          state.type = GameState.Open;
+          state.type = GameState.WaitForClueChoice;
         }
       }
       return state;

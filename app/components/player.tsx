@@ -1,8 +1,8 @@
-import { Form, useFetcher } from "@remix-run/react";
+import { useFetcher } from "@remix-run/react";
 import classNames from "classnames";
 import * as React from "react";
 
-import { Player } from "~/utils/use-game";
+import { useGameContext } from "~/utils/use-game-context";
 
 const SATURATION = 60;
 const LIGHTNESS = 85;
@@ -34,12 +34,26 @@ function stringToHslColor(str: string) {
   return `hsl(${h}, ${SATURATION}%, ${LIGHTNESS}%)`;
 }
 
-function PlayerIcon({ userId, name }: { userId: string; name: string }) {
+function PlayerIcon({
+  userId,
+  name,
+  boardControl,
+}: {
+  userId: string;
+  name: string;
+  boardControl: boolean;
+}) {
   const color = stringToHslColor(userId);
   return (
     <div className="flex items-center gap-2">
       <div
-        className="bg-blue-1000 bg-gradient-to-b from-blue-700 border-2 border-black p-3 text-white text-sm flex items-center justify-center font-mono shadow"
+        className={classNames(
+          "bg-blue-1000 bg-gradient-to-b from-blue-700 p-3 text-white text-sm flex items-center justify-center font-mono shadow",
+          {
+            "border-2 border-gray-800 opacity-70": !boardControl,
+            "border-4 border-yellow-400": boardControl,
+          }
+        )}
         style={{ color: color }}
       >
         {name}
@@ -51,10 +65,12 @@ function PlayerIcon({ userId, name }: { userId: string; name: string }) {
 export function EditablePlayerIcon({
   userId,
   name,
+  boardControl,
   onChangeName,
 }: {
   userId: string;
   name: string;
+  boardControl: boolean;
   onChangeName?: (name: string) => void;
 }) {
   const color = stringToHslColor(userId);
@@ -70,7 +86,15 @@ export function EditablePlayerIcon({
       <label htmlFor="name" className="text-gray-500 text-sm">
         You are:
       </label>
-      <div className="bg-blue-1000 bg-gradient-to-b from-blue-700 border-2 border-black text-white text-sm flex items-center justify-center font-mono shadow">
+      <div
+        className={classNames(
+          "bg-blue-1000 bg-gradient-to-b from-blue-700 text-white text-sm flex items-center justify-center font-mono shadow",
+          {
+            "border-2 border-black": !boardControl,
+            "border-4 border-yellow-400": boardControl,
+          }
+        )}
+      >
         <input
           ref={inputRef}
           type="text"
@@ -155,14 +179,14 @@ export function EditablePlayerIcon({
 }
 
 export default function Players({
-  players,
   userId,
   roomName,
 }: {
-  players: Map<string, Player>;
   userId: string;
   roomName: string;
 }) {
+  const { players, boardControl } = useGameContext();
+
   const player = players.get(userId) ?? { userId, name: "You" };
 
   const [name, setName] = React.useState(player.name);
@@ -180,6 +204,7 @@ export default function Players({
           userId={player.userId}
           name={name}
           onChangeName={(n) => setName(n)}
+          boardControl={player.userId === boardControl}
         />
         <input
           type="hidden"
@@ -190,7 +215,12 @@ export default function Players({
       </div>
       <div className="flex flex-wrap gap-2">
         {Array.from(players.values()).map((p) => (
-          <PlayerIcon key={p.userId} userId={p.userId} name={p.name} />
+          <PlayerIcon
+            key={p.userId}
+            userId={p.userId}
+            name={p.name}
+            boardControl={p.userId === boardControl}
+          />
         ))}
       </div>
     </fetcher.Form>

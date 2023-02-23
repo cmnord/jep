@@ -9,17 +9,18 @@ import { useGameContext } from "~/utils/use-game-context";
 
 function BeforeGamePreview({
   isOpen,
-  players,
   userId,
   roomName,
   round,
 }: {
   isOpen: boolean;
-  players: Map<string, Player>;
   userId: string;
   roomName: string;
   round: number;
 }) {
+  const { boardControl, players } = useGameContext();
+  const controllingPlayer = boardControl ? players.get(boardControl) : null;
+
   const fetcher = useFetcher();
 
   return (
@@ -27,10 +28,17 @@ function BeforeGamePreview({
       <Modal.Body>
         <Modal.Title>Play &rarr;</Modal.Title>
         <div className="mb-4">
-          <Players players={players} userId={userId} roomName={roomName} />
+          <Players userId={userId} roomName={roomName} />
         </div>
         <p className="text-gray-500 mb-4">
           Click "Start" to start the game for all players.
+          {controllingPlayer && (
+            <span>
+              {" "}
+              <span className="font-bold">{controllingPlayer.name}</span> will
+              start with control of the board.
+            </span>
+          )}
         </p>
       </Modal.Body>
       <Modal.Footer>
@@ -49,25 +57,22 @@ export default function Preview({
   numRounds,
   isOpen,
   finalClue,
-  players = new Map<string, Player>(),
   userId,
   roomName,
 }: {
   numRounds: number;
   isOpen: boolean;
   finalClue?: Clue;
-  players: Map<string, Player>;
   userId: string;
   roomName: string;
 }) {
-  const { round } = useGameContext();
+  const { round, boardControl } = useGameContext();
 
   switch (round) {
     case 0:
       return (
         <BeforeGamePreview
           isOpen={isOpen}
-          players={players}
           userId={userId}
           roomName={roomName}
           round={round}

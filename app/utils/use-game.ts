@@ -8,7 +8,7 @@ import { generateGrid } from "~/utils/utils";
 
 export enum GameState {
   Preview = "Preview",
-  Open = "Open",
+  WaitForClueChoice = "WaitForClueChoice",
   Prompt = "Prompt",
 }
 
@@ -20,6 +20,7 @@ export interface Player {
 export interface State {
   type: GameState;
   activeClue?: [number, number];
+  boardControl?: string;
   game: Game;
   isAnswered: boolean[][];
   numAnswered: number;
@@ -102,7 +103,7 @@ function gameReducer(state: State, action: Action): State {
         const actionRound = action.payload;
         if (actionRound === state.round) {
           const nextState = { ...state };
-          nextState.type = GameState.Open;
+          nextState.type = GameState.WaitForClueChoice;
           return nextState;
         }
         return state;
@@ -141,7 +142,7 @@ function gameReducer(state: State, action: Action): State {
       const [i, j] = activeClue;
       nextState.isAnswered[i][j] = true;
       nextState.activeClue = undefined;
-      nextState.type = GameState.Open;
+      nextState.type = GameState.WaitForClueChoice;
       nextState.numAnswered = newNumAnswered;
 
       return nextState;
@@ -150,6 +151,10 @@ function gameReducer(state: State, action: Action): State {
       if (isPlayerAction(action)) {
         const nextState = { ...state };
         nextState.players.set(action.payload.userId, action.payload);
+        // If this is the first player joining, give them board control.
+        if (nextState.players.size === 1) {
+          nextState.boardControl = action.payload.userId;
+        }
         return nextState;
       }
       throw new Error("PlayerJoin action must have an associated player");
@@ -244,10 +249,6 @@ export function useGame(
     category = state.activeClue ? board.categoryNames[j] : undefined;
   }
 
-  const onClickClue = (i: number, j: number) => {
-    dispatch({ type: ActionType.ClickClue, payload: [i, j] });
-  };
-
   const onClosePrompt = () => {
     dispatch({ type: ActionType.AnswerClue });
   };
@@ -260,9 +261,9 @@ export function useGame(
     category,
     clue,
     isAnswered,
-    onClickClue,
     onClosePrompt,
     players: state.players,
     round: state.round,
+    boardControl: state.boardControl,
   };
 }

@@ -1,3 +1,4 @@
+import { useFetcher } from "@remix-run/react";
 import classNames from "classnames";
 import * as React from "react";
 
@@ -28,16 +29,20 @@ function Clue({
   clue,
   i,
   j,
+  hasBoardControl,
   onFocusClue,
   onKeyDownClue,
+  onClickClue,
 }: {
   clue: Clue;
   i: number;
   j: number;
+  hasBoardControl: boolean;
   onFocusClue: (i: number, j: number) => void;
+  onClickClue: (i: number, j: number) => void;
   onKeyDownClue: (e: React.KeyboardEvent, i: number, j: number) => void;
 }) {
-  const { round, isAnswered, onClickClue } = useGameContext();
+  const { round, isAnswered } = useGameContext();
   const roundMultiplier = round + 1;
 
   const clueValue = (i + 1) * 200 * roundMultiplier;
@@ -52,52 +57,35 @@ function Clue({
       ${clueValue}
     </div>
   );
-  return (
-    <td
-      onFocus={() => onFocusClue(i, j)}
-      onKeyDown={(e) => onKeyDownClue(e, i, j)}
-      className={classNames(
-        "px-5 py-4 bg-blue-1000 hover:bg-blue-700 focus:bg-blue-700 transition-colors border-black border-8",
-        {
-          "text-blue-1000 hover:text-white focus:text-white hover:text-shadow-1 transition":
-            isAnswered(i, j),
-        }
-      )}
-      onClick={() => onClickClue(i, j)}
-      role="button"
-      tabIndex={0}
-    >
-      <div className="flex justify-center items-center">{clueText}</div>
-    </td>
-  );
-}
 
-function ClueRow({
-  clues,
-  i,
-  onFocusClue,
-  onKeyDownClue,
-}: {
-  clues: Clue[];
-  i: number;
-  onFocusClue: (i: number, j: number) => void;
-  onKeyDownClue: (e: React.KeyboardEvent, i: number, j: number) => void;
-}) {
+  function handleClickClue(
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+    i: number,
+    j: number
+  ) {
+    e.preventDefault();
+    return onClickClue(i, j);
+  }
+
   return (
-    <tr key={`category-${i}`}>
-      {clues.map((clue, j) => {
-        return (
-          <Clue
-            key={`clue-${i}-${j}`}
-            clue={clue}
-            i={i}
-            j={j}
-            onFocusClue={onFocusClue}
-            onKeyDownClue={onKeyDownClue}
-          />
-        );
-      })}
-    </tr>
+    <td>
+      <button
+        type="submit"
+        disabled={!hasBoardControl}
+        onClick={(e) => handleClickClue(e, i, j)}
+        onFocus={() => onFocusClue(i, j)}
+        onKeyDown={(e) => onKeyDownClue(e, i, j)}
+        className={classNames(
+          "flex items-stretch p-2 justify-center w-full h-full bg-blue-1000 hover:bg-blue-700 focus:bg-blue-700 transition-colors border-black border-4",
+          {
+            "text-blue-1000 hover:text-white focus:text-white hover:text-shadow-1 transition":
+              isAnswered(i, j),
+          }
+        )}
+      >
+        <div className="flex justify-center items-center">{clueText}</div>
+      </button>
+    </td>
   );
 }
 
@@ -105,12 +93,19 @@ function ClueRow({
 export default function BoardComponent({
   focusedClueIdx,
   onFocusClue,
+  userId,
+  roomName,
 }: {
   focusedClueIdx?: [number, number];
   onFocusClue: (i: number, j: number) => void;
+  userId: string;
+  roomName: string;
 }) {
-  const { board, onClickClue, round } = useGameContext();
+  const { board, round, boardControl } = useGameContext();
   const roundMultiplier = round + 1;
+  const hasBoardControl = boardControl === userId;
+
+  const fetcher = useFetcher();
 
   const tbodyRef = React.useRef<HTMLTableSectionElement | null>(null);
 
@@ -134,11 +129,11 @@ export default function BoardComponent({
     if (!row) {
       return;
     }
-    const element = row?.children.item(j);
-    if (!element) {
-      return;
+    const tdElement = row?.children.item(j);
+    const cellButton = tdElement?.children.item(0);
+    if (cellButton) {
+      (cellButton as HTMLElement).focus();
     }
-    (element as HTMLElement).focus();
   }
 
   React.useEffect(() => {
@@ -152,28 +147,41 @@ export default function BoardComponent({
     (a, b) => a[0] - b[0]
   );
 
+  function handleClickClue(i: number, j: number) {
+    if (hasBoardControl) {
+      return fetcher.submit(
+        { i: i.toString(), j: j.toString() },
+        { method: "post", action: `/room/${roomName}/choose-clue` }
+      );
+    }
+  }
+
   const handleKeyDown = (event: React.KeyboardEvent, i: number, j: number) => {
     event.stopPropagation();
     if (event.key === "Enter") {
-      return onClickClue(i, j);
+      return handleClickClue(i, j);
     }
 
     const currentRow = tbodyRef.current?.children.item(i);
     switch (event.key) {
       case "w":
-      case "ArrowUp":
-        const upElt = currentRow?.previousElementSibling?.children.item(j);
-        if (upElt) {
-          (upElt as HTMLElement).focus();
+      case "ArrowUp": {
+        const upTd = currentRow?.previousElementSibling?.children.item(j);
+        const cellButton = upTd?.children.item(0);
+        if (cellButton) {
+          return (cellButton as HTMLElement).focus();
         }
         break;
+      }
       case "s":
-      case "ArrowDown":
-        const downElt = currentRow?.nextElementSibling?.children.item(j);
-        if (downElt) {
-          (downElt as HTMLElement).focus();
+      case "ArrowDown": {
+        const downTd = currentRow?.nextElementSibling?.children.item(j);
+        const cellButton = downTd?.children.item(0);
+        if (cellButton) {
+          (cellButton as HTMLElement).focus();
         }
         break;
+      }
       case "a":
       case "ArrowLeft":
         return focusCell(i, j - 1);
@@ -195,13 +203,20 @@ export default function BoardComponent({
         </thead>
         <tbody ref={tbodyRef}>
           {sortedClueRows.map(([value, clues], i) => (
-            <ClueRow
-              key={value}
-              clues={clues}
-              i={i}
-              onFocusClue={onFocusClue}
-              onKeyDownClue={handleKeyDown}
-            />
+            <tr key={value}>
+              {clues.map((clue, j) => (
+                <Clue
+                  key={`clue-${i}-${j}`}
+                  clue={clue}
+                  i={i}
+                  j={j}
+                  hasBoardControl={hasBoardControl}
+                  onFocusClue={onFocusClue}
+                  onClickClue={handleClickClue}
+                  onKeyDownClue={handleKeyDown}
+                />
+              ))}
+            </tr>
           ))}
         </tbody>
       </table>
