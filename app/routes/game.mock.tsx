@@ -15,15 +15,11 @@ export async function loader() {
 export default function PlayGame() {
   const data = useLoaderData<typeof loader>();
 
-  const gameReducer = useGame(data.game);
+  const gameReducer = useGame(data.game, [], 1, "", "");
 
   return (
     <GameContext.Provider value={gameReducer}>
-      <GameComponent
-        game={data.game}
-        userId={"mock"}
-        players={new Set(["mock"])}
-      />
+      <GameComponent game={data.game} userId="mock" roomName="mock" />
     </GameContext.Provider>
   );
 }

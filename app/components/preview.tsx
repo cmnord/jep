@@ -3,7 +3,7 @@ import { Link } from "@remix-run/react";
 import Modal from "~/components/modal";
 import { Clue } from "~/models/convert.server";
 import { useGameContext } from "~/utils/use-game-context";
-import Players, { PlayerIcon } from "./player";
+import Players from "./player";
 
 export default function Preview({
   numRounds,
@@ -12,6 +12,7 @@ export default function Preview({
   finalClue,
   players = new Set(),
   userId,
+  roomName,
 }: {
   numRounds: number;
   isOpen: boolean;
@@ -19,6 +20,7 @@ export default function Preview({
   finalClue?: Clue;
   players: Set<{ userId: string; name: string }>;
   userId: string;
+  roomName: string;
 }) {
   const { round } = useGameContext();
 
@@ -60,7 +62,7 @@ export default function Preview({
           buttonContent="Start"
         >
           <p className="text-gray-500 mb-4">Click to play</p>
-          <Players players={players} userId={userId} />
+          <Players players={players} userId={userId} roomName={roomName} />
         </Modal>
       );
     case 1:

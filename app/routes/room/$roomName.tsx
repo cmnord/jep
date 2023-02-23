@@ -12,12 +12,12 @@ import { GameContext } from "~/utils/use-game-context";
 import { getRandomName } from "~/utils/name";
 
 export async function loader({ request, params }: LoaderArgs) {
-  const roomNameAndId = params.roomName;
-  if (!roomNameAndId) {
+  const roomName = params.roomName;
+  if (!roomName) {
     throw new Response("room name not found in URL params", { status: 404 });
   }
 
-  const room = await getRoom(roomNameAndId);
+  const room = await getRoom(roomName);
   if (!room) {
     throw new Response("room not found", { status: 404 });
   }
@@ -50,7 +50,7 @@ export async function loader({ request, params }: LoaderArgs) {
   }
   const env = { SUPABASE_URL, SUPABASE_ANON_KEY };
 
-  return json({ room, game, roomEvents, userId, env }, { headers });
+  return json({ room, roomName, game, roomEvents, userId, env }, { headers });
 }
 
 export default function PlayGame() {
@@ -66,7 +66,11 @@ export default function PlayGame() {
 
   return (
     <GameContext.Provider value={gameReducer}>
-      <GameComponent game={data.game} userId={data.userId} />
+      <GameComponent
+        game={data.game}
+        userId={data.userId}
+        roomName={data.roomName}
+      />
     </GameContext.Provider>
   );
 }

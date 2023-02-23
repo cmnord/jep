@@ -15,10 +15,12 @@ export default function GameComponent({
   game,
   errorMsg,
   userId,
+  roomName,
 }: {
   game: Game;
   errorMsg?: string;
   userId: string;
+  roomName: string;
 }) {
   const { type, board, players, onClosePreview, onClosePrompt } =
     useGameContext();
@@ -47,6 +49,7 @@ export default function GameComponent({
         finalClue={finalClue}
         players={players}
         userId={userId}
+        roomName={roomName}
       />
       <div className="bg-black">
         {board && (
@@ -57,7 +60,7 @@ export default function GameComponent({
         )}
       </div>
       <div className="p-12">
-        <Players players={players} userId={userId} />
+        <Players players={players} userId={userId} roomName={roomName} />
         {board && (
           <ClueList focusedClueIdx={focusedClueIdx} onFocusClue={onFocusClue} />
         )}

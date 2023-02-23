@@ -2,7 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import * as React from "react";
 
 import { Game, Clue } from "~/models/convert.server";
-import { isJoinEvent, RoomEventType } from "~/models/room-event";
+import { applyRoomEventsToState, processRoomEvent } from "~/models/room-event";
 import { RoomEvent } from "~/models/room-event.server";
 import { generateGrid } from "~/utils/utils";
 
@@ -17,22 +17,19 @@ export interface Player {
   name: string;
 }
 
-interface State {
+export interface State {
   type: GameState;
   activeClue?: [number, number];
   game: Game;
   isAnswered: boolean[][];
   numAnswered: number;
   numCluesInBoard: number;
-  players: Set<Player>;
+  players: Map<string, Player>;
   round: number;
 }
 
-function createInitialState(
-  arg: { game: Game; serverRoomEvents: RoomEvent[] },
-  round: number
-): State {
-  const board = arg.game.boards[round];
+function createInitialState(game: Game, round: number): State {
+  const board = game.boards[round];
 
   const numCluesInBoard = board.categories.reduce(
     (acc, category) => (acc += category.clues.length),
@@ -43,25 +40,24 @@ function createInitialState(
 
   return {
     type: GameState.Preview,
-    game: arg.game,
+    game: game,
     isAnswered: generateGrid(n, m, false),
     numAnswered: 0,
     numCluesInBoard,
-    players: new Set(
-      arg.serverRoomEvents.filter(isJoinEvent).map((e) => e.payload)
-    ),
+    players: new Map(),
     round,
   };
 }
 
-enum ActionType {
+export enum ActionType {
   DismissPreview = "DismissPreview",
   ClickClue = "ClickClue",
   AnswerClue = "AnswerClue",
   PlayerJoin = "PlayerJoin",
+  PlayerChangeName = "PlayerChangeName",
 }
 
-interface Action {
+export interface Action {
   type: ActionType;
   payload?: unknown;
 }
@@ -71,8 +67,8 @@ interface IndexedAction extends Action {
   payload: [number, number];
 }
 
-interface PlayerJoinAction extends Action {
-  type: ActionType.PlayerJoin;
+interface PlayerAction extends Action {
+  type: ActionType;
   payload: Player;
 }
 
@@ -80,8 +76,11 @@ function isIndexedAction(action: Action): action is IndexedAction {
   return action.type === ActionType.ClickClue;
 }
 
-function isPlayerJoinAction(action: Action): action is PlayerJoinAction {
-  return action.type === ActionType.PlayerJoin;
+function isPlayerAction(action: Action): action is PlayerAction {
+  return (
+    action.type === ActionType.PlayerJoin ||
+    action.type === ActionType.PlayerChangeName
+  );
 }
 
 /** gameReducer is the state machine which implements the game. */
@@ -113,10 +112,7 @@ function gameReducer(state: State, action: Action): State {
 
       if (newNumAnswered === state.numCluesInBoard) {
         const newRound = state.round++;
-        const nextState = createInitialState(
-          { game: state.game, serverRoomEvents: [] },
-          newRound
-        );
+        const nextState = createInitialState(state.game, newRound);
         return nextState;
       }
 
@@ -134,33 +130,21 @@ function gameReducer(state: State, action: Action): State {
       return nextState;
     }
     case ActionType.PlayerJoin: {
-      if (isPlayerJoinAction(action)) {
+      if (isPlayerAction(action)) {
         const nextState = { ...state };
-        nextState.players.add(action.payload);
+        nextState.players.set(action.payload.userId, action.payload);
         return nextState;
       }
-      throw new Error("PlayerJoin action must have an associated userId");
+      throw new Error("PlayerJoin action must have an associated player");
     }
-  }
-}
-
-/** processRoomEvent dispatches the appropriate Action to the reducer based on
- * the room event. */
-function processRoomEvent(
-  roomEvent: RoomEvent,
-  dispatch: React.Dispatch<Action>
-) {
-  switch (roomEvent.type) {
-    case RoomEventType.Join:
-      if (isJoinEvent(roomEvent)) {
-        dispatch({
-          type: ActionType.PlayerJoin,
-          payload: {
-            userId: roomEvent.payload.userId,
-            name: roomEvent.payload.name,
-          },
-        });
+    case ActionType.PlayerChangeName: {
+      if (isPlayerAction(action)) {
+        const nextState = { ...state };
+        nextState.players.set(action.payload.userId, action.payload);
+        return nextState;
       }
+      throw new Error("PlayerChangeName action must have an associated player");
+    }
   }
 }
 
@@ -173,7 +157,9 @@ export function useGame(
   SUPABASE_URL: string,
   SUPABASE_ANON_KEY: string
 ) {
-  const [roomEvents, setRoomEvents] = React.useState(serverRoomEvents);
+  const [seenRoomEvents, setSeenRoomEvents] = React.useState(
+    new Set<number>(serverRoomEvents.map((re) => re.id))
+  );
 
   const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     realtime: {
@@ -183,17 +169,27 @@ export function useGame(
     },
   });
 
-  // TODO: spectator, points, names
-
-  React.useEffect(() => {
-    setRoomEvents(serverRoomEvents);
-  }, [serverRoomEvents]);
+  // TODO: spectator, points
 
   const [state, dispatch] = React.useReducer(
     gameReducer,
     { game, serverRoomEvents },
-    () => createInitialState({ game, serverRoomEvents }, 0)
+    (arg) =>
+      applyRoomEventsToState(
+        createInitialState(arg.game, 0),
+        arg.serverRoomEvents
+      )
   );
+
+  // When new room events come in, process any we haven't seen.
+  React.useEffect(() => {
+    for (const re of serverRoomEvents) {
+      if (!seenRoomEvents.has(re.id)) {
+        setSeenRoomEvents((prev) => new Set(prev).add(re.id));
+        processRoomEvent(re, dispatch);
+      }
+    }
+  }, [serverRoomEvents]);
 
   React.useEffect(() => {
     const channel = client
@@ -209,8 +205,8 @@ export function useGame(
         (payload) => {
           const newEvent: RoomEvent = payload.new;
           // Only process events we haven't seen yet
-          if (!roomEvents.find((re) => re.id === newEvent.id)) {
-            setRoomEvents((prev) => [...prev, newEvent]);
+          if (!seenRoomEvents.has(newEvent.id)) {
+            setSeenRoomEvents((prev) => new Set(prev).add(newEvent.id));
             processRoomEvent(newEvent, dispatch);
           }
         }
@@ -219,7 +215,7 @@ export function useGame(
     return () => {
       channel.unsubscribe();
     };
-  }, [client, roomEvents, setRoomEvents]);
+  }, [client, seenRoomEvents, setSeenRoomEvents]);
 
   const board = game.boards[state.round];
 
