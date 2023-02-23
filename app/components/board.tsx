@@ -10,7 +10,7 @@ function Category({ category }: { category: string }) {
   const numWords = words.length;
   const wordScore = words.join("").length * numWords;
   return (
-    <th className="p-4 bg-blue-1000 border-black text-shadow-1 border-8 font-impact border-b-12">
+    <th className="p-4 bg-blue-1000 border-black text-shadow border-8 font-impact border-b-12">
       <div
         className={classNames("mt-auto font-bold break-words uppercase", {
           "text-4xl": wordScore <= 5,
@@ -53,7 +53,7 @@ function ClueComponent({
       <p>{clue.answer}</p>
     </div>
   ) : (
-    <div className="text-5xl text-yellow-1000 text-shadow-3 font-impact">
+    <div className="text-5xl text-yellow-1000 text-shadow-md font-impact">
       ${clueValue}
     </div>
   );
@@ -78,7 +78,7 @@ function ClueComponent({
         className={classNames(
           "flex items-stretch p-2 justify-center w-full h-full bg-blue-1000 hover:bg-blue-700 focus:bg-blue-700 transition-colors border-black border-4",
           {
-            "text-blue-1000 hover:text-white focus:text-white hover:text-shadow-1 transition":
+            "text-blue-1000 hover:text-white focus:text-white hover:text-shadow transition":
               isAnswered(i, j),
           }
         )}

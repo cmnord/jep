@@ -1,13 +1,14 @@
-.text-shadow-1 {
-  text-shadow: 1px 1px black;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-.hover\:text-shadow-1:hover {
-  text-shadow: 1px 1px black;
-}
-
-.text-shadow-3 {
-  text-shadow: 3px 3px black;
+@layer utilities {
+  .text-shadow {
+    text-shadow: 1px 1px black;
+  }
+  .text-shadow-md {
+    text-shadow: 3px 3px black;
+  }
 }
 
 .border-b-12 {

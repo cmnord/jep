@@ -204,7 +204,7 @@ export default function Prompt({ onClose }: { onClose: () => void }) {
         autoFocus
       >
         <div className="p-4 flex flex-grow items-center">
-          <div className="text-white uppercase text-center text-4xl md:text-5xl lg:text-7xl text-shadow-3 font-korinna word-spacing-1">
+          <div className="text-white uppercase text-center text-4xl md:text-5xl lg:text-7xl text-shadow-md font-korinna word-spacing-1">
             {renderContent()}
           </div>
         </div>
