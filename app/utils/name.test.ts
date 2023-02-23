@@ -5,8 +5,7 @@ import {
 } from "./name";
 
 describe("getRandomName", () => {
-  // adjective list does not have X
-  for (const char of "abcdefghijklmnopqrstuvwyz") {
+  for (const char of "abcdefghijklmnopqrstuvwxyz") {
     for (let i = 0; i < 100; i++) {
       it(`adjectives list should return a random word starting with ${char}`, () => {
         const word = randomWordFromListStartingWithLetter(
