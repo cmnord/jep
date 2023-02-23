@@ -49,13 +49,11 @@ function ClueComponent({
 
   // TODO: daily double / wagerable text
   const clueText = isAnswered(i, j) ? (
-    <div className="uppercase font-korinna">
-      <p>{clue.answer}</p>
-    </div>
+    <p className="uppercase font-korinna">{clue.answer}</p>
   ) : (
-    <div className="text-5xl text-yellow-1000 text-shadow-md font-impact">
+    <p className="text-5xl text-yellow-1000 text-shadow-md font-impact">
       ${clueValue}
-    </div>
+    </p>
   );
 
   function handleClickClue(
@@ -68,7 +66,7 @@ function ClueComponent({
   }
 
   return (
-    <td>
+    <td className="p-1 h-full">
       <button
         type="submit"
         disabled={!hasBoardControl}
@@ -76,14 +74,14 @@ function ClueComponent({
         onFocus={() => onFocusClue(i, j)}
         onKeyDown={(e) => onKeyDownClue(e, i, j)}
         className={classNames(
-          "flex items-stretch p-2 justify-center w-full h-full bg-blue-1000 hover:bg-blue-700 focus:bg-blue-700 transition-colors border-black border-4",
+          "px-4 py-3 h-full w-full bg-blue-1000 hover:bg-blue-700 focus:bg-blue-700 transition-colors",
           {
             "text-blue-1000 hover:text-white focus:text-white hover:text-shadow transition":
               isAnswered(i, j),
           }
         )}
       >
-        <div className="flex justify-center items-center">{clueText}</div>
+        {clueText}
       </button>
     </td>
   );
@@ -193,7 +191,7 @@ export default function BoardComponent({
 
   return (
     <div className="w-full overflow-scroll md:flex md:flex-col md:items-center">
-      <table className="bg-black text-white border-spacing-3 table-fixed">
+      <table className="bg-black text-white border-spacing-3 table-fixed h-1">
         <thead>
           <tr>
             {board.categoryNames.map((category) => (
