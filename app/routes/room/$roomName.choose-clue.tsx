@@ -21,6 +21,6 @@ export async function action({ request, params }: ActionArgs) {
   }
 
   console.log("choosing clue", i, j);
-  // TODO: emit a choose clue room event, which dispatches ActionType.ClickClue
+  // TODO: emit a choose clue room event, which dispatches ActionType.ChooseClue
   return null;
 }

@@ -48,7 +48,7 @@ export function processRoomEvent(
     case RoomEventType.Join:
       if (isPlayerEvent(roomEvent)) {
         return dispatch({
-          type: ActionType.PlayerJoin,
+          type: ActionType.Join,
           payload: {
             userId: roomEvent.payload.userId,
             name: roomEvent.payload.name,
@@ -59,7 +59,7 @@ export function processRoomEvent(
     case RoomEventType.ChangeName:
       if (isPlayerEvent(roomEvent)) {
         return dispatch({
-          type: ActionType.PlayerChangeName,
+          type: ActionType.ChangeName,
           payload: {
             userId: roomEvent.payload.userId,
             name: roomEvent.payload.name,

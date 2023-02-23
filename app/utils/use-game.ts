@@ -53,11 +53,11 @@ function createInitialState(game: Game, round: number): State {
 }
 
 export enum ActionType {
-  ClickClue = "ClickClue",
+  Join = "join",
+  ChangeName = "change_name",
+  StartRound = "start_round",
+  ChooseClue = "choose_clue",
   AnswerClue = "AnswerClue",
-  PlayerJoin = "PlayerJoin",
-  PlayerChangeName = "PlayerChangeName",
-  StartRound = "StartRound",
 }
 
 export interface Action {
@@ -66,7 +66,7 @@ export interface Action {
 }
 
 interface IndexedAction extends Action {
-  type: ActionType.ClickClue;
+  type: ActionType.ChooseClue;
   payload: [number, number];
 }
 
@@ -81,13 +81,12 @@ interface RoundAction extends Action {
 }
 
 function isIndexedAction(action: Action): action is IndexedAction {
-  return action.type === ActionType.ClickClue;
+  return action.type === ActionType.ChooseClue;
 }
 
 function isPlayerAction(action: Action): action is PlayerAction {
   return (
-    action.type === ActionType.PlayerJoin ||
-    action.type === ActionType.PlayerChangeName
+    action.type === ActionType.Join || action.type === ActionType.ChangeName
   );
 }
 
@@ -110,7 +109,7 @@ function gameReducer(state: State, action: Action): State {
       }
       throw new Error("StartRound action must have an associated round number");
     }
-    case ActionType.ClickClue: {
+    case ActionType.ChooseClue: {
       if (isIndexedAction(action)) {
         const [i, j] = action.payload;
         if (state.isAnswered[i][j]) {
@@ -147,7 +146,7 @@ function gameReducer(state: State, action: Action): State {
 
       return nextState;
     }
-    case ActionType.PlayerJoin: {
+    case ActionType.Join: {
       if (isPlayerAction(action)) {
         const nextState = { ...state };
         nextState.players.set(action.payload.userId, action.payload);
@@ -159,7 +158,7 @@ function gameReducer(state: State, action: Action): State {
       }
       throw new Error("PlayerJoin action must have an associated player");
     }
-    case ActionType.PlayerChangeName: {
+    case ActionType.ChangeName: {
       if (isPlayerAction(action)) {
         const nextState = { ...state };
         nextState.players.set(action.payload.userId, action.payload);
