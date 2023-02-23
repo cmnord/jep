@@ -9,17 +9,31 @@ import { GameContext } from "~/utils/use-game-context";
 export async function loader() {
   const game = await getMockGame();
 
-  return json({ game });
+  const { SUPABASE_URL, SUPABASE_ANON_KEY } = process.env;
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    throw new Error(
+      "SUPABASE_URL or SUPABASE_ANON_KEY not found in process.env"
+    );
+  }
+  const env = { SUPABASE_URL, SUPABASE_ANON_KEY };
+
+  return json({ game, env });
 }
 
 export default function PlayGame() {
   const data = useLoaderData<typeof loader>();
 
-  const gameReducer = useGame(data.game, [], 1, "", "");
+  const gameReducer = useGame(
+    data.game,
+    [],
+    0,
+    data.env.SUPABASE_URL,
+    data.env.SUPABASE_ANON_KEY
+  );
 
   return (
     <GameContext.Provider value={gameReducer}>
-      <GameComponent game={data.game} userId="mock" roomName="mock" />
+      <GameComponent game={data.game} userId="mock" roomName="0-mock" />
     </GameContext.Provider>
   );
 }
