@@ -150,7 +150,7 @@ export default function BoardComponent({
   function handleClickClue(i: number, j: number) {
     if (hasBoardControl) {
       return fetcher.submit(
-        { i: i.toString(), j: j.toString() },
+        { i: i.toString(), j: j.toString(), userId },
         { method: "post", action: `/room/${roomName}/choose-clue` }
       );
     }

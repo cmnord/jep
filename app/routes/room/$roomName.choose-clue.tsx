@@ -6,9 +6,22 @@ import { getRoom } from "~/models/room.server";
 export async function action({ request, params }: ActionArgs) {
   const formData = await request.formData();
 
-  const i = formData.get("i");
-  const j = formData.get("j");
-  console.log(i, j);
+  const iStr = formData.get("i");
+  if (typeof iStr !== "string") {
+    throw new Response("Invalid i", { status: 400 });
+  }
+  const i = parseInt(iStr);
+
+  const jStr = formData.get("j");
+  if (typeof jStr !== "string") {
+    throw new Response("Invalid j", { status: 400 });
+  }
+  const j = parseInt(jStr);
+
+  const userId = formData.get("userId");
+  if (typeof userId !== "string") {
+    throw new Response("Invalid userId", { status: 400 });
+  }
 
   const roomNameAndId = params.roomName;
   if (!roomNameAndId) {
@@ -20,7 +33,11 @@ export async function action({ request, params }: ActionArgs) {
     throw new Response("room not found", { status: 404 });
   }
 
-  console.log("choosing clue", i, j);
-  // TODO: emit a choose clue room event, which dispatches ActionType.ChooseClue
+  await createRoomEvent(room.id, RoomEventType.ChooseClue, {
+    i,
+    j,
+    userId,
+  });
+
   return null;
 }

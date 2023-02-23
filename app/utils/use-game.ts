@@ -9,7 +9,7 @@ import { generateGrid } from "~/utils/utils";
 export enum GameState {
   Preview = "Preview",
   WaitForClueChoice = "WaitForClueChoice",
-  Prompt = "Prompt",
+  ReadClue = "ReadClue",
 }
 
 export interface Player {
@@ -65,33 +65,41 @@ export interface Action {
   payload?: unknown;
 }
 
-interface IndexedAction extends Action {
+function isChooseClueAction(action: Action): action is {
   type: ActionType.ChooseClue;
-  payload: [number, number];
-}
-
-interface PlayerAction extends Action {
-  type: ActionType;
-  payload: Player;
-}
-
-interface RoundAction extends Action {
-  type: ActionType.StartRound;
-  payload: number;
-}
-
-function isIndexedAction(action: Action): action is IndexedAction {
-  return action.type === ActionType.ChooseClue;
-}
-
-function isPlayerAction(action: Action): action is PlayerAction {
+  payload: { userId: string; i: number; j: number };
+} {
   return (
-    action.type === ActionType.Join || action.type === ActionType.ChangeName
+    action.type === ActionType.ChooseClue &&
+    action.payload !== null &&
+    typeof action.payload === "object" &&
+    "userId" in action.payload &&
+    "i" in action.payload &&
+    "j" in action.payload
   );
 }
 
-function isRoundAction(action: Action): action is RoundAction {
-  return action.type === ActionType.StartRound;
+function isPlayerAction(action: Action): action is {
+  type: ActionType.Join | ActionType.ChangeName;
+  payload: Player;
+} {
+  return (
+    (action.type === ActionType.Join ||
+      action.type === ActionType.ChangeName) &&
+    action.payload !== null &&
+    typeof action.payload === "object" &&
+    "userId" in action.payload &&
+    "name" in action.payload
+  );
+}
+
+function isRoundAction(action: Action): action is {
+  type: ActionType.StartRound;
+  payload: number;
+} {
+  return (
+    action.type === ActionType.StartRound && typeof action.payload === "number"
+  );
 }
 
 /** gameReducer is the state machine which implements the game. */
@@ -110,17 +118,19 @@ function gameReducer(state: State, action: Action): State {
       throw new Error("StartRound action must have an associated round number");
     }
     case ActionType.ChooseClue: {
-      if (isIndexedAction(action)) {
-        const [i, j] = action.payload;
-        if (state.isAnswered[i][j]) {
-          return state;
+      if (isChooseClueAction(action)) {
+        const { userId, i, j } = action.payload;
+        if (
+          state.type === GameState.WaitForClueChoice &&
+          state.boardControl === userId &&
+          !state.isAnswered[i][j]
+        ) {
+          const nextState = { ...state };
+          nextState.type = GameState.ReadClue;
+          nextState.activeClue = [i, j];
+          return nextState;
         }
-
-        const nextState = { ...state };
-        nextState.type = GameState.Prompt;
-        nextState.activeClue = [i, j];
-
-        return nextState;
+        return state;
       }
       throw new Error("ClickClue action must have an associated index");
     }

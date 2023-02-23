@@ -119,7 +119,7 @@ export default function Prompt({ onClose }: { onClose: () => void }) {
   const width = calculateWidth();
 
   return (
-    <Fade show={type === GameState.Prompt}>
+    <Fade show={type === GameState.ReadClue}>
       <button
         className={classNames(
           "h-screen w-screen bg-blue-1000 flex flex-col justify-center items-center"

@@ -5,6 +5,7 @@ export enum RoomEventType {
   Join = "join",
   ChangeName = "change_name",
   StartRound = "start_round",
+  ChooseClue = "choose_clue",
 }
 
 export function isPlayerEvent(re: RoomEvent): re is {
@@ -35,6 +36,23 @@ function isRoundEvent(re: RoomEvent): re is {
     re.payload !== null &&
     typeof re.payload === "object" &&
     "round" in re.payload
+  );
+}
+
+function isChooseClueEvent(re: RoomEvent): re is {
+  id: number;
+  ts: string;
+  room_id: number;
+  type: RoomEventType.ChooseClue;
+  payload: { userId: string; i: number; j: number };
+} {
+  return (
+    re.type === RoomEventType.ChooseClue &&
+    re.payload !== null &&
+    typeof re.payload === "object" &&
+    "userId" in re.payload &&
+    "i" in re.payload &&
+    "j" in re.payload
   );
 }
 
@@ -74,6 +92,15 @@ export function processRoomEvent(
           payload: roomEvent.payload.round,
         });
       }
+      throw new Error("StartRound event must have a payload");
+    case RoomEventType.ChooseClue:
+      if (isChooseClueEvent(roomEvent)) {
+        return dispatch({
+          type: ActionType.ChooseClue,
+          payload: roomEvent.payload,
+        });
+      }
+      throw new Error("ChooseClue event must have a payload");
     default:
       throw new Error("unhandled room event type: " + roomEvent.type);
   }
@@ -82,7 +109,7 @@ export function processRoomEvent(
 /** applyRoomEventToState modifies State to account for the room event. */
 function applyRoomEventToState(roomEvent: RoomEvent, state: State) {
   switch (roomEvent.type) {
-    case RoomEventType.Join: {
+    case RoomEventType.Join:
       if (isPlayerEvent(roomEvent)) {
         state.players.set(roomEvent.payload.userId, {
           userId: roomEvent.payload.userId,
@@ -94,8 +121,7 @@ function applyRoomEventToState(roomEvent: RoomEvent, state: State) {
         }
       }
       return state;
-    }
-    case RoomEventType.ChangeName: {
+    case RoomEventType.ChangeName:
       if (isPlayerEvent(roomEvent)) {
         state.players.set(roomEvent.payload.userId, {
           userId: roomEvent.payload.userId,
@@ -103,8 +129,7 @@ function applyRoomEventToState(roomEvent: RoomEvent, state: State) {
         });
       }
       return state;
-    }
-    case RoomEventType.StartRound: {
+    case RoomEventType.StartRound:
       if (isRoundEvent(roomEvent)) {
         const actionRound = roomEvent.payload.round;
         if (actionRound === state.round) {
@@ -112,7 +137,19 @@ function applyRoomEventToState(roomEvent: RoomEvent, state: State) {
         }
       }
       return state;
-    }
+    case RoomEventType.ChooseClue:
+      if (isChooseClueEvent(roomEvent)) {
+        const { userId, i, j } = roomEvent.payload;
+        if (
+          state.type === GameState.WaitForClueChoice &&
+          state.boardControl === userId &&
+          !state.isAnswered[i][j]
+        ) {
+          state.type = GameState.ReadClue;
+          state.activeClue = [i, j];
+        }
+      }
+      return state;
     default:
       throw new Error("unhandled room event type: " + roomEvent.type);
   }
