@@ -1,7 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import * as React from "react";
 
-import { Game, Clue } from "~/models/convert.server";
+import { Game, Clue, Board } from "~/models/convert.server";
 import { applyRoomEventsToState, processRoomEvent } from "~/models/room-event";
 import { RoomEvent } from "~/models/room-event.server";
 import { generateGrid } from "~/utils/utils";
@@ -31,12 +31,14 @@ export interface State {
 function createInitialState(game: Game, round: number): State {
   const board = game.boards[round];
 
-  const numCluesInBoard = board.categories.reduce(
-    (acc, category) => (acc += category.clues.length),
-    0
-  );
-  const n = board.categories[0].clues.length;
-  const m = board.categories.length;
+  const numCluesInBoard = board
+    ? board.categories.reduce(
+        (acc, category) => (acc += category.clues.length),
+        0
+      )
+    : 0;
+  const n = board ? board.categories[0].clues.length : 0;
+  const m = board ? board.categories.length : 0;
 
   return {
     type: GameState.Preview,
@@ -50,11 +52,11 @@ function createInitialState(game: Game, round: number): State {
 }
 
 export enum ActionType {
-  DismissPreview = "DismissPreview",
   ClickClue = "ClickClue",
   AnswerClue = "AnswerClue",
   PlayerJoin = "PlayerJoin",
   PlayerChangeName = "PlayerChangeName",
+  StartRound = "StartRound",
 }
 
 export interface Action {
@@ -72,6 +74,11 @@ interface PlayerAction extends Action {
   payload: Player;
 }
 
+interface RoundAction extends Action {
+  type: ActionType.StartRound;
+  payload: number;
+}
+
 function isIndexedAction(action: Action): action is IndexedAction {
   return action.type === ActionType.ClickClue;
 }
@@ -83,15 +90,25 @@ function isPlayerAction(action: Action): action is PlayerAction {
   );
 }
 
+function isRoundAction(action: Action): action is RoundAction {
+  return action.type === ActionType.StartRound;
+}
+
 /** gameReducer is the state machine which implements the game. */
 function gameReducer(state: State, action: Action): State {
   switch (action.type) {
-    case ActionType.DismissPreview:
-      const nextState = { ...state };
-
-      nextState.type = GameState.Open;
-
-      return nextState;
+    case ActionType.StartRound: {
+      if (isRoundAction(action)) {
+        const actionRound = action.payload;
+        if (actionRound === state.round) {
+          const nextState = { ...state };
+          nextState.type = GameState.Open;
+          return nextState;
+        }
+        return state;
+      }
+      throw new Error("StartRound action must have an associated round number");
+    }
     case ActionType.ClickClue: {
       if (isIndexedAction(action)) {
         const [i, j] = action.payload;
@@ -231,8 +248,6 @@ export function useGame(
     dispatch({ type: ActionType.ClickClue, payload: [i, j] });
   };
 
-  const onClosePreview = () => dispatch({ type: ActionType.DismissPreview });
-
   const onClosePrompt = () => {
     dispatch({ type: ActionType.AnswerClue });
   };
@@ -246,7 +261,6 @@ export function useGame(
     clue,
     isAnswered,
     onClickClue,
-    onClosePreview,
     onClosePrompt,
     players: state.players,
     round: state.round,

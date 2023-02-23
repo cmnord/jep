@@ -8,9 +8,8 @@ export const GameContext = React.createContext<ReturnType<typeof useGame>>({
   clue: undefined,
   isAnswered: () => false,
   onClickClue: () => null,
-  onClosePreview: () => null,
   onClosePrompt: () => null,
-  players: new Set(),
+  players: new Map(),
   round: 0,
 });
 

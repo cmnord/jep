@@ -137,6 +137,10 @@ export default function Players({
 
   const [name, setName] = React.useState(player.name);
 
+  React.useEffect(() => {
+    setName(player.name);
+  }, [player.name, setName]);
+
   const fetcher = useFetcher();
 
   return (

@@ -1,12 +1,13 @@
 import { RoomEvent } from "~/models/room-event.server";
-import { Action, ActionType, State } from "~/utils/use-game";
+import { Action, ActionType, GameState, State } from "~/utils/use-game";
 
 export enum RoomEventType {
   Join = "join",
   ChangeName = "change_name",
+  StartRound = "start_round",
 }
 
-export function isJoinEvent(re: RoomEvent): re is {
+export function isPlayerEvent(re: RoomEvent): re is {
   id: number;
   ts: string;
   room_id: number;
@@ -14,7 +15,7 @@ export function isJoinEvent(re: RoomEvent): re is {
   payload: { userId: string; name: string };
 } {
   return (
-    re.type === RoomEventType.Join &&
+    (re.type === RoomEventType.Join || re.type === RoomEventType.ChangeName) &&
     re.payload !== null &&
     typeof re.payload === "object" &&
     "userId" in re.payload &&
@@ -22,19 +23,18 @@ export function isJoinEvent(re: RoomEvent): re is {
   );
 }
 
-function isChangeNameEvent(re: RoomEvent): re is {
+function isRoundEvent(re: RoomEvent): re is {
   id: number;
   ts: string;
   room_id: number;
-  type: RoomEventType.ChangeName;
-  payload: { userId: string; name: string };
+  type: RoomEventType.StartRound;
+  payload: { round: number };
 } {
   return (
-    re.type === RoomEventType.ChangeName &&
+    re.type === RoomEventType.StartRound &&
     re.payload !== null &&
     typeof re.payload === "object" &&
-    "userId" in re.payload &&
-    "name" in re.payload
+    "round" in re.payload
   );
 }
 
@@ -46,7 +46,7 @@ export function processRoomEvent(
 ) {
   switch (roomEvent.type) {
     case RoomEventType.Join:
-      if (isJoinEvent(roomEvent)) {
+      if (isPlayerEvent(roomEvent)) {
         return dispatch({
           type: ActionType.PlayerJoin,
           payload: {
@@ -57,7 +57,7 @@ export function processRoomEvent(
       }
       throw new Error("Join event must have a payload");
     case RoomEventType.ChangeName:
-      if (isChangeNameEvent(roomEvent)) {
+      if (isPlayerEvent(roomEvent)) {
         return dispatch({
           type: ActionType.PlayerChangeName,
           payload: {
@@ -67,6 +67,13 @@ export function processRoomEvent(
         });
       }
       throw new Error("ChangeName event must have a payload");
+    case RoomEventType.StartRound:
+      if (isRoundEvent(roomEvent)) {
+        return dispatch({
+          type: ActionType.StartRound,
+          payload: roomEvent.payload.round,
+        });
+      }
     default:
       throw new Error("unhandled room event type: " + roomEvent.type);
   }
@@ -75,20 +82,35 @@ export function processRoomEvent(
 /** applyRoomEventToState modifies State to account for the room event. */
 function applyRoomEventToState(roomEvent: RoomEvent, state: State) {
   switch (roomEvent.type) {
-    case RoomEventType.Join:
-      if (isJoinEvent(roomEvent)) {
+    case RoomEventType.Join: {
+      if (isPlayerEvent(roomEvent)) {
         state.players.set(roomEvent.payload.userId, {
           userId: roomEvent.payload.userId,
           name: roomEvent.payload.name,
         });
       }
-    case RoomEventType.ChangeName:
-      if (isChangeNameEvent(roomEvent)) {
+      return state;
+    }
+    case RoomEventType.ChangeName: {
+      if (isPlayerEvent(roomEvent)) {
         state.players.set(roomEvent.payload.userId, {
           userId: roomEvent.payload.userId,
           name: roomEvent.payload.name,
         });
       }
+      return state;
+    }
+    case RoomEventType.StartRound: {
+      if (isRoundEvent(roomEvent)) {
+        const actionRound = roomEvent.payload.round;
+        if (actionRound === state.round) {
+          state.type = GameState.Open;
+        }
+      }
+      return state;
+    }
+    default:
+      throw new Error("unhandled room event type: " + roomEvent.type);
   }
 }
 

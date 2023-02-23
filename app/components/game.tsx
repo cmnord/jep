@@ -22,8 +22,7 @@ export default function GameComponent({
   userId: string;
   roomName: string;
 }) {
-  const { type, board, players, onClosePreview, onClosePrompt } =
-    useGameContext();
+  const { type, board, players, onClosePrompt } = useGameContext();
 
   const [focusedClueIdx, setFocusedClue] = React.useState<[number, number]>();
 
@@ -45,7 +44,6 @@ export default function GameComponent({
       <Preview
         numRounds={game.boards.length}
         isOpen={type === GameState.Preview}
-        onClose={onClosePreview}
         finalClue={finalClue}
         players={players}
         userId={userId}
