@@ -9,93 +9,10 @@
   .text-shadow-md {
     text-shadow: 3px 3px black;
   }
-}
 
-.border-b-12 {
-  border-bottom-width: 12px;
-}
-
-.bg-blue-1000 {
-  background-color: #071277;
-}
-
-.text-blue-1000 {
-  color: #071277;
-}
-
-.text-yellow-1000 {
-  color: #d69f4c;
-}
-
-@font-face {
-  font-family: "Korinna-Agency";
-  src: url("../public/fonts/Korinna-Agency.ttf.woff") format("woff"),
-    url("../public/fonts/Korinna-Agency.ttf.eot") format("eot");
-}
-
-.font-impact {
-  font-family: "Impact";
-}
-
-.font-korinna {
-  font-family: "Korinna-Agency", "Times New Roman", Times, serif;
-}
-
-@keyframes slideInFromTopLeft {
-  0% {
-    transform: translate(-100%, -100%);
+  .word-spacing-1 {
+    word-spacing: 1rem;
   }
-  100% {
-    transform: translate(0, 0);
-  }
-}
-
-@keyframes slideOutToTopLeft {
-  0% {
-    transform: translate(0, 0);
-  }
-  100% {
-    transform: translate(-100%, -100%);
-  }
-}
-
-.animate-slideIn {
-  animation: 0.5s ease-out 0s 1 slideInFromTopLeft forwards;
-}
-
-.animate-slideOut {
-  animation: 0.5s ease-in 0s 1 slideOutToTopLeft forwards;
-}
-
-@keyframes showSweetAlert {
-  0% {
-    -webkit-transform: scale(1);
-    transform: scale(1);
-  }
-  1% {
-    -webkit-transform: scale(0.5);
-    transform: scale(0.5);
-  }
-  45% {
-    -webkit-transform: scale(1.05);
-    transform: scale(1.05);
-  }
-  80% {
-    -webkit-transform: scale(0.95);
-    transform: scale(0.95);
-  }
-  to {
-    -webkit-transform: scale(1);
-    transform: scale(1);
-  }
-}
-
-.animate-bouncein {
-  animation: showSweetAlert 0.3s;
-}
-
-.word-spacing-1 {
-  word-spacing: 1rem;
 }
 
 @keyframes growFromLeft {
