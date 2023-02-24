@@ -329,6 +329,7 @@ export function useGame(
     type: state.type,
     activeClue: state.activeClue,
     board,
+    buzzes: state.buzzes,
     category,
     clue,
     isAnswered,

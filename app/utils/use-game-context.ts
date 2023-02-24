@@ -8,6 +8,7 @@ export const GameContext = React.createContext<ReturnType<typeof useGame>>({
   activeClue: undefined,
   board: { categories: [], categoryNames: [] },
   boardControl: undefined,
+  buzzes: new Map(),
   category: undefined,
   clue: undefined,
   isAnswered: () => false,

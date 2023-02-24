@@ -3,7 +3,9 @@ import classNames from "classnames";
 
 import { useGameContext } from "~/utils/use-game-context";
 import { GameState } from "~/utils/use-game";
+import type { Player } from "~/utils/use-game";
 import { useFetcher } from "@remix-run/react";
+import { stringToHslColor } from "~/utils/utils";
 
 /** MS_PER_CHARACTER is a heuristic value to scale the amount of time per clue by
  * its length.
@@ -63,6 +65,19 @@ function Lockout({ active }: { active: boolean }) {
   );
 }
 
+function Buzz({ player, durationMs }: { player?: Player; durationMs: number }) {
+  const color = player ? stringToHslColor(player.userId) : "gray";
+  return (
+    <div
+      className="px-2 py-1 flex flex-col items-center justify-center text-white text-shadow"
+      style={{ color }}
+    >
+      <div className="font-bold">{player?.name ?? "Unknown player"}</div>
+      <div>{durationMs}ms</div>
+    </div>
+  );
+}
+
 function BuzzerLight({ active }: { active: boolean }) {
   if (active) {
     /* Heroicon name: solid/check-circle */
@@ -71,7 +86,7 @@ function BuzzerLight({ active }: { active: boolean }) {
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
         fill="currentColor"
-        className="w-20 h-20 mb-4 text-green-600 rounded-full bg-green-200 shadow-glow-green-200"
+        className="w-20 h-20 mb-4 mr-4 text-green-600 rounded-full bg-green-200 shadow-glow-green-200"
         role="img"
         aria-labelledby="check-title"
       >
@@ -89,7 +104,7 @@ function BuzzerLight({ active }: { active: boolean }) {
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
       fill="currentColor"
-      className="w-20 h-20 mb-4 text-red-600 rounded-full bg-red-200 shadow-glow-red-200"
+      className="w-20 h-20 mb-4 mr-4 text-red-600 rounded-full bg-red-200 shadow-glow-red-200"
       role="img"
       aria-labelledby="x-title"
     >
@@ -110,12 +125,19 @@ export default function Prompt({
   roomName: string;
   userId: string;
 }) {
-  const { type, clue, activeClue } = useGameContext();
+  const { type, clue, activeClue, buzzes, players } = useGameContext();
 
-  const [clueShownAt, setClueShownAt] = React.useState<number | undefined>();
+  const [optimisticBuzzes, setOptimisticBuzzes] = React.useState(buzzes);
+  const myBuzzDurationMs = optimisticBuzzes?.get(userId);
+
+  const [clueShownAt, setClueShownAt] = React.useState<number | undefined>(
+    myBuzzDurationMs
+  );
   const [clueIdx, setClueIdx] = React.useState(activeClue);
 
-  const [buzzerOpenAt, setBuzzerOpenAt] = React.useState<number | undefined>();
+  const [buzzerOpenAt, setBuzzerOpenAt] = React.useState<number | undefined>(
+    myBuzzDurationMs
+  );
   const [lockout, setLockout] = React.useState(false);
 
   const fetcher = useFetcher();
@@ -131,15 +153,21 @@ export default function Prompt({
     } else {
       setClueShownAt(undefined);
     }
-    setBuzzerOpenAt(undefined);
-  }, [activeClue]);
+    setBuzzerOpenAt(myBuzzDurationMs);
+  }, [activeClue, myBuzzDurationMs]);
 
   React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setBuzzerOpenAt(Date.now());
-    }, clueDurationMs);
-    return () => clearTimeout(timer);
-  }, [clueDurationMs]);
+    setOptimisticBuzzes(buzzes);
+  }, [buzzes]);
+
+  React.useEffect(() => {
+    if (myBuzzDurationMs === undefined) {
+      const timer = setTimeout(() => {
+        setBuzzerOpenAt(Date.now());
+      }, clueDurationMs);
+      return () => clearTimeout(timer);
+    }
+  }, [clueDurationMs, myBuzzDurationMs]);
 
   React.useEffect(() => {
     if (lockout) {
@@ -168,6 +196,10 @@ export default function Prompt({
     const [i, j] = clueIdx;
     const clueDeltaMs = clickedAtMs - buzzerOpenAt;
 
+    setOptimisticBuzzes((old) =>
+      old ? old.set(userId, clueDeltaMs) : new Map([[userId, clueDeltaMs]])
+    );
+
     return fetcher.submit(
       {
         i: i.toString(),
@@ -182,7 +214,7 @@ export default function Prompt({
   return (
     <Fade show={type === GameState.ReadClue}>
       <button
-        disabled={lockout}
+        disabled={lockout || myBuzzDurationMs !== undefined}
         className={classNames(
           "h-screen w-screen bg-blue-1000 flex flex-col justify-center items-center"
         )}
@@ -193,26 +225,43 @@ export default function Prompt({
           <div className="text-white uppercase text-center text-4xl md:text-5xl lg:text-7xl text-shadow-md font-korinna word-spacing-1">
             <div>
               <p className="mb-8 leading-normal">{clue?.clue}</p>
-              <p
-                className={classNames("text-cyan-300", {
-                  // TODO: show clue after buzz & evaluate
-                  /*"opacity-0": state === State.ShowClue,*/
-                })}
-              >
-                {clue?.answer}
-              </p>
+              {/* TODO: show clue after buzz & evaluate */}
+              <p className="text-cyan-300 opacity-0">{clue?.answer}</p>
             </div>
           </div>
         </div>
         <Lockout active={lockout} />
-        <BuzzerLight active={buzzerOpenAt !== undefined} />
+        <div className="flex items-center justify-between w-full">
+          <div className="flex gap-4 ml-4">
+            {optimisticBuzzes
+              ? // TODO: sort buzzes?
+                Array.from(optimisticBuzzes.entries()).map(
+                  ([userId, durationMs], i) => (
+                    <Buzz
+                      key={i}
+                      player={players.get(userId)}
+                      durationMs={durationMs}
+                    />
+                  )
+                )
+              : null}
+          </div>
+          <BuzzerLight active={buzzerOpenAt !== undefined} />
+        </div>
         <div
-          className="h-8 md:h-16 w-0 bg-white self-start"
-          style={{
-            animation: `${
-              clueDurationMs / 1000
-            }s linear 0s 1 growFromLeft forwards`,
-          }}
+          className={classNames("h-8 md:h-16 bg-white self-start", {
+            "w-0": myBuzzDurationMs === undefined,
+            "w-full": myBuzzDurationMs !== undefined,
+          })}
+          style={
+            myBuzzDurationMs === undefined
+              ? {
+                  animation: `${
+                    clueDurationMs / 1000
+                  }s linear 0s 1 growFromLeft forwards`,
+                }
+              : undefined
+          }
         />
       </button>
     </Fade>
