@@ -3,9 +3,10 @@ import {
   isPlayerAction,
   isChooseClueAction,
   isRoundAction,
+  isBuzzAction,
+  gameReducer,
 } from "~/utils/use-game";
 import type { Action, State } from "~/utils/use-game";
-import { GameState } from "~/utils/use-game";
 
 export enum RoomEventType {
   Join = "join",
@@ -20,7 +21,7 @@ interface RoomEvent extends DbRoomEvent {
 }
 
 export function isTypedRoomEvent(re: DbRoomEvent): re is RoomEvent {
-  return re.type in RoomEventType;
+  return Object.values(RoomEventType).includes(re.type as RoomEventType);
 }
 
 /** processRoomEvent dispatches the appropriate Action to the reducer based on
@@ -53,58 +54,11 @@ export function processRoomEvent(
         return dispatch(roomEvent);
       }
       throw new Error("ChooseClue event must have a payload");
-    default:
-      throw new Error("unhandled room event type: " + roomEvent.type);
-  }
-}
-
-/** applyRoomEventToState modifies State to account for the room event. */
-function applyRoomEventToState(roomEvent: DbRoomEvent, state: State) {
-  if (!isTypedRoomEvent(roomEvent)) {
-    throw new Error("unhandled room event type from DB: " + roomEvent.type);
-  }
-  switch (roomEvent.type) {
-    case RoomEventType.Join:
-      if (isPlayerAction(roomEvent)) {
-        state.players.set(roomEvent.payload.userId, {
-          userId: roomEvent.payload.userId,
-          name: roomEvent.payload.name,
-        });
-        // If this is the first player joining, give them board control.
-        if (state.players.size === 1) {
-          state.boardControl = roomEvent.payload.userId;
-        }
+    case RoomEventType.Buzz:
+      if (isBuzzAction(roomEvent)) {
+        return dispatch(roomEvent);
       }
-      return state;
-    case RoomEventType.ChangeName:
-      if (isPlayerAction(roomEvent)) {
-        state.players.set(roomEvent.payload.userId, {
-          userId: roomEvent.payload.userId,
-          name: roomEvent.payload.name,
-        });
-      }
-      return state;
-    case RoomEventType.StartRound:
-      if (isRoundAction(roomEvent)) {
-        const actionRound = roomEvent.payload.round;
-        if (actionRound === state.round) {
-          state.type = GameState.WaitForClueChoice;
-        }
-      }
-      return state;
-    case RoomEventType.ChooseClue:
-      if (isChooseClueAction(roomEvent)) {
-        const { userId, i, j } = roomEvent.payload;
-        if (
-          state.type === GameState.WaitForClueChoice &&
-          state.boardControl === userId &&
-          !state.isAnswered[i][j]
-        ) {
-          state.type = GameState.ReadClue;
-          state.activeClue = [i, j];
-        }
-      }
-      return state;
+      throw new Error("Buzz event must have a payload");
     default:
       throw new Error("unhandled room event type: " + roomEvent.type);
   }
@@ -116,7 +70,10 @@ export function applyRoomEventsToState(
   serverRoomEvents: DbRoomEvent[]
 ) {
   for (const re of serverRoomEvents) {
-    applyRoomEventToState(re, state);
+    if (!isTypedRoomEvent(re)) {
+      throw new Error("unhandled room event type from DB: " + re.type);
+    }
+    state = gameReducer(state, re);
   }
   return state;
 }

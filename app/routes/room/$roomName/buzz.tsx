@@ -23,11 +23,11 @@ export async function action({ request, params }: ActionArgs) {
     throw new Response("Invalid userId", { status: 400 });
   }
 
-  const delta = formData.get("delta");
-  if (typeof delta !== "string") {
+  const deltaStr = formData.get("deltaMs");
+  if (typeof deltaStr !== "string") {
     throw new Response("Invalid delta", { status: 400 });
   }
-  const deltaMs = parseInt(delta);
+  const deltaMs = parseInt(deltaStr);
 
   const roomNameAndId = params.roomName;
   if (!roomNameAndId) {

@@ -115,7 +115,7 @@ export default function Prompt({
   const [clueShownAt, setClueShownAt] = React.useState<number | undefined>();
   const [clueIdx, setClueIdx] = React.useState(activeClue);
 
-  const [buzzable, setBuzzable] = React.useState(false);
+  const [buzzerOpenAt, setBuzzerOpenAt] = React.useState<number | undefined>();
   const [lockout, setLockout] = React.useState(false);
 
   const fetcher = useFetcher();
@@ -123,20 +123,20 @@ export default function Prompt({
   const numCharactersInClue = clue?.clue.length ?? 0;
   const clueDurationMs = MS_PER_CHARACTER * numCharactersInClue;
 
+  // Keep activeClue set to the last valid clue index.
   React.useEffect(() => {
-    if (clue && activeClue) {
+    if (activeClue) {
       setClueShownAt(Date.now());
       setClueIdx(activeClue);
     } else {
       setClueShownAt(undefined);
-      setClueIdx(undefined);
     }
-    setBuzzable(false);
-  }, [clue, activeClue]);
+    setBuzzerOpenAt(undefined);
+  }, [activeClue]);
 
   React.useEffect(() => {
     const timer = setTimeout(() => {
-      setBuzzable(true);
+      setBuzzerOpenAt(Date.now());
     }, clueDurationMs);
     return () => clearTimeout(timer);
   }, [clueDurationMs]);
@@ -151,21 +151,30 @@ export default function Prompt({
   }, [lockout]);
 
   const handleClick = (clickedAtMs: number) => {
-    if (clueShownAt === undefined || !clueIdx) {
+    if (clueShownAt === undefined) {
       return;
     }
 
-    const delta = clickedAtMs - clueShownAt;
-    if (delta < clueDurationMs) {
-      setLockout(true);
+    const lockoutDeltaMs = clickedAtMs - clueShownAt;
+    if (lockoutDeltaMs < clueDurationMs) {
+      return setLockout(true);
+    }
+
+    if (buzzerOpenAt === undefined || !clueIdx) {
       return;
     }
 
     // Contestant buzzed, so submit their buzz time
     const [i, j] = clueIdx;
+    const clueDeltaMs = clickedAtMs - buzzerOpenAt;
 
     return fetcher.submit(
-      { i: i.toString(), j: j.toString(), userId, delta: delta.toString() },
+      {
+        i: i.toString(),
+        j: j.toString(),
+        userId,
+        deltaMs: clueDeltaMs.toString(),
+      },
       { method: "post", action: `/room/${roomName}/buzz` }
     );
   };
@@ -196,7 +205,7 @@ export default function Prompt({
           </div>
         </div>
         <Lockout active={lockout} />
-        <BuzzerLight active={buzzable} />
+        <BuzzerLight active={buzzerOpenAt !== undefined} />
         <div
           className="h-8 md:h-16 w-0 bg-white self-start"
           style={{

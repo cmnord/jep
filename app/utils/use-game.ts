@@ -10,6 +10,8 @@ import {
 import type { DbRoomEvent } from "~/models/room-event.server";
 import { generateGrid } from "~/utils/utils";
 
+const CLUE_TIMEOUT_MS = 5000;
+
 export enum GameState {
   Preview = "Preview",
   WaitForClueChoice = "WaitForClueChoice",
@@ -25,6 +27,7 @@ export interface State {
   type: GameState;
   activeClue?: [number, number];
   boardControl?: string;
+  buzzes?: Map<string, number>;
   game: Game;
   isAnswered: boolean[][];
   numAnswered: number;
@@ -102,8 +105,23 @@ export function isRoundAction(action: Action): action is {
   );
 }
 
+export function isBuzzAction(action: Action): action is {
+  type: RoomEventType.Buzz;
+  payload: { userId: string; i: number; j: number; deltaMs: number };
+} {
+  return (
+    action.type === RoomEventType.Buzz &&
+    action.payload !== null &&
+    typeof action.payload === "object" &&
+    "userId" in action.payload &&
+    "i" in action.payload &&
+    "j" in action.payload &&
+    "deltaMs" in action.payload
+  );
+}
+
 /** gameReducer is the state machine which implements the game. */
-function gameReducer(state: State, action: Action): State {
+export function gameReducer(state: State, action: Action): State {
   switch (action.type) {
     case RoomEventType.StartRound: {
       if (isRoundAction(action)) {
@@ -135,26 +153,73 @@ function gameReducer(state: State, action: Action): State {
       throw new Error("ClickClue action must have an associated index");
     }
     case RoomEventType.Buzz: {
-      const newNumAnswered = state.numAnswered + 1;
+      if (isBuzzAction(action)) {
+        const activeClue = state.activeClue;
+        // Ignore this buzz if the clue is no longer active.
+        if (!activeClue) {
+          return state;
+        }
+        const { userId, i: buzzI, j: buzzJ, deltaMs } = action.payload;
+        const [i, j] = activeClue;
+        // Ignore this buzz if it was for the wrong clue.
+        if (buzzI !== i || buzzJ !== j) {
+          return state;
+        }
 
-      if (newNumAnswered === state.numCluesInBoard) {
-        const newRound = state.round++;
-        const nextState = createInitialState(state.game, newRound);
+        let buzzes = state.buzzes;
+        if (!buzzes) {
+          buzzes = new Map();
+        }
+
+        // Accept this buzz if the user has not already buzzed and the buzz came
+        // in before the timeout.
+        if (!buzzes.has(userId) && deltaMs <= CLUE_TIMEOUT_MS) {
+          buzzes.set(userId, deltaMs);
+        }
+
+        if (buzzes.size < state.players.size) {
+          const nextState = { buzzes, ...state };
+          return nextState;
+        }
+
+        // Everyone has buzzed! We can evaluate the winner.
+        const winningBuzz = Array.from(buzzes.entries()).reduce(
+          (acc, [userId, deltaMs]) => {
+            if (deltaMs < acc.deltaMs) {
+              return { userId, deltaMs };
+            }
+            return acc;
+          },
+          { userId: "", deltaMs: Number.MAX_SAFE_INTEGER }
+        );
+
+        // TODO: winner checks to see if they are right
+        // TODO: no one buzzed
+
+        const newNumAnswered = state.numAnswered + 1;
+        if (newNumAnswered === state.numCluesInBoard) {
+          const newRound = state.round++;
+          const nextState = createInitialState(state.game, newRound);
+          return nextState;
+        }
+
+        const nextState: State = {
+          type: GameState.WaitForClueChoice,
+          activeClue: undefined,
+          boardControl: winningBuzz.userId,
+          buzzes: new Map(),
+          game: state.game,
+          isAnswered: state.isAnswered,
+          numAnswered: newNumAnswered,
+          numCluesInBoard: state.numCluesInBoard,
+          players: state.players,
+          round: state.round,
+        };
+        nextState.isAnswered[i][j] = true;
+
         return nextState;
       }
-
-      const nextState = { ...state };
-      const activeClue = state.activeClue;
-      if (!activeClue) {
-        throw new Error("cannot answer clue if no clue was active");
-      }
-      const [i, j] = activeClue;
-      nextState.isAnswered[i][j] = true;
-      nextState.activeClue = undefined;
-      nextState.type = GameState.WaitForClueChoice;
-      nextState.numAnswered = newNumAnswered;
-
-      return nextState;
+      throw new Error("Buzz action must have an associated index and delta");
     }
     case RoomEventType.Join: {
       if (isPlayerAction(action)) {
