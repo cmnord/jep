@@ -1,5 +1,5 @@
-import { v4 as uuid } from "uuid";
 import { createCookieSessionStorage } from "@remix-run/node";
+import { nanoid } from "nanoid";
 
 interface FormState {
   success: boolean;
@@ -80,7 +80,7 @@ export async function getOrCreateUserSession(
 ) {
   let userId = await getUserSession(request);
   if (!userId) {
-    userId = uuid();
+    userId = nanoid();
     await createUserSession(request, userId, headers);
   }
   return userId;
