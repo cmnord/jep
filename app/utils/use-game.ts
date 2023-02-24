@@ -2,8 +2,12 @@ import { createClient } from "@supabase/supabase-js";
 import * as React from "react";
 
 import type { Game, Clue } from "~/models/convert.server";
-import { applyRoomEventsToState, processRoomEvent } from "~/models/room-event";
-import type { RoomEvent } from "~/models/room-event.server";
+import {
+  applyRoomEventsToState,
+  processRoomEvent,
+  RoomEventType,
+} from "~/models/room-event";
+import type { DbRoomEvent } from "~/models/room-event.server";
 import { generateGrid } from "~/utils/utils";
 
 export enum GameState {
@@ -52,25 +56,17 @@ function createInitialState(game: Game, round: number): State {
   };
 }
 
-export enum ActionType {
-  Join = "join",
-  ChangeName = "change_name",
-  StartRound = "start_round",
-  ChooseClue = "choose_clue",
-  AnswerClue = "AnswerClue",
-}
-
 export interface Action {
-  type: ActionType;
+  type: RoomEventType;
   payload?: unknown;
 }
 
-function isChooseClueAction(action: Action): action is {
-  type: ActionType.ChooseClue;
+export function isChooseClueAction(action: Action): action is {
+  type: RoomEventType.ChooseClue;
   payload: { userId: string; i: number; j: number };
 } {
   return (
-    action.type === ActionType.ChooseClue &&
+    action.type === RoomEventType.ChooseClue &&
     action.payload !== null &&
     typeof action.payload === "object" &&
     "userId" in action.payload &&
@@ -79,13 +75,13 @@ function isChooseClueAction(action: Action): action is {
   );
 }
 
-function isPlayerAction(action: Action): action is {
-  type: ActionType.Join | ActionType.ChangeName;
+export function isPlayerAction(action: Action): action is {
+  type: RoomEventType.Join | RoomEventType.ChangeName;
   payload: Player;
 } {
   return (
-    (action.type === ActionType.Join ||
-      action.type === ActionType.ChangeName) &&
+    (action.type === RoomEventType.Join ||
+      action.type === RoomEventType.ChangeName) &&
     action.payload !== null &&
     typeof action.payload === "object" &&
     "userId" in action.payload &&
@@ -93,21 +89,25 @@ function isPlayerAction(action: Action): action is {
   );
 }
 
-function isRoundAction(action: Action): action is {
-  type: ActionType.StartRound;
-  payload: number;
+export function isRoundAction(action: Action): action is {
+  type: RoomEventType.StartRound;
+  payload: { round: number };
 } {
   return (
-    action.type === ActionType.StartRound && typeof action.payload === "number"
+    action.type === RoomEventType.StartRound &&
+    action.payload !== null &&
+    typeof action.payload === "object" &&
+    "round" in action.payload &&
+    typeof action.payload.round === "number"
   );
 }
 
 /** gameReducer is the state machine which implements the game. */
 function gameReducer(state: State, action: Action): State {
   switch (action.type) {
-    case ActionType.StartRound: {
+    case RoomEventType.StartRound: {
       if (isRoundAction(action)) {
-        const actionRound = action.payload;
+        const actionRound = action.payload.round;
         if (actionRound === state.round) {
           const nextState = { ...state };
           nextState.type = GameState.WaitForClueChoice;
@@ -117,7 +117,7 @@ function gameReducer(state: State, action: Action): State {
       }
       throw new Error("StartRound action must have an associated round number");
     }
-    case ActionType.ChooseClue: {
+    case RoomEventType.ChooseClue: {
       if (isChooseClueAction(action)) {
         const { userId, i, j } = action.payload;
         if (
@@ -134,7 +134,7 @@ function gameReducer(state: State, action: Action): State {
       }
       throw new Error("ClickClue action must have an associated index");
     }
-    case ActionType.AnswerClue: {
+    case RoomEventType.Buzz: {
       const newNumAnswered = state.numAnswered + 1;
 
       if (newNumAnswered === state.numCluesInBoard) {
@@ -156,7 +156,7 @@ function gameReducer(state: State, action: Action): State {
 
       return nextState;
     }
-    case ActionType.Join: {
+    case RoomEventType.Join: {
       if (isPlayerAction(action)) {
         const nextState = { ...state };
         nextState.players.set(action.payload.userId, action.payload);
@@ -168,7 +168,7 @@ function gameReducer(state: State, action: Action): State {
       }
       throw new Error("PlayerJoin action must have an associated player");
     }
-    case ActionType.ChangeName: {
+    case RoomEventType.ChangeName: {
       if (isPlayerAction(action)) {
         const nextState = { ...state };
         nextState.players.set(action.payload.userId, action.payload);
@@ -183,7 +183,7 @@ function gameReducer(state: State, action: Action): State {
  * to change them. */
 export function useGame(
   game: Game,
-  serverRoomEvents: RoomEvent[],
+  serverRoomEvents: DbRoomEvent[],
   roomId: number,
   SUPABASE_URL: string,
   SUPABASE_ANON_KEY: string
@@ -225,7 +225,7 @@ export function useGame(
   React.useEffect(() => {
     const channel = client
       .channel(`room:${roomId}`)
-      .on<RoomEvent>(
+      .on<DbRoomEvent>(
         "postgres_changes",
         {
           event: "INSERT",
@@ -234,7 +234,7 @@ export function useGame(
           filter: "room_id=eq." + roomId,
         },
         (payload) => {
-          const newEvent: RoomEvent = payload.new;
+          const newEvent: DbRoomEvent = payload.new;
           // Only process events we haven't seen yet
           if (!seenRoomEvents.has(newEvent.id)) {
             setSeenRoomEvents((prev) => new Set(prev).add(newEvent.id));
@@ -258,19 +258,15 @@ export function useGame(
     category = state.activeClue ? board.categoryNames[j] : undefined;
   }
 
-  const onClosePrompt = () => {
-    dispatch({ type: ActionType.AnswerClue });
-  };
-
   const isAnswered = (i: number, j: number) => state.isAnswered[i][j];
 
   return {
     type: state.type,
+    activeClue: state.activeClue,
     board,
     category,
     clue,
     isAnswered,
-    onClosePrompt,
     players: state.players,
     round: state.round,
     boardControl: state.boardControl,

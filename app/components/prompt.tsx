@@ -3,6 +3,7 @@ import classNames from "classnames";
 
 import { useGameContext } from "~/utils/use-game-context";
 import { GameState } from "~/utils/use-game";
+import { useFetcher } from "@remix-run/react";
 
 /** MS_PER_CHARACTER is a heuristic value to scale the amount of time per clue by
  * its length.
@@ -11,14 +12,6 @@ const MS_PER_CHARACTER = 50;
 
 /** LOCKOUT_MS applies a 500ms lockout if a contestant buzzes before the clue is read. */
 const LOCKOUT_MS = 500;
-
-// TODO: wagers
-enum State {
-  DailyDouble,
-  Final,
-  ShowClue,
-  Answer,
-}
 
 function Fade({
   show,
@@ -110,27 +103,36 @@ function BuzzerLight({ active }: { active: boolean }) {
   );
 }
 
-export default function Prompt({ onClose }: { onClose: () => void }) {
-  const { type, clue, category } = useGameContext();
-
-  const [state, setState] = React.useState(State.ShowClue);
+export default function Prompt({
+  roomName,
+  userId,
+}: {
+  roomName: string;
+  userId: string;
+}) {
+  const { type, clue, activeClue } = useGameContext();
 
   const [clueShownAt, setClueShownAt] = React.useState<number | undefined>();
-
-  const numCharactersInClue = clue?.clue.length ?? 0;
-  const clueDurationMs = MS_PER_CHARACTER * numCharactersInClue;
+  const [clueIdx, setClueIdx] = React.useState(activeClue);
 
   const [buzzable, setBuzzable] = React.useState(false);
   const [lockout, setLockout] = React.useState(false);
 
+  const fetcher = useFetcher();
+
+  const numCharactersInClue = clue?.clue.length ?? 0;
+  const clueDurationMs = MS_PER_CHARACTER * numCharactersInClue;
+
   React.useEffect(() => {
-    if (clue) {
+    if (clue && activeClue) {
       setClueShownAt(Date.now());
+      setClueIdx(activeClue);
     } else {
       setClueShownAt(undefined);
+      setClueIdx(undefined);
     }
     setBuzzable(false);
-  }, [clue]);
+  }, [clue, activeClue]);
 
   React.useEffect(() => {
     const timer = setTimeout(() => {
@@ -149,7 +151,7 @@ export default function Prompt({ onClose }: { onClose: () => void }) {
   }, [lockout]);
 
   const handleClick = (clickedAtMs: number) => {
-    if (clueShownAt === undefined) {
+    if (clueShownAt === undefined || !clueIdx) {
       return;
     }
 
@@ -159,38 +161,13 @@ export default function Prompt({ onClose }: { onClose: () => void }) {
       return;
     }
 
-    switch (state) {
-      case State.DailyDouble:
-      case State.Final:
-        return setState(State.ShowClue);
-      case State.ShowClue:
-        return setState(State.Answer);
-      case State.Answer:
-        return onClose();
-    }
-  };
+    // Contestant buzzed, so submit their buzz time
+    const [i, j] = clueIdx;
 
-  const renderContent = () => {
-    switch (state) {
-      case State.DailyDouble:
-        return <span>Daily Double</span>;
-      case State.Final:
-        return <span>{category}</span>;
-      case State.ShowClue:
-      case State.Answer:
-        return (
-          <div>
-            <p className="mb-8 leading-normal">{clue?.clue}</p>
-            <p
-              className={classNames("text-cyan-300", {
-                "opacity-0": state === State.ShowClue,
-              })}
-            >
-              {clue?.answer}
-            </p>
-          </div>
-        );
-    }
+    return fetcher.submit(
+      { i: i.toString(), j: j.toString(), userId, delta: delta.toString() },
+      { method: "post", action: `/room/${roomName}/buzz` }
+    );
   };
 
   return (
@@ -205,7 +182,17 @@ export default function Prompt({ onClose }: { onClose: () => void }) {
       >
         <div className="p-4 flex flex-grow items-center">
           <div className="text-white uppercase text-center text-4xl md:text-5xl lg:text-7xl text-shadow-md font-korinna word-spacing-1">
-            {renderContent()}
+            <div>
+              <p className="mb-8 leading-normal">{clue?.clue}</p>
+              <p
+                className={classNames("text-cyan-300", {
+                  // TODO: show clue after buzz & evaluate
+                  /*"opacity-0": state === State.ShowClue,*/
+                })}
+              >
+                {clue?.answer}
+              </p>
+            </div>
           </div>
         </div>
         <Lockout active={lockout} />

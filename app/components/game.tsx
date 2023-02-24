@@ -22,7 +22,7 @@ export default function GameComponent({
   userId: string;
   roomName: string;
 }) {
-  const { type, board, onClosePrompt } = useGameContext();
+  const { type, board } = useGameContext();
 
   const [focusedClueIdx, setFocusedClue] = React.useState<[number, number]>();
 
@@ -49,6 +49,7 @@ export default function GameComponent({
         roomName={roomName}
       />
       <div className="bg-black">
+        {/* TODO: board should never be undefined */}
         {board && (
           <BoardComponent
             focusedClueIdx={focusedClueIdx}
@@ -64,7 +65,7 @@ export default function GameComponent({
           <ClueList focusedClueIdx={focusedClueIdx} onFocusClue={onFocusClue} />
         )}
       </div>
-      <Prompt onClose={onClosePrompt} />
+      <Prompt roomName={roomName} userId={userId} />
     </>
   );
 }

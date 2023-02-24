@@ -3,11 +3,11 @@ import { db } from "~/supabase.server";
 import type { RoomEventType } from "~/models/room-event";
 
 type RoomEventTable = Database["public"]["Tables"]["room_events"];
-export type RoomEvent = RoomEventTable["Row"];
+export type DbRoomEvent = RoomEventTable["Row"];
 
 /* Reads */
 
-export async function getRoomEvents(roomId: number): Promise<RoomEvent[]> {
+export async function getRoomEvents(roomId: number): Promise<DbRoomEvent[]> {
   const { data, error } = await db
     .from<"room_events", RoomEventTable>("room_events")
     .select("*")
