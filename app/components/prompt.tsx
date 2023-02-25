@@ -2,10 +2,12 @@ import * as React from "react";
 import classNames from "classnames";
 
 import { useGameContext } from "~/utils/use-game-context";
-import { GameState } from "~/utils/use-game";
+import { CLUE_TIMEOUT_MS, GameState } from "~/utils/use-game";
 import type { Player } from "~/utils/use-game";
+import type { FetcherWithComponents } from "@remix-run/react";
 import { useFetcher } from "@remix-run/react";
 import { stringToHslColor } from "~/utils/utils";
+import Button from "./button";
 
 /** MS_PER_CHARACTER is a heuristic value to scale the amount of time per clue by
  * its length.
@@ -14,9 +16,6 @@ const MS_PER_CHARACTER = 50;
 
 /** LOCKOUT_MS applies a 500ms lockout if a contestant buzzes before the clue is read. */
 const LOCKOUT_MS = 500;
-/** BUZZ_LIMIT_MS is the total amount of time a contestant has to buzz in after
- * the clue is read. */
-const BUZZ_LIMIT_MS = 5000;
 
 function Fade({
   show,
@@ -121,6 +120,92 @@ function BuzzerLight({ active }: { active: boolean }) {
   );
 }
 
+function AnswerEvaluator({
+  roomName,
+  userId,
+  fetcher,
+  clueIdx,
+}: {
+  roomName: string;
+  userId: string;
+  fetcher: FetcherWithComponents<any>;
+  clueIdx: [number, number] | undefined;
+}) {
+  const [i, j] = clueIdx ? clueIdx : [-1, -1];
+
+  return (
+    <fetcher.Form
+      method="post"
+      action={`/room/${roomName}/answer`}
+      className="absolute top-2/3 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2"
+    >
+      <input type="hidden" value={userId} name="userId" />
+      <input type="hidden" value={i} name="i" />
+      <input type="hidden" value={j} name="j" />
+      <p className="text-white font-bold">Was your answer correct?</p>
+      <p className="text-gray-300 text-sm text-center">
+        Only you can see the answer for now. After this, it will be revealed to
+        all players.
+      </p>
+      <div className="flex gap-2">
+        <Button htmlType="submit" name="result" value="incorrect">
+          incorrect!
+        </Button>
+        <Button
+          htmlType="submit"
+          name="result"
+          value="correct"
+          type="primary"
+          autoFocus
+        >
+          correct!
+        </Button>
+      </div>
+    </fetcher.Form>
+  );
+}
+
+function AdvanceClueButton({
+  roomName,
+  userId,
+  boardController,
+  fetcher,
+  clueIdx,
+}: {
+  roomName: string;
+  userId: string;
+  boardController?: Player;
+  fetcher: FetcherWithComponents<any>;
+  clueIdx: [number, number] | undefined;
+}) {
+  const [i, j] = clueIdx ? clueIdx : [-1, -1];
+  const boardControl = boardController
+    ? boardController.name
+    : "Unknown player";
+
+  return (
+    <fetcher.Form
+      method="post"
+      action={`/room/${roomName}/next-clue`}
+      className="absolute top-2/3 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2"
+    >
+      <input type="hidden" value={userId} name="userId" />
+      <input type="hidden" value={i} name="i" />
+      <input type="hidden" value={j} name="j" />
+      {/* TODO: show who won how much money */}
+      <p className="text-white font-bold text-center">
+        {boardControl} will choose the next clue.
+      </p>
+      <p className="text-gray-300 text-sm text-center">
+        Click "OK" to return to the board for all players.
+      </p>
+      <Button htmlType="submit" type="primary" autoFocus>
+        OK
+      </Button>
+    </fetcher.Form>
+  );
+}
+
 export default function Prompt({
   roomName,
   userId,
@@ -128,7 +213,24 @@ export default function Prompt({
   roomName: string;
   userId: string;
 }) {
-  const { type, clue, activeClue, buzzes, players } = useGameContext();
+  const {
+    type,
+    clue,
+    activeClue,
+    buzzes,
+    players,
+    winningBuzzer,
+    boardControl,
+  } = useGameContext();
+
+  const shouldShowPrompt =
+    type === GameState.ReadClue ||
+    type === GameState.RevealAnswerToBuzzer ||
+    type === GameState.RevealAnswerToAll;
+
+  const shouldShowAnswerToBuzzer =
+    type === GameState.RevealAnswerToBuzzer && winningBuzzer === userId;
+  const shouldShowAnswerToAll = type === GameState.RevealAnswerToAll;
 
   const [optimisticBuzzes, setOptimisticBuzzes] = React.useState(buzzes);
   const myBuzzDurationMs = optimisticBuzzes?.get(userId);
@@ -187,7 +289,7 @@ export default function Prompt({
   // If the contestant doesn't buzz for 5 seconds, close the buzzer and send a
   // 5-second "non-buzz" buzz to the server.
   React.useEffect(() => {
-    if (buzzerOpenAt !== undefined && clueIdx) {
+    if (type === GameState.ReadClue && buzzerOpenAt !== undefined && clueIdx) {
       const [i, j] = clueIdx;
       const buzzLimitTimer = setTimeout(() => {
         return fetcher.submit(
@@ -195,14 +297,14 @@ export default function Prompt({
             i: i.toString(),
             j: j.toString(),
             userId,
-            deltaMs: BUZZ_LIMIT_MS.toString(),
+            deltaMs: (CLUE_TIMEOUT_MS + 1).toString(),
           },
           { method: "post", action: `/room/${roomName}/buzz` }
         );
-      }, BUZZ_LIMIT_MS);
+      }, CLUE_TIMEOUT_MS);
       return () => clearTimeout(buzzLimitTimer);
     }
-  }, [buzzerOpenAt, clueIdx, fetcher, roomName, userId]);
+  }, [buzzerOpenAt, clueIdx, fetcher, roomName, userId, type]);
 
   const handleClick = (clickedAtMs: number) => {
     if (clueShownAt === undefined) {
@@ -238,58 +340,89 @@ export default function Prompt({
   };
 
   return (
-    <Fade show={type === GameState.ReadClue}>
-      <button
-        disabled={lockout || myBuzzDurationMs !== undefined}
-        className={classNames(
-          "h-screen w-screen bg-blue-1000 flex flex-col justify-center items-center"
-        )}
-        onClick={() => handleClick(Date.now())}
-        autoFocus
-      >
-        <div className="p-4 flex flex-grow items-center">
-          <div className="text-white uppercase text-center text-4xl md:text-5xl lg:text-7xl text-shadow-md font-korinna word-spacing-1">
-            <div>
-              <p className="mb-8 leading-normal">{clue?.clue}</p>
-              {/* TODO: show clue after buzz & evaluate */}
-              <p className="text-cyan-300 opacity-0">{clue?.answer}</p>
+    <Fade show={shouldShowPrompt}>
+      <div className="relative">
+        <button
+          disabled={lockout || myBuzzDurationMs !== undefined}
+          className={classNames(
+            "h-screen w-screen bg-blue-1000 flex flex-col justify-center items-center"
+          )}
+          onClick={() => handleClick(Date.now())}
+          autoFocus={
+            shouldShowPrompt &&
+            !shouldShowAnswerToBuzzer &&
+            !shouldShowAnswerToAll
+          }
+        >
+          <div className="p-4 flex flex-grow items-center">
+            <div className="text-white uppercase text-center text-4xl md:text-5xl lg:text-7xl text-shadow-md font-korinna word-spacing-1">
+              <div>
+                <p className="mb-8 leading-normal">{clue?.clue}</p>
+                <p
+                  className={classNames("text-cyan-300", {
+                    "opacity-0":
+                      !shouldShowAnswerToBuzzer && !shouldShowAnswerToAll,
+                  })}
+                >
+                  {clue?.answer}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-        <Lockout active={lockout} />
-        <div className="flex items-center justify-between w-full">
-          <div className="flex gap-4 ml-4">
-            {optimisticBuzzes
-              ? // TODO: sort buzzes?
-                Array.from(optimisticBuzzes.entries()).map(
-                  ([userId, durationMs], i) => (
-                    <Buzz
-                      key={i}
-                      player={players.get(userId)}
-                      durationMs={durationMs}
-                    />
+          <Lockout active={lockout} />
+          <div className="flex items-center justify-between w-full">
+            <div className="flex gap-4 ml-4">
+              {optimisticBuzzes
+                ? // TODO: sort buzzes?
+                  Array.from(optimisticBuzzes.entries()).map(
+                    ([userId, durationMs], i) => (
+                      <Buzz
+                        key={i}
+                        player={players.get(userId)}
+                        durationMs={durationMs}
+                      />
+                    )
                   )
-                )
-              : null}
+                : null}
+            </div>
+            <BuzzerLight active={buzzerOpenAt !== undefined} />
           </div>
-          <BuzzerLight active={buzzerOpenAt !== undefined} />
-        </div>
-        <div
-          className={classNames("h-8 md:h-16 bg-white self-start", {
-            "w-0": myBuzzDurationMs === undefined,
-            "w-full": myBuzzDurationMs !== undefined,
-          })}
-          style={
-            myBuzzDurationMs === undefined
-              ? {
-                  animation: `${
-                    clueDurationMs / 1000
-                  }s linear 0s 1 growFromLeft forwards`,
-                }
-              : undefined
-          }
-        />
-      </button>
+          <div
+            className={classNames("h-8 md:h-16 bg-white self-start", {
+              "w-0": myBuzzDurationMs === undefined,
+              "w-full": myBuzzDurationMs !== undefined,
+            })}
+            style={
+              myBuzzDurationMs === undefined
+                ? {
+                    animation: `${
+                      clueDurationMs / 1000
+                    }s linear 0s 1 growFromLeft forwards`,
+                  }
+                : undefined
+            }
+          />
+        </button>
+        {shouldShowAnswerToBuzzer && (
+          <AnswerEvaluator
+            fetcher={fetcher}
+            roomName={roomName}
+            userId={userId}
+            clueIdx={clueIdx}
+          />
+        )}
+        {shouldShowAnswerToAll && (
+          <AdvanceClueButton
+            fetcher={fetcher}
+            roomName={roomName}
+            userId={userId}
+            clueIdx={clueIdx}
+            boardController={
+              boardControl ? players.get(boardControl) : undefined
+            }
+          />
+        )}
+      </div>
     </Fade>
   );
 }

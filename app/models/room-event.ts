@@ -5,6 +5,7 @@ import {
   isRoundAction,
   isBuzzAction,
   gameReducer,
+  isAnswerAction,
 } from "~/utils/use-game";
 import type { Action, State } from "~/utils/use-game";
 
@@ -14,6 +15,7 @@ export enum RoomEventType {
   StartRound = "start_round",
   ChooseClue = "choose_clue",
   Buzz = "buzz",
+  Answer = "answer",
 }
 
 interface RoomEvent extends DbRoomEvent {
@@ -59,6 +61,11 @@ export function processRoomEvent(
         return dispatch(roomEvent);
       }
       throw new Error("Buzz event must have a payload");
+    case RoomEventType.Answer:
+      if (isAnswerAction(roomEvent)) {
+        return dispatch(roomEvent);
+      }
+      throw new Error("Answer event must have a payload");
     default:
       throw new Error("unhandled room event type: " + roomEvent.type);
   }

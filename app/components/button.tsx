@@ -6,6 +6,9 @@ interface Props {
   disabled?: boolean;
   htmlType?: React.ButtonHTMLAttributes<HTMLButtonElement>["type"];
   children: React.ReactNode;
+  name?: string;
+  value?: string;
+  autoFocus?: boolean;
 }
 
 export default function Button({
@@ -14,6 +17,9 @@ export default function Button({
   type = "default",
   disabled = false,
   htmlType,
+  name,
+  value,
+  autoFocus,
 }: Props) {
   return (
     <button
@@ -27,11 +33,14 @@ export default function Button({
         {
           "border-transparent bg-blue-600 text-white hover:bg-blue-700":
             type === "primary",
-          "border-blue-600 text-blue-600 hover:text-blue-700 hover:border-blue-700":
+          "border-blue-600 bg-white text-blue-600 hover:bg-gray-100 hover:text-blue-700 hover:border-blue-700":
             type === "default",
         }
       )}
       type={htmlType}
+      name={name}
+      value={value}
+      autoFocus={autoFocus}
     >
       {children}
     </button>

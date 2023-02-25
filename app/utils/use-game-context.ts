@@ -14,6 +14,7 @@ export const GameContext = React.createContext<ReturnType<typeof useGame>>({
   isAnswered: () => false,
   players: new Map(),
   round: 0,
+  winningBuzzer: undefined,
 });
 
 export function useGameContext() {

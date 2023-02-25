@@ -10,12 +10,16 @@ import {
 import type { DbRoomEvent } from "~/models/room-event.server";
 import { generateGrid } from "~/utils/utils";
 
-const CLUE_TIMEOUT_MS = 5000;
+/** CLUE_TIMEOUT_MS is the total amount of time a contestant has to buzz in after
+ * the clue is read. */
+export const CLUE_TIMEOUT_MS = 5000;
 
 export enum GameState {
   Preview = "Preview",
   WaitForClueChoice = "WaitForClueChoice",
   ReadClue = "ReadClue",
+  RevealAnswerToBuzzer = "RevealAnswerToBuzzer",
+  RevealAnswerToAll = "RevealAnswerToAll",
 }
 
 export interface Player {
@@ -120,6 +124,41 @@ export function isBuzzAction(action: Action): action is {
   );
 }
 
+export function isAnswerAction(action: Action): action is {
+  type: RoomEventType.Answer;
+  payload: { userId: string; i: number; j: number; correct: boolean };
+} {
+  return (
+    action.type === RoomEventType.Answer &&
+    action.payload !== null &&
+    typeof action.payload === "object" &&
+    "userId" in action.payload &&
+    "i" in action.payload &&
+    "j" in action.payload &&
+    "correct" in action.payload
+  );
+}
+
+function getWinningBuzzer(buzzes?: Map<string, number>):
+  | {
+      userId: string;
+      deltaMs: number;
+    }
+  | undefined {
+  if (!buzzes) {
+    return undefined;
+  }
+  return Array.from(buzzes.entries()).reduce(
+    (acc, [userId, deltaMs]) => {
+      if (deltaMs < acc.deltaMs) {
+        return { userId, deltaMs };
+      }
+      return acc;
+    },
+    { userId: "", deltaMs: CLUE_TIMEOUT_MS + 1 }
+  );
+}
+
 /** gameReducer is the state machine which implements the game. */
 export function gameReducer(state: State, action: Action): State {
   switch (action.type) {
@@ -177,50 +216,79 @@ export function gameReducer(state: State, action: Action): State {
           buzzes.set(userId, deltaMs);
         }
 
-        if (buzzes.size < state.players.size) {
+        if (deltaMs <= CLUE_TIMEOUT_MS && buzzes.size < state.players.size) {
           const nextState = { buzzes, ...state };
           return nextState;
         }
 
-        // Everyone has buzzed! We can evaluate the winner.
-        const winningBuzz = Array.from(buzzes.entries()).reduce(
-          (acc, [userId, deltaMs]) => {
-            if (deltaMs < acc.deltaMs) {
-              return { userId, deltaMs };
-            }
-            return acc;
-          },
-          { userId: "", deltaMs: Number.MAX_SAFE_INTEGER }
-        );
+        // Evaluate the winner if either:
+        //   1. All players have buzzed
+        //   2. At least one player has submitted a > 5sec buzz
+        // If we missed someone's < 5sec buzz at this point, that's too bad.
+        const winningBuzz = getWinningBuzzer(buzzes);
 
-        // TODO: winner checks to see if they are right
-        // TODO: no one buzzed
-
-        const newNumAnswered = state.numAnswered + 1;
-        if (newNumAnswered === state.numCluesInBoard) {
-          const newRound = state.round++;
-          const nextState = createInitialState(state.game, newRound);
-          return nextState;
+        // 1. No one buzzed in: reveal the answer to everyone
+        if (!winningBuzz?.userId) {
+          return { ...state, type: GameState.RevealAnswerToAll };
         }
 
-        const nextState: State = {
-          type: GameState.WaitForClueChoice,
-          activeClue: undefined,
-          boardControl: winningBuzz.userId,
-          buzzes: new Map(),
-          game: state.game,
-          isAnswered: state.isAnswered,
-          numAnswered: newNumAnswered,
-          numCluesInBoard: state.numCluesInBoard,
-          players: state.players,
-          round: state.round,
-        };
-        nextState.isAnswered[i][j] = true;
-
-        return nextState;
+        // 2. One person buzzed before the time: reveal the answer to only them, let them evaluate correct / no
+        return { ...state, type: GameState.RevealAnswerToBuzzer };
       }
       throw new Error("Buzz action must have an associated index and delta");
     }
+    case RoomEventType.Answer:
+      if (isAnswerAction(action)) {
+        const activeClue = state.activeClue;
+        // Ignore this answer if the clue is no longer active.
+        if (!activeClue) {
+          return state;
+        }
+        const { userId, i: buzzI, j: buzzJ, correct } = action.payload;
+        const [i, j] = activeClue;
+        // Ignore this answer if it was for the wrong clue.
+        if (buzzI !== i || buzzJ !== j) {
+          return state;
+        }
+        // Ignore the answer if it was not from the winning buzzer.
+        const winningBuzzer = getWinningBuzzer(state.buzzes);
+        if (userId !== winningBuzzer?.userId) {
+          return state;
+        }
+
+        if (!correct) {
+          // If the buzzer was wrong, re-open the buzzers to everyone except that
+          // buzzer
+          const nextState: State = {
+            type: GameState.ReadClue,
+            activeClue: state.activeClue,
+            boardControl: state.boardControl,
+            buzzes: new Map([[userId, CLUE_TIMEOUT_MS + 1]]),
+            game: state.game,
+            isAnswered: state.isAnswered,
+            numAnswered: state.numAnswered,
+            numCluesInBoard: state.numCluesInBoard,
+            players: state.players,
+            round: state.round,
+          };
+          return nextState;
+        }
+
+        // If the buzzer was right, reveal the answer to everyone and give the
+        // winning buzzer board control.
+        // TODO: award points.
+        const nextState = {
+          ...state,
+          type: GameState.RevealAnswerToAll,
+          boardControl: userId,
+          numAnswered: state.numAnswered + 1,
+        };
+        nextState.isAnswered[i][i] = true;
+        return nextState;
+      }
+      throw new Error(
+        "Answer action must have an associated index and correct/incorrect"
+      );
     case RoomEventType.Join: {
       if (isPlayerAction(action)) {
         const nextState = { ...state };
@@ -325,6 +393,9 @@ export function useGame(
 
   const isAnswered = (i: number, j: number) => state.isAnswered[i][j];
 
+  const winningBuzz = getWinningBuzzer(state.buzzes);
+  const winningBuzzer = winningBuzz?.userId ?? undefined;
+
   return {
     type: state.type,
     activeClue: state.activeClue,
@@ -336,5 +407,6 @@ export function useGame(
     players: state.players,
     round: state.round,
     boardControl: state.boardControl,
+    winningBuzzer,
   };
 }
