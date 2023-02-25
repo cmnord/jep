@@ -25,7 +25,7 @@ export async function action({ request, params }: ActionArgs) {
 
   const deltaStr = formData.get("deltaMs");
   if (typeof deltaStr !== "string") {
-    throw new Response("Invalid delta", { status: 400 });
+    throw new Response("Invalid delta " + deltaStr, { status: 400 });
   }
   const deltaMs = parseInt(deltaStr);
 

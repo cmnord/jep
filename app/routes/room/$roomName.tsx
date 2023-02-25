@@ -1,6 +1,6 @@
 import { json } from "@remix-run/node";
 import type { LoaderArgs } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { useLoaderData, useCatch } from "@remix-run/react";
 
 import GameComponent from "~/components/game";
 import { getGame } from "~/models/game.server";
@@ -74,5 +74,19 @@ export default function PlayGame() {
         roomName={data.roomName}
       />
     </GameContext.Provider>
+  );
+}
+
+export function CatchBoundary() {
+  const caught = useCatch();
+
+  return (
+    <div>
+      <h1>Caught</h1>
+      <p>Status: {caught.status}</p>
+      <pre>
+        <code>{JSON.stringify(caught.data, null, 2)}</code>
+      </pre>
+    </div>
   );
 }
