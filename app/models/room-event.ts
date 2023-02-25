@@ -1,7 +1,7 @@
 import type { DbRoomEvent } from "~/models/room-event.server";
 import {
   isPlayerAction,
-  isChooseClueAction,
+  isClueAction,
   isRoundAction,
   isBuzzAction,
   gameReducer,
@@ -16,6 +16,7 @@ export enum RoomEventType {
   ChooseClue = "choose_clue",
   Buzz = "buzz",
   Answer = "answer",
+  NextClue = "next_clue",
 }
 
 interface RoomEvent extends DbRoomEvent {
@@ -52,7 +53,7 @@ export function processRoomEvent(
       }
       throw new Error("StartRound event must have a payload");
     case RoomEventType.ChooseClue:
-      if (isChooseClueAction(roomEvent)) {
+      if (isClueAction(roomEvent)) {
         return dispatch(roomEvent);
       }
       throw new Error("ChooseClue event must have a payload");
@@ -66,6 +67,11 @@ export function processRoomEvent(
         return dispatch(roomEvent);
       }
       throw new Error("Answer event must have a payload");
+    case RoomEventType.NextClue:
+      if (isClueAction(roomEvent)) {
+        return dispatch(roomEvent);
+      }
+      throw new Error("NextClue event must have a payload");
     default:
       throw new Error("unhandled room event type: " + roomEvent.type);
   }

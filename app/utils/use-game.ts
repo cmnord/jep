@@ -68,12 +68,13 @@ export interface Action {
   payload?: unknown;
 }
 
-export function isChooseClueAction(action: Action): action is {
-  type: RoomEventType.ChooseClue;
+export function isClueAction(action: Action): action is {
+  type: RoomEventType.ChooseClue | RoomEventType.NextClue;
   payload: { userId: string; i: number; j: number };
 } {
   return (
-    action.type === RoomEventType.ChooseClue &&
+    (action.type === RoomEventType.ChooseClue ||
+      action.type === RoomEventType.NextClue) &&
     action.payload !== null &&
     typeof action.payload === "object" &&
     "userId" in action.payload &&
@@ -162,6 +163,26 @@ function getWinningBuzzer(buzzes?: Map<string, number>):
 /** gameReducer is the state machine which implements the game. */
 export function gameReducer(state: State, action: Action): State {
   switch (action.type) {
+    case RoomEventType.Join: {
+      if (isPlayerAction(action)) {
+        const nextState = { ...state };
+        nextState.players.set(action.payload.userId, action.payload);
+        // If this is the first player joining, give them board control.
+        if (nextState.players.size === 1) {
+          nextState.boardControl = action.payload.userId;
+        }
+        return nextState;
+      }
+      throw new Error("PlayerJoin action must have an associated player");
+    }
+    case RoomEventType.ChangeName: {
+      if (isPlayerAction(action)) {
+        const nextState = { ...state };
+        nextState.players.set(action.payload.userId, action.payload);
+        return nextState;
+      }
+      throw new Error("PlayerChangeName action must have an associated player");
+    }
     case RoomEventType.StartRound: {
       if (isRoundAction(action)) {
         const actionRound = action.payload.round;
@@ -175,7 +196,7 @@ export function gameReducer(state: State, action: Action): State {
       throw new Error("StartRound action must have an associated round number");
     }
     case RoomEventType.ChooseClue: {
-      if (isChooseClueAction(action)) {
+      if (isClueAction(action)) {
         const { userId, i, j } = action.payload;
         if (
           state.type === GameState.WaitForClueChoice &&
@@ -227,9 +248,16 @@ export function gameReducer(state: State, action: Action): State {
         // If we missed someone's < 5sec buzz at this point, that's too bad.
         const winningBuzz = getWinningBuzzer(buzzes);
 
-        // 1. No one buzzed in: reveal the answer to everyone
+        // 1. No one buzzed in: reveal the answer to everyone and mark it as
+        // answered
         if (!winningBuzz?.userId) {
-          return { ...state, type: GameState.RevealAnswerToAll };
+          const nextState = {
+            ...state,
+            type: GameState.RevealAnswerToAll,
+            numAnswered: state.numAnswered + 1,
+          };
+          nextState.isAnswered[i][j] = true;
+          return nextState;
         }
 
         // 2. One person buzzed before the time: reveal the answer to only them, let them evaluate correct / no
@@ -260,16 +288,9 @@ export function gameReducer(state: State, action: Action): State {
           // If the buzzer was wrong, re-open the buzzers to everyone except that
           // buzzer
           const nextState: State = {
+            ...state,
             type: GameState.ReadClue,
-            activeClue: state.activeClue,
-            boardControl: state.boardControl,
             buzzes: new Map([[userId, CLUE_TIMEOUT_MS + 1]]),
-            game: state.game,
-            isAnswered: state.isAnswered,
-            numAnswered: state.numAnswered,
-            numCluesInBoard: state.numCluesInBoard,
-            players: state.players,
-            round: state.round,
           };
           return nextState;
         }
@@ -283,32 +304,61 @@ export function gameReducer(state: State, action: Action): State {
           boardControl: userId,
           numAnswered: state.numAnswered + 1,
         };
-        nextState.isAnswered[i][i] = true;
+        nextState.isAnswered[i][j] = true;
         return nextState;
       }
       throw new Error(
         "Answer action must have an associated index and correct/incorrect"
       );
-    case RoomEventType.Join: {
-      if (isPlayerAction(action)) {
-        const nextState = { ...state };
-        nextState.players.set(action.payload.userId, action.payload);
-        // If this is the first player joining, give them board control.
-        if (nextState.players.size === 1) {
-          nextState.boardControl = action.payload.userId;
+    case RoomEventType.NextClue:
+      if (isClueAction(action)) {
+        const activeClue = state.activeClue;
+        // Ignore this answer if the clue is no longer active.
+        if (!activeClue) {
+          return state;
         }
-        return nextState;
+        // TODO: make use of user ID?
+        const { i: actionI, j: actionJ } = action.payload;
+        const [i, j] = activeClue;
+        // Ignore this answer if it was for the wrong clue.
+        if (actionI !== i || actionJ !== j) {
+          return state;
+        }
+
+        if (state.numAnswered === state.numCluesInBoard) {
+          const newRound = state.round + 1;
+          // TODO: preserve points
+          const board = state.game.boards[newRound];
+
+          const numCluesInBoard = board
+            ? board.categories.reduce(
+                (acc, category) => (acc += category.clues.length),
+                0
+              )
+            : 0;
+          const n = board ? board.categories[0].clues.length : 0;
+          const m = board ? board.categories.length : 0;
+
+          return {
+            type: GameState.Preview,
+            boardControl: state.boardControl,
+            game: state.game,
+            isAnswered: generateGrid(n, m, false),
+            numAnswered: 0,
+            numCluesInBoard,
+            players: state.players,
+            round: newRound,
+          };
+        }
+
+        return {
+          ...state,
+          type: GameState.WaitForClueChoice,
+          activeClue: undefined,
+          buzzes: new Map(),
+        };
       }
-      throw new Error("PlayerJoin action must have an associated player");
-    }
-    case RoomEventType.ChangeName: {
-      if (isPlayerAction(action)) {
-        const nextState = { ...state };
-        nextState.players.set(action.payload.userId, action.payload);
-        return nextState;
-      }
-      throw new Error("PlayerChangeName action must have an associated player");
-    }
+      throw new Error("NextClue action must have an associated user");
   }
 }
 
@@ -405,6 +455,8 @@ export function useGame(
     clue,
     isAnswered,
     players: state.players,
+    numAnswered: state.numAnswered,
+    numCluesInBoard: state.numCluesInBoard,
     round: state.round,
     boardControl: state.boardControl,
     winningBuzzer,

@@ -6,6 +6,26 @@ import Players from "~/components/player";
 import type { Clue } from "~/models/convert.server";
 import { useGameContext } from "~/utils/use-game-context";
 
+function NextRoundFooter({
+  roomName,
+  round,
+}: {
+  roomName: string;
+  round: number;
+}) {
+  const fetcher = useFetcher();
+  return (
+    <Modal.Footer>
+      <fetcher.Form method="post" action={`/room/${roomName}/start`}>
+        <input type="hidden" name="round" value={round} />
+        <Button type="primary" htmlType="submit">
+          Start
+        </Button>
+      </fetcher.Form>
+    </Modal.Footer>
+  );
+}
+
 function BeforeGamePreview({
   isOpen,
   userId,
@@ -19,8 +39,6 @@ function BeforeGamePreview({
 }) {
   const { boardControl, players } = useGameContext();
   const controllingPlayer = boardControl ? players.get(boardControl) : null;
-
-  const fetcher = useFetcher();
 
   return (
     <Modal isOpen={isOpen}>
@@ -40,14 +58,7 @@ function BeforeGamePreview({
           )}
         </p>
       </Modal.Body>
-      <Modal.Footer>
-        <fetcher.Form method="post" action={`/room/${roomName}/start`}>
-          <input type="hidden" name="round" value={round} />
-          <Button type="primary" htmlType="submit">
-            Start
-          </Button>
-        </fetcher.Form>
-      </Modal.Footer>
+      <NextRoundFooter roomName={roomName} round={round} />
     </Modal>
   );
 }
@@ -104,9 +115,7 @@ export default function Preview({
             <Modal.Title>Play Final &rarr;</Modal.Title>
             <p className="text-gray-500">Round done! Click for final prompt</p>
           </Modal.Body>
-          <Modal.Footer>
-            <Button type="primary">Start</Button>
-          </Modal.Footer>
+          <NextRoundFooter roomName={roomName} round={round} />
         </Modal>
       );
     case 1:
@@ -118,9 +127,7 @@ export default function Preview({
               Single round done! Click to play double
             </p>
           </Modal.Body>
-          <Modal.Footer>
-            <Button type="primary">Start</Button>
-          </Modal.Footer>
+          <NextRoundFooter roomName={roomName} round={round} />
         </Modal>
       );
     default:

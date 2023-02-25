@@ -69,13 +69,15 @@ function Lockout({ active }: { active: boolean }) {
 
 function Buzz({ player, durationMs }: { player?: Player; durationMs: number }) {
   const color = player ? stringToHslColor(player.userId) : "gray";
+  const durationMsg =
+    durationMs > CLUE_TIMEOUT_MS ? "cannot buzz" : durationMs + "ms";
   return (
     <div
       className="px-2 py-1 flex flex-col items-center justify-center text-white text-shadow"
       style={{ color }}
     >
       <div className="font-bold">{player?.name ?? "Unknown player"}</div>
-      <div>{durationMs}ms</div>
+      <div>{durationMsg}</div>
     </div>
   );
 }
@@ -168,20 +170,26 @@ function AnswerEvaluator({
 function AdvanceClueButton({
   roomName,
   userId,
-  boardController,
   fetcher,
   clueIdx,
 }: {
   roomName: string;
   userId: string;
-  boardController?: Player;
   fetcher: FetcherWithComponents<any>;
   clueIdx: [number, number] | undefined;
 }) {
+  const { players, boardControl, numAnswered, numCluesInBoard } =
+    useGameContext();
+
   const [i, j] = clueIdx ? clueIdx : [-1, -1];
-  const boardControl = boardController
-    ? boardController.name
+  const boardController = boardControl ? players.get(boardControl) : undefined;
+  const boardControlName = boardController
+    ? boardController.userId === userId
+      ? "You"
+      : boardController.name
     : "Unknown player";
+
+  const cluesLeftInRound = numCluesInBoard - numAnswered;
 
   return (
     <fetcher.Form
@@ -193,9 +201,11 @@ function AdvanceClueButton({
       <input type="hidden" value={i} name="i" />
       <input type="hidden" value={j} name="j" />
       {/* TODO: show who won how much money */}
-      <p className="text-white font-bold text-center">
-        {boardControl} will choose the next clue.
-      </p>
+      {cluesLeftInRound ? (
+        <p className="text-white font-bold text-center">
+          {boardControlName} will choose the next clue.
+        </p>
+      ) : null}
       <p className="text-gray-300 text-sm text-center">
         Click "OK" to return to the board for all players.
       </p>
@@ -213,15 +223,8 @@ export default function Prompt({
   roomName: string;
   userId: string;
 }) {
-  const {
-    type,
-    clue,
-    activeClue,
-    buzzes,
-    players,
-    winningBuzzer,
-    boardControl,
-  } = useGameContext();
+  const { type, clue, activeClue, buzzes, players, winningBuzzer } =
+    useGameContext();
 
   const shouldShowPrompt =
     type === GameState.ReadClue ||
@@ -417,9 +420,6 @@ export default function Prompt({
             roomName={roomName}
             userId={userId}
             clueIdx={clueIdx}
-            boardController={
-              boardControl ? players.get(boardControl) : undefined
-            }
           />
         )}
       </div>
