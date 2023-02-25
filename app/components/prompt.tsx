@@ -14,6 +14,9 @@ const MS_PER_CHARACTER = 50;
 
 /** LOCKOUT_MS applies a 500ms lockout if a contestant buzzes before the clue is read. */
 const LOCKOUT_MS = 500;
+/** BUZZ_LIMIT_MS is the total amount of time a contestant has to buzz in after
+ * the clue is read. */
+const BUZZ_LIMIT_MS = 5000;
 
 function Fade({
   show,
@@ -156,19 +159,22 @@ export default function Prompt({
     setBuzzerOpenAt(myBuzzDurationMs);
   }, [activeClue, myBuzzDurationMs]);
 
+  // Update optimisticBuzzes once buzzes come in from the server.
   React.useEffect(() => {
     setOptimisticBuzzes(buzzes);
   }, [buzzes]);
 
+  // Open the buzzer after the clue is done being "read".
   React.useEffect(() => {
     if (myBuzzDurationMs === undefined) {
-      const timer = setTimeout(() => {
+      const clueReadTimer = setTimeout(() => {
         setBuzzerOpenAt(Date.now());
       }, clueDurationMs);
-      return () => clearTimeout(timer);
+      return () => clearTimeout(clueReadTimer);
     }
   }, [clueDurationMs, myBuzzDurationMs]);
 
+  // Remove the lockout after 500ms.
   React.useEffect(() => {
     if (lockout) {
       const lockoutTimer = setTimeout(() => {
@@ -177,6 +183,26 @@ export default function Prompt({
       return () => clearTimeout(lockoutTimer);
     }
   }, [lockout]);
+
+  // If the contestant doesn't buzz for 5 seconds, close the buzzer and send a
+  // 5-second "non-buzz" buzz to the server.
+  React.useEffect(() => {
+    if (buzzerOpenAt !== undefined && clueIdx) {
+      const [i, j] = clueIdx;
+      const buzzLimitTimer = setTimeout(() => {
+        return fetcher.submit(
+          {
+            i: i.toString(),
+            j: j.toString(),
+            userId,
+            deltaMs: BUZZ_LIMIT_MS.toString(),
+          },
+          { method: "post", action: `/room/${roomName}/buzz` }
+        );
+      }, BUZZ_LIMIT_MS);
+      return () => clearTimeout(buzzLimitTimer);
+    }
+  }, [buzzerOpenAt, clueIdx, fetcher, roomName, userId]);
 
   const handleClick = (clickedAtMs: number) => {
     if (clueShownAt === undefined) {
