@@ -362,9 +362,17 @@ export function gameReducer(state: State, action: Action): State {
   }
 }
 
-/** useGame provides all the state variables associated with a game and methods
- * to change them. */
-export function useGame(
+/** useGameEngine provides all the state variables associated with a game.  The
+ * game state is stored on the server as a series of "room events", or deltas,
+ * which are applied in order to derive the state.
+ *
+ * The game engine then subscribes to row inserts to the room_events table via
+ * websockets.
+ *
+ * To modify the state, submit a POST request to the proper endpoint to insert a
+ * room event. The event will then be propagated to all clients via websockets
+ * and the engine will apply it to the state. */
+export function useGameEngine(
   game: Game,
   serverRoomEvents: DbRoomEvent[],
   roomId: number,

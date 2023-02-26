@@ -8,7 +8,7 @@ import { isTypedRoomEvent, RoomEventType } from "~/models/room-event";
 import { createRoomEvent, getRoomEvents } from "~/models/room-event.server";
 import { getRoom } from "~/models/room.server";
 import { getOrCreateUserSession } from "~/session.server";
-import { isPlayerAction, useGame } from "~/utils/use-game";
+import { isPlayerAction, useGameEngine } from "engine/use-game-engine";
 import { GameContext } from "~/utils/use-game-context";
 import { getRandomName } from "~/utils/name";
 
@@ -58,7 +58,7 @@ export async function loader({ request, params }: LoaderArgs) {
 export default function PlayGame() {
   const data = useLoaderData<typeof loader>();
 
-  const gameReducer = useGame(
+  const gameReducer = useGameEngine(
     data.game,
     data.roomEvents,
     data.room.id,

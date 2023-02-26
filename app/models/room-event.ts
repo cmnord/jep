@@ -6,8 +6,8 @@ import {
   isBuzzAction,
   gameReducer,
   isAnswerAction,
-} from "~/utils/use-game";
-import type { Action, State } from "~/utils/use-game";
+} from "engine/use-game-engine";
+import type { Action, State } from "engine/use-game-engine";
 
 export enum RoomEventType {
   Join = "join",

@@ -7,7 +7,7 @@ import Preview from "~/components/preview";
 
 import type { Game, Clue } from "~/models/convert.server";
 import { useGameContext } from "~/utils/use-game-context";
-import { GameState } from "~/utils/use-game";
+import { GameState } from "engine/use-game-engine";
 import Players from "./player";
 
 /** GameComponent maintains the game state. */

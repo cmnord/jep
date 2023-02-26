@@ -4,7 +4,7 @@ import Button from "~/components/button";
 import Modal from "~/components/modal";
 import Players from "~/components/player";
 import type { Clue } from "~/models/convert.server";
-import { GameState } from "~/utils/use-game";
+import { GameState } from "engine/use-game-engine";
 import { useGameContext } from "~/utils/use-game-context";
 
 function NextRoundFooter({

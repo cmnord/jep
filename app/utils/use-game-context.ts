@@ -1,9 +1,11 @@
 import * as React from "react";
 
-import { GameState } from "./use-game";
-import type { useGame } from "./use-game";
+import { GameState } from "../../engine/use-game-engine";
+import type { useGameEngine } from "../../engine/use-game-engine";
 
-export const GameContext = React.createContext<ReturnType<typeof useGame>>({
+export const GameContext = React.createContext<
+  ReturnType<typeof useGameEngine>
+>({
   type: GameState.Preview,
   activeClue: undefined,
   board: { categories: [], categoryNames: [] },

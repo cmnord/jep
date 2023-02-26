@@ -2,8 +2,8 @@ import * as React from "react";
 import classNames from "classnames";
 
 import { useGameContext } from "~/utils/use-game-context";
-import { CLUE_TIMEOUT_MS, GameState } from "~/utils/use-game";
-import type { Player } from "~/utils/use-game";
+import { CLUE_TIMEOUT_MS, GameState } from "engine/use-game-engine";
+import type { Player } from "engine/use-game-engine";
 import type { FetcherWithComponents } from "@remix-run/react";
 import { useFetcher } from "@remix-run/react";
 import { stringToHslColor } from "~/utils/utils";
