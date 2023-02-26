@@ -98,7 +98,7 @@ export default function Index() {
         />
       </Form>
       <div className="flex mb-4">
-        <Link to={"/game/mock"}>
+        <Link to={"/mock"}>
           <Button>Play a mock game</Button>
         </Link>
       </div>
