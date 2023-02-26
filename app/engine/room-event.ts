@@ -6,25 +6,15 @@ import {
   isBuzzAction,
   isAnswerAction,
 } from "~/engine/actions";
-import { gameEngine } from "~/engine/engine";
+import { ActionType, gameEngine } from "~/engine/engine";
 import type { Action, State } from "~/engine/engine";
 
-export enum RoomEventType {
-  Join = "join",
-  ChangeName = "change_name",
-  StartRound = "start_round",
-  ChooseClue = "choose_clue",
-  Buzz = "buzz",
-  Answer = "answer",
-  NextClue = "next_clue",
-}
-
 interface RoomEvent extends DbRoomEvent {
-  type: RoomEventType;
+  type: ActionType;
 }
 
 export function isTypedRoomEvent(re: DbRoomEvent): re is RoomEvent {
-  return Object.values(RoomEventType).includes(re.type as RoomEventType);
+  return Object.values(ActionType).includes(re.type as ActionType);
 }
 
 /** processRoomEvent dispatches the appropriate Action to the reducer based on
@@ -37,37 +27,37 @@ export function processRoomEvent(
     throw new Error("unhandled room event type from DB: " + roomEvent.type);
   }
   switch (roomEvent.type) {
-    case RoomEventType.Join:
+    case ActionType.Join:
       if (isPlayerAction(roomEvent)) {
         return dispatch(roomEvent);
       }
       throw new Error("Join event must have a payload");
-    case RoomEventType.ChangeName:
+    case ActionType.ChangeName:
       if (isPlayerAction(roomEvent)) {
         return dispatch(roomEvent);
       }
       throw new Error("ChangeName event must have a payload");
-    case RoomEventType.StartRound:
+    case ActionType.StartRound:
       if (isRoundAction(roomEvent)) {
         return dispatch(roomEvent);
       }
       throw new Error("StartRound event must have a payload");
-    case RoomEventType.ChooseClue:
+    case ActionType.ChooseClue:
       if (isClueAction(roomEvent)) {
         return dispatch(roomEvent);
       }
       throw new Error("ChooseClue event must have a payload");
-    case RoomEventType.Buzz:
+    case ActionType.Buzz:
       if (isBuzzAction(roomEvent)) {
         return dispatch(roomEvent);
       }
       throw new Error("Buzz event must have a payload");
-    case RoomEventType.Answer:
+    case ActionType.Answer:
       if (isAnswerAction(roomEvent)) {
         return dispatch(roomEvent);
       }
       throw new Error("Answer event must have a payload");
-    case RoomEventType.NextClue:
+    case ActionType.NextClue:
       if (isClueAction(roomEvent)) {
         return dispatch(roomEvent);
       }

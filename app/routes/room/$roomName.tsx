@@ -4,14 +4,15 @@ import { useLoaderData, useCatch } from "@remix-run/react";
 
 import GameComponent from "~/components/game";
 import { getGame } from "~/models/game.server";
-import { isTypedRoomEvent, RoomEventType } from "~/models/room-event";
 import { createRoomEvent, getRoomEvents } from "~/models/room-event.server";
 import { getRoom } from "~/models/room.server";
 import { getOrCreateUserSession } from "~/session.server";
 import { useGameEngine } from "~/engine/use-game-engine";
 import { GameEngineContext } from "~/engine/use-engine-context";
-import { getRandomName } from "~/utils/name";
 import { isPlayerAction } from "~/engine/actions";
+import { ActionType } from "~/engine/engine";
+import { isTypedRoomEvent } from "~/engine/room-event";
+import { getRandomName } from "~/utils/name";
 
 export async function loader({ request, params }: LoaderArgs) {
   const roomName = params.roomName;
@@ -38,7 +39,7 @@ export async function loader({ request, params }: LoaderArgs) {
     .find((e) => isPlayerAction(e) && e.payload.userId === userId);
 
   if (!userInRoom) {
-    const joinEvent = await createRoomEvent(room.id, RoomEventType.Join, {
+    const joinEvent = await createRoomEvent(room.id, ActionType.Join, {
       userId,
       name: getRandomName(),
     });

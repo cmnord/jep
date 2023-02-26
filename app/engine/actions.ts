@@ -1,13 +1,13 @@
-import type { Action, Player } from "./engine";
-import { RoomEventType } from "~/models/room-event";
+import type { Action, Player } from "~/engine/engine";
+import { ActionType } from "~/engine/engine";
 
 export function isClueAction(action: Action): action is {
-  type: RoomEventType.ChooseClue | RoomEventType.NextClue;
+  type: ActionType.ChooseClue | ActionType.NextClue;
   payload: { userId: string; i: number; j: number };
 } {
   return (
-    (action.type === RoomEventType.ChooseClue ||
-      action.type === RoomEventType.NextClue) &&
+    (action.type === ActionType.ChooseClue ||
+      action.type === ActionType.NextClue) &&
     action.payload !== null &&
     typeof action.payload === "object" &&
     "userId" in action.payload &&
@@ -17,12 +17,12 @@ export function isClueAction(action: Action): action is {
 }
 
 export function isPlayerAction(action: Action): action is {
-  type: RoomEventType.Join | RoomEventType.ChangeName;
+  type: ActionType.Join | ActionType.ChangeName;
   payload: Player;
 } {
   return (
-    (action.type === RoomEventType.Join ||
-      action.type === RoomEventType.ChangeName) &&
+    (action.type === ActionType.Join ||
+      action.type === ActionType.ChangeName) &&
     action.payload !== null &&
     typeof action.payload === "object" &&
     "userId" in action.payload &&
@@ -31,11 +31,11 @@ export function isPlayerAction(action: Action): action is {
 }
 
 export function isRoundAction(action: Action): action is {
-  type: RoomEventType.StartRound;
+  type: ActionType.StartRound;
   payload: { round: number };
 } {
   return (
-    action.type === RoomEventType.StartRound &&
+    action.type === ActionType.StartRound &&
     action.payload !== null &&
     typeof action.payload === "object" &&
     "round" in action.payload &&
@@ -44,11 +44,11 @@ export function isRoundAction(action: Action): action is {
 }
 
 export function isBuzzAction(action: Action): action is {
-  type: RoomEventType.Buzz;
+  type: ActionType.Buzz;
   payload: { userId: string; i: number; j: number; deltaMs: number };
 } {
   return (
-    action.type === RoomEventType.Buzz &&
+    action.type === ActionType.Buzz &&
     action.payload !== null &&
     typeof action.payload === "object" &&
     "userId" in action.payload &&
@@ -59,11 +59,11 @@ export function isBuzzAction(action: Action): action is {
 }
 
 export function isAnswerAction(action: Action): action is {
-  type: RoomEventType.Answer;
+  type: ActionType.Answer;
   payload: { userId: string; i: number; j: number; correct: boolean };
 } {
   return (
-    action.type === RoomEventType.Answer &&
+    action.type === ActionType.Answer &&
     action.payload !== null &&
     typeof action.payload === "object" &&
     "userId" in action.payload &&

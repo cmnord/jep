@@ -2,7 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import * as React from "react";
 
 import type { Game, Clue } from "~/models/convert.server";
-import { applyRoomEventsToState, processRoomEvent } from "~/models/room-event";
+import { applyRoomEventsToState, processRoomEvent } from "~/engine/room-event";
 import type { DbRoomEvent } from "~/models/room-event.server";
 import { generateGrid } from "~/utils/utils";
 import { gameEngine, GameState, getWinningBuzzer } from "./engine";

@@ -1,5 +1,4 @@
 import type { Game } from "~/models/convert.server";
-import { RoomEventType } from "~/models/room-event";
 import { generateGrid } from "~/utils/utils";
 import {
   isAnswerAction,
@@ -30,8 +29,18 @@ export interface State {
   round: number;
 }
 
+export enum ActionType {
+  Join = "join",
+  ChangeName = "change_name",
+  StartRound = "start_round",
+  ChooseClue = "choose_clue",
+  Buzz = "buzz",
+  Answer = "answer",
+  NextClue = "next_clue",
+}
+
 export interface Action {
-  type: RoomEventType;
+  type: ActionType;
   payload?: unknown;
 }
 
@@ -67,7 +76,7 @@ export function getWinningBuzzer(buzzes?: Map<string, number>):
 /** gameEngine is the reducer (aka state machine) which implements the game. */
 export function gameEngine(state: State, action: Action): State {
   switch (action.type) {
-    case RoomEventType.Join: {
+    case ActionType.Join: {
       if (isPlayerAction(action)) {
         const nextState = { ...state };
         nextState.players.set(action.payload.userId, action.payload);
@@ -79,7 +88,7 @@ export function gameEngine(state: State, action: Action): State {
       }
       throw new Error("PlayerJoin action must have an associated player");
     }
-    case RoomEventType.ChangeName: {
+    case ActionType.ChangeName: {
       if (isPlayerAction(action)) {
         const nextState = { ...state };
         nextState.players.set(action.payload.userId, action.payload);
@@ -87,7 +96,7 @@ export function gameEngine(state: State, action: Action): State {
       }
       throw new Error("PlayerChangeName action must have an associated player");
     }
-    case RoomEventType.StartRound: {
+    case ActionType.StartRound: {
       if (isRoundAction(action)) {
         const actionRound = action.payload.round;
         if (actionRound === state.round) {
@@ -99,7 +108,7 @@ export function gameEngine(state: State, action: Action): State {
       }
       throw new Error("StartRound action must have an associated round number");
     }
-    case RoomEventType.ChooseClue: {
+    case ActionType.ChooseClue: {
       if (isClueAction(action)) {
         const { userId, i, j } = action.payload;
         if (
@@ -116,7 +125,7 @@ export function gameEngine(state: State, action: Action): State {
       }
       throw new Error("ClickClue action must have an associated index");
     }
-    case RoomEventType.Buzz: {
+    case ActionType.Buzz: {
       if (isBuzzAction(action)) {
         const activeClue = state.activeClue;
         // Ignore this buzz if the clue is no longer active.
@@ -169,7 +178,7 @@ export function gameEngine(state: State, action: Action): State {
       }
       throw new Error("Buzz action must have an associated index and delta");
     }
-    case RoomEventType.Answer:
+    case ActionType.Answer:
       if (isAnswerAction(action)) {
         const activeClue = state.activeClue;
         // Ignore this answer if the clue is no longer active.
@@ -214,7 +223,7 @@ export function gameEngine(state: State, action: Action): State {
       throw new Error(
         "Answer action must have an associated index and correct/incorrect"
       );
-    case RoomEventType.NextClue:
+    case ActionType.NextClue:
       if (isClueAction(action)) {
         const activeClue = state.activeClue;
         // Ignore this answer if the clue is no longer active.

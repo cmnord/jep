@@ -1,6 +1,6 @@
+import type { ActionType } from "~/engine/engine";
 import type { Database, Json } from "~/models/database.types";
 import { db } from "~/supabase.server";
-import type { RoomEventType } from "~/models/room-event";
 
 type RoomEventTable = Database["public"]["Tables"]["room_events"];
 export type DbRoomEvent = RoomEventTable["Row"];
@@ -24,7 +24,7 @@ export async function getRoomEvents(roomId: number): Promise<DbRoomEvent[]> {
 
 export async function createRoomEvent(
   roomId: number,
-  type: RoomEventType,
+  type: ActionType,
   payload?: Json
 ) {
   const { data, error } = await db

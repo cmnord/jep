@@ -1,5 +1,5 @@
 import type { ActionArgs } from "@remix-run/node";
-import { RoomEventType } from "~/models/room-event";
+import { ActionType } from "~/engine/engine";
 import { createRoomEvent } from "~/models/room-event.server";
 import { getRoom } from "~/models/room.server";
 
@@ -25,7 +25,7 @@ export async function action({ request, params }: ActionArgs) {
     throw new Response("room not found", { status: 404 });
   }
 
-  await createRoomEvent(room.id, RoomEventType.ChangeName, {
+  await createRoomEvent(room.id, ActionType.ChangeName, {
     userId,
     name,
   });
