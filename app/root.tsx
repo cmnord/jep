@@ -25,7 +25,7 @@ export const meta: MetaFunction = () => ({
 export const links: LinksFunction = () => [
   {
     rel: "icon",
-    href: "https://cdn.glitch.com/a0ea5fd0-c422-4261-8950-fdebebccb098%2Fjeopardy.png?v=1604939463216",
+    href: "/favicon.png",
     type: "image/png",
     sizes: "16x16",
   },
