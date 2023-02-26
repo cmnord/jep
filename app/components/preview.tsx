@@ -4,8 +4,8 @@ import Button from "~/components/button";
 import Modal from "~/components/modal";
 import Players from "~/components/player";
 import type { Clue } from "~/models/convert.server";
-import { GameState } from "engine/use-game-engine";
-import { useGameContext } from "~/utils/use-game-context";
+import { GameState } from "~/engine/engine";
+import { useEngineContext } from "~/engine/use-engine-context";
 
 function NextRoundFooter({
   roomName,
@@ -38,7 +38,7 @@ function BeforeGamePreview({
   roomName: string;
   round: number;
 }) {
-  const { boardControl, players } = useGameContext();
+  const { boardControl, players } = useEngineContext();
   const controllingPlayer = boardControl ? players.get(boardControl) : null;
 
   return (
@@ -75,7 +75,7 @@ export default function Preview({
   userId: string;
   roomName: string;
 }) {
-  const { type, round } = useGameContext();
+  const { type, round } = useEngineContext();
 
   const isOpen = type === GameState.Preview;
 

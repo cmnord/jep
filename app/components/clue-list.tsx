@@ -1,7 +1,7 @@
 import classNames from "classnames";
 import type { Clue } from "~/models/convert.server";
 
-import { useGameContext } from "~/utils/use-game-context";
+import { useEngineContext } from "~/engine/use-engine-context";
 
 function ClueItem({
   clue,
@@ -14,7 +14,7 @@ function ClueItem({
   focusedClueIdx?: [number, number];
   onFocusClue: (i: number, j: number) => void;
 }) {
-  const { round, isAnswered } = useGameContext();
+  const { round, isAnswered } = useEngineContext();
 
   const [i, j] = idx;
   const isFocused =
@@ -48,7 +48,7 @@ export default function ClueList({
   focusedClueIdx?: [number, number];
   onFocusClue: (i: number, j: number) => void;
 }) {
-  const { board } = useGameContext();
+  const { board } = useEngineContext();
   return (
     <div className="relative flex flex-wrap px-0 py-6">
       {board.categories.map((category, j) => (

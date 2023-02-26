@@ -4,10 +4,10 @@ import {
   isClueAction,
   isRoundAction,
   isBuzzAction,
-  gameReducer,
   isAnswerAction,
-} from "engine/use-game-engine";
-import type { Action, State } from "engine/use-game-engine";
+} from "~/engine/actions";
+import { gameEngine } from "~/engine/engine";
+import type { Action, State } from "~/engine/engine";
 
 export enum RoomEventType {
   Join = "join",
@@ -86,7 +86,7 @@ export function applyRoomEventsToState(
     if (!isTypedRoomEvent(re)) {
       throw new Error("unhandled room event type from DB: " + re.type);
     }
-    state = gameReducer(state, re);
+    state = gameEngine(state, re);
   }
   return state;
 }

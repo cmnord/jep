@@ -6,8 +6,7 @@ import Prompt from "~/components/prompt";
 import Preview from "~/components/preview";
 
 import type { Game, Clue } from "~/models/convert.server";
-import { useGameContext } from "~/utils/use-game-context";
-import { GameState } from "engine/use-game-engine";
+import { useEngineContext } from "~/engine/use-engine-context";
 import Players from "./player";
 
 /** GameComponent maintains the game state. */
@@ -22,7 +21,7 @@ export default function GameComponent({
   userId: string;
   roomName: string;
 }) {
-  const { board } = useGameContext();
+  const { board } = useEngineContext();
 
   const [focusedClueIdx, setFocusedClue] = React.useState<[number, number]>();
 

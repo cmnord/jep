@@ -8,9 +8,10 @@ import { isTypedRoomEvent, RoomEventType } from "~/models/room-event";
 import { createRoomEvent, getRoomEvents } from "~/models/room-event.server";
 import { getRoom } from "~/models/room.server";
 import { getOrCreateUserSession } from "~/session.server";
-import { isPlayerAction, useGameEngine } from "engine/use-game-engine";
-import { GameContext } from "~/utils/use-game-context";
+import { useGameEngine } from "~/engine/use-game-engine";
+import { GameEngineContext } from "~/engine/use-engine-context";
 import { getRandomName } from "~/utils/name";
+import { isPlayerAction } from "~/engine/actions";
 
 export async function loader({ request, params }: LoaderArgs) {
   const roomName = params.roomName;
@@ -67,13 +68,13 @@ export default function PlayGame() {
   );
 
   return (
-    <GameContext.Provider value={gameReducer}>
+    <GameEngineContext.Provider value={gameReducer}>
       <GameComponent
         game={data.game}
         userId={data.userId}
         roomName={data.roomName}
       />
-    </GameContext.Provider>
+    </GameEngineContext.Provider>
   );
 }
 

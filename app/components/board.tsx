@@ -3,7 +3,7 @@ import classNames from "classnames";
 import * as React from "react";
 
 import type { Clue } from "~/models/convert.server";
-import { useGameContext } from "~/utils/use-game-context";
+import { useEngineContext } from "~/engine/use-engine-context";
 
 function Category({ category }: { category: string }) {
   const words = category.split(" ");
@@ -42,7 +42,7 @@ function ClueComponent({
   onClickClue: (i: number, j: number) => void;
   onKeyDownClue: (e: React.KeyboardEvent, i: number, j: number) => void;
 }) {
-  const { round, isAnswered } = useGameContext();
+  const { round, isAnswered } = useEngineContext();
   const roundMultiplier = round + 1;
 
   const clueValue = (i + 1) * 200 * roundMultiplier;
@@ -99,7 +99,7 @@ export default function BoardComponent({
   userId: string;
   roomName: string;
 }) {
-  const { board, round, boardControl } = useGameContext();
+  const { board, round, boardControl } = useEngineContext();
   const roundMultiplier = round + 1;
   const hasBoardControl = boardControl === userId;
 

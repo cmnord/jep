@@ -1,13 +1,13 @@
 import * as React from "react";
 import classNames from "classnames";
 
-import { useGameContext } from "~/utils/use-game-context";
-import { CLUE_TIMEOUT_MS, GameState } from "engine/use-game-engine";
-import type { Player } from "engine/use-game-engine";
+import { useEngineContext } from "~/engine/use-engine-context";
+import type { Player } from "~/engine/engine";
 import type { FetcherWithComponents } from "@remix-run/react";
 import { useFetcher } from "@remix-run/react";
 import { stringToHslColor } from "~/utils/utils";
 import Button from "./button";
+import { CLUE_TIMEOUT_MS, GameState } from "~/engine/engine";
 
 /** MS_PER_CHARACTER is a heuristic value to scale the amount of time per clue by
  * its length.
@@ -179,7 +179,7 @@ function AdvanceClueButton({
   clueIdx: [number, number] | undefined;
 }) {
   const { players, boardControl, numAnswered, numCluesInBoard } =
-    useGameContext();
+    useEngineContext();
 
   const [i, j] = clueIdx ? clueIdx : [-1, -1];
   const boardController = boardControl ? players.get(boardControl) : undefined;
@@ -224,7 +224,7 @@ export default function Prompt({
   userId: string;
 }) {
   const { type, clue, activeClue, buzzes, players, winningBuzzer } =
-    useGameContext();
+    useEngineContext();
 
   const shouldShowPrompt =
     type === GameState.ReadClue ||

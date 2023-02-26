@@ -2,7 +2,7 @@ import { useFetcher } from "@remix-run/react";
 import classNames from "classnames";
 import * as React from "react";
 
-import { useGameContext } from "~/utils/use-game-context";
+import { useEngineContext } from "~/engine/use-engine-context";
 import { stringToHslColor } from "~/utils/utils";
 
 function PlayerIcon({
@@ -156,7 +156,7 @@ export default function Players({
   userId: string;
   roomName: string;
 }) {
-  const { players, boardControl } = useGameContext();
+  const { players, boardControl } = useEngineContext();
 
   const player = players.get(userId) ?? { userId, name: "You" };
 

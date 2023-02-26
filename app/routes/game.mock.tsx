@@ -3,8 +3,8 @@ import { useLoaderData } from "@remix-run/react";
 
 import GameComponent from "~/components/game";
 import { getMockGame } from "~/models/game.server";
-import { useGameEngine } from "engine/use-game-engine";
-import { GameContext } from "~/utils/use-game-context";
+import { useGameEngine } from "~/engine/use-game-engine";
+import { GameEngineContext } from "~/engine/use-engine-context";
 
 export async function loader() {
   const game = await getMockGame();
@@ -32,8 +32,8 @@ export default function PlayGame() {
   );
 
   return (
-    <GameContext.Provider value={gameReducer}>
+    <GameEngineContext.Provider value={gameReducer}>
       <GameComponent game={data.game} userId="mock" roomName="0-mock" />
-    </GameContext.Provider>
+    </GameEngineContext.Provider>
   );
 }

@@ -1,9 +1,9 @@
 import * as React from "react";
 
-import { GameState } from "../../engine/use-game-engine";
-import type { useGameEngine } from "../../engine/use-game-engine";
+import { GameState } from "~/engine/engine";
+import type { useGameEngine } from "~/engine/use-game-engine";
 
-export const GameContext = React.createContext<
+export const GameEngineContext = React.createContext<
   ReturnType<typeof useGameEngine>
 >({
   type: GameState.Preview,
@@ -21,6 +21,6 @@ export const GameContext = React.createContext<
   winningBuzzer: undefined,
 });
 
-export function useGameContext() {
-  return React.useContext(GameContext);
+export function useEngineContext() {
+  return React.useContext(GameEngineContext);
 }
