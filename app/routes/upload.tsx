@@ -1,7 +1,7 @@
 import { redirect, unstable_parseMultipartFormData } from "@remix-run/node";
 import type { ActionArgs } from "@remix-run/node";
 
-import { uploadHandler } from "~/file-upload-handler.server";
+import { uploadHandler } from "~/utils/file-upload-handler.server";
 import { flashFormState } from "~/session.server";
 
 export async function action({ request }: ActionArgs) {

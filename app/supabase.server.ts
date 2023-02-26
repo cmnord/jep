@@ -11,8 +11,8 @@ declare global {
 
 // this is needed because in development we don't want to restart
 // the server with every change, but we want to make sure we don't
-// create a new cache with every change either.
-// in production we'll have a single cache.
+// create a new client with every change either.
+// in production we'll have a single client.
 if (process.env.NODE_ENV === "production") {
   db = initializeDB();
 } else {
