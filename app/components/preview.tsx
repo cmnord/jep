@@ -4,6 +4,7 @@ import Button from "~/components/button";
 import Modal from "~/components/modal";
 import Players from "~/components/player";
 import type { Clue } from "~/models/convert.server";
+import { GameState } from "~/utils/use-game";
 import { useGameContext } from "~/utils/use-game-context";
 
 function NextRoundFooter({
@@ -65,18 +66,18 @@ function BeforeGamePreview({
 
 export default function Preview({
   numRounds,
-  isOpen,
   finalClue,
   userId,
   roomName,
 }: {
   numRounds: number;
-  isOpen: boolean;
   finalClue?: Clue;
   userId: string;
   roomName: string;
 }) {
-  const { round } = useGameContext();
+  const { type, round } = useGameContext();
+
+  const isOpen = type === GameState.Preview;
 
   switch (round) {
     case 0:

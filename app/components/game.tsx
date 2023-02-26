@@ -22,7 +22,7 @@ export default function GameComponent({
   userId: string;
   roomName: string;
 }) {
-  const { type, board } = useGameContext();
+  const { board } = useGameContext();
 
   const [focusedClueIdx, setFocusedClue] = React.useState<[number, number]>();
 
@@ -43,7 +43,6 @@ export default function GameComponent({
     <>
       <Preview
         numRounds={game.boards.length}
-        isOpen={type === GameState.Preview}
         finalClue={finalClue}
         userId={userId}
         roomName={roomName}
