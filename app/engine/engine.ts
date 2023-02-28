@@ -53,6 +53,10 @@ export interface Player {
  * the clue is read. */
 export const CLUE_TIMEOUT_MS = 5000;
 
+/** CANT_BUZZ_FLAG means that the player buzzed in wrong, so they can't try again
+ * on this clue. */
+const CANT_BUZZ_FLAG = -1;
+
 export function getWinningBuzzer(buzzes?: Map<string, number>):
   | {
       userId: string;
@@ -64,12 +68,12 @@ export function getWinningBuzzer(buzzes?: Map<string, number>):
   }
   return Array.from(buzzes.entries()).reduce(
     (acc, [userId, deltaMs]) => {
-      if (deltaMs < acc.deltaMs) {
+      if (deltaMs !== CANT_BUZZ_FLAG && deltaMs < acc.deltaMs) {
         return { userId, deltaMs };
       }
       return acc;
     },
-    { userId: "", deltaMs: CLUE_TIMEOUT_MS + 1 }
+    { userId: "", deltaMs: Number.MAX_SAFE_INTEGER }
   );
 }
 
@@ -179,7 +183,7 @@ export function gameEngine(state: State, action: Action): State {
         }
 
         // 2. One person buzzed before the time: reveal the answer to only them, let them evaluate correct / no
-        return { ...state, type: GameState.RevealAnswerToBuzzer };
+        return { ...state, type: GameState.RevealAnswerToBuzzer, buzzes };
       }
       throw new Error("Buzz action must have an associated index and delta");
     }
@@ -207,12 +211,12 @@ export function gameEngine(state: State, action: Action): State {
           // those who can no longer buzz.
           const lockedOutBuzzers = state.buzzes
             ? Array.from(state.buzzes.entries()).filter(
-                ([_, deltaMs]) => deltaMs === CLUE_TIMEOUT_MS + 1
+                ([_, deltaMs]) => deltaMs === CANT_BUZZ_FLAG
               )
             : [];
           const newBuzzes = new Map([
             ...lockedOutBuzzers,
-            [userId, CLUE_TIMEOUT_MS + 1],
+            [userId, CANT_BUZZ_FLAG],
           ]);
           const nextState: State = {
             ...state,
