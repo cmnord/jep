@@ -127,19 +127,40 @@ function AnswerEvaluator({
   userId,
   fetcher,
   clueIdx,
+  showAnswer,
+  onClickShowAnswer,
 }: {
   roomName: string;
   userId: string;
   fetcher: FetcherWithComponents<any>;
   clueIdx: [number, number] | undefined;
+  showAnswer: boolean;
+  onClickShowAnswer: () => void;
 }) {
-  const [i, j] = clueIdx ? clueIdx : [-1, -1];
+  if (!showAnswer) {
+    return (
+      <div className="flex flex-col items-center gap-2">
+        <p className="text-gray-300 text-sm">
+          State your answer in the form of a question, then
+        </p>
+        <Button
+          type="primary"
+          htmlType="button"
+          autoFocus
+          onClick={onClickShowAnswer}
+        >
+          Reveal answer
+        </Button>
+      </div>
+    );
+  }
 
+  const [i, j] = clueIdx ? clueIdx : [-1, -1];
   return (
     <fetcher.Form
       method="post"
       action={`/room/${roomName}/answer`}
-      className="absolute top-2/3 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2"
+      className="flex flex-col items-center gap-2"
     >
       <input type="hidden" value={userId} name="userId" />
       <input type="hidden" value={i} name="i" />
@@ -235,6 +256,9 @@ export default function Prompt({
     type === GameState.RevealAnswerToBuzzer && winningBuzzer === userId;
   const shouldShowAnswerToAll = type === GameState.RevealAnswerToAll;
 
+  // Only show the answer to the buzzer once they click "reveal".
+  const [showAnswer, setShowAnswer] = React.useState(shouldShowAnswerToAll);
+
   const [optimisticBuzzes, setOptimisticBuzzes] = React.useState(buzzes);
   const myBuzzDurationMs = optimisticBuzzes?.get(userId);
 
@@ -258,11 +282,12 @@ export default function Prompt({
     if (activeClue) {
       setClueShownAt(Date.now());
       setClueIdx(activeClue);
+      setShowAnswer(type === GameState.RevealAnswerToAll);
     } else {
       setClueShownAt(undefined);
     }
     setBuzzerOpenAt(myBuzzDurationMs);
-  }, [activeClue, myBuzzDurationMs]);
+  }, [activeClue, myBuzzDurationMs, type]);
 
   // Update optimisticBuzzes once buzzes come in from the server.
   React.useEffect(() => {
@@ -367,8 +392,7 @@ export default function Prompt({
                 <p className="mb-8 leading-normal">{clue?.clue}</p>
                 <p
                   className={classNames("text-cyan-300", {
-                    "opacity-0":
-                      !shouldShowAnswerToBuzzer && !shouldShowAnswerToAll,
+                    "opacity-0": !showAnswer && !shouldShowAnswerToAll,
                   })}
                 >
                   {clue?.answer}
@@ -411,12 +435,16 @@ export default function Prompt({
           />
         </button>
         {shouldShowAnswerToBuzzer && (
-          <AnswerEvaluator
-            fetcher={fetcher}
-            roomName={roomName}
-            userId={userId}
-            clueIdx={clueIdx}
-          />
+          <div className="absolute top-2/3 left-1/2 transform -translate-x-1/2">
+            <AnswerEvaluator
+              fetcher={fetcher}
+              roomName={roomName}
+              userId={userId}
+              clueIdx={clueIdx}
+              showAnswer={showAnswer}
+              onClickShowAnswer={() => setShowAnswer(true)}
+            />
+          </div>
         )}
         {shouldShowAnswerToAll && (
           <AdvanceClueButton
