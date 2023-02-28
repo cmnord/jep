@@ -223,7 +223,7 @@ export default function Prompt({
   roomName: string;
   userId: string;
 }) {
-  const { type, clue, activeClue, buzzes, players, winningBuzzer } =
+  const { type, clue, category, activeClue, buzzes, players, winningBuzzer } =
     useEngineContext();
 
   const shouldShowPrompt =
@@ -357,6 +357,10 @@ export default function Prompt({
             !shouldShowAnswerToAll
           }
         >
+          <div className="p-4 text-white">
+            <span className="font-bold">{category}</span> for{" "}
+            <span className="font-bold">${clue?.value}</span>
+          </div>
           <div className="p-4 flex flex-grow items-center">
             <div className="text-white uppercase text-center text-4xl md:text-5xl lg:text-7xl text-shadow-md font-korinna word-spacing-1">
               <div>
