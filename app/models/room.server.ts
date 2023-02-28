@@ -16,7 +16,7 @@ export async function getRoom(nameAndId: string): Promise<Room | null> {
     .eq("id", id);
 
   if (error !== null) {
-    throw error;
+    throw new Error(error.message);
   }
 
   if (data.length === 0) {
@@ -37,7 +37,7 @@ export async function createRoom(gameId: string) {
     .select();
 
   if (error !== null) {
-    throw error;
+    throw new Error(error.message);
   }
 
   return data[0].id + "-" + word;

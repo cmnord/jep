@@ -1,4 +1,3 @@
-import { DefaultErrorBoundary } from "~/components/error";
 import Link from "~/components/link";
 
 export default function Upload({ onChange }: { onChange?: () => void }) {
@@ -52,5 +51,3 @@ export default function Upload({ onChange }: { onChange?: () => void }) {
     </div>
   );
 }
-
-export { DefaultErrorBoundary as ErrorBoundary };

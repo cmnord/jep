@@ -80,7 +80,7 @@ export async function getGame(gameId: string): Promise<Game | null> {
     .eq("id", gameId);
 
   if (error !== null) {
-    throw error;
+    throw new Error(error.message);
   }
 
   if (data.length === 0) {
@@ -100,7 +100,7 @@ export async function getAllGames(search: string | null): Promise<Game[]> {
   // TODO: filter with .or()
 
   if (error !== null) {
-    throw error;
+    throw new Error(error.message);
   }
 
   return data

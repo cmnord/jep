@@ -15,7 +15,7 @@ export async function getRoomEvents(roomId: number): Promise<DbRoomEvent[]> {
     .eq("room_id", roomId);
 
   if (error !== null) {
-    throw error;
+    throw new Error(error.message);
   }
 
   return data;
@@ -38,7 +38,7 @@ export async function createRoomEvent(
     .select();
 
   if (error !== null) {
-    throw error;
+    throw new Error(error.message);
   }
 
   return data[0];
