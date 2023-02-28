@@ -1,4 +1,5 @@
 import classNames from "classnames";
+import LoadingSpinner from "./loading-spinner";
 
 interface Props {
   onClick?: () => void;
@@ -9,6 +10,7 @@ interface Props {
   name?: string;
   value?: string;
   autoFocus?: boolean;
+  loading?: boolean;
 }
 
 export default function Button({
@@ -20,6 +22,7 @@ export default function Button({
   name,
   value,
   autoFocus,
+  loading,
 }: Props) {
   return (
     <button
@@ -42,7 +45,10 @@ export default function Button({
       value={value}
       autoFocus={autoFocus}
     >
-      {children}
+      <div className="inline-flex justify-center gap-1">
+        {loading && <LoadingSpinner />}
+        {children}
+      </div>
     </button>
   );
 }

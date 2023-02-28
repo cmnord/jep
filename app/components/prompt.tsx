@@ -129,6 +129,7 @@ function AnswerEvaluator({
   clueIdx,
   showAnswer,
   onClickShowAnswer,
+  loading,
 }: {
   roomName: string;
   userId: string;
@@ -136,6 +137,7 @@ function AnswerEvaluator({
   clueIdx: [number, number] | undefined;
   showAnswer: boolean;
   onClickShowAnswer: () => void;
+  loading: boolean;
 }) {
   if (!showAnswer) {
     return (
@@ -148,6 +150,7 @@ function AnswerEvaluator({
           htmlType="button"
           autoFocus
           onClick={onClickShowAnswer}
+          loading={loading}
         >
           Reveal answer
         </Button>
@@ -171,7 +174,12 @@ function AnswerEvaluator({
         all players.
       </p>
       <div className="flex gap-2">
-        <Button htmlType="submit" name="result" value="incorrect">
+        <Button
+          htmlType="submit"
+          name="result"
+          value="incorrect"
+          loading={loading}
+        >
           incorrect!
         </Button>
         <Button
@@ -180,6 +188,7 @@ function AnswerEvaluator({
           value="correct"
           type="primary"
           autoFocus
+          loading={loading}
         >
           correct!
         </Button>
@@ -212,6 +221,8 @@ function AdvanceClueButton({
 
   const cluesLeftInRound = numCluesInBoard - numAnswered;
 
+  const loading = fetcher.state === "loading";
+
   return (
     <fetcher.Form
       method="post"
@@ -230,7 +241,7 @@ function AdvanceClueButton({
       <p className="text-gray-300 text-sm text-center">
         Click "OK" to return to the board for all players.
       </p>
-      <Button htmlType="submit" type="primary" autoFocus>
+      <Button htmlType="submit" type="primary" autoFocus loading={loading}>
         OK
       </Button>
     </fetcher.Form>
@@ -273,6 +284,7 @@ export default function Prompt({
   const [lockout, setLockout] = React.useState(false);
 
   const fetcher = useFetcher();
+  const loading = fetcher.state === "loading";
 
   const numCharactersInClue = clue?.clue.length ?? 0;
   const clueDurationMs = MS_PER_CHARACTER * numCharactersInClue;
@@ -443,6 +455,7 @@ export default function Prompt({
               clueIdx={clueIdx}
               showAnswer={showAnswer}
               onClickShowAnswer={() => setShowAnswer(true)}
+              loading={loading}
             />
           </div>
         )}
