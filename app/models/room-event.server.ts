@@ -11,6 +11,7 @@ export async function getRoomEvents(roomId: number): Promise<DbRoomEvent[]> {
   const { data, error } = await db
     .from<"room_events", RoomEventTable>("room_events")
     .select("*")
+    .order("ts", { ascending: true })
     .eq("room_id", roomId);
 
   if (error !== null) {

@@ -127,6 +127,11 @@ export function gameEngine(state: State, action: Action): State {
     }
     case ActionType.Buzz: {
       if (isBuzzAction(action)) {
+        // Ignore this buzz if we're not in the clue-reading stage.
+        if (state.type !== GameState.ReadClue) {
+          console.log("!!! bad buzz msg, not in ReadClue state");
+          return state;
+        }
         const activeClue = state.activeClue;
         // Ignore this buzz if the clue is no longer active.
         if (!activeClue) {
@@ -198,12 +203,21 @@ export function gameEngine(state: State, action: Action): State {
         }
 
         if (!correct) {
-          // If the buzzer was wrong, re-open the buzzers to everyone except that
-          // buzzer
+          // If the buzzer was wrong, re-open the buzzers to everyone except
+          // those who can no longer buzz.
+          const lockedOutBuzzers = state.buzzes
+            ? Array.from(state.buzzes.entries()).filter(
+                ([_, deltaMs]) => deltaMs === CLUE_TIMEOUT_MS + 1
+              )
+            : [];
+          const newBuzzes = new Map([
+            ...lockedOutBuzzers,
+            [userId, CLUE_TIMEOUT_MS + 1],
+          ]);
           const nextState: State = {
             ...state,
             type: GameState.ReadClue,
-            buzzes: new Map([[userId, CLUE_TIMEOUT_MS + 1]]),
+            buzzes: newBuzzes,
           };
           return nextState;
         }
