@@ -7,6 +7,8 @@ import type { Clue } from "~/models/convert.server";
 import { useEngineContext } from "~/engine/use-engine-context";
 import LoadingSpinner from "./loading-spinner";
 
+const UNREVEALED_CLUE = "unrevealed";
+
 function Category({ category }: { category: string }) {
   return (
     <th className="p-4 h-full bg-blue-1000 border-black border-8 border-b-12">
@@ -39,15 +41,22 @@ function ClueComponent({
 }) {
   const { round, isAnswered } = useEngineContext();
   const roundMultiplier = round + 1;
+  const [loading, setLoading] = React.useState(false);
 
   const clueValue = (i + 1) * 200 * roundMultiplier;
 
+  const unrevealed = clue.clue.toLowerCase() === UNREVEALED_CLUE;
+
   // TODO: daily double / wagerable text
   const clueText = isAnswered(i, j) ? (
-    <p className="uppercase font-korinna">{clue.answer}</p>
+    unrevealed ? (
+      <p className="text-sm text-gray-400">{UNREVEALED_CLUE}</p>
+    ) : (
+      <p className="uppercase font-korinna">{clue.answer}</p>
+    )
   ) : (
-    <p className="text-5xl text-yellow-1000 text-shadow-md font-impact">
-      ${clueValue}
+    <p className="text-4xl lg:text-5xl text-yellow-1000 text-shadow-md font-impact">
+      ${clueValue} {loading && <LoadingSpinner />}
     </p>
   );
 
@@ -57,6 +66,7 @@ function ClueComponent({
     j: number
   ) {
     e.preventDefault();
+    setLoading(true);
     return onClickClue(i, j);
   }
 
@@ -64,15 +74,17 @@ function ClueComponent({
     <td className="p-1 h-full">
       <button
         type="submit"
-        disabled={!hasBoardControl}
+        disabled={!hasBoardControl || unrevealed}
         onClick={(e) => handleClickClue(e, i, j)}
         onFocus={() => onFocusClue(i, j)}
         onKeyDown={(e) => onKeyDownClue(e, i, j)}
         className={classNames(
-          "px-4 py-3 h-full w-full bg-blue-1000 hover:bg-blue-700 focus:bg-blue-700 transition-colors",
+          "px-4 py-3 h-full w-full bg-blue-1000  transition-colors",
           {
-            "text-blue-1000 hover:text-white focus:text-white hover:text-shadow transition":
-              isAnswered(i, j),
+            "hover:bg-blue-700 focus:bg-blue-700": !unrevealed,
+            "text-blue-1000 hover:text-white focus:text-white hover:text-shadow focus:text-shadow transition":
+              isAnswered(i, j) && !unrevealed,
+            "bg-gray-800 ": unrevealed,
           }
         )}
       >

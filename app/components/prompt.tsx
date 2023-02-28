@@ -8,6 +8,9 @@ import { useFetcher } from "@remix-run/react";
 import { stringToHslColor } from "~/utils/utils";
 import Button from "./button";
 import { CLUE_TIMEOUT_MS, GameState } from "~/engine/engine";
+import { Textfit } from "react-textfit";
+import Modal from "./modal";
+import useKeyPress from "~/utils/use-key-press";
 
 /** MS_PER_CHARACTER is a heuristic value to scale the amount of time per clue by
  * its length.
@@ -69,8 +72,7 @@ function Lockout({ active }: { active: boolean }) {
 
 function Buzz({ player, durationMs }: { player?: Player; durationMs: number }) {
   const color = player ? stringToHslColor(player.userId) : "gray";
-  const durationMsg =
-    durationMs > CLUE_TIMEOUT_MS ? "cannot buzz" : durationMs + "ms";
+  const durationMsg = durationMs === -1 ? "cannot buzz" : durationMs + "ms";
   return (
     <div
       className="px-2 py-1 flex flex-col items-center justify-center text-white text-shadow"
@@ -123,6 +125,7 @@ function BuzzerLight({ active }: { active: boolean }) {
 }
 
 function AnswerEvaluator({
+  isOpen,
   roomName,
   userId,
   fetcher,
@@ -131,6 +134,7 @@ function AnswerEvaluator({
   onClickShowAnswer,
   loading,
 }: {
+  isOpen: boolean;
   roomName: string;
   userId: string;
   fetcher: FetcherWithComponents<any>;
@@ -141,7 +145,11 @@ function AnswerEvaluator({
 }) {
   if (!showAnswer) {
     return (
-      <div className="flex flex-col items-center gap-2">
+      <div
+        className={classNames("flex flex-col items-center gap-2", {
+          "opacity-0": !isOpen,
+        })}
+      >
         <p className="text-gray-300 text-sm">
           State your answer in the form of a question, then
         </p>
@@ -163,7 +171,9 @@ function AnswerEvaluator({
     <fetcher.Form
       method="post"
       action={`/room/${roomName}/answer`}
-      className="flex flex-col items-center gap-2"
+      className={classNames("flex flex-col items-center gap-2", {
+        "opacity-0": !isOpen,
+      })}
     >
       <input type="hidden" value={userId} name="userId" />
       <input type="hidden" value={i} name="i" />
@@ -197,12 +207,14 @@ function AnswerEvaluator({
   );
 }
 
-function AdvanceClueButton({
+function AdvanceClueModal({
+  isOpen,
   roomName,
   userId,
   fetcher,
   clueIdx,
 }: {
+  isOpen: boolean;
   roomName: string;
   userId: string;
   fetcher: FetcherWithComponents<any>;
@@ -224,27 +236,30 @@ function AdvanceClueButton({
   const loading = fetcher.state === "loading";
 
   return (
-    <fetcher.Form
-      method="post"
-      action={`/room/${roomName}/next-clue`}
-      className="absolute top-2/3 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2"
-    >
-      <input type="hidden" value={userId} name="userId" />
-      <input type="hidden" value={i} name="i" />
-      <input type="hidden" value={j} name="j" />
-      {/* TODO: show who won how much money */}
-      {cluesLeftInRound ? (
-        <p className="text-white font-bold text-center">
-          {boardControlName} will choose the next clue.
+    <Modal isOpen={isOpen}>
+      <Modal.Body>
+        {cluesLeftInRound ? (
+          <Modal.Title>
+            {boardControlName} will choose the next clue.
+          </Modal.Title>
+        ) : null}
+        {/* TODO: show who won how much money */}
+
+        <p className="text-gray-500 text-sm text-center">
+          Click "OK" to return to the board for all players.
         </p>
-      ) : null}
-      <p className="text-gray-300 text-sm text-center">
-        Click "OK" to return to the board for all players.
-      </p>
-      <Button htmlType="submit" type="primary" autoFocus loading={loading}>
-        OK
-      </Button>
-    </fetcher.Form>
+      </Modal.Body>
+      <Modal.Footer>
+        <fetcher.Form method="post" action={`/room/${roomName}/next-clue`}>
+          <input type="hidden" value={userId} name="userId" />
+          <input type="hidden" value={i} name="i" />
+          <input type="hidden" value={j} name="j" />
+          <Button htmlType="submit" type="primary" autoFocus loading={loading}>
+            OK
+          </Button>
+        </fetcher.Form>
+      </Modal.Footer>
+    </Modal>
   );
 }
 
@@ -347,7 +362,11 @@ export default function Prompt({
   }, [buzzerOpenAt, clueIdx, fetcher, roomName, userId, type]);
 
   const handleClick = (clickedAtMs: number) => {
-    if (clueShownAt === undefined) {
+    if (
+      clueShownAt === undefined ||
+      lockout ||
+      myBuzzDurationMs !== undefined
+    ) {
       return;
     }
 
@@ -379,40 +398,44 @@ export default function Prompt({
     );
   };
 
+  useKeyPress("Enter", () => handleClick(Date.now()));
+
   return (
     <Fade show={shouldShowPrompt}>
       <div className="relative">
-        <button
-          disabled={lockout || myBuzzDurationMs !== undefined}
+        <div
           className={classNames(
-            "h-screen w-screen bg-blue-1000 flex flex-col justify-center items-center"
+            "h-screen w-screen bg-blue-1000 flex flex-col justify-center"
           )}
-          onClick={() => handleClick(Date.now())}
-          autoFocus={
-            shouldShowPrompt &&
-            !shouldShowAnswerToBuzzer &&
-            !shouldShowAnswerToAll
-          }
         >
           <div className="p-4 text-white">
             <span className="font-bold">{category}</span> for{" "}
             <span className="font-bold">${clue?.value}</span>
           </div>
-          <div className="p-4 flex flex-grow items-center">
-            <div className="text-white uppercase text-center text-4xl md:text-5xl lg:text-7xl text-shadow-md font-korinna word-spacing-1">
-              <div>
-                <p className="mb-8 leading-normal">{clue?.clue}</p>
-                <p
-                  className={classNames("text-cyan-300", {
-                    "opacity-0": !showAnswer && !shouldShowAnswerToAll,
-                  })}
-                >
-                  {clue?.answer}
-                </p>
-              </div>
-            </div>
+          <div className="p-4 flex flex-col justify-center flex-grow uppercase text-center text-shadow-md font-korinna">
+            <Textfit className="text-white grow w-full" mode="multi">
+              {clue?.clue}
+              <br />
+              <span
+                className={classNames("text-cyan-300", {
+                  "opacity-0": !showAnswer && !shouldShowAnswerToAll,
+                })}
+              >
+                {clue?.answer}
+              </span>
+            </Textfit>
           </div>
           <Lockout active={lockout} />
+          <AnswerEvaluator
+            isOpen={shouldShowAnswerToBuzzer || showAnswer}
+            fetcher={fetcher}
+            roomName={roomName}
+            userId={userId}
+            clueIdx={clueIdx}
+            showAnswer={showAnswer}
+            onClickShowAnswer={() => setShowAnswer(true)}
+            loading={loading}
+          />
           <div className="flex items-center justify-between w-full">
             <div className="flex gap-4 ml-4">
               {optimisticBuzzes
@@ -445,28 +468,14 @@ export default function Prompt({
                 : undefined
             }
           />
-        </button>
-        {shouldShowAnswerToBuzzer && (
-          <div className="absolute top-2/3 left-1/2 transform -translate-x-1/2">
-            <AnswerEvaluator
-              fetcher={fetcher}
-              roomName={roomName}
-              userId={userId}
-              clueIdx={clueIdx}
-              showAnswer={showAnswer}
-              onClickShowAnswer={() => setShowAnswer(true)}
-              loading={loading}
-            />
-          </div>
-        )}
-        {shouldShowAnswerToAll && (
-          <AdvanceClueButton
-            fetcher={fetcher}
-            roomName={roomName}
-            userId={userId}
-            clueIdx={clueIdx}
-          />
-        )}
+        </div>
+        <AdvanceClueModal
+          isOpen={shouldShowAnswerToAll}
+          fetcher={fetcher}
+          roomName={roomName}
+          userId={userId}
+          clueIdx={clueIdx}
+        />
       </div>
     </Fade>
   );
