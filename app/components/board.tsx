@@ -1,26 +1,21 @@
 import { useFetcher } from "@remix-run/react";
 import classNames from "classnames";
 import * as React from "react";
+import { Textfit } from "react-textfit";
 
 import type { Clue } from "~/models/convert.server";
 import { useEngineContext } from "~/engine/use-engine-context";
+import LoadingSpinner from "./loading-spinner";
 
 function Category({ category }: { category: string }) {
-  const words = category.split(" ");
-  const numWords = words.length;
-  const wordScore = words.join("").length * numWords;
   return (
-    <th className="p-4 bg-blue-1000 border-black text-shadow border-8 font-impact border-b-12">
-      <div
-        className={classNames("mt-auto font-bold break-words uppercase", {
-          "text-4xl": wordScore <= 5,
-          "text-3xl": wordScore > 5 && wordScore <= 20,
-          "text-2xl": wordScore > 20 && wordScore < 30,
-          "text-xl": wordScore > 30,
-        })}
+    <th className="p-4 h-full bg-blue-1000 border-black border-8 border-b-12">
+      <Textfit
+        className="w-full h-20 flex items-center justify-center font-bold font-impact uppercase text-shadow-md"
+        mode="multi"
       >
         {category}
-      </div>
+      </Textfit>
     </th>
   );
 }
@@ -190,34 +185,36 @@ export default function BoardComponent({
   };
 
   return (
-    <div className="w-full overflow-scroll md:flex md:flex-col md:items-center">
-      <table className="bg-black text-white border-spacing-3 table-fixed h-1">
-        <thead>
-          <tr>
-            {board.categoryNames.map((category) => (
-              <Category key={category} category={category} />
-            ))}
-          </tr>
-        </thead>
-        <tbody ref={tbodyRef}>
-          {sortedClueRows.map(([value, clues], i) => (
-            <tr key={value}>
-              {clues.map((clue, j) => (
-                <ClueComponent
-                  key={`clue-${i}-${j}`}
-                  clue={clue}
-                  i={i}
-                  j={j}
-                  hasBoardControl={hasBoardControl}
-                  onFocusClue={onFocusClue}
-                  onClickClue={handleClickClue}
-                  onKeyDownClue={handleKeyDown}
-                />
+    <div className="w-full overflow-x-scroll">
+      <div className="max-w-screen-lg min-w-screen-md mx-auto">
+        <table className="w-full table-fixed h-1 bg-black text-white border-spacing-3">
+          <thead>
+            <tr className="h-1">
+              {board.categoryNames.map((category) => (
+                <Category key={category} category={category} />
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody ref={tbodyRef}>
+            {sortedClueRows.map(([value, clues], i) => (
+              <tr key={value}>
+                {clues.map((clue, j) => (
+                  <ClueComponent
+                    key={`clue-${i}-${j}`}
+                    clue={clue}
+                    i={i}
+                    j={j}
+                    hasBoardControl={hasBoardControl}
+                    onFocusClue={onFocusClue}
+                    onClickClue={handleClickClue}
+                    onKeyDownClue={handleKeyDown}
+                  />
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
