@@ -2,7 +2,7 @@ import * as React from "react";
 
 import BoardComponent from "~/components/board";
 import ClueList from "~/components/clue-list";
-import Prompt from "~/components/prompt";
+import Prompt from "~/components/prompt/prompt";
 import Preview from "~/components/preview";
 
 import type { Game, Clue } from "~/models/convert.server";

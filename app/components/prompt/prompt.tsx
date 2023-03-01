@@ -1,16 +1,19 @@
 import * as React from "react";
+import { useFetcher } from "@remix-run/react";
 import classNames from "classnames";
+import { Textfit } from "react-textfit";
 
 import { useEngineContext } from "~/engine/use-engine-context";
 import type { Player } from "~/engine/engine";
-import type { FetcherWithComponents } from "@remix-run/react";
-import { useFetcher } from "@remix-run/react";
 import { stringToHslColor } from "~/utils/utils";
-import Button from "./button";
+import Button from "~/components/button";
 import { CLUE_TIMEOUT_MS, GameState } from "~/engine/engine";
-import { Textfit } from "react-textfit";
-import Modal from "./modal";
 import useKeyPress from "~/utils/use-key-press";
+
+import AnswerForm from "./answer-form";
+import NextClueForm from "./next-clue-form";
+import Fade from "./fade";
+import Lockout from "./lockout";
 
 /** MS_PER_CHARACTER is a heuristic value to scale the amount of time per clue by
  * its length.
@@ -19,56 +22,6 @@ const MS_PER_CHARACTER = 50;
 
 /** LOCKOUT_MS applies a 500ms lockout if a contestant buzzes before the clue is read. */
 const LOCKOUT_MS = 500;
-
-function Fade({
-  show,
-  children,
-}: {
-  show: boolean;
-  children: React.ReactNode;
-}) {
-  const [shouldRender, setRender] = React.useState(show);
-
-  React.useEffect(() => {
-    if (show) setRender(true);
-  }, [show]);
-
-  const onAnimationEnd = () => {
-    if (!show) setRender(false);
-  };
-
-  return shouldRender ? (
-    <div
-      className={classNames("fixed left-0 top-0", {
-        "animate-slideIn": show,
-        "animate-slideOut": !show,
-      })}
-      onAnimationEnd={onAnimationEnd}
-    >
-      {children}
-    </div>
-  ) : null;
-}
-
-/** Lockout is a visual indicator that a contestant buzzed too early. */
-function Lockout({ active }: { active: boolean }) {
-  if (!active) {
-    return null;
-  }
-
-  return (
-    <div className="absolute left-0 top-0 w-full h-full bg-black bg-opacity-50">
-      <div
-        className={
-          "flex flex-col items-center justify-start pt-10 w-full h-full text-white font-bold " +
-          "text-6xl md:text-7xl lg:text-9xl"
-        }
-      >
-        LOCKOUT
-      </div>
-    </div>
-  );
-}
 
 function Buzz({ player, durationMs }: { player?: Player; durationMs: number }) {
   const color = player ? stringToHslColor(player.userId) : "gray";
@@ -128,7 +81,6 @@ function AnswerEvaluator({
   isOpen,
   roomName,
   userId,
-  fetcher,
   clueIdx,
   showAnswer,
   onClickShowAnswer,
@@ -137,16 +89,17 @@ function AnswerEvaluator({
   isOpen: boolean;
   roomName: string;
   userId: string;
-  fetcher: FetcherWithComponents<any>;
   clueIdx: [number, number] | undefined;
   showAnswer: boolean;
   onClickShowAnswer: () => void;
   loading: boolean;
 }) {
+  const { type } = useEngineContext();
+
   if (!showAnswer) {
     return (
       <div
-        className={classNames("flex flex-col items-center gap-2", {
+        className={classNames("p-2 flex flex-col items-center gap-2", {
           "opacity-0": !isOpen,
         })}
       >
@@ -156,7 +109,8 @@ function AnswerEvaluator({
         <Button
           type="primary"
           htmlType="button"
-          autoFocus
+          disabled={!isOpen}
+          autoFocus={!isOpen}
           onClick={onClickShowAnswer}
           loading={loading}
         >
@@ -167,100 +121,12 @@ function AnswerEvaluator({
   }
 
   const [i, j] = clueIdx ? clueIdx : [-1, -1];
-  return (
-    <fetcher.Form
-      method="post"
-      action={`/room/${roomName}/answer`}
-      className={classNames("flex flex-col items-center gap-2", {
-        "opacity-0": !isOpen,
-      })}
-    >
-      <input type="hidden" value={userId} name="userId" />
-      <input type="hidden" value={i} name="i" />
-      <input type="hidden" value={j} name="j" />
-      <p className="text-white font-bold">Was your answer correct?</p>
-      <p className="text-gray-300 text-sm text-center">
-        Only you can see the answer for now. After this, it will be revealed to
-        all players.
-      </p>
-      <div className="flex gap-2">
-        <Button
-          htmlType="submit"
-          name="result"
-          value="incorrect"
-          loading={loading}
-        >
-          incorrect!
-        </Button>
-        <Button
-          htmlType="submit"
-          name="result"
-          value="correct"
-          type="primary"
-          autoFocus
-          loading={loading}
-        >
-          correct!
-        </Button>
-      </div>
-    </fetcher.Form>
-  );
-}
 
-function AdvanceClueModal({
-  isOpen,
-  roomName,
-  userId,
-  fetcher,
-  clueIdx,
-}: {
-  isOpen: boolean;
-  roomName: string;
-  userId: string;
-  fetcher: FetcherWithComponents<any>;
-  clueIdx: [number, number] | undefined;
-}) {
-  const { players, boardControl, numAnswered, numCluesInBoard } =
-    useEngineContext();
+  if (type === GameState.RevealAnswerToAll) {
+    return <NextClueForm roomName={roomName} userId={userId} i={i} j={j} />;
+  }
 
-  const [i, j] = clueIdx ? clueIdx : [-1, -1];
-  const boardController = boardControl ? players.get(boardControl) : undefined;
-  const boardControlName = boardController
-    ? boardController.userId === userId
-      ? "You"
-      : boardController.name
-    : "Unknown player";
-
-  const cluesLeftInRound = numCluesInBoard - numAnswered;
-
-  const loading = fetcher.state === "loading";
-
-  return (
-    <Modal isOpen={isOpen}>
-      <Modal.Body>
-        {cluesLeftInRound ? (
-          <Modal.Title>
-            {boardControlName} will choose the next clue.
-          </Modal.Title>
-        ) : null}
-        {/* TODO: show who won how much money */}
-
-        <p className="text-gray-500 text-sm text-center">
-          Click "OK" to return to the board for all players.
-        </p>
-      </Modal.Body>
-      <Modal.Footer>
-        <fetcher.Form method="post" action={`/room/${roomName}/next-clue`}>
-          <input type="hidden" value={userId} name="userId" />
-          <input type="hidden" value={i} name="i" />
-          <input type="hidden" value={j} name="j" />
-          <Button htmlType="submit" type="primary" autoFocus loading={loading}>
-            OK
-          </Button>
-        </fetcher.Form>
-      </Modal.Footer>
-    </Modal>
-  );
+  return <AnswerForm roomName={roomName} userId={userId} i={i} j={j} />;
 }
 
 export default function Prompt({
@@ -284,6 +150,7 @@ export default function Prompt({
 
   // Only show the answer to the buzzer once they click "reveal".
   const [showAnswer, setShowAnswer] = React.useState(shouldShowAnswerToAll);
+  console.log("showanswer is", showAnswer, type);
 
   const [optimisticBuzzes, setOptimisticBuzzes] = React.useState(buzzes);
   const myBuzzDurationMs = optimisticBuzzes?.get(userId);
@@ -309,6 +176,7 @@ export default function Prompt({
     if (activeClue) {
       setClueShownAt(Date.now());
       setClueIdx(activeClue);
+      console.log("changed show answer", type);
       setShowAnswer(type === GameState.RevealAnswerToAll);
     } else {
       setClueShownAt(undefined);
@@ -372,6 +240,7 @@ export default function Prompt({
 
     const lockoutDeltaMs = clickedAtMs - clueShownAt;
     if (lockoutDeltaMs < clueDurationMs) {
+      console.log("lockout >:(");
       return setLockout(true);
     }
 
@@ -379,6 +248,7 @@ export default function Prompt({
       return;
     }
 
+    console.log("submitting");
     // Contestant buzzed, so submit their buzz time
     const [i, j] = clueIdx;
     const clueDeltaMs = clickedAtMs - buzzerOpenAt;
@@ -412,7 +282,18 @@ export default function Prompt({
             <span className="font-bold">{category}</span> for{" "}
             <span className="font-bold">${clue?.value}</span>
           </div>
-          <div className="p-4 flex flex-col justify-center flex-grow uppercase text-center text-shadow-md font-korinna">
+          <button
+            type="button"
+            disabled={lockout || myBuzzDurationMs !== undefined}
+            onClick={() => handleClick(Date.now())}
+            onKeyDown={(e) => console.log("got keydown....", e)}
+            className="p-4 flex flex-col justify-center flex-grow uppercase text-center text-shadow-md font-korinna"
+            autoFocus={
+              shouldShowPrompt &&
+              !shouldShowAnswerToBuzzer &&
+              shouldShowAnswerToAll
+            }
+          >
             <Textfit className="text-white grow w-full" mode="multi">
               {clue?.clue}
               <br />
@@ -424,16 +305,17 @@ export default function Prompt({
                 {clue?.answer}
               </span>
             </Textfit>
-          </div>
+          </button>
           <Lockout active={lockout} />
           <AnswerEvaluator
             isOpen={shouldShowAnswerToBuzzer || showAnswer}
-            fetcher={fetcher}
             roomName={roomName}
             userId={userId}
             clueIdx={clueIdx}
             showAnswer={showAnswer}
-            onClickShowAnswer={() => setShowAnswer(true)}
+            onClickShowAnswer={() => {
+              setShowAnswer(true);
+            }}
             loading={loading}
           />
           <div className="flex items-center justify-between w-full">
@@ -469,13 +351,6 @@ export default function Prompt({
             }
           />
         </div>
-        <AdvanceClueModal
-          isOpen={shouldShowAnswerToAll}
-          fetcher={fetcher}
-          roomName={roomName}
-          userId={userId}
-          clueIdx={clueIdx}
-        />
       </div>
     </Fade>
   );

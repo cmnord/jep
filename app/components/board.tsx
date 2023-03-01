@@ -60,6 +60,13 @@ function ClueComponent({
     </p>
   );
 
+  // Reset loading state to false when the clue is answered
+  React.useEffect(() => {
+    if (isAnswered(i, j)) {
+      setLoading(false);
+    }
+  }, [isAnswered, i, j]);
+
   function handleClickClue(
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
     i: number,
