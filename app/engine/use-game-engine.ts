@@ -1,4 +1,3 @@
-import { createClient } from "@supabase/supabase-js";
 import * as React from "react";
 
 import type { Game, Clue } from "~/models/convert.server";
@@ -7,6 +6,7 @@ import type { DbRoomEvent } from "~/models/room-event.server";
 import { generateGrid } from "~/utils/utils";
 import { gameEngine, GameState, getWinningBuzzer } from "./engine";
 import type { State } from "./engine";
+import useChannel from "~/utils/use-channel";
 
 function createInitialState(game: Game, round: number): State {
   const board = game.boards[round];
@@ -55,14 +55,6 @@ export function useGameEngine(
     new Set<number>(serverRoomEvents.map((re) => re.id))
   );
 
-  const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    realtime: {
-      params: {
-        eventsPerSecond: 1,
-      },
-    },
-  });
-
   // TODO: spectator, points
 
   const [state, dispatch] = React.useReducer(
@@ -85,31 +77,21 @@ export function useGameEngine(
     }
   }, [serverRoomEvents, seenRoomEvents]);
 
-  React.useEffect(() => {
-    const channel = client
-      .channel(`room:${roomId}`)
-      .on<DbRoomEvent>(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "room_events",
-          filter: "room_id=eq." + roomId,
-        },
-        (payload) => {
-          const newEvent: DbRoomEvent = payload.new;
-          // Only process events we haven't seen yet
-          if (!seenRoomEvents.has(newEvent.id)) {
-            setSeenRoomEvents((prev) => new Set(prev).add(newEvent.id));
-            processRoomEvent(newEvent, dispatch);
-          }
-        }
-      )
-      .subscribe();
-    return () => {
-      channel.unsubscribe();
-    };
-  }, [client, seenRoomEvents, setSeenRoomEvents, roomId]);
+  useChannel<DbRoomEvent>({
+    channelName: `roomId:${roomId}`,
+    table: "room_events",
+    filter: "room_id=eq." + roomId,
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY,
+    callback: (payload) => {
+      const newEvent: DbRoomEvent = payload.new;
+      // Only process events we haven't seen yet
+      if (!seenRoomEvents.has(newEvent.id)) {
+        setSeenRoomEvents((prev) => new Set(prev).add(newEvent.id));
+        processRoomEvent(newEvent, dispatch);
+      }
+    },
+  });
 
   const board = game.boards[state.round];
 
