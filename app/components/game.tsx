@@ -8,6 +8,7 @@ import Preview from "~/components/preview";
 import type { Game, Clue } from "~/models/convert.server";
 import { useEngineContext } from "~/engine/use-engine-context";
 import Players from "./player/player";
+import { GameState } from "~/engine/engine";
 
 /** GameComponent maintains the game state. */
 export default function GameComponent({
@@ -21,7 +22,7 @@ export default function GameComponent({
   userId: string;
   roomName: string;
 }) {
-  const { board } = useEngineContext();
+  const { type, board } = useEngineContext();
 
   const [focusedClueIdx, setFocusedClue] = React.useState<[number, number]>();
 
@@ -58,7 +59,9 @@ export default function GameComponent({
         )}
       </div>
       <div className="p-12">
-        <Players userId={userId} roomName={roomName} />
+        {type !== GameState.Preview && (
+          <Players userId={userId} roomName={roomName} />
+        )}
         {board && (
           <ClueList focusedClueIdx={focusedClueIdx} onFocusClue={onFocusClue} />
         )}
