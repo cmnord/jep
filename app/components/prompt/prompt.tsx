@@ -4,8 +4,6 @@ import classNames from "classnames";
 import { Textfit } from "react-textfit";
 
 import { useEngineContext } from "~/engine/use-engine-context";
-import type { Player } from "~/engine/engine";
-import { stringToHslColor } from "~/utils/utils";
 import Button from "~/components/button";
 import { CLUE_TIMEOUT_MS, GameState } from "~/engine/engine";
 import useKeyPress from "~/utils/use-key-press";
@@ -15,6 +13,8 @@ import NextClueForm from "./next-clue-form";
 import Fade from "./fade";
 import Lockout from "./lockout";
 import Countdown from "./countdown";
+import Kbd from "./kbd";
+import Buzz from "./buzz";
 
 /** MS_PER_CHARACTER is a heuristic value to scale the amount of time per clue by
  * its length.
@@ -23,60 +23,6 @@ const MS_PER_CHARACTER = 50;
 
 /** LOCKOUT_MS applies a 500ms lockout if a contestant buzzes before the clue is read. */
 const LOCKOUT_MS = 500;
-
-function Buzz({ player, durationMs }: { player?: Player; durationMs: number }) {
-  const color = player ? stringToHslColor(player.userId) : "gray";
-  const durationMsg = durationMs === -1 ? "cannot buzz" : durationMs + "ms";
-  return (
-    <div
-      className="px-2 py-1 flex flex-col items-center justify-center text-white text-shadow"
-      style={{ color }}
-    >
-      <div className="font-bold">{player?.name ?? "Unknown player"}</div>
-      <div>{durationMsg}</div>
-    </div>
-  );
-}
-
-function BuzzerLight({ active }: { active: boolean }) {
-  if (active) {
-    /* Heroicon name: solid/check-circle */
-    return (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="currentColor"
-        className="w-20 h-20 mb-4 mr-4 text-green-600 rounded-full bg-green-200 shadow-glow-green-200"
-        role="img"
-        aria-labelledby="check-title"
-      >
-        <title id="check-title">OK to buzz!</title>
-        <path
-          fillRule="evenodd"
-          d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z"
-          clipRule="evenodd"
-        />
-      </svg>
-    );
-  }
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      className="w-20 h-20 mb-4 mr-4 text-red-600 rounded-full bg-red-200 shadow-glow-red-200"
-      role="img"
-      aria-labelledby="x-title"
-    >
-      <title id="x-title">Do not buzz yet</title>
-      <path
-        fillRule="evenodd"
-        d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm-1.72 6.97a.75.75 0 10-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 101.06 1.06L12 13.06l1.72 1.72a.75.75 0 101.06-1.06L13.06 12l1.72-1.72a.75.75 0 10-1.06-1.06L12 10.94l-1.72-1.72z"
-        clipRule="evenodd"
-      />
-    </svg>
-  );
-}
 
 function AnswerEvaluator({
   isOpen,
@@ -151,7 +97,6 @@ export default function Prompt({
 
   // Only show the answer to the buzzer once they click "reveal".
   const [showAnswer, setShowAnswer] = React.useState(shouldShowAnswerToAll);
-  console.log("showanswer is", showAnswer, type);
 
   const [optimisticBuzzes, setOptimisticBuzzes] = React.useState(buzzes);
   const myBuzzDurationMs = optimisticBuzzes?.get(userId);
@@ -177,7 +122,6 @@ export default function Prompt({
     if (activeClue) {
       setClueShownAt(Date.now());
       setClueIdx(activeClue);
-      console.log("changed show answer", type);
       setShowAnswer(type === GameState.RevealAnswerToAll);
     } else {
       setClueShownAt(undefined);
@@ -216,12 +160,22 @@ export default function Prompt({
     if (type === GameState.ReadClue && buzzerOpenAt !== undefined && clueIdx) {
       const [i, j] = clueIdx;
       const buzzLimitTimer = setTimeout(() => {
+        const deltaMs = CLUE_TIMEOUT_MS + 1;
+        setOptimisticBuzzes((old) => {
+          if (!old) {
+            return new Map([[userId, deltaMs]]);
+          }
+          if (old.has(userId)) {
+            return old;
+          }
+          return new Map([...old, [userId, deltaMs]]);
+        });
         return fetcher.submit(
           {
             i: i.toString(),
             j: j.toString(),
             userId,
-            deltaMs: (CLUE_TIMEOUT_MS + 1).toString(),
+            deltaMs: deltaMs.toString(),
           },
           { method: "post", action: `/room/${roomName}/buzz` }
         );
@@ -241,7 +195,6 @@ export default function Prompt({
 
     const lockoutDeltaMs = clickedAtMs - clueShownAt;
     if (lockoutDeltaMs < clueDurationMs) {
-      console.log("lockout >:(");
       return setLockout(true);
     }
 
@@ -249,7 +202,6 @@ export default function Prompt({
       return;
     }
 
-    console.log("submitting");
     // Contestant buzzed, so submit their buzz time
     const [i, j] = clueIdx;
     const clueDeltaMs = clickedAtMs - buzzerOpenAt;
@@ -279,9 +231,14 @@ export default function Prompt({
             "h-screen w-screen bg-blue-1000 flex flex-col justify-center"
           )}
         >
-          <div className="p-4 text-white">
-            <span className="font-bold">{category}</span> for{" "}
-            <span className="font-bold">${clue?.value}</span>
+          <div className="flex justify-between p-4">
+            <div className="text-white">
+              <span className="font-bold">{category}</span> for{" "}
+              <span className="font-bold">${clue?.value}</span>
+            </div>
+            <span className="text-sm text-gray-300">
+              Click or press <Kbd>Enter</Kbd> to buzz in
+            </span>
           </div>
           <button
             type="button"
@@ -291,7 +248,6 @@ export default function Prompt({
               type !== GameState.ReadClue
             }
             onClick={() => handleClick(Date.now())}
-            onKeyDown={(e) => console.log("got keydown....", e)}
             className="p-4 flex flex-col justify-center flex-grow uppercase text-center text-shadow-md font-korinna"
             autoFocus={
               shouldShowPrompt &&
@@ -299,7 +255,7 @@ export default function Prompt({
               !shouldShowAnswerToAll
             }
           >
-            <Textfit className="text-white grow w-full" mode="multi">
+            <p className="text-white grow w-full block text-4xl leading-relaxed sm:text-5xl sm:leading-relaxed md:text-6xl md:leading-normal">
               {clue?.clue}
               <br />
               <span
@@ -309,7 +265,7 @@ export default function Prompt({
               >
                 {clue?.answer}
               </span>
-            </Textfit>
+            </p>
           </button>
           <Lockout active={lockout} />
           <AnswerEvaluator
@@ -338,11 +294,12 @@ export default function Prompt({
                   )
                 : null}
             </div>
-            <BuzzerLight active={buzzerOpenAt !== undefined} />
           </div>
-          <Countdown startTime={myBuzzDurationMs ? buzzerOpenAt : undefined} />
+          <Countdown
+            startTime={type === GameState.ReadClue ? buzzerOpenAt : undefined}
+          />
           <div
-            className={classNames("h-8 md:h-16 bg-white self-start", {
+            className={classNames("h-8 bg-white self-start", {
               "w-0": myBuzzDurationMs === undefined,
               "w-full":
                 myBuzzDurationMs !== undefined || type !== GameState.ReadClue,

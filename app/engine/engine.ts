@@ -68,7 +68,11 @@ export function getWinningBuzzer(buzzes?: Map<string, number>):
   }
   return Array.from(buzzes.entries()).reduce(
     (acc, [userId, deltaMs]) => {
-      if (deltaMs !== CANT_BUZZ_FLAG && deltaMs < acc.deltaMs) {
+      if (
+        deltaMs !== CANT_BUZZ_FLAG &&
+        deltaMs < acc.deltaMs &&
+        deltaMs < CLUE_TIMEOUT_MS
+      ) {
         return { userId, deltaMs };
       }
       return acc;
@@ -148,14 +152,11 @@ export function gameEngine(state: State, action: Action): State {
           return state;
         }
 
-        let buzzes = state.buzzes;
-        if (!buzzes) {
-          buzzes = new Map();
-        }
+        const buzzes = state.buzzes ? new Map(state.buzzes) : new Map();
 
         // Accept this buzz if the user has not already buzzed and the buzz came
         // in before the timeout.
-        if (!buzzes.has(userId) && deltaMs <= CLUE_TIMEOUT_MS) {
+        if (!buzzes.has(userId)) {
           buzzes.set(userId, deltaMs);
         }
 
@@ -175,6 +176,7 @@ export function gameEngine(state: State, action: Action): State {
         if (!winningBuzz?.userId) {
           const nextState = {
             ...state,
+            buzzes,
             type: GameState.RevealAnswerToAll,
             numAnswered: state.numAnswered + 1,
           };
@@ -248,6 +250,10 @@ export function gameEngine(state: State, action: Action): State {
         if (!activeClue) {
           return state;
         }
+        if (state.type !== GameState.RevealAnswerToAll) {
+          return state;
+        }
+
         // TODO: make use of user ID?
         const { i: actionI, j: actionJ } = action.payload;
         const [i, j] = activeClue;
