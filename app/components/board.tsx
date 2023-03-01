@@ -52,7 +52,7 @@ function ClueComponent({
     unrevealed ? (
       <p className="text-sm text-gray-400">{UNREVEALED_CLUE}</p>
     ) : (
-      <p className="uppercase font-korinna">{clue.answer}</p>
+      <p className="uppercase font-korinna break-words">{clue.answer}</p>
     )
   ) : (
     <p className="text-4xl lg:text-5xl text-yellow-1000 text-shadow-md font-impact">
