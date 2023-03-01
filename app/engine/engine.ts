@@ -300,7 +300,6 @@ export function gameEngine(state: State, action: Action): State {
 
         if (state.numAnswered === state.numCluesInBoard) {
           const newRound = state.round + 1;
-          // TODO: preserve points
           const board = state.game.boards[newRound];
 
           const numCluesInBoard = board

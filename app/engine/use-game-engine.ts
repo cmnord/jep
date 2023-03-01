@@ -55,7 +55,7 @@ export function useGameEngine(
     new Set<number>(serverRoomEvents.map((re) => re.id))
   );
 
-  // TODO: spectator, points
+  // TODO: spectators who cannot buzz
 
   const [state, dispatch] = React.useReducer(
     gameEngine,

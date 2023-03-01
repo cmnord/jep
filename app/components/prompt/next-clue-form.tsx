@@ -37,7 +37,6 @@ export default function NextClueForm({
       <input type="hidden" value={userId} name="userId" />
       <input type="hidden" value={i} name="i" />
       <input type="hidden" value={j} name="j" />
-      {/* TODO: show who won how much money */}
       {cluesLeftInRound ? (
         <p className="text-white font-bold">
           {boardControlName} will choose the next clue.
