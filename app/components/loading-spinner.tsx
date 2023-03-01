@@ -1,11 +1,14 @@
-export default function LoadingSpinner() {
+export default function LoadingSpinner({ className }: { className?: string }) {
   return (
     <svg
-      className="animate-spin h-5 w-5"
+      className={"animate-spin h-5 w-5 " + className}
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"
+      role="img"
+      aria-labelledby="loading-title"
     >
+      <title id="loading-title">Loading...</title>
       <circle
         className="opacity-25"
         cx="12"

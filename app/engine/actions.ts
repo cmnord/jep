@@ -18,7 +18,7 @@ export function isClueAction(action: Action): action is {
 
 export function isPlayerAction(action: Action): action is {
   type: ActionType.Join | ActionType.ChangeName;
-  payload: Player;
+  payload: { userId: string; name: string };
 } {
   return (
     (action.type === ActionType.Join ||

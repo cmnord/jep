@@ -23,7 +23,10 @@ function createInitialState(game: Game, round: number): State {
   return {
     type: GameState.Preview,
     game: game,
-    isAnswered: generateGrid(n, m, false),
+    isAnswered: generateGrid(n, m, {
+      isAnswered: false,
+      answeredBy: undefined,
+    }),
     numAnswered: 0,
     numCluesInBoard,
     players: new Map(),
@@ -118,7 +121,8 @@ export function useGameEngine(
     category = state.activeClue ? board.categoryNames[j] : undefined;
   }
 
-  const isAnswered = (i: number, j: number) => state.isAnswered[i][j];
+  const isAnswered = (i: number, j: number) =>
+    state.isAnswered[i][j].isAnswered;
 
   const winningBuzz = getWinningBuzzer(state.buzzes);
   const winningBuzzer = winningBuzz?.userId ?? undefined;

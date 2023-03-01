@@ -12,4 +12,5 @@ module.exports = {
   future: {
     unstable_tailwind: true,
   },
+  serverDependenciesToBundle: ["nanoid"],
 };

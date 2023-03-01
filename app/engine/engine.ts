@@ -16,13 +16,18 @@ export enum GameState {
   RevealAnswerToAll = "RevealAnswerToAll",
 }
 
+interface ClueAnswer {
+  isAnswered: boolean;
+  answeredBy?: string;
+}
+
 export interface State {
   type: GameState;
   activeClue?: [number, number];
   boardControl?: string;
   buzzes?: Map<string, number>;
   game: Game;
-  isAnswered: boolean[][];
+  isAnswered: ClueAnswer[][];
   numAnswered: number;
   numCluesInBoard: number;
   players: Map<string, Player>;
@@ -47,6 +52,7 @@ export interface Action {
 export interface Player {
   userId: string;
   name: string;
+  score: number;
 }
 
 /** CLUE_TIMEOUT_MS is the total amount of time a contestant has to buzz in after
@@ -87,7 +93,10 @@ export function gameEngine(state: State, action: Action): State {
     case ActionType.Join: {
       if (isPlayerAction(action)) {
         const nextState = { ...state };
-        nextState.players.set(action.payload.userId, action.payload);
+        nextState.players.set(action.payload.userId, {
+          ...action.payload,
+          score: 0,
+        });
         // If this is the first player joining, give them board control.
         if (nextState.players.size === 1) {
           nextState.boardControl = action.payload.userId;
@@ -98,9 +107,20 @@ export function gameEngine(state: State, action: Action): State {
     }
     case ActionType.ChangeName: {
       if (isPlayerAction(action)) {
-        const nextState = { ...state };
-        nextState.players.set(action.payload.userId, action.payload);
-        return nextState;
+        const players = new Map(state.players);
+        const player = players.get(action.payload.userId);
+        if (!player) {
+          players.set(action.payload.userId, {
+            ...action.payload,
+            score: 0,
+          });
+        } else {
+          players.set(action.payload.userId, {
+            ...player,
+            name: action.payload.name,
+          });
+        }
+        return { ...state, players };
       }
       throw new Error("PlayerChangeName action must have an associated player");
     }
@@ -122,7 +142,7 @@ export function gameEngine(state: State, action: Action): State {
         if (
           state.type === GameState.WaitForClueChoice &&
           state.boardControl === userId &&
-          !state.isAnswered[i][j]
+          !state.isAnswered[i][j].isAnswered
         ) {
           const nextState = { ...state };
           nextState.type = GameState.ReadClue;
@@ -137,7 +157,6 @@ export function gameEngine(state: State, action: Action): State {
       if (isBuzzAction(action)) {
         // Ignore this buzz if we're not in the clue-reading stage.
         if (state.type !== GameState.ReadClue) {
-          console.log("!!! bad buzz msg, not in ReadClue state");
           return state;
         }
         const activeClue = state.activeClue;
@@ -180,7 +199,10 @@ export function gameEngine(state: State, action: Action): State {
             type: GameState.RevealAnswerToAll,
             numAnswered: state.numAnswered + 1,
           };
-          nextState.isAnswered[i][j] = true;
+          nextState.isAnswered[i][j] = {
+            isAnswered: true,
+            answeredBy: undefined,
+          };
           return nextState;
         }
 
@@ -237,7 +259,18 @@ export function gameEngine(state: State, action: Action): State {
           boardControl: userId,
           numAnswered: state.numAnswered + 1,
         };
-        nextState.isAnswered[i][j] = true;
+        nextState.isAnswered[i][j] = {
+          isAnswered: true,
+          answeredBy: userId,
+        };
+        const player = nextState.players.get(userId);
+        if (player) {
+          const clue = state.game.boards[state.round].categories[j].clues[i];
+          nextState.players.set(userId, {
+            ...player,
+            score: player.score + clue.value,
+          });
+        }
         return nextState;
       }
       throw new Error(
@@ -280,7 +313,10 @@ export function gameEngine(state: State, action: Action): State {
             type: GameState.Preview,
             boardControl: state.boardControl,
             game: state.game,
-            isAnswered: generateGrid(n, m, false),
+            isAnswered: generateGrid(n, m, {
+              isAnswered: false,
+              answeredBy: undefined,
+            }),
             numAnswered: 0,
             numCluesInBoard,
             players: state.players,
