@@ -255,7 +255,7 @@ export default function Prompt({
               !shouldShowAnswerToAll
             }
           >
-            <p className="text-white grow w-full block text-4xl leading-relaxed sm:text-5xl sm:leading-relaxed md:text-6xl md:leading-normal">
+            <p className="text-white grow w-full block word-spacing-1 text-4xl leading-relaxed sm:text-5xl sm:leading-relaxed md:text-6xl md:leading-normal">
               {clue?.clue}
               <br />
               <span
