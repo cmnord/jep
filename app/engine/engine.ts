@@ -229,6 +229,10 @@ export function gameEngine(state: State, action: Action): State {
         if (userId !== winningBuzzer?.userId) {
           return state;
         }
+        // Ignore the answer if the clue has already been answered.
+        if (state.isAnswered[i][j].isAnswered) {
+          return { ...state, type: GameState.RevealAnswerToAll };
+        }
 
         if (!correct) {
           // If the buzzer was wrong, re-open the buzzers to everyone except
@@ -252,7 +256,6 @@ export function gameEngine(state: State, action: Action): State {
 
         // If the buzzer was right, reveal the answer to everyone and give the
         // winning buzzer board control.
-        // TODO: award points.
         const nextState = {
           ...state,
           type: GameState.RevealAnswerToAll,
