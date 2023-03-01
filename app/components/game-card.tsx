@@ -16,12 +16,12 @@ export default function GameCard({ game }: { game: Game }) {
         <div className="flex items-center justify-between">
           <div className="flex flex-col items-start p-4 min-w-0">
             <div className="flex gap-2 mb-2 w-full">
-              <strong
-                className="whitespace-nowrap min-w-0 overflow-hidden overflow-ellipsis"
-                title={game.title}
+              <p
+                className="text-sm whitespace-nowrap min-w-0 overflow-hidden overflow-ellipsis"
+                title={game.author}
               >
-                {game.title}
-              </strong>
+                {game.author}
+              </p>
               <div className="flex py-0.5">
                 <div className="border-l border-gray-200" />
               </div>
@@ -29,12 +29,12 @@ export default function GameCard({ game }: { game: Game }) {
                 {numRounds} {numRounds === 1 ? "round" : "rounds"}
               </p>
             </div>
-            <p
-              className="w-full text-sm text-left whitespace-nowrap overflow-hidden overflow-ellipsis"
-              title={game.author}
+            <strong
+              className="w-full text-left whitespace-nowrap overflow-hidden overflow-ellipsis"
+              title={game.title}
             >
-              by {game.author}
-            </p>
+              {game.title}
+            </strong>
           </div>
           <div className="flex items-center justify-center p-1 mr-2 rounded-full transition-colors group-hover:bg-blue-200">
             {/* Heroicon name: outline/chevron-right */}
