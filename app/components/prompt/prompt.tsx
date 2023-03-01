@@ -1,7 +1,6 @@
 import * as React from "react";
 import { useFetcher } from "@remix-run/react";
 import classNames from "classnames";
-import { Textfit } from "react-textfit";
 
 import { useEngineContext } from "~/engine/use-engine-context";
 import Button from "~/components/button";

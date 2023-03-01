@@ -10,7 +10,7 @@ import EditPlayerForm from "./edit-player";
 const formatter = Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD",
-  notation: "compact",
+  maximumFractionDigits: 0, // Round to whole dollars.
 });
 
 function PlayerIcon({
