@@ -14,6 +14,7 @@ import AnswerForm from "./answer-form";
 import NextClueForm from "./next-clue-form";
 import Fade from "./fade";
 import Lockout from "./lockout";
+import Countdown from "./countdown";
 
 /** MS_PER_CHARACTER is a heuristic value to scale the amount of time per clue by
  * its length.
@@ -284,14 +285,18 @@ export default function Prompt({
           </div>
           <button
             type="button"
-            disabled={lockout || myBuzzDurationMs !== undefined}
+            disabled={
+              lockout ||
+              myBuzzDurationMs !== undefined ||
+              type !== GameState.ReadClue
+            }
             onClick={() => handleClick(Date.now())}
             onKeyDown={(e) => console.log("got keydown....", e)}
             className="p-4 flex flex-col justify-center flex-grow uppercase text-center text-shadow-md font-korinna"
             autoFocus={
               shouldShowPrompt &&
               !shouldShowAnswerToBuzzer &&
-              shouldShowAnswerToAll
+              !shouldShowAnswerToAll
             }
           >
             <Textfit className="text-white grow w-full" mode="multi">
@@ -335,20 +340,21 @@ export default function Prompt({
             </div>
             <BuzzerLight active={buzzerOpenAt !== undefined} />
           </div>
+          <Countdown startTime={myBuzzDurationMs ? buzzerOpenAt : undefined} />
           <div
             className={classNames("h-8 md:h-16 bg-white self-start", {
               "w-0": myBuzzDurationMs === undefined,
-              "w-full": myBuzzDurationMs !== undefined,
+              "w-full":
+                myBuzzDurationMs !== undefined || type !== GameState.ReadClue,
             })}
-            style={
-              myBuzzDurationMs === undefined
-                ? {
-                    animation: `${
+            style={{
+              animation:
+                type !== GameState.ReadClue
+                  ? "none"
+                  : `${
                       clueDurationMs / 1000
                     }s linear 0s 1 growFromLeft forwards`,
-                  }
-                : undefined
-            }
+            }}
           />
         </div>
       </div>
