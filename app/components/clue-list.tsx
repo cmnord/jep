@@ -56,7 +56,12 @@ export default function ClueList({
           key={`category-${j}`}
           className="flex flex-col gap-2 p-2 w-full sm:w-52"
         >
-          <div className="font-bold text-lg">{category.name}</div>
+          <div
+            title={category.name}
+            className="font-bold text-lg block whitespace-nowrap overflow-hidden overflow-ellipsis"
+          >
+            {category.name}
+          </div>
           <div className="relative sm:basis-96 grow overflow-y-auto border-t-gray-300 border-t-2 mt-2 pr-3">
             {category.clues.map((clue, i) => {
               return (
