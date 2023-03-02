@@ -65,7 +65,7 @@ function BeforeGamePreview({
   );
 }
 
-export default function Preview({
+export function Preview({
   numRounds,
   finalClue,
   userId,
