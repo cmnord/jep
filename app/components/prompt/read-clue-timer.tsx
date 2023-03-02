@@ -1,6 +1,6 @@
 import classNames from "classnames";
 
-export default function ReadClueTimer({
+export function ReadClueTimer({
   clueDurationMs,
   shouldAnimate,
 }: {

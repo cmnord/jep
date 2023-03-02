@@ -3,7 +3,7 @@ import * as React from "react";
 import BoardComponent from "~/components/board";
 import ClueList from "~/components/clue-list";
 import Preview from "~/components/preview";
-import Prompt from "~/components/prompt/prompt";
+import Prompt from "~/components/prompt";
 
 import { GameState } from "~/engine/engine";
 import { useEngineContext } from "~/engine/use-engine-context";

@@ -3,7 +3,7 @@ import * as React from "react";
 
 /** Fade applies slide in and out animations on the component when it mounts and
  * unmounts. */
-export default function Fade({
+export function Fade({
   show,
   children,
 }: {

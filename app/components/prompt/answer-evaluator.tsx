@@ -2,13 +2,13 @@ import classNames from "classnames";
 import { GameState } from "~/engine/engine";
 import { useEngineContext } from "~/engine/use-engine-context";
 import Button from "../button";
-import AnswerForm from "./answer-form";
-import NextClueForm from "./next-clue-form";
+import { ConnectedAnswerForm as AnswerForm } from "./answer-form";
+import { NextClueForm } from "./next-clue-form";
 
 /** AnswerEvaluator is shown to the winning buzzer at the bottom of the prompt.
  * They can reveal the answer, then mark it correct/incorrect, then anyone can
  * advance the round. */
-export default function AnswerEvaluator({
+export function AnswerEvaluator({
   isOpen,
   roomName,
   userId,

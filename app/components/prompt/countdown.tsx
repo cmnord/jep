@@ -14,7 +14,7 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
 }
 
-export default function Countdown({ startTime }: { startTime?: number }) {
+export function Countdown({ startTime }: { startTime?: number }) {
   const [count, setCount] = React.useState(NUM_BARS / 2);
   const animationRef = React.useRef<number>();
 

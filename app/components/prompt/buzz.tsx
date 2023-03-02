@@ -50,7 +50,7 @@ function Buzz({
   );
 }
 
-export default function Buzzes({
+export function Buzzes({
   buzzes,
   clueValue,
   players,

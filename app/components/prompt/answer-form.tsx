@@ -33,7 +33,7 @@ function AnswerForm({ loading }: { loading: boolean }) {
   );
 }
 
-export default function ConnectedAnswerForm({
+export function ConnectedAnswerForm({
   roomName,
   userId,
   i,

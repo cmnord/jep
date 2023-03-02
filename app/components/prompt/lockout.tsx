@@ -1,5 +1,5 @@
 /** Lockout is a visual indicator that a contestant buzzed too early. */
-export default function Lockout({ active }: { active: boolean }) {
+export function Lockout({ active }: { active: boolean }) {
   if (!active) {
     return null;
   }
