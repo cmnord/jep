@@ -8,11 +8,13 @@ export const GameEngineContext = React.createContext<
 >({
   type: GameState.Preview,
   activeClue: undefined,
+  answeredBy: () => undefined,
   board: { categories: [], categoryNames: [] },
   boardControl: undefined,
   buzzes: new Map(),
   category: undefined,
   clue: undefined,
+  soloDispatch: () => null,
   isAnswered: () => false,
   numAnswered: 0,
   numCluesInBoard: 0,

@@ -1,20 +1,27 @@
 import { Link, useFetcher } from "@remix-run/react";
+import * as React from "react";
 
 import Button from "~/components/button";
 import Modal from "~/components/modal";
 import Players from "~/components/player";
 
+import type { Action } from "~/engine";
 import { GameState, useEngineContext } from "~/engine";
 import type { Clue } from "~/models/convert.server";
+import { useSoloAction } from "~/utils/use-solo-action";
 
 function NextRoundFooter({
   roomName,
   round,
+  soloDispatch,
 }: {
   roomName: string;
   round: number;
+  soloDispatch: React.Dispatch<Action>;
 }) {
-  const fetcher = useFetcher();
+  const fetcher = useFetcher<Action>();
+  useSoloAction(fetcher, soloDispatch);
+
   return (
     <Modal.Footer>
       <fetcher.Form method="post" action={`/room/${roomName}/start`}>
@@ -32,11 +39,13 @@ function BeforeGamePreview({
   userId,
   roomName,
   round,
+  soloDispatch,
 }: {
   isOpen: boolean;
   userId: string;
   roomName: string;
   round: number;
+  soloDispatch: React.Dispatch<Action>;
 }) {
   const { boardControl, players } = useEngineContext();
   const controllingPlayer = boardControl ? players.get(boardControl) : null;
@@ -59,7 +68,11 @@ function BeforeGamePreview({
           )}
         </p>
       </Modal.Body>
-      <NextRoundFooter roomName={roomName} round={round} />
+      <NextRoundFooter
+        roomName={roomName}
+        round={round}
+        soloDispatch={soloDispatch}
+      />
     </Modal>
   );
 }
@@ -75,7 +88,7 @@ export function Preview({
   userId: string;
   roomName: string;
 }) {
-  const { type, round } = useEngineContext();
+  const { type, round, soloDispatch } = useEngineContext();
 
   const isOpen = type === GameState.Preview;
 
@@ -87,6 +100,7 @@ export function Preview({
           userId={userId}
           roomName={roomName}
           round={round}
+          soloDispatch={soloDispatch}
         />
       );
     case numRounds:
@@ -116,7 +130,11 @@ export function Preview({
             <Modal.Title>Play Final &rarr;</Modal.Title>
             <p className="text-gray-500">Round done! Click for final prompt</p>
           </Modal.Body>
-          <NextRoundFooter roomName={roomName} round={round} />
+          <NextRoundFooter
+            roomName={roomName}
+            round={round}
+            soloDispatch={soloDispatch}
+          />
         </Modal>
       );
     case 1:
@@ -128,7 +146,11 @@ export function Preview({
               Single round done! Click to play double
             </p>
           </Modal.Body>
-          <NextRoundFooter roomName={roomName} round={round} />
+          <NextRoundFooter
+            roomName={roomName}
+            round={round}
+            soloDispatch={soloDispatch}
+          />
         </Modal>
       );
     default:

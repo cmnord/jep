@@ -17,6 +17,7 @@
   "eslintIgnore": [
     "/node_modules",
     "/build",
+    "/public/build",
     "/api"
   ],
   "dependencies": {

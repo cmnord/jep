@@ -1,8 +1,10 @@
 import { useFetcher } from "@remix-run/react";
 import * as React from "react";
 
+import type { Action } from "~/engine";
 import { useEngineContext } from "~/engine";
 import type { Board, Clue } from "~/models/convert.server";
+import { useSoloAction } from "~/utils/use-solo-action";
 import { getClueValue } from "~/utils/utils";
 import { Category } from "./category";
 import { ClueComponent } from "./clue";
@@ -92,8 +94,11 @@ export function ConnectedBoardComponent({
   userId: string;
   roomName: string;
 }) {
-  const { board, round, boardControl, isAnswered } = useEngineContext();
-  const fetcher = useFetcher();
+  const { board, round, boardControl, isAnswered, soloDispatch } =
+    useEngineContext();
+  const fetcher = useFetcher<Action>();
+  useSoloAction(fetcher, soloDispatch);
+
   const tbodyRef = React.useRef<HTMLTableSectionElement | null>(null);
 
   const hasBoardControl = boardControl === userId;

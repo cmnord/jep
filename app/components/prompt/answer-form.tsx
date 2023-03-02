@@ -1,5 +1,9 @@
 import { useFetcher } from "@remix-run/react";
+
 import Button from "~/components/button";
+import type { Action } from "~/engine";
+import { useEngineContext } from "~/engine";
+import { useSoloAction } from "~/utils/use-solo-action";
 
 function AnswerForm({ loading }: { loading: boolean }) {
   return (
@@ -44,7 +48,9 @@ export function ConnectedAnswerForm({
   i: number;
   j: number;
 }) {
-  const fetcher = useFetcher();
+  const { soloDispatch } = useEngineContext();
+  const fetcher = useFetcher<Action>();
+  useSoloAction(fetcher, soloDispatch);
   const loading = fetcher.state === "loading";
 
   return (

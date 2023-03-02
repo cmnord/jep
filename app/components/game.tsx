@@ -59,7 +59,11 @@ export default function GameComponent({
           <ClueList focusedClue={focusedClueIdx} setFocusedClue={onFocusClue} />
         )}
       </div>
-      <Prompt roomName={roomName} userId={userId} />
+      <Prompt
+        roomName={roomName}
+        userId={userId}
+        setFocusedClue={onFocusClue}
+      />
     </>
   );
 }

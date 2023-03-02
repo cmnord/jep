@@ -2,9 +2,11 @@ import { useFetcher } from "@remix-run/react";
 import classNames from "classnames";
 import * as React from "react";
 
+import type { Action } from "~/engine";
 import { CLUE_TIMEOUT_MS, GameState, useEngineContext } from "~/engine";
 import type { Clue } from "~/models/convert.server";
 import useKeyPress from "~/utils/use-key-press";
+import { useSoloAction } from "~/utils/use-solo-action";
 import { useTimeout } from "~/utils/use-timeout";
 
 import { AnswerEvaluator as AnswerEvaluatorForm } from "./answer-evaluator";
@@ -13,6 +15,7 @@ import { Countdown } from "./countdown";
 import { Fade } from "./fade";
 import { Kbd } from "./kbd";
 import { Lockout } from "./lockout";
+import { NextClueForm } from "./next-clue-form";
 import { ReadClueTimer } from "./read-clue-timer";
 
 /** MS_PER_CHARACTER is a heuristic value to scale the amount of time per clue by
@@ -88,12 +91,23 @@ function Prompt({
 export function ConnectedPrompt({
   roomName,
   userId,
+  setFocusedClue,
 }: {
   roomName: string;
   userId: string;
+  setFocusedClue: (i: number, j: number) => void;
 }) {
-  const { type, clue, category, activeClue, buzzes, players, winningBuzzer } =
-    useEngineContext();
+  const {
+    type,
+    clue,
+    category,
+    activeClue,
+    buzzes,
+    players,
+    winningBuzzer,
+    soloDispatch,
+    answeredBy,
+  } = useEngineContext();
 
   const shouldShowPrompt =
     type === GameState.ReadClue ||
@@ -120,7 +134,8 @@ export function ConnectedPrompt({
   );
   const [lockout, setLockout] = React.useState(false);
 
-  const fetcher = useFetcher();
+  const fetcher = useFetcher<Action>();
+  useSoloAction(fetcher, soloDispatch);
   const loading = fetcher.state === "loading";
 
   const numCharactersInClue = clue?.clue.length ?? 0;
@@ -243,21 +258,30 @@ export function ConnectedPrompt({
       showAnswer={showAnswer || shouldShowAnswerToAll}
     >
       <Lockout active={lockout} />
-      <AnswerEvaluatorForm
-        isOpen={shouldShowAnswerToBuzzer || showAnswer}
-        roomName={roomName}
-        userId={userId}
-        clueIdx={clueIdx}
-        showAnswer={showAnswer}
-        onClickShowAnswer={() => {
-          setShowAnswer(true);
-        }}
-        loading={loading}
-      />
+      {type === GameState.RevealAnswerToAll ? (
+        <NextClueForm
+          roomName={roomName}
+          userId={userId}
+          clueIdx={clueIdx}
+          setFocusedClue={setFocusedClue}
+        />
+      ) : (
+        <AnswerEvaluatorForm
+          isOpen={shouldShowAnswerToBuzzer || showAnswer}
+          roomName={roomName}
+          userId={userId}
+          clueIdx={clueIdx}
+          showAnswer={showAnswer}
+          onClickShowAnswer={() => {
+            setShowAnswer(true);
+          }}
+          loading={loading}
+        />
+      )}
       <Buzzes
         buzzes={optimisticBuzzes}
         players={players}
-        winningBuzzer={winningBuzzer}
+        winningBuzzer={clueIdx ? answeredBy(clueIdx[0], clueIdx[1]) : undefined}
         showWinner={type === GameState.RevealAnswerToAll}
         clueValue={clue?.value}
       />
