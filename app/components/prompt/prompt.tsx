@@ -2,18 +2,19 @@ import { useFetcher } from "@remix-run/react";
 import classNames from "classnames";
 import * as React from "react";
 
-import Button from "~/components/button";
 import { CLUE_TIMEOUT_MS, GameState } from "~/engine/engine";
 import { useEngineContext } from "~/engine/use-engine-context";
+import type { Clue } from "~/models/convert.server";
 import useKeyPress from "~/utils/use-key-press";
+import { useTimeout } from "~/utils/use-timeout";
 
-import AnswerForm from "./answer-form";
-import Buzz from "./buzz";
+import AnswerEvaluatorForm from "./answer-evaluator";
+import Buzzes from "./buzz";
 import Countdown from "./countdown";
 import Fade from "./fade";
 import Kbd from "./kbd";
 import Lockout from "./lockout";
-import NextClueForm from "./next-clue-form";
+import ReadClueTimer from "./read-clue-timer";
 
 /** MS_PER_CHARACTER is a heuristic value to scale the amount of time per clue by
  * its length.
@@ -23,59 +24,69 @@ const MS_PER_CHARACTER = 50;
 /** LOCKOUT_MS applies a 500ms lockout if a contestant buzzes before the clue is read. */
 const LOCKOUT_MS = 500;
 
-function AnswerEvaluator({
+function Prompt({
   isOpen,
-  roomName,
-  userId,
-  clueIdx,
+  category,
+  clue,
+  canBuzz,
+  onBuzz,
+  focusOnBuzz,
   showAnswer,
-  onClickShowAnswer,
-  loading,
+  children,
 }: {
   isOpen: boolean;
-  roomName: string;
-  userId: string;
-  clueIdx: [number, number] | undefined;
+  category?: string;
+  clue?: Clue;
+  canBuzz: boolean;
+  onBuzz: (buzzedAt: number) => void;
+  focusOnBuzz: boolean;
   showAnswer: boolean;
-  onClickShowAnswer: () => void;
-  loading: boolean;
+  children?: React.ReactNode;
 }) {
-  const { type } = useEngineContext();
-
-  if (!showAnswer) {
-    return (
-      <div
-        className={classNames("p-2 flex flex-col items-center gap-2", {
-          "opacity-0": !isOpen,
-        })}
-      >
-        <p className="text-gray-300 text-sm">
-          State your answer in the form of a question, then
-        </p>
-        <Button
-          type="primary"
-          htmlType="button"
-          disabled={!isOpen}
-          autoFocus={!isOpen}
-          onClick={onClickShowAnswer}
-          loading={loading}
+  return (
+    <Fade show={isOpen}>
+      <div className="relative">
+        <div
+          className={classNames(
+            "h-screen w-screen bg-blue-1000 flex flex-col justify-center"
+          )}
         >
-          Reveal answer
-        </Button>
+          <div className="flex justify-between p-4">
+            <div className="text-white">
+              <span className="font-bold">{category}</span> for{" "}
+              <span className="font-bold">${clue?.value}</span>
+            </div>
+            <span className="text-sm text-gray-300">
+              Click or press <Kbd>Enter</Kbd> to buzz in
+            </span>
+          </div>
+          <button
+            type="button"
+            disabled={!canBuzz}
+            onClick={() => onBuzz(Date.now())}
+            className="p-4 flex flex-col justify-center flex-grow uppercase text-center text-shadow-md font-korinna"
+            autoFocus={focusOnBuzz}
+          >
+            <p className="text-white grow w-full block word-spacing-1 text-4xl leading-relaxed md:text-5xl md:leading-normal">
+              {clue?.clue}
+              <br />
+              <span
+                className={classNames("text-cyan-300", {
+                  "opacity-0": !showAnswer,
+                })}
+              >
+                {clue?.answer}
+              </span>
+            </p>
+          </button>
+          {children}
+        </div>
       </div>
-    );
-  }
-
-  const [i, j] = clueIdx ? clueIdx : [-1, -1];
-
-  if (type === GameState.RevealAnswerToAll) {
-    return <NextClueForm roomName={roomName} userId={userId} i={i} j={j} />;
-  }
-
-  return <AnswerForm roomName={roomName} userId={userId} i={i} j={j} />;
+    </Fade>
+  );
 }
 
-export default function Prompt({
+export default function ConnectedPrompt({
   roomName,
   userId,
 }: {
@@ -134,14 +145,8 @@ export default function Prompt({
   }, [buzzes]);
 
   // Open the buzzer after the clue is done being "read".
-  React.useEffect(() => {
-    if (myBuzzDurationMs === undefined) {
-      const clueReadTimer = setTimeout(() => {
-        setBuzzerOpenAt(Date.now());
-      }, clueDurationMs);
-      return () => clearTimeout(clueReadTimer);
-    }
-  }, [clueDurationMs, myBuzzDurationMs]);
+  const delayMs = myBuzzDurationMs === undefined ? clueDurationMs : null;
+  useTimeout(() => setBuzzerOpenAt(Date.now()), delayMs);
 
   // Remove the lockout after 500ms.
   React.useEffect(() => {
@@ -223,102 +228,49 @@ export default function Prompt({
   useKeyPress("Enter", () => handleClick(Date.now()));
 
   return (
-    <Fade show={shouldShowPrompt}>
-      <div className="relative">
-        <div
-          className={classNames(
-            "h-screen w-screen bg-blue-1000 flex flex-col justify-center"
-          )}
-        >
-          <div className="flex justify-between p-4">
-            <div className="text-white">
-              <span className="font-bold">{category}</span> for{" "}
-              <span className="font-bold">${clue?.value}</span>
-            </div>
-            <span className="text-sm text-gray-300">
-              Click or press <Kbd>Enter</Kbd> to buzz in
-            </span>
-          </div>
-          <button
-            type="button"
-            disabled={
-              lockout ||
-              myBuzzDurationMs !== undefined ||
-              type !== GameState.ReadClue
-            }
-            onClick={() => handleClick(Date.now())}
-            className="p-4 flex flex-col justify-center flex-grow uppercase text-center text-shadow-md font-korinna"
-            autoFocus={
-              shouldShowPrompt &&
-              !shouldShowAnswerToBuzzer &&
-              !shouldShowAnswerToAll
-            }
-          >
-            <p className="text-white grow w-full block word-spacing-1 text-4xl leading-relaxed md:text-5xl md:leading-normal">
-              {clue?.clue}
-              <br />
-              <span
-                className={classNames("text-cyan-300", {
-                  "opacity-0": !showAnswer && !shouldShowAnswerToAll,
-                })}
-              >
-                {clue?.answer}
-              </span>
-            </p>
-          </button>
-          <Lockout active={lockout} />
-          <AnswerEvaluator
-            isOpen={shouldShowAnswerToBuzzer || showAnswer}
-            roomName={roomName}
-            userId={userId}
-            clueIdx={clueIdx}
-            showAnswer={showAnswer}
-            onClickShowAnswer={() => {
-              setShowAnswer(true);
-            }}
-            loading={loading}
-          />
-          <div className="flex items-center justify-between w-full">
-            <div className="flex gap-4 ml-4">
-              {optimisticBuzzes
-                ? // TODO: sort buzzes?
-                  Array.from(optimisticBuzzes.entries()).map(
-                    ([userId, durationMs], i) => (
-                      <Buzz
-                        key={i}
-                        player={players.get(userId)}
-                        durationMs={durationMs}
-                        won={
-                          winningBuzzer === userId &&
-                          type === GameState.RevealAnswerToAll
-                        }
-                        clueValue={clue?.value}
-                      />
-                    )
-                  )
-                : null}
-            </div>
-          </div>
-          <Countdown
-            startTime={type === GameState.ReadClue ? buzzerOpenAt : undefined}
-          />
-          <div
-            className={classNames("h-8 bg-white self-start", {
-              "w-0": myBuzzDurationMs === undefined,
-              "w-full":
-                myBuzzDurationMs !== undefined || type !== GameState.ReadClue,
-            })}
-            style={{
-              animation:
-                type !== GameState.ReadClue
-                  ? "none"
-                  : `${
-                      clueDurationMs / 1000
-                    }s linear 0s 1 growFromLeft forwards`,
-            }}
-          />
-        </div>
-      </div>
-    </Fade>
+    <Prompt
+      isOpen={shouldShowPrompt}
+      category={category}
+      clue={clue}
+      canBuzz={
+        !lockout &&
+        myBuzzDurationMs === undefined &&
+        type === GameState.ReadClue
+      }
+      onBuzz={() => handleClick(Date.now())}
+      focusOnBuzz={
+        shouldShowPrompt && !shouldShowAnswerToBuzzer && !shouldShowAnswerToAll
+      }
+      showAnswer={showAnswer || shouldShowAnswerToAll}
+    >
+      <Lockout active={lockout} />
+      <AnswerEvaluatorForm
+        isOpen={shouldShowAnswerToBuzzer || showAnswer}
+        roomName={roomName}
+        userId={userId}
+        clueIdx={clueIdx}
+        showAnswer={showAnswer}
+        onClickShowAnswer={() => {
+          setShowAnswer(true);
+        }}
+        loading={loading}
+      />
+      <Buzzes
+        buzzes={optimisticBuzzes}
+        players={players}
+        winningBuzzer={winningBuzzer}
+        showWinner={type === GameState.RevealAnswerToAll}
+        clueValue={clue?.value}
+      />
+      <Countdown
+        startTime={type === GameState.ReadClue ? buzzerOpenAt : undefined}
+      />
+      <ReadClueTimer
+        clueDurationMs={clueDurationMs}
+        shouldAnimate={
+          myBuzzDurationMs === undefined && type === GameState.ReadClue
+        }
+      />
+    </Prompt>
   );
 }
