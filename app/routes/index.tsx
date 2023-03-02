@@ -18,7 +18,7 @@ import {
   SuccessMessage,
 } from "~/components/error";
 import GameCard from "~/components/game-card";
-import QuestionMarkCircle from "~/components/question-mark-circle";
+import { QuestionMarkCircle } from "~/components/icons";
 import Search from "~/components/search";
 import Toggle from "~/components/toggle";
 import Tooltip from "~/components/tooltip";

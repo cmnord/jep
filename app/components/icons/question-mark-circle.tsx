@@ -1,4 +1,4 @@
-export default function QuestionMarkCircle({
+export function QuestionMarkCircle({
   outlined = false,
   className,
 }: {

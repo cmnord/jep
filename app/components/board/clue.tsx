@@ -1,8 +1,8 @@
 import classNames from "classnames";
 import * as React from "react";
 
+import { LoadingSpinner } from "~/components/icons";
 import type { Clue } from "~/models/convert.server";
-import LoadingSpinner from "../loading-spinner";
 
 const UNREVEALED_CLUE = "unrevealed";
 
