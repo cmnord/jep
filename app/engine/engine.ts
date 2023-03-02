@@ -1,5 +1,5 @@
 import type { Game } from "~/models/convert.server";
-import { generateGrid } from "~/utils/utils";
+import { generateGrid, getClueValue } from "~/utils/utils";
 import {
   isAnswerAction,
   isBuzzAction,
@@ -268,10 +268,10 @@ export function gameEngine(state: State, action: Action): State {
         };
         const player = nextState.players.get(userId);
         if (player) {
-          const clue = state.game.boards[state.round].categories[j].clues[i];
+          const clueValue = getClueValue(i, state.round);
           nextState.players.set(userId, {
             ...player,
-            score: player.score + clue.value,
+            score: player.score + clueValue,
           });
         }
         return nextState;
