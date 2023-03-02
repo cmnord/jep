@@ -1,11 +1,11 @@
 export default function Toggle({
   name,
   checked,
-  setChecked,
+  onClick,
 }: {
   name: string;
   checked: boolean;
-  setChecked: (checked: boolean) => void;
+  onClick: () => void;
 }) {
   return (
     <div className="relative inline-flex items-center">
@@ -16,15 +16,16 @@ export default function Toggle({
         id={name + "-toggle"}
         type="checkbox"
         checked={checked}
+        value={name}
         readOnly
         className="sr-only peer"
       />
       <button
+        type="submit"
         id={name}
+        value={checked ? "on" : "off"}
         name={name}
-        onClick={() => {
-          setChecked(!checked);
-        }}
+        onClick={onClick}
         className={
           "w-11 h-6 bg-gray-200 " +
           "focus:outline-none focus:ring-4 focus:ring-blue-300 " +
