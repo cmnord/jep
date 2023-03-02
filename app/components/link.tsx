@@ -1,4 +1,4 @@
-import { Link } from "@remix-run/react";
+import { Link as RemixLink } from "@remix-run/react";
 
 export function Anchor({
   href,
@@ -17,7 +17,7 @@ export function Anchor({
   );
 }
 
-export default function StyledLink({
+export default function Link({
   to,
   children,
 }: {
@@ -25,11 +25,11 @@ export default function StyledLink({
   children: React.ReactNode;
 }) {
   return (
-    <Link
+    <RemixLink
       className="text-blue-600 hover:text-blue-500 underline transition-colors visited:text-purple-700"
       to={to}
     >
       {children}
-    </Link>
+    </RemixLink>
   );
 }
