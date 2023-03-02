@@ -9,7 +9,7 @@ import useKeyPress from "~/utils/use-key-press";
 import { useSoloAction } from "~/utils/use-solo-action";
 import { useTimeout } from "~/utils/use-timeout";
 
-import { AnswerEvaluator as AnswerEvaluatorForm } from "./answer-evaluator";
+import { ConnectedAnswerForm as AnswerForm } from "./answer-evaluator";
 import { Buzzes } from "./buzz";
 import { Countdown } from "./countdown";
 import { Fade } from "./fade";
@@ -266,7 +266,7 @@ export function ConnectedPrompt({
           setFocusedClue={setFocusedClue}
         />
       ) : (
-        <AnswerEvaluatorForm
+        <AnswerForm
           isOpen={shouldShowAnswerToBuzzer || showAnswer}
           roomName={roomName}
           userId={userId}
