@@ -9,7 +9,7 @@ const UNREVEALED_CLUE = "unrevealed";
 export function ClueComponent({
   answered,
   clue,
-  hasBoardControl,
+  disabled,
   onFocus,
   onKeyDown,
   onClick,
@@ -18,7 +18,7 @@ export function ClueComponent({
   answered: boolean;
   clue: Clue;
   value: number;
-  hasBoardControl: boolean;
+  disabled: boolean;
   onFocus: () => void;
   onClick: () => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
@@ -44,7 +44,7 @@ export function ClueComponent({
     <td className="p-1 h-full">
       <button
         type="submit"
-        disabled={!hasBoardControl || unrevealed}
+        disabled={disabled || unrevealed}
         onClick={(e) => {
           e.preventDefault();
           setLoading(true);
