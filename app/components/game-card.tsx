@@ -27,10 +27,17 @@ function ChevronRightIcon({ className }: { className: string }) {
   );
 }
 
-export default function GameCard({ game }: { game: Game }) {
+export default function GameCard({
+  game,
+  solo,
+}: {
+  game: Game;
+  solo: boolean;
+}) {
   const numRounds = game.boards.length;
 
   const [loading, setLoading] = React.useState(false);
+  const to = solo ? `/${game.id}/solo` : `/${game.id}/play`;
 
   return (
     <button
@@ -41,7 +48,7 @@ export default function GameCard({ game }: { game: Game }) {
         "hover:border-blue-500 hover:shadow-sm "
       }
     >
-      <Link to={`/${game.id}/play`}>
+      <Link to={to}>
         <div className="flex items-center justify-between">
           <div className="flex flex-col items-start p-4 min-w-0">
             <div className="flex gap-2 mb-2 w-full">

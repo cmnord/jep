@@ -18,6 +18,7 @@ import {
 } from "~/components/error";
 import GameCard from "~/components/game-card";
 import Search from "~/components/search";
+import Toggle from "~/components/toggle";
 import Upload from "~/components/upload";
 
 import { getAllGames } from "~/models/game.server";
@@ -51,6 +52,8 @@ export default function Index() {
   const initialSearch = params.get("q") ?? undefined;
   const [search, setSearch] = React.useState(initialSearch);
   const debouncedSearch = useDebounce(search, 500);
+
+  const [solo, setSolo] = React.useState(false);
 
   React.useEffect(() => {
     if (fetcher.state === "submitting") {
@@ -97,10 +100,14 @@ export default function Index() {
           loading={fetcher.state === "loading"}
         />
       </Form>
-      <div className="flex mb-4">
+      <div className="flex mb-4 gap-6">
         <Link to={"/mock"}>
           <Button>Play a mock game</Button>
         </Link>
+        <div className="inline-flex items-center gap-3">
+          <Toggle name="solo" checked={solo} setChecked={setSolo} />
+          <p className="text-sm text-gray-500">Play solo</p>
+        </div>
       </div>
       {data.games.length === 0 && (
         <p className="text-sm text-gray-500">
@@ -109,7 +116,7 @@ export default function Index() {
       )}
       <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4 mb-4">
         {data.games.map((game, i) => (
-          <GameCard key={`game-${i}`} game={game} />
+          <GameCard key={`game-${i}`} game={game} solo={solo} />
         ))}
       </div>
       <fetcher.Form
