@@ -1,4 +1,4 @@
-import type { Action, Player } from "~/engine/engine";
+import type { Action } from "~/engine/engine";
 import { ActionType } from "~/engine/engine";
 
 export function isClueAction(action: Action): action is {

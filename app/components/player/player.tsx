@@ -1,5 +1,4 @@
 import classNames from "classnames";
-import * as React from "react";
 
 import type { Player } from "~/engine/engine";
 import { useEngineContext } from "~/engine/use-engine-context";

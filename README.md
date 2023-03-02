@@ -58,10 +58,8 @@ npx supabase gen types typescript --linked > app/models/database.types.ts
   ([source](https://glitch.com/~jarchive-json))
 - [Cluebase](https://cluebase.readthedocs.io/en/latest/)
   ([API](cluebase.lukelav.in/), [source](https://github.com/lukelavin/cluebase))
-  
 
 ## License
 
 [MIT](https://github.com/cmnord/jep/blob/main/LICENSE) ©
 [cmnord](https://github.com/cmnord/)
-

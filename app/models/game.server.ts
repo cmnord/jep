@@ -1,9 +1,9 @@
 import { readFile } from "fs/promises";
 
-import { db } from "~/supabase.server";
-import { Convert } from "~/models/convert.server";
 import type { Board, Game as ConvertedGame } from "~/models/convert.server";
+import { Convert } from "~/models/convert.server";
 import type { Database } from "~/models/database.types";
+import { db } from "~/supabase.server";
 
 /* Types */
 

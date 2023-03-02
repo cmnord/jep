@@ -2,9 +2,9 @@ import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 
 import GameComponent from "~/components/game";
-import { getMockGame } from "~/models/game.server";
-import { useGameEngine } from "~/engine/use-game-engine";
 import { GameEngineContext } from "~/engine/use-engine-context";
+import { useGameEngine } from "~/engine/use-game-engine";
+import { getMockGame } from "~/models/game.server";
 
 export async function loader() {
   const game = await getMockGame();

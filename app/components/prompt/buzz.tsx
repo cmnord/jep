@@ -1,5 +1,5 @@
-import { CLUE_TIMEOUT_MS } from "~/engine/engine";
 import type { Player } from "~/engine/engine";
+import { CLUE_TIMEOUT_MS } from "~/engine/engine";
 import { stringToHslColor } from "~/utils/utils";
 
 function durationMessage(durationMs: number) {

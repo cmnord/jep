@@ -2,13 +2,13 @@ import * as React from "react";
 
 import BoardComponent from "~/components/board";
 import ClueList from "~/components/clue-list";
-import Prompt from "~/components/prompt/prompt";
 import Preview from "~/components/preview";
+import Prompt from "~/components/prompt/prompt";
 
-import type { Game, Clue } from "~/models/convert.server";
-import { useEngineContext } from "~/engine/use-engine-context";
-import Players from "./player/player";
 import { GameState } from "~/engine/engine";
+import { useEngineContext } from "~/engine/use-engine-context";
+import type { Clue, Game } from "~/models/convert.server";
+import Players from "./player/player";
 
 /** GameComponent maintains the game state. */
 export default function GameComponent({

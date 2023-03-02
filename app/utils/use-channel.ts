@@ -1,6 +1,6 @@
-import * as React from "react";
 import type { RealtimePostgresInsertPayload } from "@supabase/realtime-js";
 import { createClient } from "@supabase/supabase-js";
+import * as React from "react";
 
 export function useChannel<T extends { [key: string]: any }>({
   channelName,

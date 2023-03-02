@@ -3,8 +3,8 @@ import classNames from "classnames";
 import * as React from "react";
 import { Textfit } from "react-textfit";
 
-import type { Clue } from "~/models/convert.server";
 import { useEngineContext } from "~/engine/use-engine-context";
+import type { Clue } from "~/models/convert.server";
 import LoadingSpinner from "./loading-spinner";
 
 const UNREVEALED_CLUE = "unrevealed";
