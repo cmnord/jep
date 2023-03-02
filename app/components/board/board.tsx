@@ -2,12 +2,89 @@ import { useFetcher } from "@remix-run/react";
 import * as React from "react";
 
 import { useEngineContext } from "~/engine/use-engine-context";
-import type { Clue } from "~/models/convert.server";
+import type { Board, Clue } from "~/models/convert.server";
 import { Category } from "./category";
 import { ClueComponent } from "./clue";
 
+function getClueValue(i: number, round: number) {
+  return (i + 1) * 200 * (round + 1);
+}
+
+function BoardComponent({
+  board,
+  disabled,
+  isAnswered,
+  onClickClue,
+  onFocusClue,
+  onKeyDownClue,
+  round,
+  tbodyRef,
+}: {
+  board: Board;
+  disabled: boolean;
+  isAnswered: (i: number, j: number) => boolean;
+  onClickClue: (i: number, j: number) => void;
+  onFocusClue: (i: number, j: number) => void;
+  onKeyDownClue: (event: React.KeyboardEvent, i: number, j: number) => void;
+  round: number;
+  tbodyRef: React.RefObject<HTMLTableSectionElement>;
+}) {
+  const clueRows = new Map<number, Clue[]>();
+  for (const category of board.categories) {
+    const clues = category.clues;
+    for (let i = 0; i < clues.length; i++) {
+      const clue = clues[i];
+      const clueValue = getClueValue(i, round);
+      const clueRow = clueRows.get(clueValue);
+      if (clueRow) {
+        clueRow.push(clue);
+      } else {
+        clueRows.set(clueValue, [clue]);
+      }
+    }
+  }
+
+  const sortedClueRows = Array.from(clueRows.entries()).sort(
+    (a, b) => a[0] - b[0]
+  );
+
+  return (
+    <div className="w-full overflow-x-scroll">
+      <div className="max-w-screen-lg min-w-screen-md mx-auto">
+        <table className="w-full table-fixed h-1 bg-black text-white border-spacing-3">
+          <thead>
+            <tr className="h-1">
+              {board.categoryNames.map((category) => (
+                <Category key={category} category={category} />
+              ))}
+            </tr>
+          </thead>
+          <tbody ref={tbodyRef}>
+            {sortedClueRows.map(([value, clues], i) => (
+              <tr key={value}>
+                {clues.map((clue, j) => (
+                  <ClueComponent
+                    key={`clue-${i}-${j}`}
+                    clue={clue}
+                    value={getClueValue(i, round)}
+                    answered={isAnswered(i, j)}
+                    disabled={disabled}
+                    onFocus={() => onFocusClue(i, j)}
+                    onClick={() => onClickClue(i, j)}
+                    onKeyDown={(e) => onKeyDownClue(e, i, j)}
+                  />
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 /** BoardComponent is purely presentational and renders the board. */
-export function BoardComponent({
+export function ConnectedBoardComponent({
   focusedClueIdx,
   onFocusClue,
   userId,
@@ -19,27 +96,10 @@ export function BoardComponent({
   roomName: string;
 }) {
   const { board, round, boardControl, isAnswered } = useEngineContext();
-  const roundMultiplier = round + 1;
-  const hasBoardControl = boardControl === userId;
-
   const fetcher = useFetcher();
-
   const tbodyRef = React.useRef<HTMLTableSectionElement | null>(null);
 
-  const clueRows = new Map<number, Clue[]>();
-  for (const category of board.categories) {
-    const clues = category.clues;
-    for (let i = 0; i < clues.length; i++) {
-      const clue = clues[i];
-      const clueValue = (i + 1) * 200 * roundMultiplier;
-      const clueRow = clueRows.get(clueValue);
-      if (clueRow) {
-        clueRow.push(clue);
-      } else {
-        clueRows.set(clueValue, [clue]);
-      }
-    }
-  }
+  const hasBoardControl = boardControl === userId;
 
   function focusCell(i: number, j: number) {
     const row = tbodyRef.current?.children.item(i);
@@ -59,10 +119,6 @@ export function BoardComponent({
       focusCell(i, j);
     }
   }, [focusedClueIdx]);
-
-  const sortedClueRows = Array.from(clueRows.entries()).sort(
-    (a, b) => a[0] - b[0]
-  );
 
   function handleClickClue(i: number, j: number) {
     if (hasBoardControl) {
@@ -109,36 +165,15 @@ export function BoardComponent({
   };
 
   return (
-    <div className="w-full overflow-x-scroll">
-      <div className="max-w-screen-lg min-w-screen-md mx-auto">
-        <table className="w-full table-fixed h-1 bg-black text-white border-spacing-3">
-          <thead>
-            <tr className="h-1">
-              {board.categoryNames.map((category) => (
-                <Category key={category} category={category} />
-              ))}
-            </tr>
-          </thead>
-          <tbody ref={tbodyRef}>
-            {sortedClueRows.map(([value, clues], i) => (
-              <tr key={value}>
-                {clues.map((clue, j) => (
-                  <ClueComponent
-                    key={`clue-${i}-${j}`}
-                    clue={clue}
-                    value={(i + 1) * 200 * (round + 1)}
-                    answered={isAnswered(i, j)}
-                    hasBoardControl={hasBoardControl}
-                    onFocus={() => onFocusClue(i, j)}
-                    onClick={() => handleClickClue(i, j)}
-                    onKeyDown={(e) => handleKeyDown(e, i, j)}
-                  />
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+    <BoardComponent
+      board={board}
+      tbodyRef={tbodyRef}
+      disabled={!hasBoardControl}
+      round={round}
+      isAnswered={isAnswered}
+      onClickClue={handleClickClue}
+      onFocusClue={onFocusClue}
+      onKeyDownClue={handleKeyDown}
+    />
   );
 }
