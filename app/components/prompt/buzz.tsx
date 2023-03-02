@@ -19,7 +19,7 @@ const formatter = Intl.NumberFormat("en-US", {
   maximumFractionDigits: 0, // Round to whole dollars.
 });
 
-export default function Buzz({
+function Buzz({
   player,
   durationMs,
   won,
@@ -46,6 +46,39 @@ export default function Buzz({
       ) : null}
       <div className="font-bold">{player?.name ?? "Unknown player"}</div>
       <div>{durationMsg}</div>
+    </div>
+  );
+}
+
+export default function Buzzes({
+  buzzes,
+  clueValue,
+  players,
+  showWinner,
+  winningBuzzer,
+}: {
+  buzzes?: Map<string, number>;
+  clueValue?: number;
+  players: Map<string, Player>;
+  showWinner: boolean;
+  winningBuzzer?: string;
+}) {
+  return (
+    <div className="flex items-center justify-between w-full">
+      <div className="flex gap-4 ml-4">
+        {buzzes
+          ? // TODO: sort buzzes?
+            Array.from(buzzes.entries()).map(([userId, durationMs], i) => (
+              <Buzz
+                key={i}
+                player={players.get(userId)}
+                durationMs={durationMs}
+                won={winningBuzzer === userId && showWinner}
+                clueValue={clueValue}
+              />
+            ))
+          : null}
+      </div>
     </div>
   );
 }

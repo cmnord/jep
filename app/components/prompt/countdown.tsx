@@ -16,7 +16,7 @@ function clamp(value: number, min: number, max: number) {
 
 export default function Countdown({ startTime }: { startTime?: number }) {
   const [count, setCount] = React.useState(NUM_BARS / 2);
-  const requestRef = React.useRef<number>();
+  const animationRef = React.useRef<number>();
 
   React.useEffect(() => {
     const animate = (timeMs: number) => {
@@ -27,15 +27,15 @@ export default function Countdown({ startTime }: { startTime?: number }) {
       setCount(newCount);
 
       if (count <= NUM_BARS / 2) {
-        requestRef.current = requestAnimationFrame(() => animate(timeMs));
+        animationRef.current = requestAnimationFrame(() => animate(timeMs));
       }
     };
 
     if (startTime) {
-      requestRef.current = requestAnimationFrame(() => animate(startTime));
+      animationRef.current = requestAnimationFrame(() => animate(startTime));
     }
 
-    return () => cancelAnimationFrame(requestRef.current!);
+    return () => cancelAnimationFrame(animationRef.current!);
   }, [count, startTime]);
 
   const bars = Array.from({ length: NUM_BARS }, (_, i) => (
