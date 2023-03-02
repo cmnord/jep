@@ -1,7 +1,10 @@
 import { useFetcher } from "@remix-run/react";
 
 import Button from "~/components/button";
+import type { Action } from "~/engine";
 import { useEngineContext } from "~/engine";
+import { isClueAction } from "~/engine/actions";
+import { useSoloAction } from "~/utils/use-solo-action";
 
 function NextClue({
   boardControlName,
@@ -32,17 +35,23 @@ function NextClue({
 export function NextClueForm({
   roomName,
   userId,
-  i,
-  j,
+  clueIdx,
+  setFocusedClue,
 }: {
   roomName: string;
   userId: string;
-  i: number;
-  j: number;
+  clueIdx?: [number, number];
+  setFocusedClue: (i: number, j: number) => void;
 }) {
-  const { players, boardControl, numAnswered, numCluesInBoard } =
+  const { players, boardControl, numAnswered, numCluesInBoard, soloDispatch } =
     useEngineContext();
-  const fetcher = useFetcher();
+  const fetcher = useFetcher<Action>();
+  useSoloAction(fetcher, soloDispatch, (action) => {
+    if (isClueAction(action)) {
+      const { i, j } = action.payload;
+      setFocusedClue(i, j);
+    }
+  });
   const loading = fetcher.state === "loading";
 
   const boardController = boardControl ? players.get(boardControl) : undefined;
@@ -53,6 +62,8 @@ export function NextClueForm({
     : "Unknown player";
 
   const cluesLeftInRound = numCluesInBoard - numAnswered;
+
+  const [i, j] = clueIdx ? clueIdx : [-1, -1];
 
   return (
     <fetcher.Form method="post" action={`/room/${roomName}/next-clue`}>

@@ -2,8 +2,10 @@ import { useFetcher } from "@remix-run/react";
 import * as React from "react";
 
 import classNames from "classnames";
+import type { Action } from "~/engine";
 import { useEngineContext } from "~/engine";
 import { useDebounce, useDebounceEnd } from "~/utils/use-debounce";
+import { useSoloAction } from "~/utils/use-solo-action";
 import LoadingSpinner from "../loading-spinner";
 
 function SendIcon({ className }: { className?: string }) {
@@ -85,12 +87,14 @@ export default function EditPlayerForm({
   roomName: string;
   userId: string;
 }) {
+  const { players, boardControl, soloDispatch } = useEngineContext();
+
+  const fetcher = useFetcher<Action>();
+  const loading = fetcher.state === "loading";
+  useSoloAction(fetcher, soloDispatch);
+
   const [editing, setEditing] = React.useState(false);
   const formRef = React.useRef<HTMLFormElement | null>(null);
-
-  const fetcher = useFetcher();
-
-  const { players, boardControl } = useEngineContext();
 
   const [optimisticPlayer, setOptimisticPlayer] = React.useState(
     players.get(userId)
@@ -98,8 +102,6 @@ export default function EditPlayerForm({
 
   const [name, setName] = React.useState(optimisticPlayer?.name ?? "You");
   const debouncedName = useDebounce(name, 500);
-
-  const loading = fetcher.state === "loading";
 
   React.useEffect(() => {
     const serverPlayer = players.get(userId);
@@ -111,6 +113,7 @@ export default function EditPlayerForm({
     if (
       !editing &&
       debouncedName !== optimisticPlayer?.name &&
+      debouncedName !== "" &&
       fetcher.state === "idle"
     ) {
       fetcher.submit(formRef.current);

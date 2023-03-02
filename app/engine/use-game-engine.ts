@@ -5,7 +5,7 @@ import type { DbRoomEvent } from "~/models/room-event.server";
 import useChannel from "~/utils/use-channel";
 import { generateGrid } from "~/utils/utils";
 
-import type { State } from "./engine";
+import type { Action, State } from "./engine";
 import { gameEngine, GameState, getWinningBuzzer } from "./engine";
 import { applyRoomEventsToState, processRoomEvent } from "./room-event";
 
@@ -33,6 +33,64 @@ function createInitialState(game: Game, round: number): State {
     players: new Map(),
     round,
   };
+}
+
+function stateToGameEngine(
+  game: Game,
+  state: State,
+  dispatch: React.Dispatch<Action>
+) {
+  const board = game.boards[state.round];
+
+  let clue: Clue | undefined;
+  let category: string | undefined;
+  if (state.activeClue) {
+    const [i, j] = state.activeClue;
+    clue = state.activeClue ? board.categories[j].clues[i] : undefined;
+    category = state.activeClue ? board.categoryNames[j] : undefined;
+  }
+
+  const isAnswered = (i: number, j: number) =>
+    state.isAnswered[i][j].isAnswered;
+
+  const answeredBy = (i: number, j: number) =>
+    state.isAnswered[i][j].answeredBy;
+
+  const winningBuzz = getWinningBuzzer(state.buzzes);
+  const winningBuzzer = winningBuzz?.userId ?? undefined;
+
+  return {
+    type: state.type,
+    activeClue: state.activeClue,
+    answeredBy,
+    board,
+    buzzes: state.buzzes,
+    category,
+    clue,
+    soloDispatch: dispatch,
+    isAnswered,
+    players: state.players,
+    numAnswered: state.numAnswered,
+    numCluesInBoard: state.numCluesInBoard,
+    round: state.round,
+    boardControl: state.boardControl,
+    winningBuzzer,
+  };
+}
+
+/** useSoloGameEngine handles solo play by setting the players and board control
+ * for one player without any server room events. This means that once the page
+ * refreshes the game loses all progress.
+ */
+export function useSoloGameEngine(game: Game) {
+  const [state, dispatch] = React.useReducer(gameEngine, game, (arg) => {
+    const init = createInitialState(arg, 0);
+    init.players.set("mock", { name: "mock", userId: "mock", score: 0 });
+    init.boardControl = "mock";
+    return init;
+  });
+
+  return stateToGameEngine(game, state, dispatch);
 }
 
 /** useGameEngine provides all the state variables associated with a game.  The
@@ -94,35 +152,5 @@ export function useGameEngine(
     },
   });
 
-  const board = game.boards[state.round];
-
-  let clue: Clue | undefined;
-  let category: string | undefined;
-  if (state.activeClue) {
-    const [i, j] = state.activeClue;
-    clue = state.activeClue ? board.categories[j].clues[i] : undefined;
-    category = state.activeClue ? board.categoryNames[j] : undefined;
-  }
-
-  const isAnswered = (i: number, j: number) =>
-    state.isAnswered[i][j].isAnswered;
-
-  const winningBuzz = getWinningBuzzer(state.buzzes);
-  const winningBuzzer = winningBuzz?.userId ?? undefined;
-
-  return {
-    type: state.type,
-    activeClue: state.activeClue,
-    board,
-    buzzes: state.buzzes,
-    category,
-    clue,
-    isAnswered,
-    players: state.players,
-    numAnswered: state.numAnswered,
-    numCluesInBoard: state.numCluesInBoard,
-    round: state.round,
-    boardControl: state.boardControl,
-    winningBuzzer,
-  };
+  return stateToGameEngine(game, state, dispatch);
 }

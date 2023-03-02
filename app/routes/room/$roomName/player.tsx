@@ -1,4 +1,6 @@
 import type { ActionArgs } from "@remix-run/node";
+import { json } from "@remix-run/node";
+
 import { ActionType } from "~/engine";
 import { createRoomEvent } from "~/models/room-event.server";
 import { getRoom } from "~/models/room.server";
@@ -18,6 +20,10 @@ export async function action({ request, params }: ActionArgs) {
   const roomNameAndId = params.roomName;
   if (!roomNameAndId) {
     throw new Response("room name not found in URL params", { status: 404 });
+  }
+
+  if (roomNameAndId === "solo") {
+    return json({ type: ActionType.ChangeName, payload: { userId, name } });
   }
 
   const room = await getRoom(roomNameAndId);

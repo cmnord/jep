@@ -275,6 +275,19 @@ export function gameEngine(state: State, action: Action): State {
             ...lockedOutBuzzers,
             [userId, CANT_BUZZ_FLAG],
           ]);
+          // If everyone has been locked out, reveal the answer to everyone.
+          if (newBuzzes.size === state.players.size) {
+            const nextState = {
+              ...state,
+              type: GameState.RevealAnswerToAll,
+              numAnswered: state.numAnswered + 1,
+            };
+            nextState.isAnswered[i][j] = {
+              isAnswered: true,
+              answeredBy: undefined,
+            };
+            return nextState;
+          }
           const nextState: State = {
             ...state,
             type: GameState.ReadClue,
