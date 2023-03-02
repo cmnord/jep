@@ -29,7 +29,7 @@ function NextClue({
   );
 }
 
-export default function NextClueForm({
+export function NextClueForm({
   roomName,
   userId,
   i,

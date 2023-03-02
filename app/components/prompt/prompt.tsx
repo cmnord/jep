@@ -8,13 +8,13 @@ import type { Clue } from "~/models/convert.server";
 import useKeyPress from "~/utils/use-key-press";
 import { useTimeout } from "~/utils/use-timeout";
 
-import AnswerEvaluatorForm from "./answer-evaluator";
-import Buzzes from "./buzz";
-import Countdown from "./countdown";
-import Fade from "./fade";
-import Kbd from "./kbd";
-import Lockout from "./lockout";
-import ReadClueTimer from "./read-clue-timer";
+import { AnswerEvaluator as AnswerEvaluatorForm } from "./answer-evaluator";
+import { Buzzes } from "./buzz";
+import { Countdown } from "./countdown";
+import { Fade } from "./fade";
+import { Kbd } from "./kbd";
+import { Lockout } from "./lockout";
+import { ReadClueTimer } from "./read-clue-timer";
 
 /** MS_PER_CHARACTER is a heuristic value to scale the amount of time per clue by
  * its length.
@@ -86,7 +86,7 @@ function Prompt({
   );
 }
 
-export default function ConnectedPrompt({
+export function ConnectedPrompt({
   roomName,
   userId,
 }: {
