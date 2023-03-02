@@ -27,6 +27,7 @@ export interface State {
   boardControl?: string;
   buzzes?: Map<string, number>;
   game: Game;
+  /** warning! use setIsAnswered to deep-copy instead of mutating State. */
   isAnswered: ClueAnswer[][];
   numAnswered: number;
   numCluesInBoard: number;
@@ -85,6 +86,23 @@ export function getWinningBuzzer(buzzes?: Map<string, number>):
     },
     { userId: "", deltaMs: Number.MAX_SAFE_INTEGER }
   );
+}
+
+/** setIsAnswered makes a deep copy of the 2d array, then sets the value at (i, j). */
+function setIsAnswered(
+  isAnswered: ClueAnswer[][],
+  i: number,
+  j: number,
+  val: ClueAnswer
+) {
+  const deepCopy: ClueAnswer[][] = isAnswered.map((row) =>
+    row.map((cell) => ({
+      isAnswered: cell.isAnswered,
+      answeredBy: cell.answeredBy,
+    }))
+  );
+  deepCopy[i][j] = val;
+  return deepCopy;
 }
 
 /** gameEngine is the reducer (aka state machine) which implements the game. */
@@ -212,10 +230,10 @@ export function gameEngine(state: State, action: Action): State {
             buzzes,
             type: GameState.RevealAnswerToAll,
             numAnswered: state.numAnswered + 1,
-          };
-          nextState.isAnswered[i][j] = {
-            isAnswered: true,
-            answeredBy: undefined,
+            isAnswered: setIsAnswered(state.isAnswered, i, j, {
+              isAnswered: true,
+              answeredBy: undefined,
+            }),
           };
           return nextState;
         }
@@ -281,10 +299,10 @@ export function gameEngine(state: State, action: Action): State {
               ...state,
               type: GameState.RevealAnswerToAll,
               numAnswered: state.numAnswered + 1,
-            };
-            nextState.isAnswered[i][j] = {
-              isAnswered: true,
-              answeredBy: undefined,
+              isAnswered: setIsAnswered(state.isAnswered, i, j, {
+                isAnswered: true,
+                answeredBy: undefined,
+              }),
             };
             return nextState;
           }
@@ -304,10 +322,10 @@ export function gameEngine(state: State, action: Action): State {
           type: GameState.RevealAnswerToAll,
           boardControl: userId,
           numAnswered: state.numAnswered + 1,
-        };
-        nextState.isAnswered[i][j] = {
-          isAnswered: true,
-          answeredBy: userId,
+          isAnswered: setIsAnswered(state.isAnswered, i, j, {
+            isAnswered: true,
+            answeredBy: userId,
+          }),
         };
         const player = nextState.players.get(userId);
         if (player) {
