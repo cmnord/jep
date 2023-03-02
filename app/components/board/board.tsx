@@ -5,7 +5,7 @@ import { Textfit } from "react-textfit";
 
 import { useEngineContext } from "~/engine/use-engine-context";
 import type { Clue } from "~/models/convert.server";
-import LoadingSpinner from "./loading-spinner";
+import LoadingSpinner from "../loading-spinner";
 
 const UNREVEALED_CLUE = "unrevealed";
 
@@ -102,7 +102,7 @@ function ClueComponent({
 }
 
 /** BoardComponent is purely presentational and renders the board. */
-export default function BoardComponent({
+export function BoardComponent({
   focusedClueIdx,
   onFocusClue,
   userId,
