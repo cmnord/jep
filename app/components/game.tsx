@@ -13,12 +13,10 @@ import type { Clue, Game } from "~/models/convert.server";
 /** GameComponent maintains the game state. */
 export default function GameComponent({
   game,
-  errorMsg,
   userId,
   roomName,
 }: {
   game: Game;
-  errorMsg?: string;
   userId: string;
   roomName: string;
 }) {
@@ -30,10 +28,6 @@ export default function GameComponent({
   const finalClues =
     finalBoard.categories[finalBoard.categories.length - 1].clues;
   const finalClue: Clue | undefined = finalClues[finalClues.length - 1];
-
-  if (errorMsg !== undefined) {
-    return <div>Error :({errorMsg}</div>;
-  }
 
   const onFocusClue = (i: number, j: number) => {
     setFocusedClue([i, j]);
@@ -58,7 +52,7 @@ export default function GameComponent({
           />
         )}
       </div>
-      <div className="p-12">
+      <div className="p-3 sm:p-6 md:p-12 ">
         {type !== GameState.Preview && (
           <Players userId={userId} roomName={roomName} />
         )}
