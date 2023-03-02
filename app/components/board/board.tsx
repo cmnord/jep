@@ -3,12 +3,9 @@ import * as React from "react";
 
 import { useEngineContext } from "~/engine/use-engine-context";
 import type { Board, Clue } from "~/models/convert.server";
+import { getClueValue } from "~/utils/utils";
 import { Category } from "./category";
 import { ClueComponent } from "./clue";
-
-function getClueValue(i: number, round: number) {
-  return (i + 1) * 200 * (round + 1);
-}
 
 function BoardComponent({
   board,
@@ -85,13 +82,13 @@ function BoardComponent({
 
 /** BoardComponent is purely presentational and renders the board. */
 export function ConnectedBoardComponent({
-  focusedClueIdx,
-  onFocusClue,
+  focusedClue,
+  setFocusedClue,
   userId,
   roomName,
 }: {
-  focusedClueIdx?: [number, number];
-  onFocusClue: (i: number, j: number) => void;
+  focusedClue?: [number, number];
+  setFocusedClue: (i: number, j: number) => void;
   userId: string;
   roomName: string;
 }) {
@@ -114,11 +111,11 @@ export function ConnectedBoardComponent({
   }
 
   React.useEffect(() => {
-    if (focusedClueIdx) {
-      const [i, j] = focusedClueIdx;
+    if (focusedClue) {
+      const [i, j] = focusedClue;
       focusCell(i, j);
     }
-  }, [focusedClueIdx]);
+  }, [focusedClue]);
 
   function handleClickClue(i: number, j: number) {
     if (hasBoardControl) {
@@ -172,7 +169,7 @@ export function ConnectedBoardComponent({
       round={round}
       isAnswered={isAnswered}
       onClickClue={handleClickClue}
-      onFocusClue={onFocusClue}
+      onFocusClue={setFocusedClue}
       onKeyDownClue={handleKeyDown}
     />
   );
