@@ -1,5 +1,6 @@
 import classNames from "classnames";
-import LoadingSpinner from "./loading-spinner";
+
+import { LoadingSpinner } from "~/components/icons";
 
 interface Props {
   onClick?: () => void;

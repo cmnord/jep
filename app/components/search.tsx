@@ -1,5 +1,5 @@
+import { LoadingSpinner } from "~/components/icons";
 import { useDebounceEnd } from "~/utils/use-debounce";
-import LoadingSpinner from "./loading-spinner";
 
 export default function Search({
   name,

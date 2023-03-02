@@ -2,11 +2,11 @@ import { useFetcher } from "@remix-run/react";
 import * as React from "react";
 
 import classNames from "classnames";
+import { LoadingSpinner } from "~/components/icons";
 import type { Action } from "~/engine";
 import { useEngineContext } from "~/engine";
 import { useDebounce, useDebounceEnd } from "~/utils/use-debounce";
 import { useSoloAction } from "~/utils/use-solo-action";
-import LoadingSpinner from "../loading-spinner";
 
 function SendIcon({ className }: { className?: string }) {
   // Heroicon name: solid/paper-airplane

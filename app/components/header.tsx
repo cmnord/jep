@@ -1,10 +1,10 @@
 import { Link } from "@remix-run/react";
 import * as React from "react";
 
+import { QuestionMarkCircle } from "~/components/icons";
 import { Anchor } from "~/components/link";
 import Modal from "~/components/modal";
 import Button from "./button";
-import QuestionMarkCircle from "./question-mark-circle";
 
 const GITHUB_URL = "https://github.com/cmnord/jep";
 

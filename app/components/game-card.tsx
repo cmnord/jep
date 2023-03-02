@@ -1,8 +1,8 @@
 import { Link } from "@remix-run/react";
 import * as React from "react";
 
+import { LoadingSpinner } from "~/components/icons";
 import type { Game } from "~/models/game.server";
-import LoadingSpinner from "./loading-spinner";
 
 function ChevronRightIcon({ className }: { className: string }) {
   // Heroicon name: outline/chevron-right
