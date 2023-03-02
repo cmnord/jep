@@ -33,9 +33,11 @@ export async function loader({ request }: LoaderArgs) {
   const search = new URLSearchParams(url.search);
   const games = await getAllGames(search.get("q"));
 
+  const solo = search.get("solo") === "on";
+
   const [formState, headers] = await getSessionFormState(request);
 
-  return json({ games, formState }, { headers });
+  return json({ games, formState, solo }, { headers });
 }
 
 export default function Index() {
@@ -56,7 +58,12 @@ export default function Index() {
   const [search, setSearch] = React.useState(initialSearch);
   const debouncedSearch = useDebounce(search, 500);
 
-  const [solo, setSolo] = React.useState(false);
+  const solo = params.get("solo") === "on";
+  const [optimisticSolo, setOptimisticSolo] = React.useState(solo);
+
+  React.useEffect(() => {
+    setOptimisticSolo(solo);
+  }, [solo]);
 
   React.useEffect(() => {
     if (fetcher.state === "submitting") {
@@ -102,20 +109,26 @@ export default function Index() {
           defaultValue={initialSearch}
           loading={fetcher.state === "loading"}
         />
+        <input type="hidden" name="solo" value={solo ? "on" : "off"} />
       </Form>
-      <div className="flex flex-col sm:flex-row mb-4 gap-6">
+      <Form method="get" className="flex flex-col sm:flex-row mb-4 gap-6">
         <Link to={"/mock"}>
           <Button>Play a mock game</Button>
         </Link>
+        <input type="hidden" name="q" value={debouncedSearch} />
         <div className="inline-flex items-center gap-3">
-          <Toggle name="solo" checked={solo} setChecked={setSolo} />
+          <Toggle
+            name="solo"
+            checked={optimisticSolo}
+            onClick={() => setOptimisticSolo(!optimisticSolo)}
+          />
           <div className="inline-flex gap-0.5">
             <p
               className={classNames("text-sm text-gray-500", {
-                "font-bold": solo,
+                "font-bold": optimisticSolo,
               })}
             >
-              Solo mode {solo ? "on" : "off"}
+              Solo mode {optimisticSolo ? "on" : "off"}
             </p>
             <Tooltip
               content={
@@ -135,7 +148,7 @@ export default function Index() {
             </Tooltip>
           </div>
         </div>
-      </div>
+      </Form>
       {data.games.length === 0 && (
         <p className="text-sm text-gray-500">
           No games found for search "{debouncedSearch}"
@@ -143,7 +156,7 @@ export default function Index() {
       )}
       <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4 mb-4">
         {data.games.map((game, i) => (
-          <GameCard key={`game-${i}`} game={game} solo={solo} />
+          <GameCard key={`game-${i}`} game={game} solo={optimisticSolo} />
         ))}
       </div>
       <fetcher.Form
