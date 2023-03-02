@@ -4,8 +4,7 @@ export default function Upload({ onChange }: { onChange?: () => void }) {
   // TODO: drag and drop with react-dropzone
   return (
     <div className="flex flex-col items-center">
-      <label
-        tabIndex={0}
+      <button
         className={
           "flex rounded-lg text-gray-900 cursor-pointer " +
           "border-2 border-dashed border-blue-600 " +
@@ -24,7 +23,10 @@ export default function Upload({ onChange }: { onChange?: () => void }) {
             viewBox="0 0 24 24"
             fill="currentColor"
             className="w-6 h-6 mb-2"
+            role="img"
+            aria-labelledby="upload-title"
           >
+            <title id="upload-title">Upload .jep.json file</title>
             <path
               fillRule="evenodd"
               d="M5.625 1.5H9a3.75 3.75 0 013.75 3.75v1.875c0 1.036.84 1.875 1.875 1.875H16.5a3.75 3.75 0 013.75 3.75v7.875c0 1.035-.84 1.875-1.875 1.875H5.625a1.875 1.875 0 01-1.875-1.875V3.375c0-1.036.84-1.875 1.875-1.875zm6.905 9.97a.75.75 0 00-1.06 0l-3 3a.75.75 0 101.06 1.06l1.72-1.72V18a.75.75 0 001.5 0v-4.19l1.72 1.72a.75.75 0 101.06-1.06l-3-3z"
@@ -34,6 +36,7 @@ export default function Upload({ onChange }: { onChange?: () => void }) {
           </svg>
           <p className="font-medium">Upload .jep.json file</p>
           <input
+            id="upload"
             type="file"
             accept=".jep.json,application/json"
             name="upload"
@@ -42,7 +45,7 @@ export default function Upload({ onChange }: { onChange?: () => void }) {
             onChange={onChange}
           />
         </div>
-      </label>
+      </button>
       <Link to="/help">
         <p id="upload_help" className="mt-1 text-sm">
           File format help
