@@ -4,7 +4,7 @@ import * as React from "react";
 import type { Action } from "~/engine";
 
 /** useSoloAction dispatches an action if we get data from the fetcher response.
- * This handles local play because only mock POST requests get an Action as a
+ * This handles local play because only solo POST requests get an Action as a
  * response.
  */
 export function useSoloAction(

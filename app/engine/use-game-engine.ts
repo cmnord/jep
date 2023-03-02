@@ -86,11 +86,11 @@ function stateToGameEngine(
  * for one player without any server room events. This means that once the page
  * refreshes the game loses all progress.
  */
-export function useSoloGameEngine(game: Game) {
+export function useSoloGameEngine(game: Game, userId: string, name: string) {
   const [state, dispatch] = React.useReducer(gameEngine, game, (arg) => {
     const init = createInitialState(arg, 0);
-    init.players.set("mock", { name: "mock", userId: "mock", score: 0 });
-    init.boardControl = "mock";
+    init.players.set(userId, { name, userId, score: 0 });
+    init.boardControl = userId;
     return init;
   });
 

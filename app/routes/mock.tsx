@@ -15,7 +15,7 @@ export async function loader() {
 export default function PlayGame() {
   const data = useLoaderData<typeof loader>();
 
-  const gameReducer = useSoloGameEngine(data.game);
+  const gameReducer = useSoloGameEngine(data.game, "mock", "mock");
 
   return (
     <GameEngineContext.Provider value={gameReducer}>
