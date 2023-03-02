@@ -1,7 +1,7 @@
 import classNames from "classnames";
 
-import type { Player } from "~/engine/engine";
-import { useEngineContext } from "~/engine/use-engine-context";
+import type { Player } from "~/engine";
+import { useEngineContext } from "~/engine";
 import { stringToHslColor } from "~/utils/utils";
 
 import EditPlayerForm from "./edit-player";

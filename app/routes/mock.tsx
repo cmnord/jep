@@ -2,8 +2,7 @@ import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 
 import GameComponent from "~/components/game";
-import { GameEngineContext } from "~/engine/use-engine-context";
-import { useGameEngine } from "~/engine/use-game-engine";
+import { GameEngineContext, useGameEngine } from "~/engine";
 import { getMockGame } from "~/models/game.server";
 
 export async function loader() {

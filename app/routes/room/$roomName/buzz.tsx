@@ -1,5 +1,5 @@
 import type { ActionArgs } from "@remix-run/node";
-import { ActionType } from "~/engine/engine";
+import { ActionType } from "~/engine";
 import { createRoomEvent } from "~/models/room-event.server";
 import { getRoom } from "~/models/room.server";
 

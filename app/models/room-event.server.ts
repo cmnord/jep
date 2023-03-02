@@ -1,4 +1,4 @@
-import type { ActionType } from "~/engine/engine";
+import type { ActionType } from "~/engine";
 import type { Database, Json } from "~/models/database.types";
 import { db } from "~/supabase.server";
 
