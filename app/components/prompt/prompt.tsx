@@ -9,7 +9,7 @@ import useKeyPress from "~/utils/use-key-press";
 import { useSoloAction } from "~/utils/use-solo-action";
 import { useTimeout } from "~/utils/use-timeout";
 
-import { ConnectedAnswerForm as AnswerForm } from "./answer-evaluator";
+import { ConnectedAnswerForm as AnswerForm } from "./answer-form";
 import { Buzzes } from "./buzz";
 import { Countdown } from "./countdown";
 import { Fade } from "./fade";
