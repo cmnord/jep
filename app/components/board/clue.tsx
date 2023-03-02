@@ -9,7 +9,7 @@ const UNREVEALED_CLUE = "unrevealed";
 export function ClueComponent({
   answered,
   clue,
-  disabled,
+  hasBoardControl,
   onFocus,
   onKeyDown,
   onClick,
@@ -18,7 +18,7 @@ export function ClueComponent({
   answered: boolean;
   clue: Clue;
   value: number;
-  disabled: boolean;
+  hasBoardControl: boolean;
   onFocus: () => void;
   onClick: () => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
@@ -26,6 +26,12 @@ export function ClueComponent({
   const [loading, setLoading] = React.useState(false);
 
   const unrevealed = clue.clue.toLowerCase() === UNREVEALED_CLUE;
+
+  React.useEffect(() => {
+    if (answered) {
+      setLoading(false);
+    }
+  }, [answered]);
 
   // TODO: daily double / wagerable text
   const clueText = answered ? (
@@ -40,13 +46,19 @@ export function ClueComponent({
     </p>
   );
 
+  // disabled must not include `answerable` so we can focus on answered clues.
+  const disabled = !hasBoardControl || unrevealed || loading;
+
   return (
     <td className="p-1 h-full">
       <button
         type="submit"
-        disabled={disabled || unrevealed}
+        disabled={disabled}
         onClick={(e) => {
           e.preventDefault();
+          if (disabled || answered) {
+            return;
+          }
           setLoading(true);
           onClick();
         }}

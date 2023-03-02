@@ -9,7 +9,7 @@ import { ClueComponent } from "./clue";
 
 function BoardComponent({
   board,
-  disabled,
+  hasBoardControl,
   isAnswered,
   onClickClue,
   onFocusClue,
@@ -18,7 +18,7 @@ function BoardComponent({
   tbodyRef,
 }: {
   board: Board;
-  disabled: boolean;
+  hasBoardControl: boolean;
   isAnswered: (i: number, j: number) => boolean;
   onClickClue: (i: number, j: number) => void;
   onFocusClue: (i: number, j: number) => void;
@@ -65,7 +65,7 @@ function BoardComponent({
                     clue={clue}
                     value={getClueValue(i, round)}
                     answered={isAnswered(i, j)}
-                    disabled={disabled}
+                    hasBoardControl={hasBoardControl}
                     onFocus={() => onFocusClue(i, j)}
                     onClick={() => onClickClue(i, j)}
                     onKeyDown={(e) => onKeyDownClue(e, i, j)}
@@ -165,7 +165,7 @@ export function ConnectedBoardComponent({
     <BoardComponent
       board={board}
       tbodyRef={tbodyRef}
-      disabled={!hasBoardControl}
+      hasBoardControl={hasBoardControl}
       round={round}
       isAnswered={isAnswered}
       onClickClue={handleClickClue}
