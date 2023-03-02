@@ -43,7 +43,7 @@ function PlayerIcon({
   );
 }
 
-export default function Players({
+export function Players({
   roomName,
   userId,
 }: {
