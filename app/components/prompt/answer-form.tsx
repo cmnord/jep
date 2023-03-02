@@ -79,7 +79,7 @@ export function ConnectedAnswerForm({
           type="primary"
           htmlType="button"
           disabled={!isOpen}
-          autoFocus={!isOpen}
+          autoFocus={isOpen}
           onClick={onClickShowAnswer}
           loading={loading}
         >

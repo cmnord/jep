@@ -91,11 +91,9 @@ function Prompt({
 export function ConnectedPrompt({
   roomName,
   userId,
-  setFocusedClue,
 }: {
   roomName: string;
   userId: string;
-  setFocusedClue: (i: number, j: number) => void;
 }) {
   const {
     type,
@@ -259,12 +257,7 @@ export function ConnectedPrompt({
     >
       <Lockout active={lockout} />
       {type === GameState.RevealAnswerToAll ? (
-        <NextClueForm
-          roomName={roomName}
-          userId={userId}
-          clueIdx={clueIdx}
-          setFocusedClue={setFocusedClue}
-        />
+        <NextClueForm roomName={roomName} userId={userId} clueIdx={clueIdx} />
       ) : (
         <AnswerForm
           isOpen={shouldShowAnswerToBuzzer || showAnswer}

@@ -3,7 +3,6 @@ import { useFetcher } from "@remix-run/react";
 import Button from "~/components/button";
 import type { Action } from "~/engine";
 import { useEngineContext } from "~/engine";
-import { isClueAction } from "~/engine/actions";
 import { useSoloAction } from "~/utils/use-solo-action";
 
 function NextClue({
@@ -36,22 +35,15 @@ export function NextClueForm({
   roomName,
   userId,
   clueIdx,
-  setFocusedClue,
 }: {
   roomName: string;
   userId: string;
   clueIdx?: [number, number];
-  setFocusedClue: (i: number, j: number) => void;
 }) {
   const { players, boardControl, numAnswered, numCluesInBoard, soloDispatch } =
     useEngineContext();
   const fetcher = useFetcher<Action>();
-  useSoloAction(fetcher, soloDispatch, (action) => {
-    if (isClueAction(action)) {
-      const { i, j } = action.payload;
-      setFocusedClue(i, j);
-    }
-  });
+  useSoloAction(fetcher, soloDispatch);
   const loading = fetcher.state === "loading";
 
   const boardController = boardControl ? players.get(boardControl) : undefined;

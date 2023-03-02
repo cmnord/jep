@@ -9,14 +9,12 @@ import type { Action } from "~/engine";
  */
 export function useSoloAction(
   fetcher: Fetcher<Action>,
-  dispatch: React.Dispatch<Action>,
-  callback?: (action: Action) => void
+  dispatch: React.Dispatch<Action>
 ) {
   React.useEffect(() => {
     const action = fetcher.data;
     if (action) {
       dispatch(action);
-      callback && callback(action);
     }
-  }, [fetcher.data, dispatch, callback]);
+  }, [fetcher.data, dispatch]);
 }

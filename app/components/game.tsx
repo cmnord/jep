@@ -19,7 +19,7 @@ export default function GameComponent({
   userId: string;
   roomName: string;
 }) {
-  const { type, board, round } = useEngineContext();
+  const { type, board, round, activeClue } = useEngineContext();
 
   const [focusedClueIdx, setFocusedClue] = React.useState<[number, number]>();
 
@@ -27,6 +27,18 @@ export default function GameComponent({
   const finalClues =
     finalBoard.categories[finalBoard.categories.length - 1].clues;
   const finalClue: Clue | undefined = finalClues[finalClues.length - 1];
+
+  // Keep track of the previous value of activeClue. If it changes to undefined,
+  // focus on the previous clue.
+  const prevClueRef = React.useRef(activeClue);
+  React.useEffect(() => {
+    const prevClue = prevClueRef.current;
+    if (!activeClue && prevClue) {
+      const [i, j] = prevClue;
+      setFocusedClue([i, j]);
+    }
+    prevClueRef.current = activeClue;
+  }, [activeClue]);
 
   const onFocusClue = (i: number, j: number) => {
     setFocusedClue([i, j]);
@@ -59,11 +71,7 @@ export default function GameComponent({
           <ClueList focusedClue={focusedClueIdx} setFocusedClue={onFocusClue} />
         )}
       </div>
-      <Prompt
-        roomName={roomName}
-        userId={userId}
-        setFocusedClue={onFocusClue}
-      />
+      <Prompt roomName={roomName} userId={userId} />
     </>
   );
 }
