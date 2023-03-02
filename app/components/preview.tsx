@@ -2,7 +2,8 @@ import { Link, useFetcher } from "@remix-run/react";
 
 import Button from "~/components/button";
 import Modal from "~/components/modal";
-import Players from "~/components/player/player";
+import Players from "~/components/player";
+
 import { GameState } from "~/engine/engine";
 import { useEngineContext } from "~/engine/use-engine-context";
 import type { Clue } from "~/models/convert.server";
