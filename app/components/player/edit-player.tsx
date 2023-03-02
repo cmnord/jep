@@ -23,6 +23,61 @@ function SendIcon({ className }: { className?: string }) {
   );
 }
 
+function EditPlayer({
+  boardControl,
+  loading,
+  name,
+  onBlur,
+  onChangeName,
+  onFocus,
+}: {
+  boardControl?: string;
+  loading: boolean;
+  name: string;
+  onBlur: () => void;
+  onChangeName: (name: string) => void;
+  onFocus: () => void;
+}) {
+  const inputRef = React.useRef<HTMLInputElement | null>(null);
+  const debouncedLoading = useDebounceEnd(loading, 100);
+
+  return (
+    <div className="flex gap-2 items-center mb-4">
+      <label htmlFor="name" className="text-gray-500 text-sm">
+        You are:
+      </label>
+      <div
+        className={classNames("relative shadow rounded-md", {
+          "border-2 border-black": !boardControl,
+          "border-4 border-yellow-400": boardControl,
+        })}
+      >
+        <input
+          ref={inputRef}
+          type="text"
+          id="name"
+          name="name"
+          className="p-2 bg-transparent rounded-md focus:ring-blue-500 focus:border-blue-500"
+          defaultValue={name}
+          onChange={(e) => onChangeName(e.target.value)}
+          onBlur={onBlur}
+          onFocus={() => {
+            inputRef.current?.select();
+            onFocus();
+          }}
+        />
+        <div className={"absolute right-0 bottom-0.5 p-2"}>
+          {debouncedLoading ? (
+            <LoadingSpinner className="text-blue-600" />
+          ) : (
+            <SendIcon className="text-gray-300" />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function EditPlayerForm({
   roomName,
   userId,
@@ -31,7 +86,6 @@ export default function EditPlayerForm({
   userId: string;
 }) {
   const [editing, setEditing] = React.useState(false);
-  const inputRef = React.useRef<HTMLInputElement | null>(null);
   const formRef = React.useRef<HTMLFormElement | null>(null);
 
   const fetcher = useFetcher();
@@ -46,7 +100,6 @@ export default function EditPlayerForm({
   const debouncedName = useDebounce(name, 500);
 
   const loading = fetcher.state === "loading";
-  const debouncedLoading = useDebounceEnd(loading, 100);
 
   React.useEffect(() => {
     const serverPlayer = players.get(userId);
@@ -73,50 +126,22 @@ export default function EditPlayerForm({
     <fetcher.Form
       method="post"
       action={`/room/${roomName}/player`}
-      className="mb-4"
       ref={formRef}
     >
-      <div className="flex gap-2 items-center">
-        <input
-          type="hidden"
-          name="userId"
-          aria-describedby="upload_help"
-          value={userId}
-        />
-        <label htmlFor="name" className="text-gray-500 text-sm">
-          You are:
-        </label>
-        <div
-          className={classNames("relative shadow rounded-md", {
-            "border-2 border-black": !boardControl,
-            "border-4 border-yellow-400": boardControl,
-          })}
-        >
-          <input
-            ref={inputRef}
-            type="text"
-            id="name"
-            name="name"
-            className="p-2 bg-transparent rounded-md focus:ring-blue-500 focus:border-blue-500"
-            defaultValue={optimisticPlayer?.name ?? "You"}
-            onChange={(e) => setName(e.target.value)}
-            onBlur={() => {
-              setEditing(false);
-            }}
-            onFocus={() => {
-              setEditing(true);
-              inputRef.current?.select();
-            }}
-          />
-          <div className={"absolute right-0 bottom-0.5 p-2"}>
-            {debouncedLoading ? (
-              <LoadingSpinner className="text-blue-600" />
-            ) : (
-              <SendIcon className="text-gray-300" />
-            )}
-          </div>
-        </div>
-      </div>
+      <input
+        type="hidden"
+        name="userId"
+        aria-describedby="upload_help"
+        value={userId}
+      />
+      <EditPlayer
+        boardControl={boardControl}
+        loading={loading}
+        name={optimisticPlayer?.name ?? "You"}
+        onBlur={() => setEditing(false)}
+        onChangeName={setName}
+        onFocus={() => setEditing(true)}
+      />
     </fetcher.Form>
   );
 }
