@@ -50,11 +50,15 @@ function stateToGameEngine(
     category = state.activeClue ? board.categoryNames[j] : undefined;
   }
 
-  const isAnswered = (i: number, j: number) =>
-    state.isAnswered[i][j].isAnswered;
+  const isAnswered = (i: number, j: number) => {
+    const row = state.isAnswered[i];
+    return row && row[j] && row[j].isAnswered;
+  };
 
-  const answeredBy = (i: number, j: number) =>
-    state.isAnswered[i][j].answeredBy;
+  const answeredBy = (i: number, j: number) => {
+    const row = state.isAnswered[i];
+    return row && row[j] && row[j].answeredBy;
+  };
 
   const winningBuzz = getWinningBuzzer(state.buzzes);
   const winningBuzzer = winningBuzz?.userId ?? undefined;
