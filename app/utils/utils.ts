@@ -7,6 +7,10 @@ const gameWords =
 const SATURATION = 60;
 const LIGHTNESS = 85;
 
+export function getClueValue(i: number, round: number) {
+  return (i + 1) * 200 * (round + 1);
+}
+
 export function getRandomWord() {
   return gameWords[Math.floor(Math.random() * gameWords.length)];
 }

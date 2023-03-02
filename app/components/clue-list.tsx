@@ -1,39 +1,35 @@
 import classNames from "classnames";
-import type { Clue } from "~/models/convert.server";
 
 import { useEngineContext } from "~/engine/use-engine-context";
+import type { Clue } from "~/models/convert.server";
+import { getClueValue } from "~/utils/utils";
 
 function ClueItem({
+  answered,
   clue,
-  idx,
-  focusedClueIdx,
-  onFocusClue,
+  focused,
+  halfFocused,
+  onFocus,
+  value,
 }: {
+  answered: boolean;
   clue: Clue;
-  idx: [number, number];
-  focusedClueIdx?: [number, number];
-  onFocusClue: (i: number, j: number) => void;
+  focused: boolean;
+  halfFocused: boolean;
+  onFocus: () => void;
+  value: number;
 }) {
-  const { round, isAnswered } = useEngineContext();
-
-  const [i, j] = idx;
-  const isFocused =
-    focusedClueIdx && focusedClueIdx[0] === i && focusedClueIdx[1] === j;
-  const isHalfFocused = focusedClueIdx && focusedClueIdx[0] === i;
-  const roundMultiplier = round + 1;
-
-  const value = clue.value * roundMultiplier;
-  const text = isAnswered(i, j) ? clue.clue : "?";
+  const text = answered ? clue.clue : "?";
 
   return (
     <button
       className={classNames("flex py-1 border-l-8 w-full", {
-        "text-gray-500": isAnswered(i, j),
-        "bg-blue-300": isFocused,
-        "border-l-blue-300": isHalfFocused,
-        "border-l-transparent": !isHalfFocused,
+        "text-gray-500": answered,
+        "bg-blue-300": focused,
+        "border-l-blue-300": halfFocused,
+        "border-l-transparent": !halfFocused,
       })}
-      onClick={() => onFocusClue(i, j)}
+      onClick={onFocus}
     >
       <div className="ml-1 font-bold leading-5">{value}</div>
       <div className="ml-3 break-words text-left">{text}</div>
@@ -41,14 +37,15 @@ function ClueItem({
   );
 }
 
-export default function ClueList({
-  focusedClueIdx,
-  onFocusClue,
+export default function ConnectedClueList({
+  focusedClue,
+  setFocusedClue,
 }: {
-  focusedClueIdx?: [number, number];
-  onFocusClue: (i: number, j: number) => void;
+  focusedClue?: [number, number];
+  setFocusedClue: (i: number, j: number) => void;
 }) {
-  const { board } = useEngineContext();
+  const { board, round, isAnswered } = useEngineContext();
+
   return (
     <div className="relative flex flex-wrap px-0 py-6">
       {board.categories.map((category, j) => (
@@ -68,9 +65,15 @@ export default function ClueList({
                 <ClueItem
                   key={`clue-${i}-${j}`}
                   clue={clue}
-                  idx={[i, j]}
-                  focusedClueIdx={focusedClueIdx}
-                  onFocusClue={onFocusClue}
+                  answered={isAnswered(i, j)}
+                  value={getClueValue(i, round)}
+                  halfFocused={focusedClue ? focusedClue[0] === i : false}
+                  focused={
+                    focusedClue
+                      ? focusedClue[0] === i && focusedClue[1] === j
+                      : false
+                  }
+                  onFocus={() => setFocusedClue(i, j)}
                 />
               );
             })}

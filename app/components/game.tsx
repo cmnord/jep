@@ -51,8 +51,8 @@ export default function GameComponent({
         {/* TODO: board should never be undefined */}
         {board && (
           <BoardComponent
-            focusedClueIdx={focusedClueIdx}
-            onFocusClue={onFocusClue}
+            focusedClue={focusedClueIdx}
+            setFocusedClue={onFocusClue}
             userId={userId}
             roomName={roomName}
           />
@@ -63,7 +63,7 @@ export default function GameComponent({
           <Players userId={userId} roomName={roomName} />
         )}
         {board && (
-          <ClueList focusedClueIdx={focusedClueIdx} onFocusClue={onFocusClue} />
+          <ClueList focusedClue={focusedClueIdx} setFocusedClue={onFocusClue} />
         )}
       </div>
       <Prompt roomName={roomName} userId={userId} />
