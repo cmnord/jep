@@ -2,8 +2,7 @@ import { useFetcher } from "@remix-run/react";
 import classNames from "classnames";
 import * as React from "react";
 
-import { CLUE_TIMEOUT_MS, GameState } from "~/engine/engine";
-import { useEngineContext } from "~/engine/use-engine-context";
+import { CLUE_TIMEOUT_MS, GameState, useEngineContext } from "~/engine";
 import type { Clue } from "~/models/convert.server";
 import useKeyPress from "~/utils/use-key-press";
 import { useTimeout } from "~/utils/use-timeout";

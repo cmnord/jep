@@ -1,7 +1,7 @@
 import { useFetcher } from "@remix-run/react";
 import * as React from "react";
 
-import { useEngineContext } from "~/engine/use-engine-context";
+import { useEngineContext } from "~/engine";
 import type { Board, Clue } from "~/models/convert.server";
 import { getClueValue } from "~/utils/utils";
 import { Category } from "./category";

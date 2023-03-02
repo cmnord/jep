@@ -1,5 +1,5 @@
-import type { Action } from "~/engine/engine";
-import { ActionType } from "~/engine/engine";
+import type { Action } from "./engine";
+import { ActionType } from "./engine";
 
 export function isClueAction(action: Action): action is {
   type: ActionType.ChooseClue | ActionType.NextClue;

@@ -89,6 +89,7 @@ export function getWinningBuzzer(buzzes?: Map<string, number>):
 
 /** gameEngine is the reducer (aka state machine) which implements the game. */
 export function gameEngine(state: State, action: Action): State {
+  console.log("-----applying room event", action.type);
   switch (action.type) {
     case ActionType.Join: {
       if (isPlayerAction(action)) {
@@ -101,6 +102,7 @@ export function gameEngine(state: State, action: Action): State {
         if (nextState.players.size === 1) {
           nextState.boardControl = action.payload.userId;
         }
+        console.log(action.payload.name, "joined the game");
         return nextState;
       }
       throw new Error("PlayerJoin action must have an associated player");
@@ -130,8 +132,10 @@ export function gameEngine(state: State, action: Action): State {
         if (actionRound === state.round) {
           const nextState = { ...state };
           nextState.type = GameState.WaitForClueChoice;
+          console.log("starting round", actionRound);
           return nextState;
         }
+        console.log("!!!! bad startround msg", actionRound, state.round);
         return state;
       }
       throw new Error("StartRound action must have an associated round number");
@@ -144,11 +148,13 @@ export function gameEngine(state: State, action: Action): State {
           state.boardControl === userId &&
           !state.isAnswered[i][j].isAnswered
         ) {
+          console.log("choosing clue", i, j, "for round", state.round);
           const nextState = { ...state };
           nextState.type = GameState.ReadClue;
           nextState.activeClue = [i, j];
           return nextState;
         }
+        console.log("!!!! bad chooseclue msg", action.payload);
         return state;
       }
       throw new Error("ClickClue action must have an associated index");
@@ -162,12 +168,18 @@ export function gameEngine(state: State, action: Action): State {
         const activeClue = state.activeClue;
         // Ignore this buzz if the clue is no longer active.
         if (!activeClue) {
+          console.log("!!!! bad buzz msg, no more active clue", action.payload);
           return state;
         }
         const { userId, i: buzzI, j: buzzJ, deltaMs } = action.payload;
         const [i, j] = activeClue;
         // Ignore this buzz if it was for the wrong clue.
         if (buzzI !== i || buzzJ !== j) {
+          console.log(
+            "!!!! bad buzz msg, wrong clue",
+            activeClue,
+            action.payload
+          );
           return state;
         }
 
@@ -181,6 +193,7 @@ export function gameEngine(state: State, action: Action): State {
 
         if (deltaMs <= CLUE_TIMEOUT_MS && buzzes.size < state.players.size) {
           const nextState = { buzzes, ...state };
+          console.log("moving on... got 1 buzz", buzzes);
           return nextState;
         }
 
@@ -189,6 +202,7 @@ export function gameEngine(state: State, action: Action): State {
         //   2. At least one player has submitted a > 5sec buzz
         // If we missed someone's < 5sec buzz at this point, that's too bad.
         const winningBuzz = getWinningBuzzer(buzzes);
+        console.log("winning buzz is", winningBuzz);
 
         // 1. No one buzzed in: reveal the answer to everyone and mark it as
         // answered
@@ -206,6 +220,7 @@ export function gameEngine(state: State, action: Action): State {
           return nextState;
         }
 
+        console.log("only one person buzzed! showing them", i, j);
         // 2. One person buzzed before the time: reveal the answer to only them, let them evaluate correct / no
         return { ...state, type: GameState.RevealAnswerToBuzzer, buzzes };
       }
@@ -216,17 +231,31 @@ export function gameEngine(state: State, action: Action): State {
         const activeClue = state.activeClue;
         // Ignore this answer if the clue is no longer active.
         if (!activeClue) {
+          console.log(
+            "!!!! bad answer msg, no more active clue",
+            action.payload
+          );
           return state;
         }
         const { userId, i: buzzI, j: buzzJ, correct } = action.payload;
         const [i, j] = activeClue;
         // Ignore this answer if it was for the wrong clue.
         if (buzzI !== i || buzzJ !== j) {
+          console.log(
+            "!!!! bad answer msg, wrong clue",
+            activeClue,
+            action.payload
+          );
           return state;
         }
         // Ignore the answer if it was not from the winning buzzer.
         const winningBuzzer = getWinningBuzzer(state.buzzes);
         if (userId !== winningBuzzer?.userId) {
+          console.log(
+            "!!!! bad answer msg, wrong buzzer",
+            winningBuzzer,
+            action.payload
+          );
           return state;
         }
         // Ignore the answer if the clue has already been answered.
@@ -251,6 +280,7 @@ export function gameEngine(state: State, action: Action): State {
             type: GameState.ReadClue,
             buzzes: newBuzzes,
           };
+          console.log("buzzer was wrong :O re-opening buzzers");
           return nextState;
         }
 
@@ -284,6 +314,7 @@ export function gameEngine(state: State, action: Action): State {
         const activeClue = state.activeClue;
         // Ignore this answer if the clue is no longer active.
         if (!activeClue) {
+          console.log("!!!! bad next clue msg, no more active clue");
           return state;
         }
         if (state.type !== GameState.RevealAnswerToAll) {
@@ -295,6 +326,7 @@ export function gameEngine(state: State, action: Action): State {
         const [i, j] = activeClue;
         // Ignore this answer if it was for the wrong clue.
         if (actionI !== i || actionJ !== j) {
+          console.log("!!!! bad next clue msg, wrong clue", activeClue, i, j);
           return state;
         }
 
@@ -310,6 +342,12 @@ export function gameEngine(state: State, action: Action): State {
             : 0;
           const n = board ? board.categories[0].clues.length : 0;
           const m = board ? board.categories.length : 0;
+          console.log(
+            "last clue in board :0",
+            numCluesInBoard,
+            "/",
+            state.numAnswered
+          );
 
           return {
             type: GameState.Preview,
@@ -326,6 +364,7 @@ export function gameEngine(state: State, action: Action): State {
           };
         }
 
+        console.log("go back to waiting for clue, no more active clue");
         return {
           ...state,
           type: GameState.WaitForClueChoice,

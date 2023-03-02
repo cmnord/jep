@@ -1,7 +1,7 @@
 import { useFetcher } from "@remix-run/react";
 
 import Button from "~/components/button";
-import { useEngineContext } from "~/engine/use-engine-context";
+import { useEngineContext } from "~/engine";
 
 function NextClue({
   boardControlName,

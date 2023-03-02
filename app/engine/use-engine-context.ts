@@ -1,7 +1,7 @@
 import * as React from "react";
 
-import { GameState } from "~/engine/engine";
-import type { useGameEngine } from "~/engine/use-game-engine";
+import { GameState } from "./engine";
+import type { useGameEngine } from "./use-game-engine";
 
 export const GameEngineContext = React.createContext<
   ReturnType<typeof useGameEngine>

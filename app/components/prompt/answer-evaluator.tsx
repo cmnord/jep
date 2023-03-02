@@ -1,6 +1,5 @@
 import classNames from "classnames";
-import { GameState } from "~/engine/engine";
-import { useEngineContext } from "~/engine/use-engine-context";
+import { GameState, useEngineContext } from "~/engine";
 import Button from "../button";
 import { ConnectedAnswerForm as AnswerForm } from "./answer-form";
 import { NextClueForm } from "./next-clue-form";
