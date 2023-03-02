@@ -8,6 +8,7 @@ import {
   useSearchParams,
   useSubmit,
 } from "@remix-run/react";
+import classNames from "classnames";
 import * as React from "react";
 
 import Button from "~/components/button";
@@ -17,8 +18,10 @@ import {
   SuccessMessage,
 } from "~/components/error";
 import GameCard from "~/components/game-card";
+import QuestionMarkCircle from "~/components/question-mark-circle";
 import Search from "~/components/search";
 import Toggle from "~/components/toggle";
+import Tooltip from "~/components/tooltip";
 import Upload from "~/components/upload";
 
 import { getAllGames } from "~/models/game.server";
@@ -100,13 +103,37 @@ export default function Index() {
           loading={fetcher.state === "loading"}
         />
       </Form>
-      <div className="flex mb-4 gap-6">
+      <div className="flex flex-col sm:flex-row mb-4 gap-6">
         <Link to={"/mock"}>
           <Button>Play a mock game</Button>
         </Link>
         <div className="inline-flex items-center gap-3">
           <Toggle name="solo" checked={solo} setChecked={setSolo} />
-          <p className="text-sm text-gray-500">Play solo</p>
+          <div className="inline-flex gap-0.5">
+            <p
+              className={classNames("text-sm text-gray-500", {
+                "font-bold": solo,
+              })}
+            >
+              Solo mode {solo ? "on" : "off"}
+            </p>
+            <Tooltip
+              content={
+                <span>
+                  In solo mode, no other players can join the game.
+                  <br />
+                  If you refresh the page the game will reset.
+                </span>
+              }
+            >
+              <button>
+                <QuestionMarkCircle
+                  outlined
+                  className="w-4 h-4 text-gray-400"
+                />
+              </button>
+            </Tooltip>
+          </div>
         </div>
       </div>
       {data.games.length === 0 && (
