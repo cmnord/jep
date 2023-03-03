@@ -1,4 +1,4 @@
-import { Link, useFetcher } from "@remix-run/react";
+import { useFetcher } from "@remix-run/react";
 import * as React from "react";
 
 import Button from "~/components/button";
@@ -77,6 +77,35 @@ function BeforeGamePreview({
   );
 }
 
+function AfterGamePreview({ clue }: { clue?: Clue }) {
+  return (
+    <div className="px-3 pt-3 sm:px-6 sm:pt-6 md:px-12 md:pt-12">
+      <h2 className="text-2xl font-semibold mb-4">Game over!</h2>
+      {clue ? (
+        <div className="flex flex-col gap-4 mb-6">
+          <p className="mb-2">The final answer was:</p>
+          <blockquote className="relative border-l-4 pl-4 sm:pl-6 dark:border-gray-700">
+            <p className="text-gray-800 sm:text-xl uppercase font-bold">
+              {clue.clue}
+            </p>
+          </blockquote>
+          <p>
+            <em>
+              What is{" "}
+              <span className="uppercase font-bold text-sm bg-cyan-200 rounded-md p-1.5">
+                {clue?.answer}
+              </span>
+              ?
+            </em>
+          </p>
+        </div>
+      ) : null}
+      <hr className="my-4" />
+      <h2 className="text-2xl font-semibold mb-4">Final scores:</h2>
+    </div>
+  );
+}
+
 export function Preview({
   numRounds,
   finalClue,
@@ -104,25 +133,7 @@ export function Preview({
         />
       );
     case numRounds:
-      return (
-        <Modal isOpen={isOpen}>
-          <Modal.Body>
-            <Modal.Title>Game over!</Modal.Title>
-            <p className="text-gray-500">The final answer was:</p>
-            <div>
-              <p className="text-gray-500">{finalClue?.clue}</p>
-              <p className="text-gray-500">
-                <strong>{finalClue?.answer}</strong>
-              </p>
-            </div>
-          </Modal.Body>
-          <Modal.Footer>
-            <Link to="/">
-              <Button type="primary">Home</Button>
-            </Link>
-          </Modal.Footer>
-        </Modal>
-      );
+      return <AfterGamePreview clue={finalClue} />;
     case numRounds - 1:
       return (
         <Modal isOpen={isOpen}>
