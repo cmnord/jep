@@ -1,7 +1,6 @@
 import classNames from "classnames";
 import * as React from "react";
 
-import { LoadingSpinner } from "~/components/icons";
 import type { Clue } from "~/models/convert.server";
 
 const UNREVEALED_CLUE = "unrevealed";
@@ -42,7 +41,7 @@ export function ClueComponent({
     )
   ) : (
     <p className="text-4xl lg:text-5xl text-yellow-1000 text-shadow-md font-impact">
-      ${value} {loading && <LoadingSpinner />}
+      ${value}
     </p>
   );
 
@@ -65,12 +64,13 @@ export function ClueComponent({
         onFocus={onFocus}
         onKeyDown={onKeyDown}
         className={classNames(
-          "px-4 py-3 h-full w-full bg-blue-1000  transition-colors",
+          "px-4 py-3 relative h-full w-full bg-blue-1000  transition-colors",
           {
             "hover:bg-blue-700 focus:bg-blue-700": !unrevealed,
             "text-blue-1000 hover:text-white focus:text-white hover:text-shadow focus:text-shadow transition":
               answered && !unrevealed,
-            "bg-gray-800 ": unrevealed,
+            "bg-gray-800": unrevealed,
+            "border-spin opacity-75": loading,
           }
         )}
       >

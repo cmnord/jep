@@ -23,3 +23,49 @@
     width: 100%;
   }
 }
+
+.border-spin {
+  --bw: 4px;
+  --c: #d69f4c;
+
+  background-image: linear-gradient(var(--c), var(--c)),
+    linear-gradient(var(--c), var(--c)), linear-gradient(var(--c), var(--c)),
+    linear-gradient(var(--c), var(--c));
+  background-repeat: no-repeat;
+  background-position: 0 100%, 0 0, 0 100%, 100% 0, 0 0, 0 0, 0 100%, 100% 0;
+  background-size: var(--bw) 0%, 100% var(--bw), 0% var(--bw), var(--bw) 0%,
+    var(--bw) 100%, 100% var(--bw), 100% var(--bw), var(--bw) 100%;
+  animation: animate 4s linear infinite;
+}
+
+@keyframes animate {
+  0% {
+    background-position: 0 100%, 0 0, 0 100%, 100% 0;
+    background-size: var(--bw) 0%, 100% var(--bw), 0% var(--bw), var(--bw) 0%;
+  }
+  15% {
+    /* Right border appears */
+    background-position: 0 100%, 100% 0, 100% 100%, 100% 0;
+    background-size: var(--bw) 0%, 100% var(--bw), 0% var(--bw), var(--bw) 100%;
+  }
+  40% {
+    /* Bottom border appears */
+    background-position: 0 100%, 100% 0, 100% 100%, 100% 100%;
+    background-size: var(--bw) 0%, 0% var(--bw), 100% var(--bw), var(--bw) 100%;
+  }
+  55% {
+    /* Left border appears */
+    background-position: 0 100%, 100% 0, 0% 100%, 100% 100%;
+    background-size: var(--bw) 100%, 0% var(--bw), 100% var(--bw), var(--bw) 0%;
+  }
+  75% {
+    /* Bottom border disappears */
+    background-position: 0% 0%, 0% 0, 0% 100%, 100% 100%;
+    background-size: var(--bw) 100%, 0% var(--bw), 0% var(--bw), var(--bw) 0%;
+  }
+  100% {
+    /* Top border appears */
+    background-position: 0% 0%, 0 0, 0 100%, 100% 100%;
+    background-size: var(--bw) 0%, 100% var(--bw), 0% var(--bw), var(--bw) 0%;
+  }
+}
