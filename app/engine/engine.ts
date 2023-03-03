@@ -146,6 +146,9 @@ export function gameEngine(state: State, action: Action): State {
     }
     case ActionType.StartRound: {
       if (isRoundAction(action)) {
+        if (state.type !== GameState.Preview) {
+          return state;
+        }
         const actionRound = action.payload.round;
         if (actionRound === state.round) {
           const nextState = { ...state };
