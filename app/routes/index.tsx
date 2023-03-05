@@ -151,7 +151,7 @@ export default function Index() {
       </Form>
       {data.games.length === 0 && (
         <p className="text-sm text-gray-500">
-          No games found for search "{debouncedSearch}"
+          No games found{search ? ` for search "${debouncedSearch}"` : ""}
         </p>
       )}
       <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4 mb-4">
