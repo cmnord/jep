@@ -42,6 +42,11 @@ To modify the database schema in Supabase, run:
 npx supabase gen types typescript --linked > app/models/database.types.ts
 ```
 
+## Local Supabase
+
+To use a local version of Supabase instead of the production URL, set
+`SUPABASE_URL` and `SUPABASE_ANON_KEY` from the results of `npx supabase start`.
+
 ## Tools used
 
 - Web framework: [Remix](https://remix.run/)
