@@ -53,8 +53,11 @@ export function useChannel<T extends { [key: string]: any }>({
 
       // cleanup function to unsubscribe from the channel
       return () => {
-        channel.unsubscribe();
-        client.removeChannel(channel);
+        if (channel.state === "joined") {
+          console.log("unsubscribing from channel", channel.state);
+          channel.unsubscribe();
+          client.removeChannel(channel);
+        }
       };
     } catch (error) {
       console.error(error);
