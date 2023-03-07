@@ -61,9 +61,6 @@ module.exports = {
           "100%": { transform: "translate(-100%, -100%)" },
         },
       },
-      minWidth: ({ theme }) => ({
-        "screen-md": theme("screens.md"),
-      }),
       maxHeight: {
         "1/2": "50%",
       },

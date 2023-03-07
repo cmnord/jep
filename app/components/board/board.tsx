@@ -49,7 +49,13 @@ function BoardComponent({
 
   return (
     <div className="w-full overflow-x-scroll">
-      <div className="max-w-screen-lg min-w-screen-md mx-auto">
+      <div
+        className="mx-auto"
+        style={{
+          minWidth: `${120 * board.categories.length}px`,
+          maxWidth: `${200 * board.categories.length}px`,
+        }}
+      >
         <table className="w-full table-fixed h-1 bg-black text-white border-spacing-3">
           <thead>
             <tr className="h-1">
