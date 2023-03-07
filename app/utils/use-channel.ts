@@ -19,19 +19,26 @@ export function useChannel<T extends { [key: string]: any }>({
   SUPABASE_URL: string;
   SUPABASE_ANON_KEY: string;
 }) {
-  const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    realtime: {
-      params: {
-        eventsPerSecond: 1,
-      },
-    },
-  });
+  const client = React.useMemo(
+    () =>
+      createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        realtime: {
+          params: {
+            eventsPerSecond: 1,
+          },
+        },
+      }),
+    [SUPABASE_ANON_KEY, SUPABASE_URL]
+  );
+
+  const channel = client.channel(`realtime:${channelName}`);
 
   React.useEffect(() => {
+    if (channel.state !== "closed") {
+      return;
+    }
     try {
-      // create the channel in the database
-      const channel = client
-        .channel(`realtime:${channelName}`)
+      channel
         .on<T>(
           "postgres_changes",
           {
@@ -45,7 +52,7 @@ export function useChannel<T extends { [key: string]: any }>({
           }
         )
         .subscribe((status, err) => {
-          console.log(status);
+          console.info(status);
           if (err) {
             throw err;
           }
@@ -54,7 +61,7 @@ export function useChannel<T extends { [key: string]: any }>({
       // cleanup function to unsubscribe from the channel
       return () => {
         if (channel.state === "joined") {
-          console.log("unsubscribing from channel", channel.state);
+          console.info("unsubscribing from channel", channel.state);
           channel.unsubscribe();
           client.removeChannel(channel);
         }
@@ -62,7 +69,7 @@ export function useChannel<T extends { [key: string]: any }>({
     } catch (error) {
       console.error(error);
     }
-  }, [channelName, filter, table, callback, client]);
+  }, [channel, filter, table, callback, client]);
 }
 
 export default useChannel;
