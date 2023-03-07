@@ -64,6 +64,9 @@ module.exports = {
       minWidth: ({ theme }) => ({
         "screen-md": theme("screens.md"),
       }),
+      maxHeight: {
+        "1/2": "50%",
+      },
     },
   },
   plugins: [
