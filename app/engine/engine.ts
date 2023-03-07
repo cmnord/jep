@@ -151,10 +151,8 @@ export function gameEngine(state: State, action: Action): State {
         }
         const actionRound = action.payload.round;
         if (actionRound === state.round) {
-          const nextState = { ...state };
-          nextState.type = GameState.WaitForClueChoice;
           console.log("starting round", actionRound);
-          return nextState;
+          return { ...state, type: GameState.WaitForClueChoice };
         }
         console.log("!!!! bad startround msg", actionRound, state.round);
         return state;
@@ -170,8 +168,7 @@ export function gameEngine(state: State, action: Action): State {
           !state.isAnswered[i][j].isAnswered
         ) {
           console.log("choosing clue", i, j, "for round", state.round);
-          const nextState = { ...state };
-          nextState.type = GameState.ReadClue;
+          const nextState = { ...state, type: GameState.ReadClue };
           nextState.activeClue = [i, j];
           return nextState;
         }
@@ -213,9 +210,7 @@ export function gameEngine(state: State, action: Action): State {
         }
 
         if (deltaMs <= CLUE_TIMEOUT_MS && buzzes.size < state.players.size) {
-          const nextState = { buzzes, ...state };
-          console.log("moving on... got 1 buzz", buzzes);
-          return nextState;
+          return { ...state, buzzes };
         }
 
         // Evaluate the winner if either:
