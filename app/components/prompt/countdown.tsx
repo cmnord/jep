@@ -49,5 +49,5 @@ export function Countdown({ startTime }: { startTime?: number }) {
     />
   ));
 
-  return <div className="flex justify-center gap-2 mb-2">{bars}</div>;
+  return <div className="flex justify-center gap-2 mt-2">{bars}</div>;
 }

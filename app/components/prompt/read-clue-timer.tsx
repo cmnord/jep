@@ -9,7 +9,7 @@ export function ReadClueTimer({
 }) {
   return (
     <div
-      className={classNames("h-8 bg-white self-start", {
+      className={classNames("h-8 mt-2 bg-white self-start", {
         "w-0": shouldAnimate,
         "w-full": !shouldAnimate,
       })}
