@@ -109,7 +109,6 @@ export function useGameEngine(
   // When new room events come in, re-process the entire state.
   React.useEffect(() => {
     dispatch({ type: ActionType.Reset });
-    console.log(state);
     for (const re of serverRoomEvents) {
       if (!isTypedRoomEvent(re)) {
         throw new Error("unhandled room event type from DB: " + re.type);
