@@ -3,37 +3,16 @@ import * as React from "react";
 import type { Clue, Game } from "~/models/convert.server";
 import type { DbRoomEvent } from "~/models/room-event.server";
 import useChannel from "~/utils/use-channel";
-import { generateGrid } from "~/utils/utils";
 
-import type { Action, State } from "./engine";
-import { gameEngine, GameState, getWinningBuzzer } from "./engine";
-import { applyRoomEventsToState, processRoomEvent } from "./room-event";
-
-function createInitialState(game: Game, round: number): State {
-  const board = game.boards[round];
-
-  const numCluesInBoard = board
-    ? board.categories.reduce(
-        (acc, category) => (acc += category.clues.length),
-        0
-      )
-    : 0;
-  const n = board ? board.categories[0].clues.length : 0;
-  const m = board ? board.categories.length : 0;
-
-  return {
-    type: GameState.Preview,
-    game: game,
-    isAnswered: generateGrid(n, m, {
-      isAnswered: false,
-      answeredBy: undefined,
-    }),
-    numAnswered: 0,
-    numCluesInBoard,
-    players: new Map(),
-    round,
-  };
-}
+import {
+  Action,
+  ActionType,
+  createInitialState,
+  gameEngine,
+  getWinningBuzzer,
+  State,
+} from "./engine";
+import { applyRoomEventsToState, isTypedRoomEvent } from "./room-event";
 
 function stateToGameEngine(
   game: Game,
@@ -88,7 +67,7 @@ function stateToGameEngine(
  */
 export function useSoloGameEngine(game: Game, userId: string, name: string) {
   const [state, dispatch] = React.useReducer(gameEngine, game, (arg) => {
-    const init = createInitialState(arg, 0);
+    const init = createInitialState(arg);
     init.players.set(userId, { name, userId, score: 0 });
     init.boardControl = userId;
     return init;
@@ -115,7 +94,7 @@ export function useGameEngine(
   SUPABASE_ANON_KEY: string
 ) {
   const [seenRoomEvents, setSeenRoomEvents] = React.useState(
-    new Set<number>(serverRoomEvents.map((re) => re.id))
+    new Set(serverRoomEvents.map((re) => re.id))
   );
 
   // TODO: spectators who cannot buzz
@@ -124,21 +103,21 @@ export function useGameEngine(
     gameEngine,
     { game, serverRoomEvents },
     (arg) =>
-      applyRoomEventsToState(
-        createInitialState(arg.game, 0),
-        arg.serverRoomEvents
-      )
+      applyRoomEventsToState(createInitialState(arg.game), arg.serverRoomEvents)
   );
 
-  // When new room events come in, process any we haven't seen.
+  // When new room events come in, re-process the entire state.
   React.useEffect(() => {
+    dispatch({ type: ActionType.Reset });
+    console.log(state);
     for (const re of serverRoomEvents) {
-      if (!seenRoomEvents.has(re.id)) {
-        setSeenRoomEvents((prev) => new Set(prev).add(re.id));
-        processRoomEvent(re, dispatch);
+      if (!isTypedRoomEvent(re)) {
+        throw new Error("unhandled room event type from DB: " + re.type);
       }
+      dispatch(re);
     }
-  }, [serverRoomEvents, seenRoomEvents]);
+    setSeenRoomEvents(new Set(serverRoomEvents.map((re) => re.id)));
+  }, [serverRoomEvents]);
 
   useChannel<DbRoomEvent>({
     channelName: `roomId:${roomId}`,
@@ -148,10 +127,13 @@ export function useGameEngine(
     SUPABASE_ANON_KEY,
     callback: (payload) => {
       const newEvent: DbRoomEvent = payload.new;
+      if (!isTypedRoomEvent(newEvent)) {
+        throw new Error("unhandled room event type from DB: " + newEvent.type);
+      }
       // Only process events we haven't seen yet
       if (!seenRoomEvents.has(newEvent.id)) {
         setSeenRoomEvents((prev) => new Set(prev).add(newEvent.id));
-        processRoomEvent(newEvent, dispatch);
+        dispatch(newEvent);
       }
     },
   });

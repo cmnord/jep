@@ -36,6 +36,7 @@ export interface State {
 }
 
 export enum ActionType {
+  Reset = "reset",
   Join = "join",
   ChangeName = "change_name",
   StartRound = "start_round",
@@ -105,10 +106,40 @@ function setIsAnswered(
   return deepCopy;
 }
 
+export function createInitialState(game: Game): State {
+  const round = 0;
+  const board = game.boards[round];
+
+  const numCluesInBoard = board
+    ? board.categories.reduce(
+        (acc, category) => (acc += category.clues.length),
+        0
+      )
+    : 0;
+  const n = board ? board.categories[0].clues.length : 0;
+  const m = board ? board.categories.length : 0;
+
+  return {
+    type: GameState.Preview,
+    game: game,
+    isAnswered: generateGrid(n, m, {
+      isAnswered: false,
+      answeredBy: undefined,
+    }),
+    numAnswered: 0,
+    numCluesInBoard,
+    players: new Map(),
+    round,
+  };
+}
+
 /** gameEngine is the reducer (aka state machine) which implements the game. */
 export function gameEngine(state: State, action: Action): State {
   console.log("-----applying room event", action.type);
   switch (action.type) {
+    case ActionType.Reset: {
+      return createInitialState(state.game);
+    }
     case ActionType.Join: {
       if (isPlayerAction(action)) {
         const nextState = { ...state };
