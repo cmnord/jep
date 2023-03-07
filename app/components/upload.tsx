@@ -4,7 +4,9 @@ export default function Upload({ onChange }: { onChange?: () => void }) {
   // TODO: drag and drop with react-dropzone
   return (
     <div className="flex flex-col items-center">
-      <button
+      <label
+        tabIndex={0}
+        role="button"
         className={
           "flex rounded-lg text-gray-900 cursor-pointer " +
           "border-2 border-dashed border-blue-600 " +
@@ -45,7 +47,7 @@ export default function Upload({ onChange }: { onChange?: () => void }) {
             onChange={onChange}
           />
         </div>
-      </button>
+      </label>
       <Link to="/help">
         <p id="upload_help" className="mt-1 text-sm">
           File format help
