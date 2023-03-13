@@ -8,8 +8,8 @@ import { useEngineContext } from "~/engine";
 import { useDebounce, useDebounceEnd } from "~/utils/use-debounce";
 import { useSoloAction } from "~/utils/use-solo-action";
 
+/** Heroicon name: solid/paper-airplane */
 function SendIcon({ className }: { className?: string }) {
-  // Heroicon name: solid/paper-airplane
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

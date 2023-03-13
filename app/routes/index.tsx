@@ -5,6 +5,7 @@ import {
   Link,
   useFetcher,
   useLoaderData,
+  useNavigation,
   useSearchParams,
   useSubmit,
 } from "@remix-run/react";
@@ -51,6 +52,7 @@ export default function Index() {
     data.formState.success
   );
   const submit = useSubmit();
+  const navigation = useNavigation();
 
   const [params] = useSearchParams();
   const searchFormRef = React.useRef<HTMLFormElement | null>(null);
@@ -166,7 +168,12 @@ export default function Index() {
         ref={uploadFormRef}
         replace
       >
-        <Upload onChange={() => submit(uploadFormRef.current)} />
+        <Upload
+          loading={navigation.state === "submitting"}
+          onChange={() => {
+            submit(uploadFormRef.current);
+          }}
+        />
       </fetcher.Form>
       {error && <ErrorMessage error={new Error(error)} />}
       {showSuccessMsg && <SuccessMessage message={"File Uploaded"} />}

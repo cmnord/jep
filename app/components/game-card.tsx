@@ -4,8 +4,8 @@ import * as React from "react";
 import { LoadingSpinner } from "~/components/icons";
 import type { Game } from "~/models/game.server";
 
+/** Heroicon name: outline/chevron-right */
 function ChevronRightIcon({ className }: { className: string }) {
-  // Heroicon name: outline/chevron-right
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

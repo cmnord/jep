@@ -1,3 +1,4 @@
+/** Heroicon names: outline/question-mark-circle, solid/question-mark-circle */
 export function QuestionMarkCircle({
   outlined = false,
   className,
@@ -6,7 +7,6 @@ export function QuestionMarkCircle({
   className?: string;
 }) {
   if (outlined) {
-    // Heroicon name: outline/question-mark-circle
     return (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -24,7 +24,6 @@ export function QuestionMarkCircle({
       </svg>
     );
   }
-  // Heroicon name: solid/question-mark-circle
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
