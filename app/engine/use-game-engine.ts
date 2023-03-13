@@ -4,13 +4,12 @@ import type { Clue, Game } from "~/models/convert.server";
 import type { DbRoomEvent } from "~/models/room-event.server";
 import useChannel from "~/utils/use-channel";
 
+import type { Action, State } from "./engine";
 import {
-  Action,
   ActionType,
   createInitialState,
   gameEngine,
   getWinningBuzzer,
-  State,
 } from "./engine";
 import { applyRoomEventsToState, isTypedRoomEvent } from "./room-event";
 
