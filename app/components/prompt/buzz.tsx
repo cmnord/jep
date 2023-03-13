@@ -72,12 +72,18 @@ export function Buzzes({
   winningBuzzer?: string;
   buzzCorrect: boolean;
 }) {
+  const sortedBuzzes = buzzes
+    ? Array.from(buzzes.entries()).sort(
+        ([_aUserId, aDurationMs], [_bUserId, bDurationMs]) =>
+          aDurationMs - bDurationMs
+      )
+    : [];
+
   return (
     <div className="flex items-center justify-between w-full">
       <div className="flex gap-4 ml-4">
-        {buzzes
-          ? // TODO: sort buzzes?
-            Array.from(buzzes.entries()).map(([userId, durationMs], i) => (
+        {sortedBuzzes
+          ? sortedBuzzes.map(([userId, durationMs], i) => (
               <Buzz
                 key={i}
                 player={players.get(userId)}
