@@ -8,6 +8,7 @@ import { CLUE_TIMEOUT_MS, GameState, useEngineContext } from "~/engine";
 import useKeyPress from "~/utils/use-key-press";
 import { useSoloAction } from "~/utils/use-solo-action";
 import { useTimeout } from "~/utils/use-timeout";
+import { getClueValue } from "~/utils/utils";
 
 import { ConnectedAnswerForm as AnswerForm } from "./answer-form";
 import { Buzzes } from "./buzz";
@@ -109,6 +110,7 @@ export function ConnectedPrompt({
     winningBuzzer,
     soloDispatch,
     answeredBy,
+    round,
   } = useEngineContext();
 
   const shouldShowPrompt =
@@ -243,6 +245,8 @@ export function ConnectedPrompt({
 
   useKeyPress("Enter", () => handleClick(Date.now()));
 
+  const clueValue = getClueValue(clueIdx ? clueIdx[0] : 0, round);
+
   return (
     <Prompt isOpen={shouldShowPrompt}>
       <Countdown
@@ -257,7 +261,7 @@ export function ConnectedPrompt({
       <div className="flex justify-between p-4">
         <div className="text-white">
           <span className="font-bold">{category}</span> for{" "}
-          <span className="font-bold">${clue?.value}</span>
+          <span className="font-bold">${clueValue}</span>
         </div>
         <span className="text-sm text-gray-300">
           Click or press <Kbd>Enter</Kbd> to buzz in
@@ -299,9 +303,12 @@ export function ConnectedPrompt({
       <Buzzes
         buzzes={optimisticBuzzes}
         players={players}
-        winningBuzzer={clueIdx ? answeredBy(clueIdx[0], clueIdx[1]) : undefined}
+        winningBuzzer={winningBuzzer}
         showWinner={type === GameState.RevealAnswerToAll}
-        clueValue={clue?.value}
+        buzzCorrect={
+          clueIdx ? answeredBy(clueIdx[0], clueIdx[1]) === winningBuzzer : false
+        }
+        clueValue={clueValue}
       />
     </Prompt>
   );

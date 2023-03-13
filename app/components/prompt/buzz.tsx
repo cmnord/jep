@@ -1,3 +1,4 @@
+import classNames from "classnames";
 import type { Player } from "~/engine";
 import { CLUE_TIMEOUT_MS } from "~/engine";
 import { stringToHslColor } from "~/utils/utils";
@@ -17,18 +18,19 @@ const formatter = Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD",
   maximumFractionDigits: 0, // Round to whole dollars.
+  signDisplay: "always", // Show +/- for positive and negative values.
 });
 
 function Buzz({
   player,
   durationMs,
-  won,
+  wonBuzz,
   clueValue,
 }: {
   player?: Player;
   durationMs: number;
-  won: boolean;
-  clueValue?: number;
+  wonBuzz: boolean;
+  clueValue: number;
 }) {
   const color = player ? stringToHslColor(player.userId) : "gray";
   const durationMsg = durationMessage(durationMs);
@@ -39,9 +41,14 @@ function Buzz({
       className="relative px-2 py-1 flex flex-col items-center justify-center text-white text-shadow"
       style={{ color }}
     >
-      {won && clueValueStr !== undefined ? (
-        <span className="absolute -top-5 text-green-300 font-bold animate-bounce">
-          +{clueValueStr}
+      {wonBuzz && clueValueStr !== undefined ? (
+        <span
+          className={classNames("absolute -top-5 font-bold animate-bounce", {
+            "text-green-300": clueValue >= 0,
+            "text-red-300": clueValue < 0,
+          })}
+        >
+          {clueValueStr}
         </span>
       ) : null}
       <div className="font-bold">{player?.name ?? "Unknown player"}</div>
@@ -56,12 +63,14 @@ export function Buzzes({
   players,
   showWinner,
   winningBuzzer,
+  buzzCorrect,
 }: {
   buzzes?: Map<string, number>;
-  clueValue?: number;
+  clueValue: number;
   players: Map<string, Player>;
   showWinner: boolean;
   winningBuzzer?: string;
+  buzzCorrect: boolean;
 }) {
   return (
     <div className="flex items-center justify-between w-full">
@@ -73,8 +82,8 @@ export function Buzzes({
                 key={i}
                 player={players.get(userId)}
                 durationMs={durationMs}
-                won={winningBuzzer === userId && showWinner}
-                clueValue={clueValue}
+                wonBuzz={winningBuzzer === userId && showWinner}
+                clueValue={buzzCorrect ? clueValue : -1 * clueValue}
               />
             ))
           : null}
