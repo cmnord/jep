@@ -18,18 +18,9 @@ type DbClue = ClueTable["Row"];
 
 type GameAndClues = DbGame & { clues: DbClue[] };
 
-/* Helpers */
+const SEARCHABLE_GAME_COLUMNS = ["title", "author"];
 
-function matchesSearch(game: DbGame, casedSearch: string | null) {
-  if (casedSearch === null) {
-    return true;
-  }
-  const search = casedSearch.toLowerCase();
-  return (
-    game.title.toLowerCase().includes(search) ||
-    game.author.toLowerCase().includes(search)
-  );
-}
+/* Helpers */
 
 function dbGameToGame(dbGame: DbGame, clues: DbClue[]): Game {
   const game: Game = {
@@ -92,21 +83,39 @@ export async function getGame(gameId: string): Promise<Game | null> {
   return dbGameToGame(gameAndClues, gameAndClues.clues);
 }
 
-/** getAllGames gets all games from the database, then filters them in memory. */
+/** getAllGames gets all games from the database. Search searches the title and
+ * author fields.
+ */
 export async function getAllGames(search: string | null): Promise<Game[]> {
-  const { data, error } = await db
+  let query = db
     .from<"games", GameTable>("games")
     .select<"*, clues ( * )", GameAndClues>("*, clues ( * )")
     .order("created_at", { ascending: false });
-  // TODO: filter with .or()
+
+  if (search !== null && search.trim() !== "") {
+    // .or doesn't accept variables, so sanitize the search string to prevent
+    // SQL injection
+    const sanitizedSearch = search.trim().replace(/[^a-zA-Z0-9\s]/g, "");
+    const tokens = sanitizedSearch.split(/\s/);
+    // Make a search clause for each searchable column. The tokens must all
+    // match the same column.
+    const clauses = [];
+    for (const column of SEARCHABLE_GAME_COLUMNS) {
+      // Make an ILIKE clause for every token.
+      const tokenClauses = tokens.map((t) => `${column}.ilike.%${t}%`);
+      const clause = `and(${tokenClauses.join(",")})`;
+      clauses.push(clause);
+    }
+    query = query.or(clauses.join(","));
+  }
+
+  const { data, error } = await query;
 
   if (error !== null) {
     throw new Error(error.message);
   }
 
-  return data
-    .filter((game) => matchesSearch(game, search))
-    .map((gac) => dbGameToGame(gac, gac.clues));
+  return data.map((gac) => dbGameToGame(gac, gac.clues));
 }
 
 export async function getMockGame(): Promise<Game> {

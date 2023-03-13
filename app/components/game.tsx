@@ -64,7 +64,7 @@ export default function GameComponent({
         )}
       </div>
       <div className="p-3 sm:p-6 md:p-12 ">
-        {!(type === GameState.Preview && round === 0) && (
+        {(type !== GameState.Preview || round !== 0) && (
           <Players userId={userId} roomName={roomName} />
         )}
         {board && (
