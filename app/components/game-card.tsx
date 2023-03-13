@@ -43,15 +43,15 @@ export default function GameCard({
     <button
       onClick={() => setLoading(true)}
       className={
-        "basis-full sm:basis-auto " +
+        "basis-full sm:basis-auto flex flex-col " +
         "border-gray-200 border-2 rounded-lg group transition-colors " +
         "hover:border-blue-500 hover:shadow-sm "
       }
     >
-      <Link to={to}>
+      <Link to={to} className="grow">
         <div className="flex items-center justify-between">
-          <div className="flex flex-col items-start p-4 min-w-0">
-            <div className="flex gap-2 mb-2 w-full">
+          <div className="flex flex-col items-start p-4 gap-2 min-w-0">
+            <div className="flex gap-2 w-full">
               <p
                 className="text-sm whitespace-nowrap min-w-0 overflow-hidden overflow-ellipsis"
                 title={game.author}
@@ -71,6 +71,9 @@ export default function GameCard({
             >
               {game.title}
             </strong>
+            {game.note && (
+              <p className="text-sm text-gray-500 text-left">{game.note}</p>
+            )}
           </div>
           <div
             className={
