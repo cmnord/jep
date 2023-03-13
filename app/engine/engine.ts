@@ -298,21 +298,26 @@ export function gameEngine(state: State, action: Action): State {
         // Ignore the answer if it was not from the winning buzzer.
         const winningBuzzer = getWinningBuzzer(state.buzzes);
         if (userId !== winningBuzzer?.userId) {
-          console.log(
-            "!!!! bad answer msg, wrong buzzer",
-            winningBuzzer,
-            action.payload
-          );
           return state;
         }
         // Ignore the answer if the clue has already been answered.
         if (state.isAnswered[i][j].isAnswered) {
           return { ...state, type: GameState.RevealAnswerToAll };
         }
+        const players = new Map(state.players);
+        const player = players.get(userId);
+        if (!player) {
+          throw new Error("Player not found in state");
+        }
+        const clueValue = getClueValue(i, state.round);
 
         if (!correct) {
-          // If the buzzer was wrong, re-open the buzzers to everyone except
-          // those who can no longer buzz.
+          // If the buzzer was wrong, reduce their points and re-open the
+          // buzzers to everyone who can still buzz.
+          players.set(userId, {
+            ...player,
+            score: player.score - clueValue,
+          });
           const lockedOutBuzzers = state.buzzes
             ? Array.from(state.buzzes.entries()).filter(
                 ([_, deltaMs]) => deltaMs === CANT_BUZZ_FLAG
@@ -324,47 +329,44 @@ export function gameEngine(state: State, action: Action): State {
           ]);
           // If everyone has been locked out, reveal the answer to everyone.
           if (newBuzzes.size === state.players.size) {
-            const nextState = {
+            return {
               ...state,
               type: GameState.RevealAnswerToAll,
+              players,
               numAnswered: state.numAnswered + 1,
               isAnswered: setIsAnswered(state.isAnswered, i, j, {
                 isAnswered: true,
                 answeredBy: undefined,
               }),
             };
-            return nextState;
           }
-          const nextState: State = {
+
+          return {
             ...state,
             type: GameState.ReadClue,
+            players,
             buzzes: newBuzzes,
           };
-          console.log("buzzer was wrong :O re-opening buzzers");
-          return nextState;
         }
 
         // If the buzzer was right, reveal the answer to everyone and give the
         // winning buzzer board control.
-        const nextState = {
+        players.set(userId, {
+          ...player,
+          score: player.score + clueValue,
+        });
+
+        return {
           ...state,
           type: GameState.RevealAnswerToAll,
           boardControl: userId,
           numAnswered: state.numAnswered + 1,
+          players,
           isAnswered: setIsAnswered(state.isAnswered, i, j, {
             isAnswered: true,
             answeredBy: userId,
           }),
         };
-        const player = nextState.players.get(userId);
-        if (player) {
-          const clueValue = getClueValue(i, state.round);
-          nextState.players.set(userId, {
-            ...player,
-            score: player.score + clueValue,
-          });
-        }
-        return nextState;
       }
       throw new Error(
         "Answer action must have an associated index and correct/incorrect"
