@@ -96,7 +96,8 @@ export async function getGame(gameId: string): Promise<Game | null> {
 export async function getAllGames(search: string | null): Promise<Game[]> {
   const { data, error } = await db
     .from<"games", GameTable>("games")
-    .select<"*, clues ( * )", GameAndClues>("*, clues ( * )");
+    .select<"*, clues ( * )", GameAndClues>("*, clues ( * )")
+    .order("created_at", { ascending: false });
   // TODO: filter with .or()
 
   if (error !== null) {
