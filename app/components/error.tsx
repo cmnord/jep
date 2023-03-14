@@ -18,7 +18,7 @@ export function DefaultErrorBoundary({ error }: { error: Error }) {
 
 export function ErrorMessage({ error }: { error: Error }) {
   return (
-    <div className="bg-red-100 rounded-md p-3">
+    <div className="bg-red-100 rounded-md p-3" role="alert">
       <p className="text-sm text-red-500">{error.message}</p>
     </div>
   );
