@@ -11,6 +11,7 @@ module.exports = {
   // publicPath: "/build/",
   future: {
     unstable_tailwind: true,
+    v2_routeConvention: true,
   },
   serverDependenciesToBundle: ["nanoid"],
 };
