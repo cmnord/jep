@@ -108,6 +108,31 @@ describe("gameEngine", () => {
         players: new Map([[PLAYER1.userId, PLAYER1]]),
       },
     },
+    {
+      name: "Choose clue",
+      state: initialState,
+      actions: [
+        {
+          type: ActionType.Join,
+          payload: { name: PLAYER1.name, userId: PLAYER1.userId },
+        },
+        {
+          type: ActionType.StartRound,
+          payload: { round: 0 },
+        },
+        {
+          type: ActionType.ChooseClue,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0 },
+        },
+      ],
+      expectedState: {
+        ...initialState,
+        type: GameState.ReadClue,
+        activeClue: [0, 0],
+        boardControl: PLAYER1.userId,
+        players: new Map([[PLAYER1.userId, PLAYER1]]),
+      },
+    },
   ];
 
   for (const tc of testCases) {

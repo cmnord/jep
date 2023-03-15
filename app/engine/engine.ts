@@ -194,17 +194,17 @@ export function gameEngine(state: State, action: Action): State {
       if (isClueAction(action)) {
         const { userId, i, j } = action.payload;
         if (
-          state.type === GameState.WaitForClueChoice &&
-          state.boardControl === userId &&
-          !state.isAnswered[i][j].isAnswered
+          state.type !== GameState.WaitForClueChoice ||
+          state.boardControl !== userId ||
+          state.isAnswered[i][j].isAnswered
         ) {
-          console.log("choosing clue", i, j, "for round", state.round);
-          const nextState = { ...state, type: GameState.ReadClue };
-          nextState.activeClue = [i, j];
-          return nextState;
+          return state;
         }
-        console.log("!!!! bad chooseclue msg", action.payload);
-        return state;
+        return {
+          ...state,
+          type: GameState.ReadClue,
+          activeClue: [i, j],
+        };
       }
       throw new Error("ClickClue action must have an associated index");
     }
