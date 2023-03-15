@@ -72,9 +72,11 @@ jobs:
       - name: 🌳 Cypress run
         uses: cypress-io/github-action@v5
         with:
+          # TODO: use npm start instead
           start: npm run dev
           wait-on: "http://localhost:8811"
         env:
+          CYPRESS_IS_CI: "true"
           PORT: "8811"
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}

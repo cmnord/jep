@@ -7,11 +7,13 @@
     "dev": "remix dev",
     "format": "prettier --write .",
     "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint .",
+    "start": "node --require dotenv/config node_modules/@remix-run/serve/dist/cli.js build",
     "test": "vitest",
     "test:e2e:dev": "start-server-and-test dev http://localhost:3000 \"npx cypress open\"",
     "pretest:e2e:run": "npm run build",
-    "test:e2e:run": "cross-env PORT=8811 start-server-and-test dev http://localhost:8811 \"npx cypress run\"",
-    "typecheck": "tsc -b && tsc -b cypress"
+    "test:e2e:run": "cross-env PORT=8811 start-server-and-test start http://localhost:8811 \"npx cypress run\"",
+    "typecheck": "tsc -b && tsc -b cypress",
+    "validate": "run-p \"test -- --run\" lint typecheck test:e2e:run"
   },
   "dependencies": {
     "@remix-run/node": "^1.13.0",
@@ -36,6 +38,7 @@
     "@vitejs/plugin-react": "^3.1.0",
     "cross-env": "^7.0.3",
     "cypress": "^12.7.0",
+    "dotenv": "^16.0.3",
     "eslint": "^8.35.0",
     "eslint-config-prettier": "^8.6.0",
     "eslint-plugin-cypress": "^2.12.1",
