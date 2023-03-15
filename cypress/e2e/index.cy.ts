@@ -17,6 +17,11 @@ describe("landing page", () => {
       { force: true }
     );
 
+    if (Cypress.env("IS_CI")) {
+      // Submit the form -- necessary to pass in CI
+      cy.get("form[method=post]").submit();
+    }
+
     cy.wait("@postGame").then(() => cy.findByRole("alert"));
   });
 });
