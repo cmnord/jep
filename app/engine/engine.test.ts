@@ -1,6 +1,11 @@
 import { MOCK_GAME } from "~/models/mock.server";
 import type { Action, Player, State } from "./engine";
-import { ActionType, createInitialState, gameEngine } from "./engine";
+import {
+  ActionType,
+  createInitialState,
+  gameEngine,
+  GameState,
+} from "./engine";
 
 const PLAYER1: Player = {
   name: "Player 1",
@@ -81,6 +86,26 @@ describe("gameEngine", () => {
           [PLAYER1.userId, PLAYER1],
           [PLAYER2.userId, PLAYER2],
         ]),
+      },
+    },
+    {
+      name: "Round start",
+      state: initialState,
+      actions: [
+        {
+          type: ActionType.Join,
+          payload: { name: PLAYER1.name, userId: PLAYER1.userId },
+        },
+        {
+          type: ActionType.StartRound,
+          payload: { round: 0 },
+        },
+      ],
+      expectedState: {
+        ...initialState,
+        type: GameState.WaitForClueChoice,
+        boardControl: PLAYER1.userId,
+        players: new Map([[PLAYER1.userId, PLAYER1]]),
       },
     },
   ];

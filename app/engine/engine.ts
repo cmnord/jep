@@ -178,12 +178,14 @@ export function gameEngine(state: State, action: Action): State {
         if (state.type !== GameState.Preview) {
           return state;
         }
+        // Game cannot start without any players
+        if (state.players.size === 0) {
+          return state;
+        }
         const actionRound = action.payload.round;
         if (actionRound === state.round) {
-          console.log("starting round", actionRound);
           return { ...state, type: GameState.WaitForClueChoice };
         }
-        console.log("!!!! bad startround msg", actionRound, state.round);
         return state;
       }
       throw new Error("StartRound action must have an associated round number");
