@@ -14,8 +14,7 @@ import Header from "~/components/header";
 import Link, { Anchor } from "~/components/link";
 import { CodeBlock } from "./components/code";
 
-import globalStylesheet from "./styles.css";
-import styles from "./tailwind.css";
+import stylesheet from "./styles.css";
 
 export const meta: MetaFunction = () => ({
   charset: "utf-8",
@@ -31,8 +30,7 @@ export const links: LinksFunction = () => [
     type: "image/png",
     sizes: "16x16",
   },
-  { rel: "stylesheet", href: styles },
-  { rel: "stylesheet", href: globalStylesheet },
+  { rel: "stylesheet", href: stylesheet },
 ];
 
 export default function App() {

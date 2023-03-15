@@ -5,12 +5,8 @@ node_modules
 .vercel
 .output
 
+/api/
 /build/
 /public/build
-/api/index.js
-/api/index.js.map
-
-/app/tailwind.css
-api/
 
 .DS_Store
