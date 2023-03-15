@@ -3,6 +3,7 @@
   "sideEffects": false,
   "scripts": {
     "build": "remix build",
+    "db:start": "npx supabase start -x gotrue,realtime,storage-api,imgproxy,inbucket,pgadmin-schema-diff,migra,postgres-meta,studio,deno-relay",
     "dev": "remix dev",
     "format": "prettier --write .",
     "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint .",
