@@ -4,7 +4,7 @@ import { useLoaderData } from "@remix-run/react";
 import GameComponent from "~/components/game";
 import { GameEngineContext } from "~/engine";
 import { useSoloGameEngine } from "~/engine/use-game-engine";
-import { getMockGame } from "~/models/game.server";
+import { getMockGame } from "~/models/mock.server";
 
 export async function loader() {
   const game = await getMockGame();

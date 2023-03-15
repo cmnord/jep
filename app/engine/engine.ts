@@ -142,16 +142,16 @@ export function gameEngine(state: State, action: Action): State {
     }
     case ActionType.Join: {
       if (isPlayerAction(action)) {
-        const nextState = { ...state };
-        nextState.players.set(action.payload.userId, {
+        const players = new Map(state.players);
+        players.set(action.payload.userId, {
           ...action.payload,
           score: 0,
         });
+        const nextState = { ...state, players };
         // If this is the first player joining, give them board control.
-        if (nextState.players.size === 1) {
+        if (players.size === 1) {
           nextState.boardControl = action.payload.userId;
         }
-        console.log(action.payload.name, "joined the game");
         return nextState;
       }
       throw new Error("PlayerJoin action must have an associated player");
@@ -160,17 +160,15 @@ export function gameEngine(state: State, action: Action): State {
       if (isPlayerAction(action)) {
         const players = new Map(state.players);
         const player = players.get(action.payload.userId);
+        // Player must already exist to change name
         if (!player) {
-          players.set(action.payload.userId, {
-            ...action.payload,
-            score: 0,
-          });
-        } else {
-          players.set(action.payload.userId, {
-            ...player,
-            name: action.payload.name,
-          });
+          return state;
         }
+
+        players.set(action.payload.userId, {
+          ...player,
+          name: action.payload.name,
+        });
         return { ...state, players };
       }
       throw new Error("PlayerChangeName action must have an associated player");

@@ -1,7 +1,4 @@
-import { readFile } from "fs/promises";
-
 import type { Board, Game as ConvertedGame } from "~/models/convert.server";
-import { Convert } from "~/models/convert.server";
 import type { Database } from "~/models/database.types";
 import { db } from "~/supabase.server";
 
@@ -116,19 +113,6 @@ export async function getAllGames(search: string | null): Promise<Game[]> {
   }
 
   return data.map((gac) => dbGameToGame(gac, gac.clues));
-}
-
-export async function getMockGame(): Promise<Game> {
-  // Find the absolute path of the json directory
-  // Note: Vercel doesn't include the json directory when using process.cwd() or
-  // path.join(). The workaround is to use __dirname and concatenate the json
-  // directory to it.
-  const jsonDirectory = __dirname + "/../app/static";
-  // Read the json data file data.json
-  const fileContents = await readFile(jsonDirectory + "/mock.jep.json", "utf8");
-
-  const game = Convert.toGame(fileContents);
-  return { id: "mock", ...game };
 }
 
 /* Writes */
