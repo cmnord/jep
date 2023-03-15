@@ -63,7 +63,8 @@ jobs:
           useLockFile: false
 
       - name: 🛠 Setup Database
-        run: npx prisma migrate reset --force
+        # db:start only starts the kong and postgrest containers.
+        run: npm run db:start
 
       - name: ⚙️ Build
         run: npm run build
@@ -71,7 +72,9 @@ jobs:
       - name: 🌳 Cypress run
         uses: cypress-io/github-action@v5
         with:
-          start: npm run start:mocks
+          start: npm run dev
           wait-on: "http://localhost:8811"
         env:
           PORT: "8811"
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
