@@ -288,7 +288,10 @@ describe("gameEngine", () => {
         activeClue: [0, 0],
         boardControl: PLAYER1.userId,
         buzzes: new Map([[PLAYER1.userId, CLUE_TIMEOUT_MS + 1]]),
-        isAnswered: [[{ isAnswered: true, answeredBy: undefined }]],
+        isAnswered: [
+          [{ isAnswered: true, answeredBy: undefined }],
+          [{ isAnswered: false, answeredBy: undefined }],
+        ],
         numAnswered: 1,
         players: new Map([
           [PLAYER1.userId, PLAYER1],
@@ -324,7 +327,10 @@ describe("gameEngine", () => {
         activeClue: [0, 0],
         boardControl: PLAYER1.userId,
         buzzes: new Map([[PLAYER1.userId, 123]]),
-        isAnswered: [[{ isAnswered: true, answeredBy: undefined }]],
+        isAnswered: [
+          [{ isAnswered: true, answeredBy: undefined }],
+          [{ isAnswered: false, answeredBy: undefined }],
+        ],
         numAnswered: 1,
         players: new Map([[PLAYER1.userId, { ...PLAYER1, score: -200 }]]),
       },
@@ -453,7 +459,10 @@ describe("gameEngine", () => {
         ...initialState,
         type: GameState.RevealAnswerToAll,
         activeClue: [0, 0],
-        isAnswered: [[{ isAnswered: true, answeredBy: PLAYER2.userId }]],
+        isAnswered: [
+          [{ isAnswered: true, answeredBy: PLAYER2.userId }],
+          [{ isAnswered: false, answeredBy: undefined }],
+        ],
         boardControl: PLAYER2.userId,
         buzzes: new Map([
           [PLAYER1.userId, -1],
@@ -466,6 +475,124 @@ describe("gameEngine", () => {
         ]),
       },
     },
+    {
+      name: "Dismiss clue to go back to the board (round not yet over)",
+      state: initialState,
+      actions: [
+        ...TWO_PLAYERS_ROUND_0,
+        {
+          type: ActionType.ChooseClue,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0 },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0, deltaMs: 123 },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: {
+            userId: PLAYER2.userId,
+            i: 0,
+            j: 0,
+            deltaMs: CLUE_TIMEOUT_MS + 1,
+          },
+        },
+        {
+          type: ActionType.Answer,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0, correct: true },
+        },
+        {
+          type: ActionType.NextClue,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0 },
+        },
+      ],
+      expectedState: {
+        ...initialState,
+        type: GameState.WaitForClueChoice,
+        activeClue: undefined,
+        boardControl: PLAYER1.userId,
+        buzzes: undefined,
+        isAnswered: [
+          [{ isAnswered: true, answeredBy: PLAYER1.userId }],
+          [{ isAnswered: false, answeredBy: undefined }],
+        ],
+        numAnswered: 1,
+        players: new Map([
+          [PLAYER1.userId, { ...PLAYER1, score: 200 }],
+          [PLAYER2.userId, PLAYER2],
+        ]),
+      },
+    },
+    {
+      name: "Dismiss clue to go back to the board (round over)",
+      state: initialState,
+      actions: [
+        ...TWO_PLAYERS_ROUND_0,
+        {
+          type: ActionType.ChooseClue,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0 },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0, deltaMs: 123 },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: {
+            userId: PLAYER2.userId,
+            i: 0,
+            j: 0,
+            deltaMs: CLUE_TIMEOUT_MS + 1,
+          },
+        },
+        {
+          type: ActionType.Answer,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0, correct: true },
+        },
+        {
+          type: ActionType.NextClue,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0 },
+        },
+        {
+          type: ActionType.ChooseClue,
+          payload: { userId: PLAYER1.userId, i: 0, j: 1 },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: { userId: PLAYER2.userId, i: 0, j: 1, deltaMs: 123 },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: {
+            userId: PLAYER1.userId,
+            i: 0,
+            j: 1,
+            deltaMs: CLUE_TIMEOUT_MS + 1,
+          },
+        },
+        {
+          type: ActionType.Answer,
+          payload: { userId: PLAYER2.userId, i: 0, j: 1, correct: true },
+        },
+        {
+          type: ActionType.NextClue,
+          payload: { userId: PLAYER1.userId, i: 0, j: 1 },
+        },
+      ],
+      expectedState: {
+        ...initialState,
+        type: GameState.Preview,
+        boardControl: PLAYER2.userId,
+        isAnswered: [[{ isAnswered: false, answeredBy: undefined }]],
+        numAnswered: 0,
+        numCluesInBoard: 1,
+        players: new Map([
+          [PLAYER1.userId, { ...PLAYER1, score: 200 }],
+          [PLAYER2.userId, { ...PLAYER2, score: 200 }],
+        ]),
+        round: 1,
+      },
+    },
   ];
 
   for (const tc of testCases) {
@@ -474,6 +601,7 @@ describe("gameEngine", () => {
       for (const action of tc.actions) {
         state = gameEngine(state, action);
       }
+      // Previous state is not mutated
       expect(tc.state).toStrictEqual(initialState);
       expect(state).toStrictEqual(tc.expectedState);
     });

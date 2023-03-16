@@ -199,7 +199,10 @@ export function gameEngine(state: State, action: Action): State {
         if (
           state.type !== GameState.WaitForClueChoice ||
           state.boardControl !== userId ||
-          state.isAnswered[i][j].isAnswered
+          (state.isAnswered &&
+            state.isAnswered[i] &&
+            state.isAnswered[i][j] &&
+            state.isAnswered[i][j].isAnswered)
         ) {
           return state;
         }
@@ -286,7 +289,10 @@ export function gameEngine(state: State, action: Action): State {
         const winningBuzzer = getWinningBuzzer(state.buzzes);
         if (
           userId !== winningBuzzer?.userId ||
-          state.isAnswered[i][j].isAnswered
+          (state.isAnswered &&
+            state.isAnswered[i] &&
+            state.isAnswered[i][j] &&
+            state.isAnswered[i][j].isAnswered)
         ) {
           return state;
         }
@@ -360,11 +366,7 @@ export function gameEngine(state: State, action: Action): State {
       if (isClueAction(action)) {
         const activeClue = state.activeClue;
         // Ignore this answer if the clue is no longer active.
-        if (!activeClue) {
-          console.log("!!!! bad next clue msg, no more active clue");
-          return state;
-        }
-        if (state.type !== GameState.RevealAnswerToAll) {
+        if (!activeClue || state.type !== GameState.RevealAnswerToAll) {
           return state;
         }
 
@@ -373,7 +375,6 @@ export function gameEngine(state: State, action: Action): State {
         const [i, j] = activeClue;
         // Ignore this answer if it was for the wrong clue.
         if (actionI !== i || actionJ !== j) {
-          console.log("!!!! bad next clue msg, wrong clue", activeClue, i, j);
           return state;
         }
 
@@ -389,12 +390,6 @@ export function gameEngine(state: State, action: Action): State {
             : 0;
           const n = board ? board.categories[0].clues.length : 0;
           const m = board ? board.categories.length : 0;
-          console.log(
-            "last clue in board :0",
-            numCluesInBoard,
-            "/",
-            state.numAnswered
-          );
 
           return {
             type: GameState.Preview,
@@ -411,12 +406,11 @@ export function gameEngine(state: State, action: Action): State {
           };
         }
 
-        console.log("go back to waiting for clue, no more active clue");
         return {
           ...state,
           type: GameState.WaitForClueChoice,
           activeClue: undefined,
-          buzzes: new Map(),
+          buzzes: undefined,
         };
       }
       throw new Error("NextClue action must have an associated user");

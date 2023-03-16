@@ -3,6 +3,9 @@ import { Convert } from "./convert.server";
 
 import type { Game } from "./game.server";
 
+/** MOCK_GAME has two rounds. The first round has 1 category with 2 clues and the
+ * second round has 1 category with 1 clue.
+ */
 export const MOCK_GAME: Game = {
   id: "mock",
   title: "Mock Game",
@@ -16,11 +19,8 @@ export const MOCK_GAME: Game = {
         {
           name: "Round 1, Category 1",
           clues: [
-            {
-              clue: "Clue 1",
-              answer: "Answer 1",
-              value: 200,
-            },
+            { clue: "a", answer: "b", value: 200 },
+            { clue: "c", answer: "d", value: 400 },
           ],
         },
       ],
@@ -30,13 +30,7 @@ export const MOCK_GAME: Game = {
       categories: [
         {
           name: "Round 2, Category 1",
-          clues: [
-            {
-              clue: "Clue 2",
-              answer: "Answer 2",
-              value: 400,
-            },
-          ],
+          clues: [{ clue: "e", answer: "f", value: 400 }],
         },
       ],
     },
