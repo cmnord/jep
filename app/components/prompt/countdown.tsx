@@ -14,6 +14,8 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
 }
 
+/** Countdown displays 10 red bars which count down from the outside in once per
+ * second for 5 seconds total. */
 export function Countdown({ startTime }: { startTime?: number }) {
   const [count, setCount] = React.useState(NUM_BARS / 2);
   const animationRef = React.useRef<number>();

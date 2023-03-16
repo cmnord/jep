@@ -48,7 +48,6 @@ export function ConnectedAnswerForm({
   clueIdx,
   showAnswer,
   onClickShowAnswer,
-  loading,
 }: {
   isOpen: boolean;
   roomName: string;
@@ -56,14 +55,13 @@ export function ConnectedAnswerForm({
   clueIdx: [number, number] | undefined;
   showAnswer: boolean;
   onClickShowAnswer: () => void;
-  loading: boolean;
 }) {
   const [i, j] = clueIdx ? clueIdx : [-1, -1];
 
   const { soloDispatch } = useEngineContext();
   const fetcher = useFetcher<Action>();
   useSoloAction(fetcher, soloDispatch);
-  const fetcherLoading = fetcher.state === "loading";
+  const loading = fetcher.state === "loading";
 
   if (!showAnswer) {
     return (
@@ -94,7 +92,7 @@ export function ConnectedAnswerForm({
       <input type="hidden" value={userId} name="userId" />
       <input type="hidden" value={i} name="i" />
       <input type="hidden" value={j} name="j" />
-      <AnswerForm loading={fetcherLoading} />
+      <AnswerForm loading={loading} />
     </fetcher.Form>
   );
 }
