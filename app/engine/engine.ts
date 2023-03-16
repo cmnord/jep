@@ -74,7 +74,8 @@ export function getWinningBuzzer(buzzes?: Map<string, number>):
   if (!buzzes) {
     return undefined;
   }
-  return Array.from(buzzes.entries()).reduce(
+
+  const result = Array.from(buzzes.entries()).reduce(
     (acc, [userId, deltaMs]) => {
       if (
         deltaMs !== CANT_BUZZ_FLAG &&
@@ -87,6 +88,12 @@ export function getWinningBuzzer(buzzes?: Map<string, number>):
     },
     { userId: "", deltaMs: Number.MAX_SAFE_INTEGER }
   );
+
+  if (result.userId === "") {
+    return undefined;
+  }
+
+  return result;
 }
 
 /** setIsAnswered makes a deep copy of the 2d array, then sets the value at (i, j). */
@@ -217,22 +224,18 @@ export function gameEngine(state: State, action: Action): State {
         const activeClue = state.activeClue;
         // Ignore this buzz if the clue is no longer active.
         if (!activeClue) {
-          console.log("!!!! bad buzz msg, no more active clue", action.payload);
           return state;
         }
         const { userId, i: buzzI, j: buzzJ, deltaMs } = action.payload;
         const [i, j] = activeClue;
         // Ignore this buzz if it was for the wrong clue.
         if (buzzI !== i || buzzJ !== j) {
-          console.log(
-            "!!!! bad buzz msg, wrong clue",
-            activeClue,
-            action.payload
-          );
           return state;
         }
 
-        const buzzes = state.buzzes ? new Map(state.buzzes) : new Map();
+        const buzzes: Map<string, number> = state.buzzes
+          ? new Map(state.buzzes)
+          : new Map();
 
         // Accept this buzz if the user has not already buzzed and the buzz came
         // in before the timeout.
@@ -240,21 +243,20 @@ export function gameEngine(state: State, action: Action): State {
           buzzes.set(userId, deltaMs);
         }
 
+        // Wait for others to buzz in if we haven't yet received buzzes from all
+        // players or a timeout buzz.
         if (deltaMs <= CLUE_TIMEOUT_MS && buzzes.size < state.players.size) {
           return { ...state, buzzes };
         }
 
-        // Evaluate the winner if either:
-        //   1. All players have buzzed
-        //   2. At least one player has submitted a > 5sec buzz
-        // If we missed someone's < 5sec buzz at this point, that's too bad.
+        // All buzzes are in or we've timed out, so find the winner. If we
+        // missed someone's < 5sec buzz at this point, that's too bad.
         const winningBuzz = getWinningBuzzer(buzzes);
-        console.log("winning buzz is", winningBuzz);
 
-        // 1. No one buzzed in: reveal the answer to everyone and mark it as
-        // answered
-        if (!winningBuzz?.userId) {
-          const nextState = {
+        // If there's no winning buzzer, reveal the answer to everyone and mark
+        // it as answered
+        if (!winningBuzz) {
+          return {
             ...state,
             buzzes,
             type: GameState.RevealAnswerToAll,
@@ -264,11 +266,10 @@ export function gameEngine(state: State, action: Action): State {
               answeredBy: undefined,
             }),
           };
-          return nextState;
         }
 
-        console.log("only one person buzzed! showing them", i, j);
-        // 2. One person buzzed before the time: reveal the answer to only them, let them evaluate correct / no
+        // Reveal the answer to the winning buzzer and let them evaluate its
+        // correctness
         return { ...state, type: GameState.RevealAnswerToBuzzer, buzzes };
       }
       throw new Error("Buzz action must have an associated index and delta");
