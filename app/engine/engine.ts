@@ -144,10 +144,9 @@ export function createInitialState(game: Game): State {
 export function gameEngine(state: State, action: Action): State {
   console.log("-----applying room event", action.type);
   switch (action.type) {
-    case ActionType.Reset: {
+    case ActionType.Reset:
       return createInitialState(state.game);
-    }
-    case ActionType.Join: {
+    case ActionType.Join:
       if (isPlayerAction(action)) {
         const players = new Map(state.players);
         players.set(action.payload.userId, {
@@ -162,8 +161,7 @@ export function gameEngine(state: State, action: Action): State {
         return nextState;
       }
       throw new Error("PlayerJoin action must have an associated player");
-    }
-    case ActionType.ChangeName: {
+    case ActionType.ChangeName:
       if (isPlayerAction(action)) {
         const players = new Map(state.players);
         const player = players.get(action.payload.userId);
@@ -179,8 +177,7 @@ export function gameEngine(state: State, action: Action): State {
         return { ...state, players };
       }
       throw new Error("PlayerChangeName action must have an associated player");
-    }
-    case ActionType.StartRound: {
+    case ActionType.StartRound:
       if (isRoundAction(action)) {
         if (state.type !== GameState.Preview) {
           return state;
@@ -196,8 +193,7 @@ export function gameEngine(state: State, action: Action): State {
         return state;
       }
       throw new Error("StartRound action must have an associated round number");
-    }
-    case ActionType.ChooseClue: {
+    case ActionType.ChooseClue:
       if (isClueAction(action)) {
         const { userId, i, j } = action.payload;
         if (
@@ -214,8 +210,7 @@ export function gameEngine(state: State, action: Action): State {
         };
       }
       throw new Error("ClickClue action must have an associated index");
-    }
-    case ActionType.Buzz: {
+    case ActionType.Buzz:
       if (isBuzzAction(action)) {
         // Ignore this buzz if we're not in the clue-reading stage.
         if (state.type !== GameState.ReadClue) {
@@ -273,7 +268,6 @@ export function gameEngine(state: State, action: Action): State {
         return { ...state, type: GameState.RevealAnswerToBuzzer, buzzes };
       }
       throw new Error("Buzz action must have an associated index and delta");
-    }
     case ActionType.Answer:
       if (isAnswerAction(action)) {
         const activeClue = state.activeClue;
