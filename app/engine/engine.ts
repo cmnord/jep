@@ -279,32 +279,24 @@ export function gameEngine(state: State, action: Action): State {
         const activeClue = state.activeClue;
         // Ignore this answer if the clue is no longer active.
         if (!activeClue) {
-          console.log(
-            "!!!! bad answer msg, no more active clue",
-            action.payload
-          );
           return state;
         }
         const { userId, i: buzzI, j: buzzJ, correct } = action.payload;
         const [i, j] = activeClue;
         // Ignore this answer if it was for the wrong clue.
         if (buzzI !== i || buzzJ !== j) {
-          console.log(
-            "!!!! bad answer msg, wrong clue",
-            activeClue,
-            action.payload
-          );
           return state;
         }
-        // Ignore the answer if it was not from the winning buzzer.
+        // Ignore the answer if it was not from the winning buzzer or it has
+        // already been answered.
         const winningBuzzer = getWinningBuzzer(state.buzzes);
-        if (userId !== winningBuzzer?.userId) {
+        if (
+          userId !== winningBuzzer?.userId ||
+          state.isAnswered[i][j].isAnswered
+        ) {
           return state;
         }
-        // Ignore the answer if the clue has already been answered.
-        if (state.isAnswered[i][j].isAnswered) {
-          return { ...state, type: GameState.RevealAnswerToAll };
-        }
+
         const players = new Map(state.players);
         const player = players.get(userId);
         if (!player) {
@@ -312,61 +304,59 @@ export function gameEngine(state: State, action: Action): State {
         }
         const clueValue = getClueValue(i, state.round);
 
-        if (!correct) {
-          // If the buzzer was wrong, reduce their points and re-open the
-          // buzzers to everyone who can still buzz.
+        if (correct) {
+          // Reveal the answer to everyone, add points, and give the winning
+          // buzzer board control.
           players.set(userId, {
             ...player,
-            score: player.score - clueValue,
+            score: player.score + clueValue,
           });
-          const lockedOutBuzzers = state.buzzes
-            ? Array.from(state.buzzes.entries()).filter(
-                ([_, deltaMs]) => deltaMs === CANT_BUZZ_FLAG
-              )
-            : [];
-          const newBuzzes = new Map([
-            ...lockedOutBuzzers,
-            [userId, CANT_BUZZ_FLAG],
-          ]);
-          // If everyone has been locked out, reveal the answer to everyone.
-          if (newBuzzes.size === state.players.size) {
-            return {
-              ...state,
-              type: GameState.RevealAnswerToAll,
-              players,
-              numAnswered: state.numAnswered + 1,
-              isAnswered: setIsAnswered(state.isAnswered, i, j, {
-                isAnswered: true,
-                answeredBy: undefined,
-              }),
-            };
-          }
 
           return {
             ...state,
-            type: GameState.ReadClue,
+            type: GameState.RevealAnswerToAll,
+            boardControl: userId,
+            numAnswered: state.numAnswered + 1,
             players,
-            buzzes: newBuzzes,
+            isAnswered: setIsAnswered(state.isAnswered, i, j, {
+              isAnswered: true,
+              answeredBy: userId,
+            }),
           };
         }
 
-        // If the buzzer was right, reveal the answer to everyone and give the
-        // winning buzzer board control.
+        // If the buzzer was wrong, reduce their points.
         players.set(userId, {
           ...player,
-          score: player.score + clueValue,
+          score: player.score - clueValue,
         });
+        const lockedOutBuzzers = Array.from(state.buzzes ?? []).filter(
+          ([_, deltaMs]) => deltaMs === CANT_BUZZ_FLAG
+        );
+        const newBuzzes = new Map([
+          ...lockedOutBuzzers,
+          [userId, CANT_BUZZ_FLAG],
+        ]);
+        // If everyone has been locked out, reveal the answer to everyone.
+        if (newBuzzes.size === state.players.size) {
+          return {
+            ...state,
+            type: GameState.RevealAnswerToAll,
+            players,
+            numAnswered: state.numAnswered + 1,
+            isAnswered: setIsAnswered(state.isAnswered, i, j, {
+              isAnswered: true,
+              answeredBy: undefined,
+            }),
+          };
+        }
 
+        // If some players have not yet been locked out, re-open the buzzers.
         return {
           ...state,
-          type: GameState.RevealAnswerToAll,
-          boardControl: userId,
-          numAnswered: state.numAnswered + 1,
+          type: GameState.ReadClue,
           players,
-          isAnswered: setIsAnswered(state.isAnswered, i, j, {
-            isAnswered: true,
-            answeredBy: userId,
-          }),
+          buzzes: newBuzzes,
         };
       }
       throw new Error(

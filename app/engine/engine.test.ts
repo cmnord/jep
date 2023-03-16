@@ -296,6 +296,176 @@ describe("gameEngine", () => {
         ]),
       },
     },
+    {
+      name: "If single player is incorrect, reveal to all",
+      state: initialState,
+      actions: [
+        PLAYER1_JOIN_ACTION,
+        {
+          type: ActionType.StartRound,
+          payload: { round: 0 },
+        },
+        {
+          type: ActionType.ChooseClue,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0 },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0, deltaMs: 123 },
+        },
+        {
+          type: ActionType.Answer,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0, correct: false },
+        },
+      ],
+      expectedState: {
+        ...initialState,
+        type: GameState.RevealAnswerToAll,
+        activeClue: [0, 0],
+        boardControl: PLAYER1.userId,
+        buzzes: new Map([[PLAYER1.userId, 123]]),
+        isAnswered: [[{ isAnswered: true, answeredBy: undefined }]],
+        numAnswered: 1,
+        players: new Map([[PLAYER1.userId, { ...PLAYER1, score: -200 }]]),
+      },
+    },
+    {
+      name: "If one of multiple players answers incorrectly, re-open buzzers with prev buzzer locked out",
+      state: initialState,
+      actions: [
+        ...TWO_PLAYERS_ROUND_0,
+        {
+          type: ActionType.ChooseClue,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0 },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0, deltaMs: 123 },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: {
+            userId: PLAYER2.userId,
+            i: 0,
+            j: 0,
+            deltaMs: CLUE_TIMEOUT_MS + 1,
+          },
+        },
+        {
+          type: ActionType.Answer,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0, correct: false },
+        },
+      ],
+      expectedState: {
+        ...initialState,
+        type: GameState.ReadClue,
+        activeClue: [0, 0],
+        boardControl: PLAYER1.userId,
+        buzzes: new Map([[PLAYER1.userId, -1]]),
+        players: new Map([
+          [PLAYER1.userId, { ...PLAYER1, score: -200 }],
+          [PLAYER2.userId, PLAYER2],
+        ]),
+      },
+    },
+    {
+      name: "Second player can buzz after first is locked out",
+      state: initialState,
+      actions: [
+        ...TWO_PLAYERS_ROUND_0,
+        {
+          type: ActionType.ChooseClue,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0 },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0, deltaMs: 123 },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: {
+            userId: PLAYER2.userId,
+            i: 0,
+            j: 0,
+            deltaMs: CLUE_TIMEOUT_MS + 1,
+          },
+        },
+        {
+          type: ActionType.Answer,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0, correct: false },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0, deltaMs: 123 },
+        },
+      ],
+      expectedState: {
+        ...initialState,
+        type: GameState.RevealAnswerToBuzzer,
+        activeClue: [0, 0],
+        boardControl: PLAYER1.userId,
+        buzzes: new Map([
+          [PLAYER1.userId, -1],
+          [PLAYER2.userId, 123],
+        ]),
+        players: new Map([
+          [PLAYER1.userId, { ...PLAYER1, score: -200 }],
+          [PLAYER2.userId, PLAYER2],
+        ]),
+      },
+    },
+    {
+      name: "Second player correct, first is locked out",
+      state: initialState,
+      actions: [
+        ...TWO_PLAYERS_ROUND_0,
+        {
+          type: ActionType.ChooseClue,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0 },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0, deltaMs: 123 },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: {
+            userId: PLAYER2.userId,
+            i: 0,
+            j: 0,
+            deltaMs: CLUE_TIMEOUT_MS + 1,
+          },
+        },
+        {
+          type: ActionType.Answer,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0, correct: false },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0, deltaMs: 123 },
+        },
+        {
+          type: ActionType.Answer,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0, correct: true },
+        },
+      ],
+      expectedState: {
+        ...initialState,
+        type: GameState.RevealAnswerToAll,
+        activeClue: [0, 0],
+        isAnswered: [[{ isAnswered: true, answeredBy: PLAYER2.userId }]],
+        boardControl: PLAYER2.userId,
+        buzzes: new Map([
+          [PLAYER1.userId, -1],
+          [PLAYER2.userId, 123],
+        ]),
+        numAnswered: 1,
+        players: new Map([
+          [PLAYER1.userId, { ...PLAYER1, score: -200 }],
+          [PLAYER2.userId, { ...PLAYER2, score: 200 }],
+        ]),
+      },
+    },
   ];
 
   for (const tc of testCases) {
