@@ -283,7 +283,7 @@ function RevealAnswerToBuzzerPrompt({
         showAnswer={canShowAnswer && showAnswer}
       />
       <AnswerForm
-        isOpen={true}
+        isOpen={canShowAnswer}
         roomName={roomName}
         userId={userId}
         clueIdx={activeClue}

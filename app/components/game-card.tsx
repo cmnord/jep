@@ -48,7 +48,7 @@ export default function GameCard({
         "hover:border-blue-500 hover:shadow-sm "
       }
     >
-      <Link to={to} className="grow">
+      <Link to={to} className="grow w-full">
         <div className="flex items-center justify-between">
           <div className="flex flex-col items-start p-4 gap-2 min-w-0">
             <div className="flex gap-2 w-full">
