@@ -73,57 +73,18 @@ function ClueText({
   );
 }
 
-function Prompt({
-  isOpen,
-  children,
-}: {
-  isOpen: boolean;
-  children?: React.ReactNode;
-}) {
-  return (
-    <Fade show={isOpen}>
-      <div
-        className={classNames(
-          "relative h-screen w-screen bg-blue-1000 flex flex-col justify-between"
-        )}
-      >
-        {children}
-      </div>
-    </Fade>
-  );
-}
-
-export function ConnectedPrompt({
+/** ReadCluePrompt handles all frontend behavior while the game state is
+ * GameState.ReadClue.
+ */
+function ReadCluePrompt({
   roomName,
   userId,
 }: {
   roomName: string;
   userId: string;
 }) {
-  const {
-    type,
-    clue,
-    category,
-    activeClue,
-    buzzes,
-    players,
-    winningBuzzer,
-    soloDispatch,
-    answeredBy,
-    round,
-  } = useEngineContext();
-
-  const shouldShowPrompt =
-    type === GameState.ReadClue ||
-    type === GameState.RevealAnswerToBuzzer ||
-    type === GameState.RevealAnswerToAll;
-
-  const shouldShowAnswerToBuzzer =
-    type === GameState.RevealAnswerToBuzzer && winningBuzzer === userId;
-  const shouldShowAnswerToAll = type === GameState.RevealAnswerToAll;
-
-  // Only show the answer to the buzzer once they click "reveal".
-  const [showAnswer, setShowAnswer] = React.useState(shouldShowAnswerToAll);
+  const { activeClue, buzzes, category, clue, players, round, soloDispatch } =
+    useEngineContext();
 
   const [optimisticBuzzes, setOptimisticBuzzes] = React.useState(buzzes);
   const myBuzzDurationMs = optimisticBuzzes?.get(userId);
@@ -140,7 +101,6 @@ export function ConnectedPrompt({
 
   const fetcher = useFetcher<Action>();
   useSoloAction(fetcher, soloDispatch);
-  const loading = fetcher.state === "loading";
 
   const numCharactersInClue = clue?.clue.length ?? 0;
   const clueDurationMs = MS_PER_CHARACTER * numCharactersInClue;
@@ -150,12 +110,11 @@ export function ConnectedPrompt({
     if (activeClue) {
       setClueShownAt(Date.now());
       setClueIdx(activeClue);
-      setShowAnswer(type === GameState.RevealAnswerToAll);
     } else {
       setClueShownAt(undefined);
     }
     setBuzzerOpenAt(myBuzzDurationMs);
-  }, [activeClue, myBuzzDurationMs, type]);
+  }, [activeClue, myBuzzDurationMs]);
 
   // Update optimisticBuzzes once buzzes come in from the server.
   React.useEffect(() => {
@@ -179,7 +138,7 @@ export function ConnectedPrompt({
   // If the contestant doesn't buzz for 5 seconds, close the buzzer and send a
   // 5-second "non-buzz" buzz to the server.
   React.useEffect(() => {
-    if (type === GameState.ReadClue && buzzerOpenAt !== undefined && clueIdx) {
+    if (buzzerOpenAt !== undefined && clueIdx) {
       const [i, j] = clueIdx;
       const buzzLimitTimer = setTimeout(() => {
         const deltaMs = CLUE_TIMEOUT_MS + 1;
@@ -204,7 +163,7 @@ export function ConnectedPrompt({
       }, CLUE_TIMEOUT_MS);
       return () => clearTimeout(buzzLimitTimer);
     }
-  }, [buzzerOpenAt, clueIdx, fetcher, roomName, userId, type]);
+  }, [buzzerOpenAt, clueIdx, fetcher, roomName, userId]);
 
   const handleClick = (clickedAtMs: number) => {
     if (
@@ -248,15 +207,11 @@ export function ConnectedPrompt({
   const clueValue = getClueValue(clueIdx ? clueIdx[0] : 0, round);
 
   return (
-    <Prompt isOpen={shouldShowPrompt}>
-      <Countdown
-        startTime={type === GameState.ReadClue ? buzzerOpenAt : undefined}
-      />
+    <>
+      <Countdown startTime={buzzerOpenAt} />
       <ReadClueTimer
         clueDurationMs={clueDurationMs}
-        shouldAnimate={
-          myBuzzDurationMs === undefined && type === GameState.ReadClue
-        }
+        shouldAnimate={myBuzzDurationMs === undefined}
       />
       <div className="flex justify-between p-4">
         <div className="text-white">
@@ -270,46 +225,185 @@ export function ConnectedPrompt({
 
       <ClueText
         clue={clue?.clue}
-        canBuzz={
-          !lockout &&
-          myBuzzDurationMs === undefined &&
-          type === GameState.ReadClue
-        }
+        canBuzz={!lockout && myBuzzDurationMs === undefined}
         onBuzz={() => handleClick(Date.now())}
-        focusOnBuzz={
-          shouldShowPrompt &&
-          !shouldShowAnswerToBuzzer &&
-          !shouldShowAnswerToAll
-        }
-        showAnswer={showAnswer || shouldShowAnswerToAll}
-        answer={clue?.answer}
+        focusOnBuzz={true}
+        showAnswer={false}
+        answer={undefined}
       />
       <Lockout active={lockout} />
-      {type === GameState.RevealAnswerToAll ? (
-        <NextClueForm roomName={roomName} userId={userId} clueIdx={clueIdx} />
-      ) : (
-        <AnswerForm
-          isOpen={shouldShowAnswerToBuzzer || showAnswer}
-          roomName={roomName}
-          userId={userId}
-          clueIdx={clueIdx}
-          showAnswer={showAnswer}
-          onClickShowAnswer={() => {
-            setShowAnswer(true);
-          }}
-          loading={loading}
-        />
-      )}
       <Buzzes
         buzzes={optimisticBuzzes}
         players={players}
+        winningBuzzer={undefined}
+        showWinner={false}
+        buzzCorrect={false}
+        clueValue={clueValue}
+      />
+    </>
+  );
+}
+
+/** RevealAnswerToBuzzerPrompt handles all frontend behavior while the game state
+ * is GameState.ReadAnswerToBuzzer.
+ */
+function RevealAnswerToBuzzerPrompt({
+  roomName,
+  userId,
+}: {
+  roomName: string;
+  userId: string;
+}) {
+  const { activeClue, buzzes, category, clue, players, round, winningBuzzer } =
+    useEngineContext();
+  const clueValue = getClueValue(activeClue ? activeClue[0] : 0, round);
+
+  const canShowAnswer = winningBuzzer === userId;
+  const [showAnswer, setShowAnswer] = React.useState(false);
+
+  return (
+    <>
+      <Countdown startTime={undefined} />
+      <ReadClueTimer clueDurationMs={0} shouldAnimate={false} />
+      <div className="flex justify-between p-4">
+        <div className="text-white">
+          <span className="font-bold">{category}</span> for{" "}
+          <span className="font-bold">${clueValue}</span>
+        </div>
+        <span className="text-sm text-gray-300">
+          Click or press <Kbd>Enter</Kbd> to buzz in
+        </span>
+      </div>
+      <ClueText
+        answer={clue?.answer}
+        canBuzz={false}
+        clue={clue?.clue}
+        focusOnBuzz={false}
+        onBuzz={() => null}
+        showAnswer={canShowAnswer && showAnswer}
+      />
+      <AnswerForm
+        isOpen={true}
+        roomName={roomName}
+        userId={userId}
+        clueIdx={activeClue}
+        showAnswer={canShowAnswer && showAnswer}
+        onClickShowAnswer={
+          canShowAnswer ? () => setShowAnswer(true) : () => null
+        }
+      />
+      <Buzzes
+        buzzes={buzzes}
+        players={players}
         winningBuzzer={winningBuzzer}
-        showWinner={type === GameState.RevealAnswerToAll}
+        showWinner={false}
+        buzzCorrect={false}
+        clueValue={clueValue}
+      />
+    </>
+  );
+}
+
+/** RevealAnswerToAllPrompt handles all frontend behavior while the game state is
+ * GameState.ReadAnswerToAll.
+ */
+function RevealAnswerToAllPrompt({
+  roomName,
+  userId,
+}: {
+  roomName: string;
+  userId: string;
+}) {
+  const {
+    activeClue,
+    answeredBy,
+    buzzes,
+    category,
+    clue,
+    players,
+    round,
+    winningBuzzer,
+  } = useEngineContext();
+
+  const clueValue = getClueValue(activeClue ? activeClue[0] : 0, round);
+
+  return (
+    <>
+      <Countdown startTime={undefined} />
+      <ReadClueTimer clueDurationMs={0} shouldAnimate={false} />
+      <div className="flex justify-between p-4">
+        <div className="text-white">
+          <span className="font-bold">{category}</span> for{" "}
+          <span className="font-bold">${clueValue}</span>
+        </div>
+        <span className="text-sm text-gray-300">
+          Click or press <Kbd>Enter</Kbd> to buzz in
+        </span>
+      </div>
+
+      <ClueText
+        clue={clue?.clue}
+        canBuzz={false}
+        onBuzz={() => null}
+        focusOnBuzz={false}
+        showAnswer={true}
+        answer={clue?.answer}
+      />
+      <NextClueForm roomName={roomName} userId={userId} clueIdx={activeClue} />
+      <Buzzes
+        buzzes={buzzes}
+        players={players}
+        winningBuzzer={winningBuzzer}
+        showWinner={true}
         buzzCorrect={
-          clueIdx ? answeredBy(clueIdx[0], clueIdx[1]) === winningBuzzer : false
+          activeClue
+            ? answeredBy(activeClue[0], activeClue[1]) === winningBuzzer
+            : false
         }
         clueValue={clueValue}
       />
-    </Prompt>
+    </>
+  );
+}
+
+export function ConnectedPrompt({
+  roomName,
+  userId,
+}: {
+  roomName: string;
+  userId: string;
+}) {
+  const { type } = useEngineContext();
+
+  const isOpen =
+    type === GameState.ReadClue ||
+    type === GameState.RevealAnswerToBuzzer ||
+    type === GameState.RevealAnswerToAll;
+
+  function getPromptContent() {
+    switch (type) {
+      case GameState.ReadClue:
+        return <ReadCluePrompt roomName={roomName} userId={userId} />;
+      case GameState.RevealAnswerToBuzzer:
+        return (
+          <RevealAnswerToBuzzerPrompt roomName={roomName} userId={userId} />
+        );
+      case GameState.RevealAnswerToAll:
+        return <RevealAnswerToAllPrompt roomName={roomName} userId={userId} />;
+      default:
+        return null;
+    }
+  }
+
+  return (
+    <Fade show={isOpen}>
+      <div
+        className={classNames(
+          "relative h-screen w-screen bg-blue-1000 flex flex-col justify-between"
+        )}
+      >
+        {getPromptContent()}
+      </div>
+    </Fade>
   );
 }

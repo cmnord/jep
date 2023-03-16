@@ -1,5 +1,7 @@
 import classNames from "classnames";
 
+/** ReadClueTimer is a white bar which scrolls across the screen for
+ * clueDurationMs. */
 export function ReadClueTimer({
   clueDurationMs,
   shouldAnimate,
