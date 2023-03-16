@@ -115,16 +115,17 @@ function setIsAnswered(
 
 export function createInitialState(game: Game): State {
   const round = 0;
-  const board = game.boards[round];
+  const board = game.boards.at(round);
+  if (!board) {
+    throw new Error("board must have at least one round");
+  }
 
-  const numCluesInBoard = board
-    ? board.categories.reduce(
-        (acc, category) => (acc += category.clues.length),
-        0
-      )
-    : 0;
-  const n = board ? board.categories[0].clues.length : 0;
-  const m = board ? board.categories.length : 0;
+  const numCluesInBoard = board.categories.reduce(
+    (acc, category) => (acc += category.clues.length),
+    0
+  );
+  const n = board.categories[0].clues.length;
+  const m = board.categories.length;
 
   return {
     type: GameState.Preview,
@@ -199,10 +200,7 @@ export function gameEngine(state: State, action: Action): State {
         if (
           state.type !== GameState.WaitForClueChoice ||
           state.boardControl !== userId ||
-          (state.isAnswered &&
-            state.isAnswered[i] &&
-            state.isAnswered[i][j] &&
-            state.isAnswered[i][j].isAnswered)
+          state.isAnswered.at(i)?.at(j)?.isAnswered
         ) {
           return state;
         }
@@ -289,10 +287,7 @@ export function gameEngine(state: State, action: Action): State {
         const winningBuzzer = getWinningBuzzer(state.buzzes);
         if (
           userId !== winningBuzzer?.userId ||
-          (state.isAnswered &&
-            state.isAnswered[i] &&
-            state.isAnswered[i][j] &&
-            state.isAnswered[i][j].isAnswered)
+          state.isAnswered.at(i)?.at(j)?.isAnswered
         ) {
           return state;
         }
@@ -380,7 +375,7 @@ export function gameEngine(state: State, action: Action): State {
 
         if (state.numAnswered === state.numCluesInBoard) {
           const newRound = state.round + 1;
-          const board = state.game.boards[newRound];
+          const board = state.game.boards.at(newRound);
 
           const numCluesInBoard = board
             ? board.categories.reduce(

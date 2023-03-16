@@ -107,6 +107,15 @@ export function ConnectedBoardComponent({
 
   const tbodyRef = React.useRef<HTMLTableSectionElement | null>(null);
 
+  React.useEffect(() => {
+    if (focusedClue) {
+      const [i, j] = focusedClue;
+      focusCell(i, j);
+    }
+  }, [focusedClue]);
+
+  if (!board) return null;
+
   const hasBoardControl = boardControl === userId;
 
   function focusCell(i: number, j: number) {
@@ -120,13 +129,6 @@ export function ConnectedBoardComponent({
       (cellButton as HTMLElement).focus();
     }
   }
-
-  React.useEffect(() => {
-    if (focusedClue) {
-      const [i, j] = focusedClue;
-      focusCell(i, j);
-    }
-  }, [focusedClue]);
 
   function handleClickClue(i: number, j: number) {
     if (hasBoardControl) {

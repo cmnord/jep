@@ -53,15 +53,12 @@ export default function GameComponent({
         roomName={roomName}
       />
       <div className="bg-black">
-        {/* TODO: board should never be undefined */}
-        {board && (
-          <BoardComponent
-            focusedClue={focusedClueIdx}
-            setFocusedClue={onFocusClue}
-            userId={userId}
-            roomName={roomName}
-          />
-        )}
+        <BoardComponent
+          focusedClue={focusedClueIdx}
+          setFocusedClue={onFocusClue}
+          userId={userId}
+          roomName={roomName}
+        />
       </div>
       <div className="p-3 sm:p-6 md:p-12 ">
         {(type !== GameState.Preview || round !== 0) && (

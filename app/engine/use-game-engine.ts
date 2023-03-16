@@ -18,24 +18,23 @@ function stateToGameEngine(
   state: State,
   dispatch: React.Dispatch<Action>
 ) {
-  const board = game.boards[state.round];
+  // Board may be undefined
+  const board = game.boards.at(state.round);
 
   let clue: Clue | undefined;
   let category: string | undefined;
-  if (state.activeClue) {
+  if (state.activeClue && board) {
     const [i, j] = state.activeClue;
     clue = state.activeClue ? board.categories[j].clues[i] : undefined;
     category = state.activeClue ? board.categoryNames[j] : undefined;
   }
 
   const isAnswered = (i: number, j: number) => {
-    const row = state.isAnswered[i];
-    return row && row[j] && row[j].isAnswered;
+    return state.isAnswered.at(i)?.at(j)?.isAnswered ?? false;
   };
 
   const answeredBy = (i: number, j: number) => {
-    const row = state.isAnswered[i];
-    return row && row[j] && row[j].answeredBy;
+    return state.isAnswered.at(i)?.at(j)?.answeredBy ?? undefined;
   };
 
   const winningBuzz = getWinningBuzzer(state.buzzes);

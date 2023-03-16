@@ -45,6 +45,7 @@ export default function ConnectedClueList({
   setFocusedClue: (i: number, j: number) => void;
 }) {
   const { board, round, isAnswered } = useEngineContext();
+  if (!board) return null;
 
   return (
     <div className="relative flex flex-wrap px-0 py-6">
