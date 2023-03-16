@@ -90,12 +90,12 @@ function ReadCluePrompt({
   const myBuzzDurationMs = optimisticBuzzes?.get(userId);
 
   const [clueShownAt, setClueShownAt] = React.useState<number | undefined>(
-    myBuzzDurationMs
+    myBuzzDurationMs !== undefined ? 0 : undefined
   );
   const [clueIdx, setClueIdx] = React.useState(activeClue);
 
   const [buzzerOpenAt, setBuzzerOpenAt] = React.useState<number | undefined>(
-    myBuzzDurationMs
+    myBuzzDurationMs !== undefined ? 0 : undefined
   );
   const [lockout, setLockout] = React.useState(false);
 
@@ -110,10 +110,11 @@ function ReadCluePrompt({
     if (activeClue) {
       setClueShownAt(Date.now());
       setClueIdx(activeClue);
+      setBuzzerOpenAt(myBuzzDurationMs !== undefined ? 0 : undefined);
     } else {
       setClueShownAt(undefined);
+      setBuzzerOpenAt(undefined);
     }
-    setBuzzerOpenAt(myBuzzDurationMs);
   }, [activeClue, myBuzzDurationMs]);
 
   // Update optimisticBuzzes once buzzes come in from the server.
@@ -126,44 +127,35 @@ function ReadCluePrompt({
   useTimeout(() => setBuzzerOpenAt(Date.now()), delayMs);
 
   // Remove the lockout after 500ms.
-  React.useEffect(() => {
-    if (lockout) {
-      const lockoutTimer = setTimeout(() => {
-        setLockout(false);
-      }, LOCKOUT_MS);
-      return () => clearTimeout(lockoutTimer);
-    }
-  }, [lockout]);
+  useTimeout(() => setLockout(false), lockout ? LOCKOUT_MS : null);
 
   // If the contestant doesn't buzz for 5 seconds, close the buzzer and send a
   // 5-second "non-buzz" buzz to the server.
-  React.useEffect(() => {
-    if (buzzerOpenAt !== undefined && clueIdx) {
-      const [i, j] = clueIdx;
-      const buzzLimitTimer = setTimeout(() => {
-        const deltaMs = CLUE_TIMEOUT_MS + 1;
-        setOptimisticBuzzes((old) => {
-          if (!old) {
-            return new Map([[userId, deltaMs]]);
-          }
-          if (old.has(userId)) {
-            return old;
-          }
-          return new Map([...old, [userId, deltaMs]]);
-        });
-        return fetcher.submit(
-          {
-            i: i.toString(),
-            j: j.toString(),
-            userId,
-            deltaMs: deltaMs.toString(),
-          },
-          { method: "post", action: `/room/${roomName}/buzz` }
-        );
-      }, CLUE_TIMEOUT_MS);
-      return () => clearTimeout(buzzLimitTimer);
-    }
-  }, [buzzerOpenAt, clueIdx, fetcher, roomName, userId]);
+  useTimeout(
+    () => {
+      const deltaMs = CLUE_TIMEOUT_MS + 1;
+      setOptimisticBuzzes((old) => {
+        if (!old) {
+          return new Map([[userId, deltaMs]]);
+        }
+        if (old.has(userId)) {
+          return old;
+        }
+        return new Map([...old, [userId, deltaMs]]);
+      });
+      const [i, j] = clueIdx ?? [-1, -1];
+      return fetcher.submit(
+        {
+          i: i.toString(),
+          j: j.toString(),
+          userId,
+          deltaMs: deltaMs.toString(),
+        },
+        { method: "post", action: `/room/${roomName}/buzz` }
+      );
+    },
+    buzzerOpenAt !== undefined && clueIdx ? CLUE_TIMEOUT_MS : null
+  );
 
   const handleClick = (clickedAtMs: number) => {
     if (

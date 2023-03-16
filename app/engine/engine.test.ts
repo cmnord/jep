@@ -1,11 +1,14 @@
 import { MOCK_GAME } from "~/models/mock.server";
-import type { Action, Player, State } from "./engine";
 import {
+  Action,
   ActionType,
+  CANT_BUZZ_FLAG,
   CLUE_TIMEOUT_MS,
   createInitialState,
   gameEngine,
   GameState,
+  Player,
+  State,
 } from "./engine";
 
 const PLAYER1: Player = {
@@ -367,7 +370,7 @@ describe("gameEngine", () => {
         type: GameState.ReadClue,
         activeClue: [0, 0],
         boardControl: PLAYER1.userId,
-        buzzes: new Map([[PLAYER1.userId, -1]]),
+        buzzes: new Map([[PLAYER1.userId, CANT_BUZZ_FLAG]]),
         players: new Map([
           [PLAYER1.userId, { ...PLAYER1, score: -200 }],
           [PLAYER2.userId, PLAYER2],
@@ -411,7 +414,7 @@ describe("gameEngine", () => {
         activeClue: [0, 0],
         boardControl: PLAYER1.userId,
         buzzes: new Map([
-          [PLAYER1.userId, -1],
+          [PLAYER1.userId, CANT_BUZZ_FLAG],
           [PLAYER2.userId, 123],
         ]),
         players: new Map([
@@ -465,7 +468,7 @@ describe("gameEngine", () => {
         ],
         boardControl: PLAYER2.userId,
         buzzes: new Map([
-          [PLAYER1.userId, -1],
+          [PLAYER1.userId, CANT_BUZZ_FLAG],
           [PLAYER2.userId, 123],
         ]),
         numAnswered: 1,

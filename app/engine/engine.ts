@@ -63,7 +63,7 @@ export const CLUE_TIMEOUT_MS = 5000;
 
 /** CANT_BUZZ_FLAG means that the player buzzed in wrong, so they can't try again
  * on this clue. */
-const CANT_BUZZ_FLAG = -1;
+export const CANT_BUZZ_FLAG = -1;
 
 export function getWinningBuzzer(buzzes?: Map<string, number>):
   | {

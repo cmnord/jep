@@ -1,11 +1,11 @@
 import classNames from "classnames";
 import type { Player } from "~/engine";
-import { CLUE_TIMEOUT_MS } from "~/engine";
+import { CANT_BUZZ_FLAG, CLUE_TIMEOUT_MS } from "~/engine";
 import { stringToHslColor } from "~/utils/utils";
 
 function durationMessage(durationMs: number) {
   switch (durationMs) {
-    case -1:
+    case CANT_BUZZ_FLAG:
       return "cannot buzz";
     case CLUE_TIMEOUT_MS + 1:
       return "timed out";
