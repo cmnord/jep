@@ -22,10 +22,15 @@ import { ReadClueTimer } from "./read-clue-timer";
 /** MS_PER_CHARACTER is a heuristic value to scale the amount of time per clue by
  * its length.
  */
-const MS_PER_CHARACTER = 50;
+const MS_PER_CHARACTER = 70;
 
-/** LOCKOUT_MS applies a 500ms lockout if a contestant buzzes before the clue is read. */
-const LOCKOUT_MS = 500;
+/** CLUE_READ_OFFSET is the base amount of time it takes to read a clue. */
+const CLUE_READ_OFFSET = 500;
+
+/** LOCKOUT_MS applies a 250ms lockout if a contestant buzzes before the clue is
+ * read.
+ */
+const LOCKOUT_MS = 250;
 
 function ClueText({
   answer,
@@ -103,7 +108,8 @@ function ReadCluePrompt({
   useSoloAction(fetcher, soloDispatch);
 
   const numCharactersInClue = clue?.clue.length ?? 0;
-  const clueDurationMs = MS_PER_CHARACTER * numCharactersInClue;
+  const clueDurationMs =
+    CLUE_READ_OFFSET + MS_PER_CHARACTER * numCharactersInClue;
 
   // Keep activeClue set to the last valid clue index.
   React.useEffect(() => {
@@ -214,7 +220,6 @@ function ReadCluePrompt({
           Click or press <Kbd>Enter</Kbd> to buzz in
         </span>
       </div>
-
       <ClueText
         clue={clue?.clue}
         canBuzz={!lockout && myBuzzDurationMs === undefined}
@@ -222,6 +227,15 @@ function ReadCluePrompt({
         focusOnBuzz={true}
         showAnswer={false}
         answer={undefined}
+      />
+      {/* placed here for spacing so clue doesn't resize */}
+      <AnswerForm
+        isOpen={false}
+        roomName={""}
+        userId={""}
+        clueIdx={undefined}
+        showAnswer={false}
+        onClickShowAnswer={() => null}
       />
       <Lockout active={lockout} />
       <Buzzes
