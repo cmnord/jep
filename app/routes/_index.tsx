@@ -122,7 +122,7 @@ export default function Index() {
           <Toggle
             name="solo"
             checked={optimisticSolo}
-            onClick={() => setOptimisticSolo(!optimisticSolo)}
+            onClick={(checked) => setOptimisticSolo(checked)}
           />
           <div className="inline-flex gap-0.5">
             <p
