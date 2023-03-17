@@ -136,7 +136,10 @@ export default function Index() {
               <button>
                 <QuestionMarkCircle
                   outlined
-                  className="w-4 h-4 text-gray-400"
+                  className={
+                    "w-4 h-4 text-gray-400 rounded-md " +
+                    "hover:text-gray-500 hover:bg-gray-100"
+                  }
                 />
               </button>
             </Popover>
