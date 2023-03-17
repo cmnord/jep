@@ -9,10 +9,9 @@ import {
   useCatch,
 } from "@remix-run/react";
 
+import { CodeBlock } from "~/components/code";
 import { DefaultErrorBoundary } from "~/components/error";
 import Header from "~/components/header";
-import Link, { Anchor } from "~/components/link";
-import { CodeBlock } from "./components/code";
 
 import stylesheet from "./styles.css";
 
@@ -46,10 +45,6 @@ export default function App() {
         <ScrollRestoration />
         <Scripts />
         <LiveReload />
-        <footer className="mt-auto p-6 text-center text-sm text-gray-500">
-          Made with &lt;3 by{" "}
-          <Anchor href="https://github.com/cmnord">cmnord</Anchor>
-        </footer>
       </body>
     </html>
   );
@@ -70,9 +65,6 @@ export function ErrorBoundary({ error }: { error: Error }) {
         <ScrollRestoration />
         <Scripts />
         <LiveReload />
-        <footer className="mt-auto p-6 text-center text-sm text-gray-500">
-          Made with &lt;3 by <Link to="https://github.com/cmnord">cmnord</Link>
-        </footer>
       </body>
     </html>
   );
@@ -98,9 +90,6 @@ export function CatchBoundary() {
         <ScrollRestoration />
         <Scripts />
         <LiveReload />
-        <footer className="mt-auto p-6 text-center text-sm text-gray-500">
-          Made with &lt;3 by <Link to="https://github.com/cmnord">cmnord</Link>
-        </footer>
       </body>
     </html>
   );
