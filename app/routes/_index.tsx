@@ -20,9 +20,9 @@ import {
 } from "~/components/error";
 import GameCard from "~/components/game-card";
 import { QuestionMarkCircle } from "~/components/icons";
+import Popover from "~/components/popover";
 import Search from "~/components/search";
 import Toggle from "~/components/toggle";
-import Tooltip from "~/components/tooltip";
 import Upload from "~/components/upload";
 
 import { getAllGames } from "~/models/game.server";
@@ -132,22 +132,14 @@ export default function Index() {
             >
               Solo mode {optimisticSolo ? "on" : "off"}
             </p>
-            <Tooltip
-              content={
-                <span>
-                  In solo mode, no other players can join the game.
-                  <br />
-                  If you refresh the page the game will reset.
-                </span>
-              }
-            >
+            <Popover content="In solo mode, no other players can join the game. If you refresh the page the game will reset.">
               <button>
                 <QuestionMarkCircle
                   outlined
                   className="w-4 h-4 text-gray-400"
                 />
               </button>
-            </Tooltip>
+            </Popover>
           </div>
         </div>
       </Form>
