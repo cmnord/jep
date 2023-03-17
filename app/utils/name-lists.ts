@@ -721,10 +721,9 @@ seamless
 seasoned
 secure
 selective
-self-determination
-self-respect
-self-satisfaction
-self-sufficiency
+self-determined
+self-respecting
+self-satisfied
 self-sufficient
 sensational
 sensible
