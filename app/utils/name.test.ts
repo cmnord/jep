@@ -6,7 +6,7 @@ import {
   randomWordFromListStartingWithLetter,
 } from "./name";
 
-describe("getRandomName", () => {
+describe("randomWordFromListStartingWithLetter", () => {
   for (const char of "abcdefghijklmnopqrstuvwxyz") {
     for (let i = 0; i < 100; i++) {
       it(`adjectives list should return a random word starting with ${char}`, () => {
@@ -20,10 +20,7 @@ describe("getRandomName", () => {
         }
         expect(word.startsWith(char)).toBe(true);
       });
-    }
-  }
-  for (const char of "abcdefghijklmnopqrstuvwxyz") {
-    for (let i = 0; i < 100; i++) {
+
       it(`poke list should return a random word starting with ${char}`, () => {
         const word = randomWordFromListStartingWithLetter(pokeNamesList, char);
         expect(word).toBeDefined();
