@@ -1,68 +1,87 @@
 import classNames from "classnames";
 import * as React from "react";
 
+import Popover from "~/components/popover";
 import type { Clue } from "~/models/convert.server";
 
 const UNREVEALED_CLUE = "unrevealed";
 
-export function ClueComponent({
-  answered,
-  clue,
-  hasBoardControl,
-  onFocus,
-  onKeyDown,
-  onClick,
-  value,
-}: {
+interface Props {
   answered: boolean;
   clue: Clue;
   value: number;
   hasBoardControl: boolean;
   onFocus: () => void;
-  onClick: () => void;
+  onClick: (e: React.MouseEvent) => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
-}) {
-  const [loading, setLoading] = React.useState(false);
+}
 
-  const unrevealed = clue.clue.toLowerCase() === UNREVEALED_CLUE;
+const ClueButton = React.forwardRef<
+  HTMLButtonElement,
+  React.ComponentProps<"button"> & Props
+>(
+  (
+    {
+      answered,
+      clue,
+      value,
+      hasBoardControl,
+      onFocus,
+      onClick,
+      onKeyDown,
+      ...rest
+    },
+    ref
+  ) => {
+    const [loading, setLoading] = React.useState(false);
 
-  React.useEffect(() => {
-    if (answered) {
-      setLoading(false);
-    }
-  }, [answered]);
+    const unrevealed = clue.clue.toLowerCase() === UNREVEALED_CLUE;
 
-  // TODO: daily double / wagerable text
-  const clueText = answered ? (
-    unrevealed ? (
-      <p className="text-sm text-gray-400">{UNREVEALED_CLUE}</p>
+    React.useEffect(() => {
+      if (answered) {
+        setLoading(false);
+      }
+    }, [answered]);
+
+    // TODO: daily double / wagerable text
+    const clueText = answered ? (
+      unrevealed ? (
+        <p className="text-sm text-gray-400">{UNREVEALED_CLUE}</p>
+      ) : (
+        <p className="uppercase font-korinna break-words">{clue.answer}</p>
+      )
     ) : (
-      <p className="uppercase font-korinna break-words">{clue.answer}</p>
-    )
-  ) : (
-    <p className="text-4xl lg:text-5xl text-yellow-1000 text-shadow-md font-impact">
-      ${value}
-    </p>
-  );
+      <p className="text-4xl lg:text-5xl text-yellow-1000 text-shadow-md font-impact">
+        ${value}
+      </p>
+    );
 
-  // disabled must not include `answerable` so we can focus on answered clues.
-  const disabled = !hasBoardControl || unrevealed || loading;
+    // disabled must not include `answerable` so we can focus on answered clues.
+    const disabled = !hasBoardControl || unrevealed || loading;
 
-  return (
-    <td className="p-1 h-full">
+    return (
       <button
         type="submit"
         disabled={disabled}
-        onClick={(e) => {
-          e.preventDefault();
-          if (disabled || answered) {
+        onClick={(event) => {
+          if (disabled) {
             return;
           }
-          setLoading(true);
-          onClick();
+          if (!answered) {
+            setLoading(true);
+          }
+          onClick(event);
         }}
         onFocus={onFocus}
-        onKeyDown={onKeyDown}
+        onKeyDown={(event) => {
+          if (disabled) {
+            return;
+          }
+          if (!answered && event.key === "Enter") {
+            setLoading(true);
+          }
+          onKeyDown(event);
+        }}
         className={classNames(
           "px-4 py-3 relative h-full w-full bg-blue-1000  transition-colors",
           {
@@ -73,9 +92,26 @@ export function ClueComponent({
             "border-spin opacity-75": loading,
           }
         )}
+        ref={ref}
+        {...rest}
       >
         {clueText}
       </button>
+    );
+  }
+);
+ClueButton.displayName = "ClueButton";
+
+export function ClueComponent(props: Props) {
+  return (
+    <td className="p-1 h-full">
+      {props.answered ? (
+        <Popover content={props.clue.clue}>
+          <ClueButton {...props} />
+        </Popover>
+      ) : (
+        <ClueButton {...props} />
+      )}
     </td>
   );
 }

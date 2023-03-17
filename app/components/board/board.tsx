@@ -131,7 +131,7 @@ export function ConnectedBoardComponent({
   }
 
   function handleClickClue(i: number, j: number) {
-    if (hasBoardControl) {
+    if (hasBoardControl && !isAnswered(i, j)) {
       return fetcher.submit(
         { i: i.toString(), j: j.toString(), userId },
         { method: "post", action: `/room/${roomName}/choose-clue` }
@@ -140,7 +140,6 @@ export function ConnectedBoardComponent({
   }
 
   const handleKeyDown = (event: React.KeyboardEvent, i: number, j: number) => {
-    event.stopPropagation();
     if (event.key === "Enter") {
       return handleClickClue(i, j);
     }
