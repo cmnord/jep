@@ -15,7 +15,10 @@ export function QuestionMarkCircle({
         strokeWidth={1.5}
         stroke="currentColor"
         className={className}
+        role="img"
+        aria-labelledby="question-mark-circle-title"
       >
+        <title id="question-mark-circle-title">About</title>
         <path
           strokeLinecap="round"
           strokeLinejoin="round"
