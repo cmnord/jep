@@ -16,6 +16,7 @@
     "validate": "run-p \"test -- --run\" lint typecheck test:e2e:run"
   },
   "dependencies": {
+    "@radix-ui/react-popover": "1.0.5",
     "@remix-run/node": "^1.13.0",
     "@remix-run/react": "^1.13.0",
     "@remix-run/vercel": "^1.13.0",
