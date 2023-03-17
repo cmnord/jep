@@ -5,6 +5,78 @@ export const positiveAdjectivesList =
 
 export const pokeNamesList = POKE_NAMES.toLowerCase().split("\n");
 
+function makePdf(array: string[]) {
+  const weights = new Map<string, number>();
+  let totalCount = 0;
+
+  for (const word of array) {
+    const firstChar = word[0];
+    const prevWeight = weights.get(firstChar);
+    if (prevWeight) {
+      weights.set(firstChar, prevWeight + 1);
+    } else {
+      weights.set(firstChar, 1);
+    }
+    totalCount++;
+  }
+
+  // Normalize weights by total count
+  for (const [key, value] of weights) {
+    weights.set(key, value / totalCount);
+  }
+
+  return Array.from(weights.entries())
+    .sort(([a, _weightA], [b, _weightB]) => {
+      if (a < b) return -1;
+      if (a === b) return 0;
+      return 1;
+    })
+    .map(([_char, weight]) => weight);
+}
+
+function makeCombinedPdf(...arrays: string[][]) {
+  const pdfs = arrays.map((a) => makePdf(a));
+  const len = pdfs[0].length;
+  for (const pdf of pdfs) {
+    if (pdf.length !== len) {
+      throw new Error(
+        `pdfs must be the same length ${len}, but one is ${pdfs.length}`
+      );
+    }
+  }
+
+  const combinedPdf = new Array<number>(len);
+  let totalCount = 0;
+
+  for (let i = 0; i < len; i++) {
+    const weightProduct = pdfs.reduce((acc, pdf) => acc * pdf[i], 1);
+    combinedPdf[i] = weightProduct;
+    totalCount += weightProduct;
+  }
+
+  // Normalize combined PDF by total count
+  for (let i = 0; i < len; i++) {
+    combinedPdf[i] = combinedPdf[i] / totalCount;
+  }
+
+  return combinedPdf;
+}
+
+/** LETTER_PDF is the probability distribution function of alliterative
+ * (adjective, noun) combos by frequency.
+ */
+const LETTER_PDF = makeCombinedPdf(positiveAdjectivesList, pokeNamesList);
+
+/** LETTER_CDF is the cumulative distribution function of LETTER_PDF. */
+const LETTER_CDF = new Array<number>(LETTER_PDF.length);
+for (let i = 0; i < LETTER_PDF.length; i++) {
+  if (i === 0) {
+    LETTER_CDF[i] = LETTER_PDF[i];
+  } else {
+    LETTER_CDF[i] = LETTER_CDF[i - 1] + LETTER_PDF[i];
+  }
+}
+
 function binarySearchChar(sortedArray: string[], char: string) {
   let left = 0;
   let right = sortedArray.length - 1;
@@ -68,7 +140,20 @@ function capitalize(s: string) {
 
 /** getRandomName returns a random, alliterative name of Adjective + Noun. */
 export function getRandomName() {
-  const char = "abcdefghijklmnopqrstuvwxyz"[Math.floor(Math.random() * 26)];
+  const sample = Math.random(); // sample is in the range [0, 1).
+  return getRandomNameWithSample(sample);
+}
+
+export function getRandomNameWithSample(sample: number) {
+  // Find the first letter where sample < LETTER_CDF[i]
+  const char = "abcdefghijklmnopqrstuvwxyz".split("").find((_char, i) => {
+    return sample < LETTER_CDF[i];
+  });
+
+  if (!char) {
+    throw new Error("No letter found for sample " + sample);
+  }
+
   const adjective = randomWordFromListStartingWithLetter(
     positiveAdjectivesList,
     char
