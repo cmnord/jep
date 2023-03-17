@@ -22,7 +22,7 @@ import GameCard from "~/components/game-card";
 import { QuestionMarkCircle } from "~/components/icons";
 import Popover from "~/components/popover";
 import Search from "~/components/search";
-import Toggle from "~/components/toggle";
+import Switch from "~/components/switch";
 import Upload from "~/components/upload";
 
 import { getAllGames } from "~/models/game.server";
@@ -119,7 +119,7 @@ export default function Index() {
         </Link>
         <input type="hidden" name="q" value={debouncedSearch} />
         <div className="inline-flex items-center gap-3">
-          <Toggle
+          <Switch
             name="solo"
             checked={optimisticSolo}
             onClick={(checked) => setOptimisticSolo(checked)}
