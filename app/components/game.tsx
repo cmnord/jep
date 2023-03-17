@@ -1,7 +1,6 @@
 import * as React from "react";
 
 import BoardComponent from "~/components/board";
-import ClueList from "~/components/clue-list";
 import Players from "~/components/player";
 import Preview from "~/components/preview";
 import Prompt from "~/components/prompt";
@@ -63,9 +62,6 @@ export default function GameComponent({
       <div className="p-3 sm:p-6 md:p-12 ">
         {(type !== GameState.Preview || round !== 0) && (
           <Players userId={userId} roomName={roomName} />
-        )}
-        {board && (
-          <ClueList focusedClue={focusedClueIdx} setFocusedClue={onFocusClue} />
         )}
       </div>
       <Prompt roomName={roomName} userId={userId} />
