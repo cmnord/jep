@@ -182,7 +182,12 @@ export function ConnectedBoardComponent({
       round={round}
       isAnswered={isAnswered}
       onClickClue={handleClickClue}
-      onFocusClue={setFocusedClue}
+      onFocusClue={(i, j) => {
+        if (focusedClue && focusedClue[0] === i && focusedClue[1] === j) {
+          return;
+        }
+        setFocusedClue(i, j);
+      }}
       onKeyDownClue={handleKeyDown}
     />
   );
