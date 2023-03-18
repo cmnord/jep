@@ -16,9 +16,7 @@ import Header from "~/components/header";
 import stylesheet from "./styles.css";
 
 export const meta: MetaFunction = () => ({
-  charset: "utf-8",
   title: "jep!",
-  viewport: "width=device-width,initial-scale=1",
   description: "A J! trivia app",
 });
 
@@ -36,6 +34,8 @@ export default function App() {
   return (
     <html lang="en">
       <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
         <Meta />
         <Links />
       </head>
@@ -56,6 +56,8 @@ export function ErrorBoundary({ error }: { error: Error }) {
     <html>
       <head>
         <title>Oh no!</title>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
         <Meta />
         <Links />
       </head>
@@ -77,6 +79,8 @@ export function CatchBoundary() {
     <html>
       <head>
         <title>Oh no!</title>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
         <Meta />
         <Links />
       </head>

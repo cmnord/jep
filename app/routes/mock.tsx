@@ -1,3 +1,4 @@
+import type { MetaFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 
@@ -5,6 +6,10 @@ import GameComponent from "~/components/game";
 import { GameEngineContext } from "~/engine";
 import { useSoloGameEngine } from "~/engine/use-game-engine";
 import { getMockGame } from "~/models/mock.server";
+
+export const meta: MetaFunction<typeof loader> = ({ data }) => ({
+  title: data.game.title,
+});
 
 export async function loader() {
   const game = await getMockGame();
