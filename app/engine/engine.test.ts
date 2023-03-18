@@ -104,7 +104,7 @@ describe("gameEngine", () => {
       ],
       expectedState: {
         ...initialState,
-        type: GameState.WaitForClueChoice,
+        type: GameState.ShowBoard,
         boardControl: PLAYER1.userId,
         players: new Map([[PLAYER1.userId, PLAYER1]]),
       },
@@ -509,7 +509,7 @@ describe("gameEngine", () => {
       ],
       expectedState: {
         ...initialState,
-        type: GameState.WaitForClueChoice,
+        type: GameState.ShowBoard,
         activeClue: undefined,
         boardControl: PLAYER1.userId,
         buzzes: undefined,
