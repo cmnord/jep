@@ -115,7 +115,7 @@ export default function Index() {
       </Form>
       <Form method="get" className="flex flex-col sm:flex-row mb-4 gap-6">
         <Link to={"/mock"}>
-          <Button>Play a mock game</Button>
+          <Button htmlType="button">Play a mock game</Button>
         </Link>
         <input type="hidden" name="q" value={debouncedSearch} />
         <div className="inline-flex items-center gap-3">
