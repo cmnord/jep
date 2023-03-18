@@ -10,7 +10,7 @@ import {
 
 export enum GameState {
   Preview = "Preview",
-  WaitForClueChoice = "WaitForClueChoice",
+  ShowBoard = "ShowBoard",
   ReadClue = "ReadClue",
   RevealAnswerToBuzzer = "RevealAnswerToBuzzer",
   RevealAnswerToAll = "RevealAnswerToAll",
@@ -189,7 +189,7 @@ export function gameEngine(state: State, action: Action): State {
         }
         const actionRound = action.payload.round;
         if (actionRound === state.round) {
-          return { ...state, type: GameState.WaitForClueChoice };
+          return { ...state, type: GameState.ShowBoard };
         }
         return state;
       }
@@ -198,7 +198,7 @@ export function gameEngine(state: State, action: Action): State {
       if (isClueAction(action)) {
         const { userId, i, j } = action.payload;
         if (
-          state.type !== GameState.WaitForClueChoice ||
+          state.type !== GameState.ShowBoard ||
           state.boardControl !== userId ||
           state.isAnswered.at(i)?.at(j)?.isAnswered
         ) {
@@ -417,7 +417,7 @@ export function gameEngine(state: State, action: Action): State {
 
         return {
           ...state,
-          type: GameState.WaitForClueChoice,
+          type: GameState.ShowBoard,
           activeClue: undefined,
           buzzes: undefined,
         };
