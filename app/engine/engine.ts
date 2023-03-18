@@ -326,7 +326,7 @@ export function gameEngine(state: State, action: Action): State {
           score: player.score - clueValue,
         });
         const lockedOutBuzzers = Array.from(state.buzzes ?? []).filter(
-          ([_, deltaMs]) => deltaMs === CANT_BUZZ_FLAG
+          ([, deltaMs]) => deltaMs === CANT_BUZZ_FLAG
         );
         const newBuzzes = new Map([
           ...lockedOutBuzzers,
@@ -386,9 +386,23 @@ export function gameEngine(state: State, action: Action): State {
           const n = board ? board.categories[0].clues.length : 0;
           const m = board ? board.categories.length : 0;
 
+          // Board control goes to the player with the lowest score. In the
+          // case of a tie, keep the same player in control.
+          const lowestScoringPlayer = Array.from(state.players.values()).sort(
+            (a, b) => a.score - b.score
+          )[0];
+
+          let newBoardControl = lowestScoringPlayer.userId;
+          if (state.boardControl) {
+            const controllingPlayer = state.players.get(state.boardControl);
+            if (controllingPlayer?.score === lowestScoringPlayer.score) {
+              newBoardControl = controllingPlayer.userId;
+            }
+          }
+
           return {
             type: GameState.Preview,
-            boardControl: state.boardControl,
+            boardControl: newBoardControl,
             game: state.game,
             isAnswered: generateGrid(n, m, {
               isAnswered: false,
