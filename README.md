@@ -47,6 +47,16 @@ npx supabase gen types typescript --linked > app/models/database.types.ts
 To use a local version of Supabase instead of the production URL, set
 `SUPABASE_URL` and `SUPABASE_ANON_KEY` from the results of `npx supabase start`.
 
+View the local Supabase dashboard at
+[http://localhost:54323/](http://localhost:54323/).
+
+- [Make a
+  migration](https://supabase.com/docs/guides/cli/local-development#database-migrations):
+  `npx supabase db diff -f my_migration_name`
+- [Deploy a
+  migration](https://supabase.com/docs/guides/cli/local-development#deploy-database-changes):
+  `npx supabase db push`
+
 ## Tools used
 
 - Web framework: [Remix](https://remix.run/)
@@ -56,7 +66,9 @@ To use a local version of Supabase instead of the production URL, set
 
 ## Thanks
 
-- [Making a Basic React + Firebase App](https://paper.dropbox.com/doc/Making-a-Basic-React-Firebase-App--Bys208PiI1n34J9lnkc7lzRxAg-oepkAUyjqbd7Ts0hIB8U4) by [jynnie](https://github.com/jynnie)
+- [Making a Basic React + Firebase
+  App](https://paper.dropbox.com/doc/Making-a-Basic-React-Firebase-App--Bys208PiI1n34J9lnkc7lzRxAg-oepkAUyjqbd7Ts0hIB8U4)
+  by [jynnie](https://github.com/jynnie)
 - [jeopardy-remixable-app on Glitch](https://jeopardy-remixable-app.glitch.me)
   ([source](https://glitch.com/~jeopardy-remixable-app))
 - [jarchive-json on Glitch](https://jarchive-json.glitch.me)

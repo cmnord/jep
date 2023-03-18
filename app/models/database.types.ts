@@ -43,6 +43,7 @@ export interface Database {
           id: number;
           round: number;
           value: number;
+          wagerable: boolean;
         };
         Insert: {
           answer: string;
@@ -52,6 +53,7 @@ export interface Database {
           id?: number;
           round?: number;
           value: number;
+          wagerable?: boolean;
         };
         Update: {
           answer?: string;
@@ -61,6 +63,7 @@ export interface Database {
           id?: number;
           round?: number;
           value?: number;
+          wagerable?: boolean;
         };
       };
       games: {
@@ -147,7 +150,10 @@ export interface Database {
     Tables: {
       buckets: {
         Row: {
+          allowed_mime_types: string[] | null;
+          avif_autodetection: boolean | null;
           created_at: string | null;
+          file_size_limit: number | null;
           id: string;
           name: string;
           owner: string | null;
@@ -155,7 +161,10 @@ export interface Database {
           updated_at: string | null;
         };
         Insert: {
+          allowed_mime_types?: string[] | null;
+          avif_autodetection?: boolean | null;
           created_at?: string | null;
+          file_size_limit?: number | null;
           id: string;
           name: string;
           owner?: string | null;
@@ -163,7 +172,10 @@ export interface Database {
           updated_at?: string | null;
         };
         Update: {
+          allowed_mime_types?: string[] | null;
+          avif_autodetection?: boolean | null;
           created_at?: string | null;
+          file_size_limit?: number | null;
           id?: string;
           name?: string;
           owner?: string | null;
