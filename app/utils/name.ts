@@ -26,12 +26,12 @@ function makePdf(array: string[]) {
   }
 
   return Array.from(weights.entries())
-    .sort(([a, _weightA], [b, _weightB]) => {
+    .sort(([a], [b]) => {
       if (a < b) return -1;
       if (a === b) return 0;
       return 1;
     })
-    .map(([_char, weight]) => weight);
+    .map(([, weight]) => weight);
 }
 
 function makeCombinedPdf(...arrays: string[][]) {

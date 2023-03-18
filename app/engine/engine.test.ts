@@ -1,14 +1,12 @@
 import { MOCK_GAME } from "~/models/mock.server";
+import type { Action, Player, State } from "./engine";
 import {
-  Action,
   ActionType,
   CANT_BUZZ_FLAG,
   CLUE_TIMEOUT_MS,
   createInitialState,
   gameEngine,
   GameState,
-  Player,
-  State,
 } from "./engine";
 
 const PLAYER1: Player = {
@@ -527,7 +525,7 @@ describe("gameEngine", () => {
       },
     },
     {
-      name: "Dismiss clue to go back to the board (round over)",
+      name: "Dismiss clue to go back to the board (round over), same scores so existing player keeps board control",
       state: initialState,
       actions: [
         ...TWO_PLAYERS_ROUND_0,
@@ -592,6 +590,76 @@ describe("gameEngine", () => {
         players: new Map([
           [PLAYER1.userId, { ...PLAYER1, score: 200 }],
           [PLAYER2.userId, { ...PLAYER2, score: 200 }],
+        ]),
+        round: 1,
+      },
+    },
+    {
+      name: "Dismiss clue to go back to the board (round over), player with lowest score gets board control",
+      state: initialState,
+      actions: [
+        ...TWO_PLAYERS_ROUND_0,
+        {
+          type: ActionType.ChooseClue,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0 },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0, deltaMs: 123 },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: {
+            userId: PLAYER2.userId,
+            i: 0,
+            j: 0,
+            deltaMs: CLUE_TIMEOUT_MS + 1,
+          },
+        },
+        {
+          type: ActionType.Answer,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0, correct: true },
+        },
+        {
+          type: ActionType.NextClue,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0 },
+        },
+        {
+          type: ActionType.ChooseClue,
+          payload: { userId: PLAYER1.userId, i: 0, j: 1 },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: { userId: PLAYER1.userId, i: 0, j: 1, deltaMs: 123 },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: {
+            userId: PLAYER2.userId,
+            i: 0,
+            j: 1,
+            deltaMs: CLUE_TIMEOUT_MS + 1,
+          },
+        },
+        {
+          type: ActionType.Answer,
+          payload: { userId: PLAYER1.userId, i: 0, j: 1, correct: true },
+        },
+        {
+          type: ActionType.NextClue,
+          payload: { userId: PLAYER1.userId, i: 0, j: 1 },
+        },
+      ],
+      expectedState: {
+        ...initialState,
+        type: GameState.Preview,
+        boardControl: PLAYER2.userId,
+        isAnswered: [[{ isAnswered: false, answeredBy: undefined }]],
+        numAnswered: 0,
+        numCluesInBoard: 1,
+        players: new Map([
+          [PLAYER1.userId, { ...PLAYER1, score: 400 }],
+          [PLAYER2.userId, { ...PLAYER2, score: 0 }],
         ]),
         round: 1,
       },
