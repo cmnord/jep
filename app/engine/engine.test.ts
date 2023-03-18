@@ -582,7 +582,7 @@ describe("gameEngine", () => {
       ],
       expectedState: {
         ...initialState,
-        type: GameState.Preview,
+        type: GameState.PreviewRound,
         boardControl: PLAYER2.userId,
         isAnswered: [[{ isAnswered: false, answeredBy: undefined }]],
         numAnswered: 0,
@@ -652,7 +652,7 @@ describe("gameEngine", () => {
       ],
       expectedState: {
         ...initialState,
-        type: GameState.Preview,
+        type: GameState.PreviewRound,
         boardControl: PLAYER2.userId,
         isAnswered: [[{ isAnswered: false, answeredBy: undefined }]],
         numAnswered: 0,

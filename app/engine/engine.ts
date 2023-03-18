@@ -9,7 +9,7 @@ import {
 } from "./actions";
 
 export enum GameState {
-  Preview = "Preview",
+  PreviewRound = "PreviewRound",
   ShowBoard = "ShowBoard",
   ReadClue = "ReadClue",
   RevealAnswerToBuzzer = "RevealAnswerToBuzzer",
@@ -128,7 +128,7 @@ export function createInitialState(game: Game): State {
   const m = board.categories.length;
 
   return {
-    type: GameState.Preview,
+    type: GameState.PreviewRound,
     game: game,
     isAnswered: generateGrid(n, m, {
       isAnswered: false,
@@ -180,7 +180,7 @@ export function gameEngine(state: State, action: Action): State {
       throw new Error("PlayerChangeName action must have an associated player");
     case ActionType.StartRound:
       if (isRoundAction(action)) {
-        if (state.type !== GameState.Preview) {
+        if (state.type !== GameState.PreviewRound) {
           return state;
         }
         // Game cannot start without any players
@@ -401,7 +401,7 @@ export function gameEngine(state: State, action: Action): State {
           }
 
           return {
-            type: GameState.Preview,
+            type: GameState.PreviewRound,
             boardControl: newBoardControl,
             game: state.game,
             isAnswered: generateGrid(n, m, {
