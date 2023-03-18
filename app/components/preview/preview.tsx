@@ -126,7 +126,7 @@ export function Preview({
 }) {
   const { type, round, soloDispatch } = useEngineContext();
 
-  const isOpen = type === GameState.Preview;
+  const isOpen = type === GameState.PreviewRound;
 
   switch (round) {
     case 0:
