@@ -1,7 +1,7 @@
 import classNames from "classnames";
 import * as React from "react";
 
-const NUM_BARS = 10;
+const NUM_BARS = 9;
 const COUNTDOWN_TIME_SEC = 5;
 const CENTER = (NUM_BARS - 1) / 2;
 
