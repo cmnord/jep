@@ -74,8 +74,7 @@ export function Buzzes({
 }) {
   const sortedBuzzes = buzzes
     ? Array.from(buzzes.entries()).sort(
-        ([_aUserId, aDurationMs], [_bUserId, bDurationMs]) =>
-          aDurationMs - bDurationMs
+        ([, aDurationMs], [, bDurationMs]) => aDurationMs - bDurationMs
       )
     : [];
 
