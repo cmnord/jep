@@ -2,6 +2,7 @@ import { useFetcher } from "@remix-run/react";
 import classNames from "classnames";
 import * as React from "react";
 import useFitText from "use-fit-text";
+import useSound from "use-sound";
 
 import type { Action } from "~/engine";
 import { CLUE_TIMEOUT_MS, GameState, useEngineContext } from "~/engine";
@@ -31,6 +32,8 @@ const CLUE_READ_OFFSET = 500;
  * read.
  */
 const LOCKOUT_MS = 250;
+
+const TIMES_UP_SFX = "/sounds/times-up.mp3";
 
 function ClueText({
   answer,
@@ -267,9 +270,17 @@ function RevealAnswerToBuzzerPrompt({
   const canShowAnswer = winningBuzzer === userId;
   const [showAnswer, setShowAnswer] = React.useState(false);
 
+  // Play the "time's up" sound after 5 seconds if the contestant can reveal the
+  // answer but hasn't yet.
+  const [playTimesUpSfx] = useSound(TIMES_UP_SFX, { volume: 0.5 });
+  useTimeout(
+    playTimesUpSfx,
+    canShowAnswer && !showAnswer ? CLUE_TIMEOUT_MS : null
+  );
+
   return (
     <>
-      <Countdown startTime={undefined} />
+      <Countdown startTime={canShowAnswer ? Date.now() : undefined} />
       <ReadClueTimer clueDurationMs={0} shouldAnimate={false} />
       <div className="flex justify-between p-4">
         <div className="text-white">
