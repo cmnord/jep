@@ -14,10 +14,12 @@ function NextRoundFooter({
   roomName,
   round,
   soloDispatch,
+  onDismiss,
 }: {
   roomName: string;
   round: number;
   soloDispatch: React.Dispatch<Action>;
+  onDismiss?: () => void;
 }) {
   const fetcher = useFetcher<Action>();
   useSoloAction(fetcher, soloDispatch);
@@ -26,7 +28,7 @@ function NextRoundFooter({
     <Modal.Footer>
       <fetcher.Form method="post" action={`/room/${roomName}/start`}>
         <input type="hidden" name="round" value={round} />
-        <Button type="primary" htmlType="submit">
+        <Button type="primary" htmlType="submit" onClick={onDismiss}>
           Start
         </Button>
       </fetcher.Form>
@@ -40,12 +42,14 @@ function BeforeGamePreview({
   roomName,
   round,
   soloDispatch,
+  onDismiss,
 }: {
   isOpen: boolean;
   userId: string;
   roomName: string;
   round: number;
   soloDispatch: React.Dispatch<Action>;
+  onDismiss: () => void;
 }) {
   const { boardControl, players } = useEngineContext();
   const controllingPlayer = boardControl ? players.get(boardControl) : null;
@@ -72,6 +76,7 @@ function BeforeGamePreview({
         roomName={roomName}
         round={round}
         soloDispatch={soloDispatch}
+        onDismiss={onDismiss}
       />
     </Modal>
   );
@@ -111,11 +116,13 @@ export function Preview({
   finalClue,
   userId,
   roomName,
+  onDismiss,
 }: {
   numRounds: number;
   finalClue?: Clue;
   userId: string;
   roomName: string;
+  onDismiss: () => void;
 }) {
   const { type, round, soloDispatch } = useEngineContext();
 
@@ -130,6 +137,7 @@ export function Preview({
           roomName={roomName}
           round={round}
           soloDispatch={soloDispatch}
+          onDismiss={onDismiss}
         />
       );
     case numRounds:
