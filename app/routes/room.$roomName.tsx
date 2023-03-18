@@ -1,4 +1,4 @@
-import type { LoaderArgs } from "@remix-run/node";
+import type { LoaderArgs, MetaFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 
@@ -11,6 +11,10 @@ import { createRoomEvent, getRoomEvents } from "~/models/room-event.server";
 import { getRoom } from "~/models/room.server";
 import { getOrCreateUserSession } from "~/session.server";
 import { getRandomName } from "~/utils/name";
+
+export const meta: MetaFunction<typeof loader> = ({ data }) => ({
+  title: data.game.title,
+});
 
 export async function loader({ request, params }: LoaderArgs) {
   const roomName = params.roomName;
