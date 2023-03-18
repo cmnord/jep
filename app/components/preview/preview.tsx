@@ -153,6 +153,7 @@ export function Preview({
             roomName={roomName}
             round={round}
             soloDispatch={soloDispatch}
+            onDismiss={onDismiss}
           />
         </Modal>
       );

@@ -10,6 +10,7 @@ import { GameState, useEngineContext } from "~/engine";
 import type { Clue, Game } from "~/models/convert.server";
 
 const BOARD_FILL_SFX = "/sounds/board-fill.mp3";
+const FINAL_CATEGORY_REVEAL_SFX = "/sounds/final-category-reveal.mp3";
 
 /** GameComponent maintains the game state. */
 export default function GameComponent({
@@ -43,6 +44,7 @@ export default function GameComponent({
   }, [activeClue]);
 
   const [playBoardFillSfx] = useSound(BOARD_FILL_SFX);
+  const [playFinalSfx] = useSound(FINAL_CATEGORY_REVEAL_SFX);
 
   const onFocusClue = (i: number, j: number) => {
     setFocusedClue([i, j]);
@@ -55,7 +57,9 @@ export default function GameComponent({
         finalClue={finalClue}
         userId={userId}
         roomName={roomName}
-        onDismiss={playBoardFillSfx}
+        onDismiss={
+          round === game.boards.length - 1 ? playFinalSfx : playBoardFillSfx
+        }
       />
       <div className="bg-black">
         <BoardComponent
