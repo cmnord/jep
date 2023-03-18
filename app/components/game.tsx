@@ -1,4 +1,5 @@
 import * as React from "react";
+import useSound from "use-sound";
 
 import BoardComponent from "~/components/board";
 import Players from "~/components/player";
@@ -7,6 +8,8 @@ import Prompt from "~/components/prompt";
 
 import { GameState, useEngineContext } from "~/engine";
 import type { Clue, Game } from "~/models/convert.server";
+
+const BOARD_FILL_SFX = "/sounds/board-fill.mp3";
 
 /** GameComponent maintains the game state. */
 export default function GameComponent({
@@ -18,7 +21,7 @@ export default function GameComponent({
   userId: string;
   roomName: string;
 }) {
-  const { type, board, round, activeClue } = useEngineContext();
+  const { type, round, activeClue } = useEngineContext();
 
   const [focusedClueIdx, setFocusedClue] = React.useState<[number, number]>();
 
@@ -39,6 +42,8 @@ export default function GameComponent({
     prevClueRef.current = activeClue;
   }, [activeClue]);
 
+  const [playBoardFillSfx] = useSound(BOARD_FILL_SFX);
+
   const onFocusClue = (i: number, j: number) => {
     setFocusedClue([i, j]);
   };
@@ -50,6 +55,7 @@ export default function GameComponent({
         finalClue={finalClue}
         userId={userId}
         roomName={roomName}
+        onDismiss={playBoardFillSfx}
       />
       <div className="bg-black">
         <BoardComponent
