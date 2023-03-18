@@ -146,7 +146,9 @@ export async function createGame(inputGame: ConvertedGame) {
           category: category.name,
           game_id: game.id,
           round,
-          ...clue,
+          answer: clue.answer,
+          clue: clue.clue,
+          value: clue.value,
         });
       }
     }
@@ -157,6 +159,8 @@ export async function createGame(inputGame: ConvertedGame) {
     .insert<ClueTable["Insert"]>(clues)
     .select();
 
+  // TODO: createGame is not transactional, so if any clue fails to insert the
+  // game will still be created.
   if (cluesErr !== null) {
     throw cluesErr;
   }
