@@ -6,7 +6,7 @@ import type { useGameEngine } from "./use-game-engine";
 export const GameEngineContext = React.createContext<
   ReturnType<typeof useGameEngine>
 >({
-  type: GameState.Preview,
+  type: GameState.PreviewRound,
   activeClue: undefined,
   answeredBy: () => undefined,
   board: { categories: [], categoryNames: [] },
