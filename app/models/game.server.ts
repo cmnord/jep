@@ -149,6 +149,7 @@ export async function createGame(inputGame: ConvertedGame) {
           answer: clue.answer,
           clue: clue.clue,
           value: clue.value,
+          wagerable: clue.wagerable ?? false,
         });
       }
     }
