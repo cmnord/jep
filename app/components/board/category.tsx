@@ -8,7 +8,7 @@ export function Category({ category }: { category: string }) {
       <p
         style={{ fontSize }}
         ref={ref}
-        className="w-full h-20 flex items-center justify-center font-bold font-impact uppercase text-shadow-md"
+        className="w-full h-20 flex items-center justify-center font-bold font-impact uppercase text-shadow-lg"
       >
         {category}
       </p>

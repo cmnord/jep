@@ -7,11 +7,12 @@
     text-shadow: 1px 1px black;
   }
   .text-shadow-md {
-    text-shadow: 3px 3px black;
+    text-shadow: 1px 1px black, 2px 2px black, 3px 3px black;
   }
 
   .text-shadow-lg {
-    text-shadow: 5px 5px black;
+    text-shadow: 1px 1px black, 2px 2px black, 3px 3px black, 4px 4px black,
+      5px 5px black;
   }
 
   .word-spacing-1 {
