@@ -51,8 +51,9 @@ const ClueButton = React.forwardRef<
         <p className="uppercase font-korinna break-words">{clue.answer}</p>
       )
     ) : (
-      <p className="text-4xl lg:text-5xl text-yellow-1000 text-shadow-md font-impact">
-        ${value}
+      <p className="flex items-center justify-center gap-1 text-yellow-1000 text-shadow-lg font-impact">
+        <span className="text-3xl lg:text-4xl">$</span>
+        <span className="text-4xl lg:text-5xl">{value}</span>
       </p>
     );
 

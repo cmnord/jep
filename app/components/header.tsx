@@ -14,7 +14,7 @@ export default function Header() {
     <nav className="p-6 bg-blue-1000">
       <div className="flex justify-between">
         <Link to="/">
-          <h1 className="text-2xl font-bold text-white font-korinna text-shadow">
+          <h1 className="text-2xl font-bold text-white font-korinna text-shadow-md">
             Jep!
           </h1>
         </Link>
