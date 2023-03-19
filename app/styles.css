@@ -10,8 +10,12 @@
     text-shadow: 3px 3px black;
   }
 
+  .text-shadow-lg {
+    text-shadow: 5px 5px black;
+  }
+
   .word-spacing-1 {
-    word-spacing: 1rem;
+    word-spacing: 0.5rem;
   }
 }
 

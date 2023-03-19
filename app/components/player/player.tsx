@@ -38,7 +38,9 @@ function PlayerIcon({
       >
         {player.name}
       </div>
-      <div className="text-white">{formatter.format(player.score)}</div>
+      <div className="text-white text-xl font-impact text-shadow-md">
+        {formatter.format(player.score)}
+      </div>
     </div>
   );
 }

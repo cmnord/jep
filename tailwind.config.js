@@ -19,10 +19,10 @@ module.exports = {
         12: "12px",
       },
       backgroundColor: {
-        "blue-1000": "#071277",
+        "blue-1000": "#120081",
       },
       colors: {
-        "blue-1000": "#071277",
+        "blue-1000": "#120081",
         "yellow-1000": "#d69f4c",
       },
       fontFamily: {

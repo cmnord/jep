@@ -57,11 +57,14 @@ function ClueText({
       type="button"
       disabled={!canBuzz}
       onClick={() => onBuzz(Date.now())}
-      className="p-4 max-w-screen-lg mx-auto flex flex-col justify-center grow uppercase text-shadow-md font-korinna"
+      className={
+        "p-4 max-w-screen-lg mx-auto flex flex-col justify-center grow " +
+        "uppercase text-shadow-lg font-korinna font-bold"
+      }
       autoFocus={focusOnBuzz}
     >
       <p
-        className="text-white word-spacing-1 leading-relaxed md:leading-normal w-full max-h-96"
+        className="text-white word-spacing-1 leading-normal w-full max-h-96"
         ref={ref}
         style={{
           fontSize,
