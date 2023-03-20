@@ -290,8 +290,10 @@ describe("gameEngine", () => {
         boardControl: PLAYER1.userId,
         buzzes: new Map([[PLAYER1.userId, CLUE_TIMEOUT_MS + 1]]),
         isAnswered: [
-          [{ isAnswered: true, answeredBy: undefined }],
-          [{ isAnswered: false, answeredBy: undefined }],
+          [
+            { isAnswered: true, answeredBy: undefined },
+            { isAnswered: false, answeredBy: undefined },
+          ],
         ],
         numAnswered: 1,
         players: new Map([
@@ -329,8 +331,10 @@ describe("gameEngine", () => {
         boardControl: PLAYER1.userId,
         buzzes: new Map([[PLAYER1.userId, 123]]),
         isAnswered: [
-          [{ isAnswered: true, answeredBy: undefined }],
-          [{ isAnswered: false, answeredBy: undefined }],
+          [
+            { isAnswered: true, answeredBy: undefined },
+            { isAnswered: false, answeredBy: undefined },
+          ],
         ],
         numAnswered: 1,
         players: new Map([[PLAYER1.userId, { ...PLAYER1, score: -200 }]]),
@@ -461,8 +465,10 @@ describe("gameEngine", () => {
         type: GameState.RevealAnswerToAll,
         activeClue: [0, 0],
         isAnswered: [
-          [{ isAnswered: true, answeredBy: PLAYER2.userId }],
-          [{ isAnswered: false, answeredBy: undefined }],
+          [
+            { isAnswered: true, answeredBy: PLAYER2.userId },
+            { isAnswered: false, answeredBy: undefined },
+          ],
         ],
         boardControl: PLAYER2.userId,
         buzzes: new Map([
@@ -514,8 +520,10 @@ describe("gameEngine", () => {
         boardControl: PLAYER1.userId,
         buzzes: undefined,
         isAnswered: [
-          [{ isAnswered: true, answeredBy: PLAYER1.userId }],
-          [{ isAnswered: false, answeredBy: undefined }],
+          [
+            { isAnswered: true, answeredBy: PLAYER1.userId },
+            { isAnswered: false, answeredBy: undefined },
+          ],
         ],
         numAnswered: 1,
         players: new Map([
