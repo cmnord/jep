@@ -67,15 +67,19 @@ export function ConnectedAnswerForm({
         <p className="text-gray-300 text-sm">
           State your answer in the form of a question, then
         </p>
-        <Button
-          type="primary"
-          htmlType="button"
-          autoFocus
-          onClick={onClickShowAnswer}
-          loading={loading}
-        >
-          Reveal answer
-        </Button>
+        <div className="relative">
+          <span className="absolute inline-flex top-1/6 left-1/6 h-2/3 w-2/3 rounded-md bg-blue-300 opacity-75 animate-ping"></span>
+          <Button
+            type="primary"
+            htmlType="button"
+            autoFocus
+            onClick={onClickShowAnswer}
+            loading={loading}
+            className="relative"
+          >
+            Reveal answer
+          </Button>
+        </div>
       </div>
     );
   }

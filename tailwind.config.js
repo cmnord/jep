@@ -64,6 +64,9 @@ module.exports = {
       maxHeight: {
         "1/2": "50%",
       },
+      spacing: {
+        "1/6": "16.666667%",
+      },
     },
   },
   plugins: [
