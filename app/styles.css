@@ -20,6 +20,43 @@
   }
 }
 
+@layer components {
+  .shiny-text {
+    --text-cream: #feeae4;
+    --highlight: #f3d2ec;
+    --light-shadow: #542877;
+    --dark-shadow: #23215a;
+
+    background-clip: text;
+    grid-area: overlap;
+    -webkit-text-stroke: 5px transparent;
+  }
+
+  .shiny-text-bg {
+    background-image: repeating-linear-gradient(
+      105deg,
+      var(--highlight) 0%,
+      var(--dark-shadow) 5%,
+      var(--highlight) 12%
+    );
+    color: transparent;
+    filter: drop-shadow(5px 10px 10px black);
+    transform: scaleX(0.96) scaleY(0.96);
+    transform-origin: center;
+  }
+
+  .shiny-text-fg {
+    color: var(--text-cream);
+    background-image: repeating-linear-gradient(
+      5deg,
+      var(--highlight) 0%,
+      var(--light-shadow) 23%,
+      var(--highlight) 31%
+    );
+    transform: scale(1);
+  }
+}
+
 @keyframes growFromLeft {
   0% {
     width: 0;
