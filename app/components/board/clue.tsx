@@ -43,7 +43,6 @@ const ClueButton = React.forwardRef<
       }
     }, [answered]);
 
-    // TODO: daily double / wagerable text
     const clueText = answered ? (
       unrevealed ? (
         <p className="text-sm text-gray-400">{UNREVEALED_CLUE}</p>
