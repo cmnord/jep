@@ -164,6 +164,7 @@ function ReadCluePrompt({
 
   const fetcher = useFetcher<Action>();
   useSoloAction(fetcher, soloDispatch);
+  const submit = fetcher.submit;
 
   const numCharactersInClue = clue?.clue.length ?? 0;
   const clueDurationMs =
@@ -181,10 +182,39 @@ function ReadCluePrompt({
     }
   }, [activeClue, myBuzzDurationMs]);
 
+  /** submitTimeoutBuzz submits a buzz of CLUE_TIMEOUT_MS + 1 to the server. */
+  const submitTimeoutBuzz = React.useCallback(() => {
+    const deltaMs = CLUE_TIMEOUT_MS + 1;
+    const [i, j] = clueIdx ?? [-1, -1];
+    return submit(
+      {
+        i: i.toString(),
+        j: j.toString(),
+        userId,
+        deltaMs: deltaMs.toString(),
+      },
+      { method: "post", action: `/room/${roomName}/buzz` }
+    );
+  }, [submit, roomName, userId, clueIdx]);
+
   // Update optimisticBuzzes once buzzes come in from the server.
   React.useEffect(() => {
+    // If a new buzz comes in that's less than the current deltaMs, submit a
+    // timeout buzz.
+    if (buzzes && buzzerOpenAt) {
+      const currentDeltaMs = Date.now() - buzzerOpenAt;
+      for (const [buzzUserId, buzz] of buzzes) {
+        if (
+          buzzUserId !== userId &&
+          buzz !== CANT_BUZZ_FLAG &&
+          buzz < currentDeltaMs
+        ) {
+          submitTimeoutBuzz();
+        }
+      }
+    }
     setOptimisticBuzzes(buzzes ?? new Map<string, number>());
-  }, [buzzes]);
+  }, [buzzes, buzzerOpenAt, userId, submitTimeoutBuzz]);
 
   // Open the buzzer after the clue is done being "read".
   const delayMs = myBuzzDurationMs === undefined ? clueDurationMs : null;
@@ -197,25 +227,17 @@ function ReadCluePrompt({
   // 5-second "non-buzz" buzz to the server.
   useTimeout(
     () => {
-      const deltaMs = CLUE_TIMEOUT_MS + 1;
       setOptimisticBuzzes((old) => {
         if (old.has(userId)) {
           return old;
         }
-        return new Map([...old, [userId, deltaMs]]);
+        return new Map([...old, [userId, CLUE_TIMEOUT_MS + 1]]);
       });
-      const [i, j] = clueIdx ?? [-1, -1];
-      return fetcher.submit(
-        {
-          i: i.toString(),
-          j: j.toString(),
-          userId,
-          deltaMs: deltaMs.toString(),
-        },
-        { method: "post", action: `/room/${roomName}/buzz` }
-      );
+      submitTimeoutBuzz();
     },
-    buzzerOpenAt !== undefined && clueIdx ? CLUE_TIMEOUT_MS : null
+    buzzerOpenAt !== undefined && myBuzzDurationMs === undefined && clueIdx
+      ? CLUE_TIMEOUT_MS
+      : null
   );
 
   // Play the "time's up" sound after 5 seconds if no one buzzed in.
