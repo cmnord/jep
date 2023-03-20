@@ -65,10 +65,7 @@ export default function GameCard({
                 {numRounds} {numRounds === 1 ? "round" : "rounds"}
               </p>
             </div>
-            <strong
-              className="w-full text-left whitespace-nowrap overflow-hidden overflow-ellipsis"
-              title={game.title}
-            >
+            <strong className="text-left" title={game.title}>
               {game.title}
             </strong>
             {game.note && (
