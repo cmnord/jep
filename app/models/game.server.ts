@@ -59,6 +59,62 @@ function dbGameToGame(dbGame: DbGame, clues: DbClue[]): Game {
   return game;
 }
 
+/** validateGame validates a game before inserting it into the database. */
+function validateGame(game: ConvertedGame) {
+  if (game.title.trim() === "") {
+    throw new Error("title must not be empty");
+  }
+  if (game.author.trim() === "") {
+    throw new Error("author must not be empty");
+  }
+  if (game.boards.length === 0) {
+    throw new Error("game must have at least one board");
+  }
+
+  for (let round = 0; round < game.boards.length; round++) {
+    const board = game.boards[round];
+    if (board.categories.length === 0) {
+      throw new Error("board " + round + " must have at least one category");
+    }
+    if (board.categoryNames.length === 0) {
+      throw new Error(
+        "board " + round + " must have at least one category name"
+      );
+    }
+    if (board.categoryNames.length !== board.categories.length) {
+      throw new Error("categoryNames and categories must have the same length");
+    }
+    if (new Set(board.categoryNames).size !== board.categoryNames.length) {
+      throw new Error("categoryNames must not have duplicates");
+    }
+    for (let j = 0; j < board.categories.length; j++) {
+      const category = board.categories[j];
+      if (category.name !== board.categoryNames[j]) {
+        throw new Error("category name must match categoryNames at index " + j);
+      }
+      if (category.name.trim() === "") {
+        throw new Error("category name " + j + " must not be empty");
+      }
+      if (category.clues.length === 0) {
+        throw new Error("category " + j + " must have at least one clue");
+      }
+      for (let i = 0; i < category.clues.length; i++) {
+        const clue = category.clues[i];
+        if (clue.clue.trim() === "") {
+          throw new Error(
+            "clue " + i + " in category " + j + " must not be empty"
+          );
+        }
+        if (clue.answer.trim() === "") {
+          throw new Error(
+            "answer " + i + " in category " + j + " must not be empty"
+          );
+        }
+      }
+    }
+  }
+}
+
 /* Reads */
 
 export async function getGame(gameId: string): Promise<Game | null> {
@@ -118,6 +174,8 @@ export async function getAllGames(search: string | null): Promise<Game[]> {
 /* Writes */
 
 export async function createGame(inputGame: ConvertedGame) {
+  validateGame(inputGame);
+
   const { data: gameData, error: gameErr } = await db
     .from<"games", GameTable>("games")
     .insert<GameTable["Insert"]>({
