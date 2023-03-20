@@ -17,15 +17,12 @@ function NextClue({
   return (
     <div className="p-2 flex flex-col items-center gap-2">
       {cluesLeftInRound ? (
-        <p className="text-white font-bold">
+        <p className="text-gray-300 text-sm">
           {boardControlName} will choose the next clue.
         </p>
       ) : null}
-      <p className="text-gray-300 text-sm text-center">
-        Click "OK" to return to the board for all players.
-      </p>
       <Button htmlType="submit" type="primary" autoFocus loading={loading}>
-        OK
+        Back to board
       </Button>
     </div>
   );
