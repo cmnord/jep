@@ -1,5 +1,4 @@
 import { useFetcher } from "@remix-run/react";
-import classNames from "classnames";
 
 import Button from "~/components/button";
 import type { Action } from "~/engine";
@@ -42,14 +41,12 @@ function AnswerForm({ loading }: { loading: boolean }) {
  * prompt.  They can reveal the answer, then mark it correct/incorrect.
  */
 export function ConnectedAnswerForm({
-  isOpen,
   roomName,
   userId,
   clueIdx,
   showAnswer,
   onClickShowAnswer,
 }: {
-  isOpen: boolean;
   roomName: string;
   userId: string;
   clueIdx: [number, number] | undefined;
@@ -65,19 +62,15 @@ export function ConnectedAnswerForm({
 
   if (!showAnswer) {
     return (
-      <div
-        className={classNames("p-2 flex flex-col items-center gap-2", {
-          "opacity-0": !isOpen,
-        })}
-      >
+      <div className="p-2 flex flex-col items-center gap-2">
+        <p className="text-white font-bold">You won the buzz!</p>
         <p className="text-gray-300 text-sm">
           State your answer in the form of a question, then
         </p>
         <Button
           type="primary"
           htmlType="button"
-          disabled={!isOpen}
-          autoFocus={isOpen}
+          autoFocus
           onClick={onClickShowAnswer}
           loading={loading}
         >
