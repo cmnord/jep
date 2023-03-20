@@ -7,11 +7,11 @@ const gameWords =
 const SATURATION = 60;
 const LIGHTNESS = 85;
 
-/** getClueValue gets the normalized clue value based on its position in the
+/** getNormalizedClueValue gets the normalized clue value based on its position in the
  * board. Otherwise, the clue value for wagerable or unrevealed clues would be
  * 0.
  */
-export function getClueValue(i: number, round: number) {
+export function getNormalizedClueValue(i: number, round: number) {
   return (i + 1) * 200 * (round + 1);
 }
 

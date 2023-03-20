@@ -9,6 +9,7 @@ import {
   ActionType,
   createInitialState,
   gameEngine,
+  getClueValue,
   getWinningBuzzer,
 } from "./engine";
 import { applyRoomEventsToState, isTypedRoomEvent } from "./room-event";
@@ -48,6 +49,7 @@ function stateToGameEngine(
     buzzes: state.buzzes,
     category,
     clue,
+    getClueValue: (idx: [number, number]) => getClueValue(state, idx),
     soloDispatch: dispatch,
     isAnswered,
     players: state.players,
