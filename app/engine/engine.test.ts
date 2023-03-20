@@ -40,6 +40,60 @@ const TWO_PLAYERS_ROUND_0: Action[] = [
   },
 ];
 
+const TWO_PLAYERS_ROUND_1: Action[] = [
+  ...TWO_PLAYERS_ROUND_0,
+  {
+    type: ActionType.ChooseClue,
+    payload: { userId: PLAYER1.userId, i: 0, j: 0 },
+  },
+  {
+    type: ActionType.Buzz,
+    payload: { userId: PLAYER1.userId, i: 0, j: 0, deltaMs: 123 },
+  },
+  {
+    type: ActionType.Buzz,
+    payload: {
+      userId: PLAYER2.userId,
+      i: 0,
+      j: 0,
+      deltaMs: CLUE_TIMEOUT_MS + 1,
+    },
+  },
+  {
+    type: ActionType.Answer,
+    payload: { userId: PLAYER1.userId, i: 0, j: 0, correct: true },
+  },
+  {
+    type: ActionType.NextClue,
+    payload: { userId: PLAYER1.userId, i: 0, j: 0 },
+  },
+  {
+    type: ActionType.ChooseClue,
+    payload: { userId: PLAYER1.userId, i: 0, j: 1 },
+  },
+  {
+    type: ActionType.Buzz,
+    payload: { userId: PLAYER1.userId, i: 0, j: 1, deltaMs: 123 },
+  },
+  {
+    type: ActionType.Buzz,
+    payload: {
+      userId: PLAYER2.userId,
+      i: 0,
+      j: 1,
+      deltaMs: CLUE_TIMEOUT_MS + 1,
+    },
+  },
+  {
+    type: ActionType.Answer,
+    payload: { userId: PLAYER1.userId, i: 0, j: 1, correct: true },
+  },
+  {
+    type: ActionType.NextClue,
+    payload: { userId: PLAYER1.userId, i: 0, j: 1 },
+  },
+];
+
 describe("gameEngine", () => {
   interface TestCase {
     name: string;
@@ -291,8 +345,8 @@ describe("gameEngine", () => {
         buzzes: new Map([[PLAYER1.userId, CLUE_TIMEOUT_MS + 1]]),
         isAnswered: [
           [
-            { isAnswered: true, answeredBy: undefined },
-            { isAnswered: false, answeredBy: undefined },
+            { isAnswered: true, answeredBy: undefined, wager: undefined },
+            { isAnswered: false, answeredBy: undefined, wager: undefined },
           ],
         ],
         numAnswered: 1,
@@ -332,8 +386,8 @@ describe("gameEngine", () => {
         buzzes: new Map([[PLAYER1.userId, 123]]),
         isAnswered: [
           [
-            { isAnswered: true, answeredBy: undefined },
-            { isAnswered: false, answeredBy: undefined },
+            { isAnswered: true, answeredBy: undefined, wager: undefined },
+            { isAnswered: false, answeredBy: undefined, wager: undefined },
           ],
         ],
         numAnswered: 1,
@@ -466,8 +520,8 @@ describe("gameEngine", () => {
         activeClue: [0, 0],
         isAnswered: [
           [
-            { isAnswered: true, answeredBy: PLAYER2.userId },
-            { isAnswered: false, answeredBy: undefined },
+            { isAnswered: true, answeredBy: PLAYER2.userId, wager: undefined },
+            { isAnswered: false, answeredBy: undefined, wager: undefined },
           ],
         ],
         boardControl: PLAYER2.userId,
@@ -521,8 +575,8 @@ describe("gameEngine", () => {
         buzzes: undefined,
         isAnswered: [
           [
-            { isAnswered: true, answeredBy: PLAYER1.userId },
-            { isAnswered: false, answeredBy: undefined },
+            { isAnswered: true, answeredBy: PLAYER1.userId, wager: undefined },
+            { isAnswered: false, answeredBy: undefined, wager: undefined },
           ],
         ],
         numAnswered: 1,
@@ -605,59 +659,7 @@ describe("gameEngine", () => {
     {
       name: "Dismiss clue to go back to the board (round over), player with lowest score gets board control",
       state: initialState,
-      actions: [
-        ...TWO_PLAYERS_ROUND_0,
-        {
-          type: ActionType.ChooseClue,
-          payload: { userId: PLAYER1.userId, i: 0, j: 0 },
-        },
-        {
-          type: ActionType.Buzz,
-          payload: { userId: PLAYER1.userId, i: 0, j: 0, deltaMs: 123 },
-        },
-        {
-          type: ActionType.Buzz,
-          payload: {
-            userId: PLAYER2.userId,
-            i: 0,
-            j: 0,
-            deltaMs: CLUE_TIMEOUT_MS + 1,
-          },
-        },
-        {
-          type: ActionType.Answer,
-          payload: { userId: PLAYER1.userId, i: 0, j: 0, correct: true },
-        },
-        {
-          type: ActionType.NextClue,
-          payload: { userId: PLAYER1.userId, i: 0, j: 0 },
-        },
-        {
-          type: ActionType.ChooseClue,
-          payload: { userId: PLAYER1.userId, i: 0, j: 1 },
-        },
-        {
-          type: ActionType.Buzz,
-          payload: { userId: PLAYER1.userId, i: 0, j: 1, deltaMs: 123 },
-        },
-        {
-          type: ActionType.Buzz,
-          payload: {
-            userId: PLAYER2.userId,
-            i: 0,
-            j: 1,
-            deltaMs: CLUE_TIMEOUT_MS + 1,
-          },
-        },
-        {
-          type: ActionType.Answer,
-          payload: { userId: PLAYER1.userId, i: 0, j: 1, correct: true },
-        },
-        {
-          type: ActionType.NextClue,
-          payload: { userId: PLAYER1.userId, i: 0, j: 1 },
-        },
-      ],
+      actions: TWO_PLAYERS_ROUND_1,
       expectedState: {
         ...initialState,
         type: GameState.PreviewRound,
@@ -668,6 +670,118 @@ describe("gameEngine", () => {
         players: new Map([
           [PLAYER1.userId, { ...PLAYER1, score: 400 }],
           [PLAYER2.userId, { ...PLAYER2, score: 0 }],
+        ]),
+        round: 1,
+      },
+    },
+    {
+      name: "Choose wagerable clue",
+      state: initialState,
+      actions: [
+        ...TWO_PLAYERS_ROUND_1,
+        {
+          type: ActionType.StartRound,
+          payload: { round: 1 },
+        },
+        {
+          type: ActionType.ChooseClue,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0 },
+        },
+      ],
+      expectedState: {
+        ...initialState,
+        type: GameState.WagerClue,
+        activeClue: [0, 0],
+        boardControl: PLAYER2.userId,
+        isAnswered: [[{ isAnswered: false, answeredBy: undefined }]],
+        numAnswered: 0,
+        numCluesInBoard: 1,
+        players: new Map([
+          [PLAYER1.userId, { ...PLAYER1, score: 400 }],
+          [PLAYER2.userId, { ...PLAYER2, score: 0 }],
+        ]),
+        round: 1,
+      },
+    },
+    {
+      name: "Set clue wager amount, all other players locked out of buzz",
+      state: initialState,
+      actions: [
+        ...TWO_PLAYERS_ROUND_1,
+        {
+          type: ActionType.StartRound,
+          payload: { round: 1 },
+        },
+        {
+          type: ActionType.ChooseClue,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0 },
+        },
+        {
+          type: ActionType.SetClueWager,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0, wager: 345 },
+        },
+      ],
+      expectedState: {
+        ...initialState,
+        type: GameState.ReadClue,
+        activeClue: [0, 0],
+        boardControl: PLAYER2.userId,
+        buzzes: new Map([[PLAYER1.userId, CANT_BUZZ_FLAG]]),
+        isAnswered: [
+          [{ isAnswered: false, answeredBy: undefined, wager: 345 }],
+        ],
+        numAnswered: 0,
+        numCluesInBoard: 1,
+        players: new Map([
+          [PLAYER1.userId, { ...PLAYER1, score: 400 }],
+          [PLAYER2.userId, { ...PLAYER2, score: 0 }],
+        ]),
+        round: 1,
+      },
+    },
+    {
+      name: "Correct answer to wagered clue adds wager value",
+      state: initialState,
+      actions: [
+        ...TWO_PLAYERS_ROUND_1,
+        {
+          type: ActionType.StartRound,
+          payload: { round: 1 },
+        },
+        {
+          type: ActionType.ChooseClue,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0 },
+        },
+        {
+          type: ActionType.SetClueWager,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0, wager: 345 },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0, deltaMs: 123 },
+        },
+        {
+          type: ActionType.Answer,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0, correct: true },
+        },
+      ],
+      expectedState: {
+        ...initialState,
+        type: GameState.RevealAnswerToAll,
+        activeClue: [0, 0],
+        boardControl: PLAYER2.userId,
+        buzzes: new Map([
+          [PLAYER1.userId, CANT_BUZZ_FLAG],
+          [PLAYER2.userId, 123],
+        ]),
+        isAnswered: [
+          [{ isAnswered: true, answeredBy: PLAYER2.userId, wager: 345 }],
+        ],
+        numAnswered: 1,
+        numCluesInBoard: 1,
+        players: new Map([
+          [PLAYER1.userId, { ...PLAYER1, score: 400 }],
+          [PLAYER2.userId, { ...PLAYER2, score: 345 }],
         ]),
         round: 1,
       },

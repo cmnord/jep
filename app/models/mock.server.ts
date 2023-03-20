@@ -31,7 +31,7 @@ export const MOCK_GAME: Game = {
       categories: [
         {
           name: "Round 2, Category 1",
-          clues: [{ clue: "e", answer: "f", value: 400 }],
+          clues: [{ clue: "e", answer: "f", value: 400, wagerable: true }],
         },
       ],
     },
