@@ -18,10 +18,11 @@ export const MOCK_GAME: Game = {
       categories: [
         {
           name: "Round 1, Category 1",
-          clues: [
-            { clue: "a", answer: "b", value: 200 },
-            { clue: "c", answer: "d", value: 400 },
-          ],
+          clues: [{ clue: "a", answer: "b", value: 200 }],
+        },
+        {
+          name: "Round 1, Category 2",
+          clues: [{ clue: "c", answer: "d", value: 200 }],
         },
       ],
     },
