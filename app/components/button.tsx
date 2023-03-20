@@ -5,6 +5,7 @@ import { LoadingSpinner } from "~/components/icons";
 interface Props {
   onClick?: () => void;
   type?: "primary" | "default";
+  className?: string;
   disabled?: boolean;
   htmlType?: React.ButtonHTMLAttributes<HTMLButtonElement>["type"];
   children: React.ReactNode;
@@ -17,6 +18,7 @@ interface Props {
 export default function Button({
   onClick,
   children,
+  className,
   type = "default",
   disabled = false,
   htmlType,
@@ -30,10 +32,11 @@ export default function Button({
       disabled={disabled}
       onClick={onClick}
       className={classNames(
-        "inline-flex w-full justify-center rounded-md border px-4 py-2 text-base font-medium shadow-sm transition-colors " +
-          "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 " +
-          "sm:w-auto sm:text-sm " +
-          "disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none disabled:cursor-not-allowed",
+        className ? className : "",
+        "inline-flex w-full justify-center rounded-md border px-4 py-2 text-base font-medium shadow-sm transition-colors",
+        "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
+        "sm:w-auto sm:text-sm",
+        "disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none disabled:cursor-not-allowed",
         {
           "border-transparent bg-blue-600 text-white hover:bg-blue-700":
             type === "primary",
