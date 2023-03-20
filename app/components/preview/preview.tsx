@@ -29,7 +29,7 @@ function NextRoundFooter({
       <fetcher.Form method="post" action={`/room/${roomName}/start`}>
         <input type="hidden" name="round" value={round} />
         <Button type="primary" htmlType="submit" onClick={onDismiss}>
-          Start
+          Start round
         </Button>
       </fetcher.Form>
     </Modal.Footer>
@@ -51,26 +51,11 @@ function BeforeGamePreview({
   soloDispatch: React.Dispatch<Action>;
   onDismiss: () => void;
 }) {
-  const { boardControl, players } = useEngineContext();
-  const controllingPlayer = boardControl ? players.get(boardControl) : null;
-
   return (
     <Modal isOpen={isOpen}>
       <Modal.Body>
         <Modal.Title>Play &rarr;</Modal.Title>
-        <div className="mb-4">
-          <Players userId={userId} roomName={roomName} />
-        </div>
-        <p className="text-gray-500 mb-4">
-          Click "Start" to start the game for all players.
-          {controllingPlayer && (
-            <span>
-              {" "}
-              <span className="font-bold">{controllingPlayer.name}</span> will
-              start with control of the board.
-            </span>
-          )}
-        </p>
+        <Players userId={userId} roomName={roomName} />
       </Modal.Body>
       <NextRoundFooter
         roomName={roomName}
