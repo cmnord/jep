@@ -4,8 +4,13 @@ import * as React from "react";
 import useFitText from "use-fit-text";
 import useSound from "use-sound";
 
-import type { Action } from "~/engine";
-import { CLUE_TIMEOUT_MS, GameState, useEngineContext } from "~/engine";
+import {
+  Action,
+  CANT_BUZZ_FLAG,
+  CLUE_TIMEOUT_MS,
+  GameState,
+  useEngineContext,
+} from "~/engine";
 import useKeyPress from "~/utils/use-key-press";
 import { useSoloAction } from "~/utils/use-solo-action";
 import { useTimeout } from "~/utils/use-timeout";
@@ -142,7 +147,9 @@ function ReadCluePrompt({
     soloDispatch,
   } = useEngineContext();
 
-  const [optimisticBuzzes, setOptimisticBuzzes] = React.useState(buzzes);
+  const [optimisticBuzzes, setOptimisticBuzzes] = React.useState(
+    buzzes ?? new Map<string, number>()
+  );
   const myBuzzDurationMs = optimisticBuzzes?.get(userId);
 
   const [clueShownAt, setClueShownAt] = React.useState<number | undefined>(
@@ -176,7 +183,7 @@ function ReadCluePrompt({
 
   // Update optimisticBuzzes once buzzes come in from the server.
   React.useEffect(() => {
-    setOptimisticBuzzes(buzzes);
+    setOptimisticBuzzes(buzzes ?? new Map<string, number>());
   }, [buzzes]);
 
   // Open the buzzer after the clue is done being "read".
@@ -192,9 +199,6 @@ function ReadCluePrompt({
     () => {
       const deltaMs = CLUE_TIMEOUT_MS + 1;
       setOptimisticBuzzes((old) => {
-        if (!old) {
-          return new Map([[userId, deltaMs]]);
-        }
         if (old.has(userId)) {
           return old;
         }
@@ -212,6 +216,18 @@ function ReadCluePrompt({
       );
     },
     buzzerOpenAt !== undefined && clueIdx ? CLUE_TIMEOUT_MS : null
+  );
+
+  // Play the "time's up" sound after 5 seconds if no one buzzed in.
+  const [playTimesUpSfx] = useSound(TIMES_UP_SFX, { volume: 0.5 });
+  useTimeout(
+    playTimesUpSfx,
+    buzzerOpenAt !== undefined &&
+      !Array.from(optimisticBuzzes.values()).some(
+        (v) => v !== CANT_BUZZ_FLAG && v < CLUE_TIMEOUT_MS
+      )
+      ? CLUE_TIMEOUT_MS
+      : null
   );
 
   const handleClick = (clickedAtMs: number) => {
@@ -236,9 +252,7 @@ function ReadCluePrompt({
     const [i, j] = clueIdx;
     const clueDeltaMs = clickedAtMs - buzzerOpenAt;
 
-    setOptimisticBuzzes((old) =>
-      old ? old.set(userId, clueDeltaMs) : new Map([[userId, clueDeltaMs]])
-    );
+    setOptimisticBuzzes((old) => old.set(userId, clueDeltaMs));
 
     return fetcher.submit(
       {
