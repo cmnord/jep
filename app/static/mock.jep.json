@@ -60,7 +60,8 @@
             {
               "clue": "This historical geographic marker forms part of Delaware's border",
               "answer": "The Mason-Dixon Line",
-              "value": 600
+              "value": 600,
+              "wagerable": true
             },
             {
               "clue": "Along with New Castle and Kent, this is the 3rd county in Delaware",
