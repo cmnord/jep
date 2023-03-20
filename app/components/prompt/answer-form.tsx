@@ -8,10 +8,9 @@ import { useSoloAction } from "~/utils/use-solo-action";
 function AnswerForm({ loading }: { loading: boolean }) {
   return (
     <div className="p-2 flex flex-col items-center gap-2">
-      <p className="text-white font-bold">Was your answer correct?</p>
+      <p className="text-white font-bold">Were you right?</p>
       <p className="text-gray-300 text-sm text-center">
-        Only you can see the answer for now. After this, it will be revealed to
-        all players.
+        (only you can see this answer)
       </p>
       <div className="flex gap-2">
         <Button
@@ -63,9 +62,8 @@ export function ConnectedAnswerForm({
   if (!showAnswer) {
     return (
       <div className="p-2 flex flex-col items-center gap-2">
-        <p className="text-white font-bold">You won the buzz!</p>
         <p className="text-gray-300 text-sm">
-          State your answer in the form of a question, then
+          Answer in the form of a question, then
         </p>
         <div className="relative">
           <span className="absolute inline-flex top-1/6 left-1/6 h-2/3 w-2/3 rounded-md bg-blue-300 opacity-75 animate-ping"></span>
