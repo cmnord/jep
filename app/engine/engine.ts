@@ -69,6 +69,8 @@ export const CLUE_TIMEOUT_MS = 5000;
  * on this clue. */
 export const CANT_BUZZ_FLAG = -1;
 
+export const UNREVEALED_CLUE = "unrevealed";
+
 export function getWinningBuzzer(buzzes: Map<string, number>):
   | {
       userId: string;
@@ -141,7 +143,10 @@ export function createInitialState(game: Game): State {
   }
 
   const numCluesInBoard = board.categories.reduce(
-    (acc, category) => (acc += category.clues.length),
+    (acc, category) =>
+      (acc += category.clues.filter(
+        (c) => c.clue.toLowerCase() !== UNREVEALED_CLUE
+      ).length),
     0
   );
   const n = board.categories[0].clues.length;
@@ -449,7 +454,10 @@ export function gameEngine(state: State, action: Action): State {
 
           const numCluesInBoard = board
             ? board.categories.reduce(
-                (acc, category) => (acc += category.clues.length),
+                (acc, category) =>
+                  (acc += category.clues.filter(
+                    (c) => c.clue.toLowerCase() !== UNREVEALED_CLUE
+                  ).length),
                 0
               )
             : 0;
