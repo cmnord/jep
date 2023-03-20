@@ -1,5 +1,5 @@
 import type { Game } from "~/models/convert.server";
-import { generateGrid, getClueValue } from "~/utils/utils";
+import { generateGrid, getNormalizedClueValue } from "~/utils/utils";
 import {
   isAnswerAction,
   isBuzzAction,
@@ -111,6 +111,17 @@ function setIsAnswered(
   );
   deepCopy[i][j] = val;
   return deepCopy;
+}
+
+/** getClueValue gets the clue's wagered value if it's wagerable and its
+ * normalized value on the board otherwise.
+ */
+export function getClueValue(state: State, [i, j]: [number, number]) {
+  const board = state.game.boards.at(state.round);
+  if (board?.categories.at(j)?.clues.at(i)?.wagerable) {
+    return state.isAnswered.at(i)?.at(j)?.wager ?? 0;
+  }
+  return getNormalizedClueValue(i, state.round);
 }
 
 export function createInitialState(game: Game): State {
@@ -297,7 +308,8 @@ export function gameEngine(state: State, action: Action): State {
         if (!player) {
           throw new Error("Player not found in state");
         }
-        const clueValue = getClueValue(i, state.round);
+
+        const clueValue = getClueValue(state, [i, j]);
 
         if (correct) {
           // Reveal the answer to everyone, add points, and give the winning

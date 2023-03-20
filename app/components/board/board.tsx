@@ -5,7 +5,7 @@ import type { Action } from "~/engine";
 import { useEngineContext } from "~/engine";
 import type { Board, Clue } from "~/models/convert.server";
 import { useSoloAction } from "~/utils/use-solo-action";
-import { getClueValue } from "~/utils/utils";
+import { getNormalizedClueValue } from "~/utils/utils";
 import { Category } from "./category";
 import { ClueComponent } from "./clue";
 
@@ -33,7 +33,7 @@ function BoardComponent({
     const clues = category.clues;
     for (let i = 0; i < clues.length; i++) {
       const clue = clues[i];
-      const clueValue = getClueValue(i, round);
+      const clueValue = getNormalizedClueValue(i, round);
       const clueRow = clueRows.get(clueValue);
       if (clueRow) {
         clueRow.push(clue);
@@ -71,7 +71,7 @@ function BoardComponent({
                   <ClueComponent
                     key={`clue-${i}-${j}`}
                     clue={clue}
-                    value={getClueValue(i, round)}
+                    value={value}
                     answered={isAnswered(i, j)}
                     hasBoardControl={hasBoardControl}
                     onFocus={() => onFocusClue(i, j)}
