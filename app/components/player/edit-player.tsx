@@ -1,7 +1,6 @@
 import { useFetcher } from "@remix-run/react";
 import * as React from "react";
 
-import classNames from "classnames";
 import { LoadingSpinner } from "~/components/icons";
 import type { Action } from "~/engine";
 import { useEngineContext } from "~/engine";
@@ -26,14 +25,12 @@ function SendIcon({ className }: { className?: string }) {
 }
 
 function EditPlayer({
-  boardControl,
   loading,
   name,
   onBlur,
   onChangeName,
   onFocus,
 }: {
-  boardControl?: string;
   loading: boolean;
   name: string;
   onBlur: () => void;
@@ -44,16 +41,11 @@ function EditPlayer({
   const debouncedLoading = useDebounceEnd(loading, 100);
 
   return (
-    <div className="flex gap-2 items-center mb-4">
+    <div className="flex gap-2 items-center">
       <label htmlFor="name" className="text-gray-500 text-sm">
         You are:
       </label>
-      <div
-        className={classNames("relative shadow rounded-md", {
-          "border-2 border-black": !boardControl,
-          "border-4 border-yellow-400": boardControl,
-        })}
-      >
+      <div className="relative shadow rounded-md border border-gray-300">
         <input
           ref={inputRef}
           type="text"
@@ -87,7 +79,7 @@ export default function EditPlayerForm({
   roomName: string;
   userId: string;
 }) {
-  const { players, boardControl, soloDispatch } = useEngineContext();
+  const { players, soloDispatch } = useEngineContext();
 
   const fetcher = useFetcher<Action>();
   const loading = fetcher.state === "loading";
@@ -138,7 +130,6 @@ export default function EditPlayerForm({
         value={userId}
       />
       <EditPlayer
-        boardControl={boardControl}
         loading={loading}
         name={optimisticPlayer?.name ?? "You"}
         onBlur={() => setEditing(false)}
