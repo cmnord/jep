@@ -1,5 +1,6 @@
 import { useFetcher } from "@remix-run/react";
 import * as React from "react";
+import useSound from "use-sound";
 
 import type { Action } from "~/engine";
 import { useEngineContext } from "~/engine";
@@ -8,6 +9,8 @@ import { useSoloAction } from "~/utils/use-solo-action";
 import { getNormalizedClueValue } from "~/utils/utils";
 import { Category } from "./category";
 import { ClueComponent } from "./clue";
+
+const WAGER_SFX = "/sounds/wager.mp3";
 
 function BoardComponent({
   board,
@@ -114,6 +117,8 @@ export function ConnectedBoardComponent({
     }
   }, [focusedClue]);
 
+  const [playWagerSfx] = useSound(WAGER_SFX, { volume: 0.1 });
+
   if (!board) return null;
 
   const hasBoardControl = boardControl === userId;
@@ -131,6 +136,9 @@ export function ConnectedBoardComponent({
   }
 
   function handleClickClue(i: number, j: number) {
+    if (board?.categories.at(j)?.clues.at(i)?.wagerable) {
+      playWagerSfx();
+    }
     if (hasBoardControl && !isAnswered(i, j)) {
       return fetcher.submit(
         { i: i.toString(), j: j.toString(), userId },
