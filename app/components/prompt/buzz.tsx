@@ -3,8 +3,10 @@ import type { Player } from "~/engine";
 import { CANT_BUZZ_FLAG, CLUE_TIMEOUT_MS } from "~/engine";
 import { stringToHslColor } from "~/utils/utils";
 
-function durationMessage(durationMs: number) {
+function durationMessage(durationMs?: number) {
   switch (durationMs) {
+    case undefined:
+      return "--";
     case CANT_BUZZ_FLAG:
       return "cannot buzz";
     case CLUE_TIMEOUT_MS + 1:
@@ -28,7 +30,7 @@ function Buzz({
   clueValue,
 }: {
   player?: Player;
-  durationMs: number;
+  durationMs?: number;
   wonBuzz: boolean;
   clueValue: number;
 }) {
@@ -72,27 +74,31 @@ export function Buzzes({
   winningBuzzer?: string;
   buzzCorrect: boolean;
 }) {
-  const sortedBuzzes = buzzes
-    ? Array.from(buzzes.entries()).sort(
-        ([, aDurationMs], [, bDurationMs]) => aDurationMs - bDurationMs
-      )
-    : [];
+  // sort players by buzz time
+  const sortedPlayers = Array.from(players.entries()).sort(
+    ([aUserId], [bUserId]) => {
+      const aDurationMs = buzzes?.get(aUserId);
+      const bDurationMs = buzzes?.get(bUserId);
+      if (aDurationMs === undefined) {
+        return 1;
+      } else if (bDurationMs === undefined) {
+        return -1;
+      }
+      return aDurationMs - bDurationMs;
+    }
+  );
 
   return (
-    <div className="flex items-center justify-between w-full">
-      <div className="flex gap-4 ml-4">
-        {sortedBuzzes
-          ? sortedBuzzes.map(([userId, durationMs], i) => (
-              <Buzz
-                key={i}
-                player={players.get(userId)}
-                durationMs={durationMs}
-                wonBuzz={winningBuzzer === userId && showWinner}
-                clueValue={buzzCorrect ? clueValue : -1 * clueValue}
-              />
-            ))
-          : null}
-      </div>
+    <div className="flex gap-4 w-full overflow-x-scroll">
+      {sortedPlayers.map(([userId, player], i) => (
+        <Buzz
+          key={i}
+          player={player}
+          durationMs={buzzes?.get(userId)}
+          wonBuzz={winningBuzzer === userId && showWinner}
+          clueValue={buzzCorrect ? clueValue : -1 * clueValue}
+        />
+      ))}
     </div>
   );
 }
