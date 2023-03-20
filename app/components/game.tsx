@@ -58,7 +58,9 @@ export default function GameComponent({
         userId={userId}
         roomName={roomName}
         onDismiss={
-          round === game.boards.length - 1 ? playFinalSfx : playBoardFillSfx
+          round > 0 && round === game.boards.length - 1
+            ? playFinalSfx
+            : playBoardFillSfx
         }
       />
       <div className="bg-black">
