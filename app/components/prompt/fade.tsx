@@ -22,7 +22,7 @@ export function Fade({
 
   return shouldRender ? (
     <div
-      className={classNames("fixed left-0 top-0", {
+      className={classNames("fixed left-0 top-0 w-screen", {
         "animate-slideIn": show,
         "animate-slideOut": !show,
       })}
