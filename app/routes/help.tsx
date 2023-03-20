@@ -51,7 +51,12 @@ export default function Help() {
   ]
 }`}
         />
-        <p className="mb-4">In summary:</p>
+        <p className="mb-4">
+          A clue can be <span className="italic">wagerable</span> or not. The
+          "wagerable" field is not required.
+          <br />
+          In summary:
+        </p>
         <CodeBlock
           text={`interface Game {
   title: string;
@@ -75,6 +80,7 @@ interface Clue {
   clue: string;
   answer: string;
   value: number;
+  wagerable?: boolean; // default false
 }`}
         />
       </main>
