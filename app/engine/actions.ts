@@ -16,6 +16,21 @@ export function isClueAction(action: Action): action is {
   );
 }
 
+export function isClueWagerAction(action: Action): action is {
+  type: ActionType.SetClueWager;
+  payload: { userId: string; i: number; j: number; wager: number };
+} {
+  return (
+    action.type === ActionType.SetClueWager &&
+    action.payload !== null &&
+    typeof action.payload === "object" &&
+    "userId" in action.payload &&
+    "i" in action.payload &&
+    "j" in action.payload &&
+    "wager" in action.payload
+  );
+}
+
 export function isPlayerAction(action: Action): action is {
   type: ActionType.Join | ActionType.ChangeName;
   payload: { userId: string; name: string };
