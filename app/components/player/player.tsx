@@ -14,10 +14,10 @@ const formatter = Intl.NumberFormat("en-US", {
 
 function PlayerIcon({
   player,
-  boardControl,
+  hasBoardControl,
 }: {
   player: Player;
-  boardControl: boolean;
+  hasBoardControl: boolean;
 }) {
   const color = stringToHslColor(player.userId);
   return (
@@ -25,8 +25,8 @@ function PlayerIcon({
       className={classNames(
         "flex flex-col items-center gap-2 p-3 bg-blue-1000 bg-gradient-to-b from-blue-700 shadow",
         {
-          "border-2 border-gray-800 opacity-70": !boardControl,
-          "border-4 border-yellow-400": boardControl,
+          "border-2 border-gray-800 opacity-70": !hasBoardControl,
+          "border-4 border-yellow-400": hasBoardControl,
         }
       )}
     >
@@ -54,18 +54,29 @@ export function Players({
 }) {
   const { players, boardControl } = useEngineContext();
 
+  const boardController = boardControl ? players.get(boardControl) : undefined;
+  const boardControlName = boardController
+    ? boardController.name
+    : "Unknown player";
+
   return (
-    <div>
-      <EditPlayerForm roomName={roomName} userId={userId} />
+    <div className="flex flex-col gap-4">
+      {boardControlName && (
+        <p>
+          <span className="font-bold">{boardControlName}</span> has control of
+          the board.
+        </p>
+      )}
       <div className="flex flex-wrap gap-2">
         {Array.from(players.values()).map((p) => (
           <PlayerIcon
             key={p.userId}
             player={p}
-            boardControl={p.userId === boardControl}
+            hasBoardControl={p.userId === boardControl}
           />
         ))}
       </div>
+      <EditPlayerForm roomName={roomName} userId={userId} />
     </div>
   );
 }
