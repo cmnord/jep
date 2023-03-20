@@ -2,9 +2,8 @@ import classNames from "classnames";
 import * as React from "react";
 
 import Popover from "~/components/popover";
+import { UNREVEALED_CLUE } from "~/engine/engine";
 import type { Clue } from "~/models/convert.server";
-
-const UNREVEALED_CLUE = "unrevealed";
 
 interface Props {
   answered: boolean;
