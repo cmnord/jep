@@ -18,6 +18,8 @@ import { Kbd } from "./kbd";
 import { Lockout } from "./lockout";
 import { NextClueForm } from "./next-clue-form";
 import { ReadClueTimer } from "./read-clue-timer";
+import ShinyText from "./shiny-text";
+import WagerForm from "./wager-form";
 
 /** MS_PER_CHARACTER is a heuristic value to scale the amount of time per clue by
  * its length.
@@ -80,6 +82,43 @@ function ClueText({
         </span>
       </p>
     </button>
+  );
+}
+
+/** WagerCluePrompt handles all frontend behavior while the game state is
+ * GameState.WagerClue.
+ */
+function WagerCluePrompt({
+  roomName,
+  userId,
+}: {
+  roomName: string;
+  userId: string;
+}) {
+  const { buzzes, category, players } = useEngineContext();
+
+  return (
+    <>
+      <Countdown startTime={undefined} />
+      <ReadClueTimer clueDurationMs={0} shouldAnimate={false} />
+      <div className="flex justify-between p-4">
+        <div className="text-white">
+          <span className="font-bold">{category}</span>
+        </div>
+      </div>
+      <div className="p-4 max-w-screen-lg mx-auto flex flex-col justify-center grow gap-4">
+        <ShinyText text="double down" />
+        <WagerForm roomName={roomName} userId={userId} />
+      </div>
+      <Buzzes
+        buzzes={buzzes}
+        players={players}
+        winningBuzzer={undefined}
+        showWinner={false}
+        buzzCorrect={false}
+        clueValue={0}
+      />
+    </>
   );
 }
 
@@ -410,12 +449,15 @@ export function ConnectedPrompt({
   const { type } = useEngineContext();
 
   const isOpen =
+    type === GameState.WagerClue ||
     type === GameState.ReadClue ||
     type === GameState.RevealAnswerToBuzzer ||
     type === GameState.RevealAnswerToAll;
 
   function getPromptContent() {
     switch (type) {
+      case GameState.WagerClue:
+        return <WagerCluePrompt roomName={roomName} userId={userId} />;
       case GameState.ReadClue:
         return <ReadCluePrompt roomName={roomName} userId={userId} />;
       case GameState.RevealAnswerToBuzzer:
