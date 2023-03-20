@@ -9,7 +9,6 @@ import { CLUE_TIMEOUT_MS, GameState, useEngineContext } from "~/engine";
 import useKeyPress from "~/utils/use-key-press";
 import { useSoloAction } from "~/utils/use-solo-action";
 import { useTimeout } from "~/utils/use-timeout";
-import { getClueValue } from "~/utils/utils";
 
 import { ConnectedAnswerForm as AnswerForm } from "./answer-form";
 import { Buzzes } from "./buzz";
@@ -94,8 +93,15 @@ function ReadCluePrompt({
   roomName: string;
   userId: string;
 }) {
-  const { activeClue, buzzes, category, clue, players, round, soloDispatch } =
-    useEngineContext();
+  const {
+    activeClue,
+    buzzes,
+    category,
+    clue,
+    getClueValue,
+    players,
+    soloDispatch,
+  } = useEngineContext();
 
   const [optimisticBuzzes, setOptimisticBuzzes] = React.useState(buzzes);
   const myBuzzDurationMs = optimisticBuzzes?.get(userId);
@@ -208,7 +214,7 @@ function ReadCluePrompt({
 
   useKeyPress("Enter", () => handleClick(Date.now()));
 
-  const clueValue = getClueValue(clueIdx ? clueIdx[0] : 0, round);
+  const clueValue = getClueValue(clueIdx ?? [-1, -1]);
 
   return (
     <>
@@ -266,9 +272,17 @@ function RevealAnswerToBuzzerPrompt({
   roomName: string;
   userId: string;
 }) {
-  const { activeClue, buzzes, category, clue, players, round, winningBuzzer } =
-    useEngineContext();
-  const clueValue = getClueValue(activeClue ? activeClue[0] : 0, round);
+  const {
+    activeClue,
+    buzzes,
+    category,
+    clue,
+    getClueValue,
+    players,
+    winningBuzzer,
+  } = useEngineContext();
+
+  const clueValue = getClueValue(activeClue ?? [-1, -1]);
 
   const canShowAnswer = winningBuzzer === userId;
   const [showAnswer, setShowAnswer] = React.useState(false);
@@ -340,12 +354,12 @@ function RevealAnswerToAllPrompt({
     buzzes,
     category,
     clue,
+    getClueValue,
     players,
-    round,
     winningBuzzer,
   } = useEngineContext();
 
-  const clueValue = getClueValue(activeClue ? activeClue[0] : 0, round);
+  const clueValue = getClueValue(activeClue ?? [-1, -1]);
 
   return (
     <>

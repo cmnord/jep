@@ -14,6 +14,7 @@ export const GameEngineContext = React.createContext<
   buzzes: new Map(),
   category: undefined,
   clue: undefined,
+  getClueValue: () => 0,
   soloDispatch: () => null,
   isAnswered: () => false,
   numAnswered: 0,
