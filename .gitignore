@@ -11,6 +11,7 @@ node_modules
 
 /cypress/screenshots
 /cypress/videos
+/coverage
 
 .DS_Store
 .vscode/
