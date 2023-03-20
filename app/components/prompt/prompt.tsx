@@ -4,8 +4,8 @@ import * as React from "react";
 import useFitText from "use-fit-text";
 import useSound from "use-sound";
 
+import type { Action } from "~/engine";
 import {
-  Action,
   CANT_BUZZ_FLAG,
   CLUE_TIMEOUT_MS,
   GameState,
@@ -293,15 +293,6 @@ function ReadCluePrompt({
         showAnswer={false}
         answer={undefined}
       />
-      {/* placed here for spacing so clue doesn't resize */}
-      <AnswerForm
-        isOpen={false}
-        roomName={""}
-        userId={""}
-        clueIdx={undefined}
-        showAnswer={false}
-        onClickShowAnswer={() => null}
-      />
       <Lockout active={lockout} />
       <Buzzes
         buzzes={optimisticBuzzes}
@@ -348,6 +339,10 @@ function RevealAnswerToBuzzerPrompt({
     canShowAnswer && !showAnswer ? CLUE_TIMEOUT_MS : null
   );
 
+  const winningPlayerName = winningBuzzer
+    ? players.get(winningBuzzer)?.name ?? "winning buzzer"
+    : "winning buzzer";
+
   return (
     <>
       <Countdown startTime={canShowAnswer ? Date.now() : undefined} />
@@ -369,16 +364,23 @@ function RevealAnswerToBuzzerPrompt({
         onBuzz={() => null}
         showAnswer={canShowAnswer && showAnswer}
       />
-      <AnswerForm
-        isOpen={canShowAnswer}
-        roomName={roomName}
-        userId={userId}
-        clueIdx={activeClue}
-        showAnswer={canShowAnswer && showAnswer}
-        onClickShowAnswer={
-          canShowAnswer ? () => setShowAnswer(true) : () => null
-        }
-      />
+      {canShowAnswer ? (
+        <AnswerForm
+          roomName={roomName}
+          userId={userId}
+          clueIdx={activeClue}
+          showAnswer={canShowAnswer && showAnswer}
+          onClickShowAnswer={
+            canShowAnswer ? () => setShowAnswer(true) : () => null
+          }
+        />
+      ) : (
+        <div className="p-2 flex flex-col items-center gap-2">
+          <p className="text-white font-bold">
+            Waiting for response from {winningPlayerName}...
+          </p>
+        </div>
+      )}
       <Buzzes
         buzzes={buzzes}
         players={players}
