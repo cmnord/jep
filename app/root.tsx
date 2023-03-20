@@ -39,7 +39,7 @@ export default function App() {
         <Meta />
         <Links />
       </head>
-      <body className="flex flex-col min-h-screen">
+      <body className="flex flex-col">
         <Header />
         <Outlet />
         <ScrollRestoration />
@@ -61,7 +61,7 @@ export function ErrorBoundary({ error }: { error: Error }) {
         <Meta />
         <Links />
       </head>
-      <body className="flex flex-col min-h-screen">
+      <body className="flex flex-col">
         <Header />
         <DefaultErrorBoundary error={error} />
         <ScrollRestoration />
@@ -84,7 +84,7 @@ export function CatchBoundary() {
         <Meta />
         <Links />
       </head>
-      <body className="flex flex-col min-h-screen">
+      <body className="flex flex-col">
         <Header />
         <div className="p-12 flex flex-col gap-4">
           <h1 className="text-3xl font-bold">Caught</h1>
