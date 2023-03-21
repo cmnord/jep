@@ -8,12 +8,14 @@ import {
   ScrollRestoration,
   useCatch,
 } from "@remix-run/react";
+import * as React from "react";
 
 import { CodeBlock } from "~/components/code";
 import { DefaultErrorBoundary } from "~/components/error";
 import Header from "~/components/header";
 
 import stylesheet from "./styles.css";
+import { SoundContext } from "./utils/use-sound";
 
 export const meta: MetaFunction = () => ({
   title: "jep!",
@@ -31,6 +33,9 @@ export const links: LinksFunction = () => [
 ];
 
 export default function App() {
+  const [volume, setVolume] = React.useState(0.5);
+  const [mute, setMute] = React.useState(false);
+
   return (
     <html lang="en">
       <head>
@@ -40,11 +45,20 @@ export default function App() {
         <Links />
       </head>
       <body className="flex flex-col">
-        <Header />
-        <Outlet />
-        <ScrollRestoration />
-        <Scripts />
-        <LiveReload />
+        <SoundContext.Provider
+          value={{
+            volume,
+            setVolume,
+            mute,
+            setMute,
+          }}
+        >
+          <Header />
+          <Outlet />
+          <ScrollRestoration />
+          <Scripts />
+          <LiveReload />
+        </SoundContext.Provider>
       </body>
     </html>
   );

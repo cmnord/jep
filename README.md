@@ -63,6 +63,7 @@ View the local Supabase dashboard at
 - CSS framework: [Tailwind CSS](https://tailwindcss.com/)
 - Hosting, deployment: [Vercel](https://vercel.com)
 - Database: [Supabase](https://supabase.com/)
+- UI components: [Radix UI](https://radix-ui.com/)
 
 ## Thanks
 
