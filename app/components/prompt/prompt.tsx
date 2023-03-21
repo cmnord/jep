@@ -1,6 +1,7 @@
 import { useFetcher } from "@remix-run/react";
 import classNames from "classnames";
 import * as React from "react";
+import { use100vh } from "react-div-100vh";
 import useFitText from "use-fit-text";
 
 import type { Action } from "~/engine";
@@ -575,6 +576,8 @@ export function ConnectedPrompt({ roomName, userId }: Props) {
     type === GameState.RevealAnswerLongForm ||
     type === GameState.RevealAnswerToAll;
 
+  const height = use100vh();
+
   function getPromptContent() {
     switch (type) {
       case GameState.WagerClue:
@@ -601,9 +604,8 @@ export function ConnectedPrompt({ roomName, userId }: Props) {
   return (
     <Fade show={isOpen}>
       <div
-        className={classNames(
-          "relative h-screen w-screen bg-blue-1000 flex flex-col justify-between"
-        )}
+        className="w-screen bg-blue-1000 flex flex-col justify-between overflow-x-hidden overflow-y-scroll"
+        style={{ height: height ? `${height}px` : "100vh" }}
       >
         {getPromptContent()}
       </div>
