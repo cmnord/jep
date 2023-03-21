@@ -2,7 +2,6 @@ import { useFetcher } from "@remix-run/react";
 import classNames from "classnames";
 import * as React from "react";
 import useFitText from "use-fit-text";
-import useSound from "use-sound";
 
 import type { Action } from "~/engine";
 import {
@@ -13,6 +12,7 @@ import {
 } from "~/engine";
 import useKeyPress from "~/utils/use-key-press";
 import { useSoloAction } from "~/utils/use-solo-action";
+import useGameSound from "~/utils/use-sound";
 import { useTimeout } from "~/utils/use-timeout";
 
 import { ConnectedAnswerForm as AnswerForm } from "./answer-form";
@@ -241,7 +241,7 @@ function ReadCluePrompt({
   );
 
   // Play the "time's up" sound after 5 seconds if no one buzzed in.
-  const [playTimesUpSfx] = useSound(TIMES_UP_SFX, { volume: 0.5 });
+  const [playTimesUpSfx] = useGameSound(TIMES_UP_SFX);
   useTimeout(
     playTimesUpSfx,
     buzzerOpenAt !== undefined &&
@@ -355,7 +355,7 @@ function RevealAnswerToBuzzerPrompt({
 
   // Play the "time's up" sound after 5 seconds if the contestant can reveal the
   // answer but hasn't yet.
-  const [playTimesUpSfx] = useSound(TIMES_UP_SFX, { volume: 0.5 });
+  const [playTimesUpSfx] = useGameSound(TIMES_UP_SFX);
   useTimeout(
     playTimesUpSfx,
     canShowAnswer && !showAnswer ? CLUE_TIMEOUT_MS : null
