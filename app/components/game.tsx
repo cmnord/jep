@@ -71,10 +71,17 @@ export default function GameComponent({
           roomName={roomName}
         />
       </div>
-      <div className="p-3 sm:p-6 md:p-12 ">
+      <div className="p-3 sm:p-6 md:p-12 flex flex-col gap-3">
         {(type !== GameState.PreviewRound || round !== 0) && (
           <Players userId={userId} roomName={roomName} />
         )}
+        <div>
+          <h2 className="text-2xl font-semibold mb-2">{game.title}</h2>
+          <p>by {game.author}</p>
+          {game.note && (
+            <p className="text-sm text-gray-500 text-left">{game.note}</p>
+          )}
+        </div>
       </div>
       <Prompt roomName={roomName} userId={userId} />
     </>
