@@ -361,6 +361,9 @@ function RevealAnswerToBuzzerPrompt({
     playTimesUpSfx,
     canShowAnswer && !showAnswer ? CLUE_TIMEOUT_MS : null
   );
+  const [countdownStartedAt] = React.useState(
+    canShowAnswer && !showAnswer ? Date.now() : undefined
+  );
 
   const winningPlayerName = winningBuzzer
     ? players.get(winningBuzzer)?.name ?? "winning buzzer"
@@ -368,7 +371,7 @@ function RevealAnswerToBuzzerPrompt({
 
   return (
     <>
-      <Countdown startTime={canShowAnswer ? Date.now() : undefined} />
+      <Countdown startTime={countdownStartedAt} />
       <ReadClueTimer clueDurationMs={0} shouldAnimate={false} />
       <div className="flex justify-between p-4">
         <div className="text-white">
