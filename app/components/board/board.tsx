@@ -1,11 +1,11 @@
 import { useFetcher } from "@remix-run/react";
 import * as React from "react";
-import useSound from "use-sound";
 
 import type { Action } from "~/engine";
 import { useEngineContext } from "~/engine";
 import type { Board, Clue } from "~/models/convert.server";
 import { useSoloAction } from "~/utils/use-solo-action";
+import useGameSound from "~/utils/use-sound";
 import { getNormalizedClueValue } from "~/utils/utils";
 import { Category } from "./category";
 import { ClueComponent } from "./clue";
@@ -117,7 +117,7 @@ export function ConnectedBoardComponent({
     }
   }, [focusedClue]);
 
-  const [playWagerSfx] = useSound(WAGER_SFX, { volume: 0.1 });
+  const [playWagerSfx] = useGameSound(WAGER_SFX);
 
   if (!board) return null;
 
