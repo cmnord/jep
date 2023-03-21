@@ -1,13 +1,12 @@
 import * as React from "react";
-import useSound from "use-sound";
 
 import BoardComponent from "~/components/board";
 import Players from "~/components/player";
 import Preview from "~/components/preview";
 import Prompt from "~/components/prompt";
-
 import { GameState, useEngineContext } from "~/engine";
 import type { Clue, Game } from "~/models/convert.server";
+import useGameSound from "~/utils/use-sound";
 
 const BOARD_FILL_SFX = "/sounds/board-fill.mp3";
 const FINAL_CATEGORY_REVEAL_SFX = "/sounds/final-category-reveal.mp3";
@@ -43,8 +42,8 @@ export default function GameComponent({
     prevClueRef.current = activeClue;
   }, [activeClue]);
 
-  const [playBoardFillSfx] = useSound(BOARD_FILL_SFX);
-  const [playFinalSfx] = useSound(FINAL_CATEGORY_REVEAL_SFX);
+  const [playBoardFillSfx] = useGameSound(BOARD_FILL_SFX);
+  const [playFinalSfx] = useGameSound(FINAL_CATEGORY_REVEAL_SFX);
 
   const onFocusClue = (i: number, j: number) => {
     setFocusedClue([i, j]);

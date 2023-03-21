@@ -1,15 +1,28 @@
-import { Link } from "@remix-run/react";
+import { Link, useMatches } from "@remix-run/react";
 import * as React from "react";
 
+import Button from "~/components/button";
 import { QuestionMarkCircle } from "~/components/icons";
 import { Anchor } from "~/components/link";
 import Modal from "~/components/modal";
-import Button from "./button";
+import SoundControl from "./sound";
 
 const GITHUB_URL = "https://github.com/cmnord/jep";
 
+const SOUND_CONTROL_ROUTES = [
+  "routes/$gameId.solo",
+  "routes/mock",
+  "routes/room.$roomName",
+];
+
 export default function Header() {
   const [showModal, setShowModal] = React.useState(false);
+
+  const matches = useMatches();
+  const shouldShowSoundControl = matches.some((match) =>
+    SOUND_CONTROL_ROUTES.includes(match.id)
+  );
+
   return (
     <nav className="p-6 bg-blue-1000">
       <div className="flex justify-between">
@@ -61,9 +74,12 @@ export default function Header() {
             </Button>
           </Modal.Footer>
         </Modal>
-        <button onClick={() => setShowModal(true)} title="About">
-          <QuestionMarkCircle className="w-6 h-6 text-white" />
-        </button>
+        <div className="flex gap-4">
+          {shouldShowSoundControl && <SoundControl />}
+          <button onClick={() => setShowModal(true)} title="About">
+            <QuestionMarkCircle className="w-6 h-6 text-white" />
+          </button>
+        </div>
       </div>
     </nav>
   );
