@@ -4,6 +4,7 @@ import * as React from "react";
 import Button from "~/components/button";
 import Modal from "~/components/modal";
 import Players from "~/components/player";
+import SoundControl from "~/components/sound";
 import type { Action } from "~/engine";
 import { GameState, useEngineContext } from "~/engine";
 import type { Clue } from "~/models/convert.server";
@@ -53,7 +54,15 @@ function BeforeGamePreview({
   return (
     <Modal isOpen={isOpen}>
       <Modal.Body>
-        <Modal.Title>Play &rarr;</Modal.Title>
+        <Modal.Title>
+          <div className="grid grid-cols-3">
+            <span />
+            <p>Play &rarr;</p>
+            <div className="flex flex-row-reverse">
+              <SoundControl showSlider={false} theme="light" />
+            </div>
+          </div>
+        </Modal.Title>
         <Players userId={userId} roomName={roomName} />
       </Modal.Body>
       <NextRoundFooter
