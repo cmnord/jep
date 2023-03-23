@@ -3,12 +3,13 @@ import * as React from "react";
 
 import Button from "~/components/button";
 import Modal from "~/components/modal";
-import Players from "~/components/player";
+import { EditPlayerForm, PlayerIcon } from "~/components/player";
 import SoundControl from "~/components/sound";
-import type { Action } from "~/engine";
+import type { Action, Player } from "~/engine";
 import { GameState, useEngineContext } from "~/engine";
 import type { Clue } from "~/models/convert.server";
 import { useSoloAction } from "~/utils/use-solo-action";
+import { stringToHslColor } from "~/utils/utils";
 
 function NextRoundFooter({
   roomName,
@@ -37,33 +38,64 @@ function NextRoundFooter({
 }
 
 function BeforeGamePreview({
+  boardControl,
   isOpen,
   userId,
   roomName,
+  players,
   round,
   soloDispatch,
   onDismiss,
 }: {
+  boardControl?: string;
   isOpen: boolean;
   userId: string;
   roomName: string;
+  players: Map<string, Player>;
   round: number;
   soloDispatch: React.Dispatch<Action>;
   onDismiss: () => void;
 }) {
+  const boardController = boardControl ? players.get(boardControl) : undefined;
+  const boardControlName = boardController
+    ? boardController.name
+    : "Unknown player";
+
+  const boardControlColor = boardController
+    ? stringToHslColor(boardController.userId)
+    : "gray";
+
   return (
     <Modal isOpen={isOpen}>
       <Modal.Body>
         <Modal.Title>
           <div className="grid grid-cols-3">
             <span />
-            <p>Play &rarr;</p>
+            <p className="text-center">Play &rarr;</p>
             <div className="flex flex-row-reverse">
               <SoundControl showSlider={false} theme="light" />
             </div>
           </div>
         </Modal.Title>
-        <Players userId={userId} roomName={roomName} />
+        <div className="flex flex-col gap-2">
+          <p className="text-left">
+            <span
+              className="font-bold border-b-4"
+              style={{
+                borderColor: boardControlColor,
+              }}
+            >
+              {boardControlName}
+            </span>{" "}
+            will start with control of the board.
+          </p>
+          <EditPlayerForm roomName={roomName} userId={userId} />
+          <div className="flex gap-2 flex-wrap">
+            {Array.from(players.values()).map((p, i) => (
+              <PlayerIcon key={i} player={p} />
+            ))}
+          </div>
+        </div>
       </Modal.Body>
       <NextRoundFooter
         roomName={roomName}
@@ -117,7 +149,8 @@ export function Preview({
   roomName: string;
   onDismiss: () => void;
 }) {
-  const { type, round, soloDispatch } = useEngineContext();
+  const { type, boardControl, players, round, soloDispatch } =
+    useEngineContext();
 
   const isOpen = type === GameState.PreviewRound;
 
@@ -126,8 +159,10 @@ export function Preview({
       return (
         <BeforeGamePreview
           isOpen={isOpen}
+          boardControl={boardControl}
           userId={userId}
           roomName={roomName}
+          players={players}
           round={round}
           soloDispatch={soloDispatch}
           onDismiss={onDismiss}
