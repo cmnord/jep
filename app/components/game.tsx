@@ -102,15 +102,6 @@ export default function GameComponent({
             <EditPlayerForm roomName={roomName} userId={userId} />
           )}
           <PlayerScores />
-          <div>
-            <h2 className="text-md text-2xl font-semibold mb-2">
-              {game.title}
-            </h2>
-            <p>by {game.author}</p>
-            {game.note && (
-              <p className="text-sm text-gray-500 text-left">{game.note}</p>
-            )}
-          </div>
         </div>
         <Prompt roomName={roomName} userId={userId} />
       </div>
