@@ -44,7 +44,7 @@ const ClueButton = React.forwardRef<
 
     const clueText = answered ? (
       unrevealed ? (
-        <p className="text-sm text-gray-400">{UNREVEALED_CLUE}</p>
+        <p className="text-sm text-slate-400">{UNREVEALED_CLUE}</p>
       ) : (
         <p className="uppercase font-korinna break-words">{clue.answer}</p>
       )
@@ -87,7 +87,7 @@ const ClueButton = React.forwardRef<
             "hover:bg-blue-700 focus:bg-blue-700": !unrevealed,
             "text-blue-1000 hover:text-white focus:text-white hover:text-shadow focus:text-shadow transition":
               answered && !unrevealed,
-            "bg-gray-800": unrevealed,
+            "bg-slate-800": unrevealed,
             "border-spin opacity-75": loading,
           }
         )}

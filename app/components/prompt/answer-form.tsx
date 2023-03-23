@@ -9,7 +9,7 @@ function AnswerForm({ loading }: { loading: boolean }) {
   return (
     <div className="p-2 flex flex-col items-center gap-2">
       <p className="text-white font-bold">Were you right?</p>
-      <p className="text-gray-300 text-sm text-center">
+      <p className="text-slate-300 text-sm text-center">
         (only you can see this answer)
       </p>
       <div className="flex gap-2">
@@ -62,7 +62,7 @@ export function ConnectedAnswerForm({
   if (!showAnswer) {
     return (
       <div className="p-2 flex flex-col items-center gap-2">
-        <p className="text-gray-300 text-sm">
+        <p className="text-slate-300 text-sm">
           Answer in the form of a question, then
         </p>
         <div className="relative">

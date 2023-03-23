@@ -19,7 +19,7 @@ export default function Switch({
       </label>
       <SwitchPrimitive.Root
         className={
-          "w-11 h-6 bg-gray-200 rounded-full relative " +
+          "w-11 h-6 bg-slate-200 rounded-full relative " +
           "focus:outline-none focus:ring-4 focus:ring-blue-300 " +
           "data-[state=checked]:bg-blue-600 outline-none cursor-default"
         }
@@ -31,7 +31,7 @@ export default function Switch({
       >
         <SwitchPrimitive.Thumb
           className={
-            "block w-5 h-5 bg-white border border-gray-300 rounded-full " +
+            "block w-5 h-5 bg-white border border-slate-300 rounded-full " +
             "transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[22px] " +
             "data-[state=checked]:border-white"
           }

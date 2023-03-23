@@ -18,7 +18,7 @@ function GameSettings({ game }: { game: Game }) {
         <button
           className={
             "w-6 h-6 flex items-center justify-center text-white " +
-            "hover:text-gray-300 data-[state=open]:text-gray-300"
+            "hover:text-slate-300 data-[state=open]:text-slate-300"
           }
           aria-label="Customise options"
         >
@@ -43,7 +43,7 @@ function GameSettings({ game }: { game: Game }) {
       <DropdownMenu.Portal>
         <DropdownMenu.Content
           className={
-            "w-56 bg-white text-gray-900 rounded-md p-1 will-change-[opacity,transform] " +
+            "w-56 bg-white text-slate-900 rounded-md p-1 will-change-[opacity,transform] " +
             "data-[side=top]:animate-slideDownAndFade " +
             "data-[side=right]:animate-slideLeftAndFade " +
             "data-[side=bottom]:animate-slideUpAndFade " +
@@ -63,7 +63,7 @@ function GameSettings({ game }: { game: Game }) {
             </DropdownMenu.Label>
           )}
 
-          <DropdownMenu.Separator className="h-px bg-gray-200 m-1" />
+          <DropdownMenu.Separator className="h-px bg-slate-200 m-1" />
 
           <DropdownMenu.Item
             className="flex items-center p-1 rounded-md relative"
@@ -120,12 +120,12 @@ export default function Header() {
               </div>
             </Modal.Title>
             <div className="mt-4 flex flex-col gap-4">
-              <p className="text-gray-500">
+              <p className="text-slate-500">
                 Jep! is a website for playing trivia puzzles with friends
                 online.
               </p>
               <hr />
-              <p className="text-gray-500">
+              <p className="text-slate-500">
                 This website is open to contributions from developers of any
                 level or experience. For more information or to report any
                 issues, check out the project on{" "}

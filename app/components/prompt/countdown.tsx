@@ -45,7 +45,7 @@ export function Countdown({ startTime }: { startTime?: number }) {
       key={i}
       className={classNames("h-5", {
         "bg-red-600": startTime && shouldShowTick(count, i),
-        "bg-gray-500": !startTime || !shouldShowTick(count, i),
+        "bg-slate-500": !startTime || !shouldShowTick(count, i),
       })}
       style={{ width: `${100 / NUM_BARS}%` }}
     />
