@@ -126,7 +126,7 @@ export default function Index() {
           />
           <div className="inline-flex gap-0.5">
             <p
-              className={classNames("text-sm text-gray-500", {
+              className={classNames("text-sm text-slate-500", {
                 "font-bold": optimisticSolo,
               })}
             >
@@ -137,8 +137,8 @@ export default function Index() {
                 <QuestionMarkCircle
                   outlined
                   className={
-                    "w-4 h-4 text-gray-400 rounded-md " +
-                    "hover:text-gray-500 hover:bg-gray-100"
+                    "w-4 h-4 text-slate-400 rounded-md " +
+                    "hover:text-slate-500 hover:bg-slate-100"
                   }
                 />
               </button>
@@ -147,7 +147,7 @@ export default function Index() {
         </div>
       </Form>
       {data.games.length === 0 && (
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-slate-500">
           No games found{search ? ` for search "${debouncedSearch}"` : ""}
         </p>
       )}

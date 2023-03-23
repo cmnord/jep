@@ -44,7 +44,7 @@ export default function GameCard({
       onClick={() => setLoading(true)}
       className={
         "basis-full sm:basis-auto flex flex-col " +
-        "border-gray-200 border-2 rounded-lg group transition-colors " +
+        "border-slate-200 border-2 rounded-lg group transition-colors " +
         "hover:border-blue-500 hover:shadow-sm "
       }
     >
@@ -59,9 +59,9 @@ export default function GameCard({
                 {game.author}
               </p>
               <div className="flex py-0.5">
-                <div className="border-l border-gray-200" />
+                <div className="border-l border-slate-200" />
               </div>
-              <p className="shrink-0 text-sm text-gray-500 flex items-center">
+              <p className="shrink-0 text-sm text-slate-500 flex items-center">
                 {numRounds} {numRounds === 1 ? "round" : "rounds"}
               </p>
             </div>
@@ -69,7 +69,7 @@ export default function GameCard({
               {game.title}
             </strong>
             {game.note && (
-              <p className="text-sm text-gray-500 text-left">{game.note}</p>
+              <p className="text-sm text-slate-500 text-left">{game.note}</p>
             )}
           </div>
           <div

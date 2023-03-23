@@ -74,7 +74,7 @@ export default function GameComponent({
             : playBoardFillSfx
         }
       />
-      <div className="flex flex-col bg-gray-900 grow">
+      <div className="flex flex-col bg-slate-900 grow">
         <BoardComponent
           focusedClue={focusedClueIdx}
           setFocusedClue={onFocusClue}
@@ -83,7 +83,7 @@ export default function GameComponent({
         />
         <div
           className={
-            "p-3 sm:p-6 md:p-12 text-gray-100 w-full max-w-screen-lg mx-auto " +
+            "p-3 sm:p-6 md:p-12 text-slate-100 w-full max-w-screen-lg mx-auto " +
             "flex flex-col gap-4"
           }
         >
