@@ -40,7 +40,7 @@ export default function Button({
         {
           "border-transparent bg-blue-600 text-white hover:bg-blue-700":
             type === "primary",
-          "border-blue-600 bg-white text-blue-600 hover:bg-gray-100 hover:text-blue-700 hover:border-blue-700":
+          "border-blue-600 bg-white text-blue-600 hover:bg-slate-100 hover:text-blue-700 hover:border-blue-700":
             type === "default",
         }
       )}

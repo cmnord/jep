@@ -17,7 +17,7 @@ function NextClue({
   return (
     <div className="p-2 flex flex-col items-center gap-2">
       {cluesLeftInRound ? (
-        <p className="text-gray-300 text-sm">
+        <p className="text-slate-300 text-sm">
           {boardControlName} will choose the next clue.
         </p>
       ) : null}

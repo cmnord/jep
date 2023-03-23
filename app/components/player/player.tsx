@@ -23,7 +23,7 @@ function PlayerScore({
       className={classNames(
         "flex sm:flex-col items-center gap-2 p-2 sm:p-3 border-2 bg-blue-1000 bg-gradient-to-b from-blue-800",
         {
-          "border-gray-200 opacity-70": !hasBoardControl,
+          "border-slate-200 opacity-70": !hasBoardControl,
           "border-yellow-400": hasBoardControl,
         }
       )}

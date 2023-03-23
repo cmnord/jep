@@ -39,10 +39,10 @@ function WagerForm({
         <p className="text-white font-bold">
           How much will you wager on this clue?
         </p>
-        <p className="text-gray-300 text-sm text-center">
+        <p className="text-slate-300 text-sm text-center">
           You can wager up to {formatter.format(maxWager)}.
         </p>
-        <div className="text-gray-300 text-sm flex self-start gap-2 w-full overflow-x-scroll">
+        <div className="text-slate-300 text-sm flex self-start gap-2 w-full overflow-x-scroll">
           {playerScores.map((p, i) => (
             <div
               className="flex flex-col items-center justify-between"
@@ -64,7 +64,7 @@ function WagerForm({
           id="wager"
           name="wager"
           className={
-            "px-4 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 " +
+            "px-4 text-sm text-slate-900 border border-slate-300 rounded-lg bg-slate-50 " +
             "focus:ring-blue-500 focus:border-blue-500"
           }
           placeholder="choose wager amount"
