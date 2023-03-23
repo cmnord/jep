@@ -9,7 +9,7 @@ export function VolumeSlider({
 }) {
   return (
     <SliderPrimitive.Root
-      className="relative flex items-center select-none touch-none w-32 h-5"
+      className="relative flex items-center select-none touch-none w-full h-5"
       value={[value]}
       onValueChange={([newVal]) => onValueChange(newVal)}
       max={1}
