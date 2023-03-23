@@ -114,8 +114,8 @@ function AfterGamePreview({ clue }: { clue?: Clue }) {
       {clue ? (
         <div className="flex flex-col gap-4 mb-6">
           <p className="mb-2">The final answer was:</p>
-          <blockquote className="relative border-l-4 pl-4 sm:pl-6 dark:border-gray-700">
-            <p className="text-gray-800 sm:text-xl uppercase font-bold">
+          <blockquote className="relative border-l-4 pl-4 sm:pl-6 dark:border-slate-700">
+            <p className="text-slate-800 sm:text-xl uppercase font-bold">
               {clue.clue}
             </p>
           </blockquote>
@@ -175,7 +175,7 @@ export function Preview({
         <Modal isOpen={isOpen}>
           <Modal.Body>
             <Modal.Title>Play Final &rarr;</Modal.Title>
-            <p className="text-gray-500">Round done! Click for final prompt</p>
+            <p className="text-slate-500">Round done! Click for final prompt</p>
           </Modal.Body>
           <NextRoundFooter
             roomName={roomName}
@@ -190,7 +190,7 @@ export function Preview({
         <Modal isOpen={isOpen}>
           <Modal.Body>
             <Modal.Title>Play Double &rarr;</Modal.Title>
-            <p className="text-gray-500">
+            <p className="text-slate-500">
               Single round done! Click to play double
             </p>
           </Modal.Body>

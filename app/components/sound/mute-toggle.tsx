@@ -58,8 +58,8 @@ export function MuteToggle({
         "flex items-center justify-center p-1 rounded-md",
         "focus:ring-2 focus:ring-blue-500",
         {
-          "text-gray-300 group-hover:text-white": theme === "dark",
-          "text-gray-500 group-hover:text-gray-700": theme === "light",
+          "text-slate-300 group-hover:text-white": theme === "dark",
+          "text-slate-500 group-hover:text-slate-700": theme === "light",
         }
       )}
     >

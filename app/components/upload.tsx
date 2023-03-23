@@ -37,15 +37,15 @@ export default function Upload({
         tabIndex={loading ? undefined : 0}
         role={loading ? undefined : "button"}
         className={
-          "flex rounded-lg text-gray-900 " +
+          "flex rounded-lg text-slate-900 " +
           "border-2 border-dashed border-blue-600 " +
           "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
         }
       >
         <div
           className={
-            "flex flex-col justify-center items-center p-6 text-sm bg-gray-100 rounded-lg transition-colors " +
-            "hover:bg-gray-200 "
+            "flex flex-col justify-center items-center p-6 text-sm bg-slate-100 rounded-lg transition-colors " +
+            "hover:bg-slate-200 "
           }
         >
           {loading ? <LoadingSpinner className="mb-2" /> : <UploadIcon />}

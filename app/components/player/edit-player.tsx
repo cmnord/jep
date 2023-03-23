@@ -42,10 +42,10 @@ function EditPlayer({
 
   return (
     <div className="flex flex-wrap gap-2 items-center">
-      <label htmlFor="name" className="text-gray-400 text-sm">
+      <label htmlFor="name" className="text-slate-400 text-sm">
         You are:
       </label>
-      <div className="relative shadow rounded-md border border-gray-300">
+      <div className="relative shadow rounded-md border border-slate-300">
         <input
           ref={inputRef}
           type="text"
@@ -64,7 +64,7 @@ function EditPlayer({
           {debouncedLoading ? (
             <LoadingSpinner className="text-blue-600" />
           ) : (
-            <SendIcon className="text-gray-300" />
+            <SendIcon className="text-slate-300" />
           )}
         </div>
       </div>

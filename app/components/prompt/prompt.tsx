@@ -303,7 +303,7 @@ function ReadCluePrompt({
           <span className="font-bold">{category}</span> for{" "}
           <span className="font-bold">${clueValue}</span>
         </div>
-        <span className="text-sm text-gray-300">
+        <span className="text-sm text-slate-300">
           Click or press <Kbd>Enter</Kbd> to buzz in
         </span>
       </div>
@@ -377,7 +377,7 @@ function RevealAnswerToBuzzerPrompt({
           <span className="font-bold">{category}</span> for{" "}
           <span className="font-bold">${clueValue}</span>
         </div>
-        <span className="text-sm text-gray-300">
+        <span className="text-sm text-slate-300">
           Click or press <Kbd>Enter</Kbd> to buzz in
         </span>
       </div>
@@ -450,7 +450,7 @@ function RevealAnswerToAllPrompt({
           <span className="font-bold">{category}</span> for{" "}
           <span className="font-bold">${clueValue}</span>
         </div>
-        <span className="text-sm text-gray-300">
+        <span className="text-sm text-slate-300">
           Click or press <Kbd>Enter</Kbd> to buzz in
         </span>
       </div>
