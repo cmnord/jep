@@ -50,8 +50,8 @@ const ClueButton = React.forwardRef<
       )
     ) : (
       <p className="flex items-center justify-center gap-1 text-yellow-1000 text-shadow-lg font-impact">
-        <span className="text-3xl lg:text-4xl">$</span>
-        <span className="text-4xl lg:text-5xl">{value}</span>
+        <span className="text-sm sm:text-3xl lg:text-4xl">$</span>
+        <span className="text-md sm:text-4xl lg:text-5xl">{value}</span>
       </p>
     );
 
@@ -103,7 +103,7 @@ ClueButton.displayName = "ClueButton";
 
 export function ClueComponent(props: Props) {
   return (
-    <td className="p-1 h-full">
+    <td className="sm:p-1 h-full">
       {props.answered ? (
         <Popover content={props.clue.clue}>
           <ClueButton {...props} />
