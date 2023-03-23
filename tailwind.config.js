@@ -9,6 +9,13 @@ module.exports = {
         bouncein: "showSweetAlert 0.3s",
         slideIn: "0.5s ease-out 0s 1 slideInFromTopLeft forwards",
         slideOut: "0.5s ease-in 0s 1 slideOutToTopLeft forwards",
+        slideDownAndFade:
+          "slideDownAndFade 400ms cubic-bezier(0.16, 1, 0.3, 1)",
+        slideLeftAndFade:
+          "slideLeftAndFade 400ms cubic-bezier(0.16, 1, 0.3, 1)",
+        slideUpAndFade: "slideUpAndFade 400ms cubic-bezier(0.16, 1, 0.3, 1)",
+        slideRightAndFade:
+          "slideRightAndFade 400ms cubic-bezier(0.16, 1, 0.3, 1)",
       },
       boxShadow: ({ theme }) => ({
         // x-offsey y-offset blur spread color
@@ -59,6 +66,22 @@ module.exports = {
         slideOutToTopLeft: {
           "0%": { transform: "translate(0, 0)" },
           "100%": { transform: "translate(-100%, -100%)" },
+        },
+        slideDownAndFade: {
+          from: { opacity: 0, transform: "translateY(-2px)" },
+          to: { opacity: 1, transform: "translateY(0)" },
+        },
+        slideLeftAndFade: {
+          from: { opacity: 0, transform: "translateX(2px)" },
+          to: { opacity: 1, transform: "translateX(0)" },
+        },
+        slideUpAndFade: {
+          from: { opacity: 0, transform: "translateY(2px)" },
+          to: { opacity: 1, transform: "translateY(0)" },
+        },
+        slideRightAndFade: {
+          from: { opacity: 0, transform: "translateX(2px)" },
+          to: { opacity: 1, transform: "translateX(0)" },
         },
       },
       maxHeight: {

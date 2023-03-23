@@ -1,31 +1,96 @@
 import { Link, useMatches } from "@remix-run/react";
 import * as React from "react";
 
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import Button from "~/components/button";
 import { QuestionMarkCircle } from "~/components/icons";
 import { Anchor } from "~/components/link";
 import Modal from "~/components/modal";
+import type { Game } from "~/models/game.server";
 import SoundControl from "./sound";
 
 const GITHUB_URL = "https://github.com/cmnord/jep";
 
-const SOUND_CONTROL_ROUTES = [
-  "routes/$gameId.solo",
-  "routes/mock",
-  "routes/room.$roomName",
-];
+function GameSettings({ game }: { game: Game }) {
+  return (
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger asChild>
+        <button
+          className={
+            "w-6 h-6 flex items-center justify-center text-white " +
+            "hover:text-gray-300 data-[state=open]:text-gray-300"
+          }
+          aria-label="Customise options"
+        >
+          {/* Heroicon name: outline/bars-3 */}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+            className="w-6 h-6"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+            />
+          </svg>
+        </button>
+      </DropdownMenu.Trigger>
+
+      <DropdownMenu.Portal>
+        <DropdownMenu.Content
+          className={
+            "w-56 bg-white text-gray-900 rounded-md p-1 will-change-[opacity,transform] " +
+            "data-[side=top]:animate-slideDownAndFade " +
+            "data-[side=right]:animate-slideLeftAndFade " +
+            "data-[side=bottom]:animate-slideUpAndFade " +
+            "data-[side=left]:animate-slideRightAndFade"
+          }
+          sideOffset={5}
+        >
+          <DropdownMenu.Label className="p-1 font-bold">
+            {game.title}
+          </DropdownMenu.Label>
+          <DropdownMenu.Label className="p-1">
+            by {game.author}
+          </DropdownMenu.Label>
+          {game.note && (
+            <DropdownMenu.Label>
+              <p className="p-1 text-sm">{game.note}</p>
+            </DropdownMenu.Label>
+          )}
+
+          <DropdownMenu.Separator className="h-px bg-gray-200 m-1" />
+
+          <DropdownMenu.Item
+            className="flex items-center p-1 rounded-md relative"
+            // Prevent the dropdown menu from closing
+            onSelect={(e) => e.preventDefault()}
+          >
+            <div className="w-full">
+              <SoundControl theme="light" />
+            </div>
+          </DropdownMenu.Item>
+          <DropdownMenu.Arrow className="fill-white" />
+        </DropdownMenu.Content>
+      </DropdownMenu.Portal>
+    </DropdownMenu.Root>
+  );
+}
 
 export default function Header() {
   const [showModal, setShowModal] = React.useState(false);
 
   const matches = useMatches();
-  const shouldShowSoundControl = matches.some((match) =>
-    SOUND_CONTROL_ROUTES.includes(match.id)
-  );
+  const gameRoute = matches.find((match) => match.data && "game" in match.data);
+  const game = gameRoute ? (gameRoute.data.game as Game) : undefined;
 
   return (
     <nav className="p-6 bg-blue-1000">
-      <div className="flex justify-between">
+      <div className="flex items-center justify-between">
         <Link to="/">
           <h1 className="text-2xl font-bold text-white font-korinna text-shadow-md">
             Jep!
@@ -74,12 +139,13 @@ export default function Header() {
             </Button>
           </Modal.Footer>
         </Modal>
-        <div className="flex gap-4">
-          {shouldShowSoundControl && <SoundControl />}
+        {game ? (
+          <GameSettings game={game} />
+        ) : (
           <button onClick={() => setShowModal(true)} title="About">
             <QuestionMarkCircle className="w-6 h-6 text-white" />
           </button>
-        </div>
+        )}
       </div>
     </nav>
   );
