@@ -41,8 +41,8 @@ function EditPlayer({
   const debouncedLoading = useDebounceEnd(loading, 100);
 
   return (
-    <div className="flex gap-2 items-center">
-      <label htmlFor="name" className="text-gray-500 text-sm">
+    <div className="flex flex-wrap gap-2 items-center">
+      <label htmlFor="name" className="text-gray-400 text-sm">
         You are:
       </label>
       <div className="relative shadow rounded-md border border-gray-300">
@@ -72,7 +72,7 @@ function EditPlayer({
   );
 }
 
-export default function EditPlayerForm({
+export function EditPlayerForm({
   roomName,
   userId,
 }: {

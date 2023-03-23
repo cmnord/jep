@@ -4,15 +4,13 @@ import type { Player } from "~/engine";
 import { useEngineContext } from "~/engine";
 import { stringToHslColor } from "~/utils/utils";
 
-import EditPlayerForm from "./edit-player";
-
 const formatter = Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD",
   maximumFractionDigits: 0, // Round to whole dollars.
 });
 
-function PlayerIcon({
+function PlayerScore({
   player,
   hasBoardControl,
 }: {
@@ -23,60 +21,55 @@ function PlayerIcon({
   return (
     <div
       className={classNames(
-        "flex flex-col items-center gap-2 p-3 bg-blue-1000 bg-gradient-to-b from-blue-700 shadow",
+        "flex sm:flex-col items-center gap-2 p-2 sm:p-3 border-2 bg-blue-1000 bg-gradient-to-b from-blue-800",
         {
-          "border-2 border-gray-800 opacity-70": !hasBoardControl,
-          "border-4 border-yellow-400": hasBoardControl,
+          "border-gray-200 opacity-70": !hasBoardControl,
+          "border-yellow-400": hasBoardControl,
         }
       )}
     >
       <div
-        className={classNames(
-          "text-sm flex items-center justify-center font-mono"
-        )}
+        className="text-sm font-mono font-bold grow"
         style={{ color: color }}
       >
         {player.name}
       </div>
-      <div className="text-white text-xl font-impact text-shadow-md">
+      <div className="text-white text-xl font-impact text-shadow-md grow">
         {formatter.format(player.score)}
       </div>
     </div>
   );
 }
 
-export function Players({
-  roomName,
-  userId,
-}: {
-  roomName: string;
-  userId: string;
-}) {
+export function PlayerIcon({ player }: { player: Player }) {
+  const color = stringToHslColor(player.userId);
+  return (
+    <div
+      className="w-8 h-8 rounded-full flex items-center justify-center"
+      style={{
+        backgroundColor: color,
+      }}
+      title={player.name}
+    >
+      <div className="text-white text-md font-mono font-bold">
+        {player.name[0]}
+      </div>
+    </div>
+  );
+}
+
+export function PlayerScores() {
   const { players, boardControl } = useEngineContext();
 
-  const boardController = boardControl ? players.get(boardControl) : undefined;
-  const boardControlName = boardController
-    ? boardController.name
-    : "Unknown player";
-
   return (
-    <div className="flex flex-col gap-4">
-      {boardControlName && (
-        <p>
-          <span className="font-bold">{boardControlName}</span> has control of
-          the board.
-        </p>
-      )}
-      <div className="flex flex-wrap gap-2">
-        {Array.from(players.values()).map((p) => (
-          <PlayerIcon
-            key={p.userId}
-            player={p}
-            hasBoardControl={p.userId === boardControl}
-          />
-        ))}
-      </div>
-      <EditPlayerForm roomName={roomName} userId={userId} />
+    <div className="flex flex-col sm:grid sm:grid-cols-3 gap-2">
+      {Array.from(players.values()).map((p, i) => (
+        <PlayerScore
+          key={i}
+          player={p}
+          hasBoardControl={p.userId === boardControl}
+        />
+      ))}
     </div>
   );
 }

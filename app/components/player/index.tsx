@@ -1,3 +1,5 @@
-import { Players } from "./player";
+import { EditPlayerForm } from "./edit-player";
+import { PlayerIcon, PlayerScores } from "./player";
 
-export default Players;
+export { EditPlayerForm, PlayerIcon };
+export default PlayerScores;

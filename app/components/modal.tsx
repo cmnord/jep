@@ -3,7 +3,7 @@ import * as React from "react";
 function Title({ children }: { children: React.ReactNode }) {
   return (
     <h3
-      className="text-2xl font-medium leading-6 text-gray-900 mb-4"
+      className="w-full text-2xl font-medium leading-6 text-gray-900 mb-4"
       id="modal-title"
     >
       {children}
@@ -15,9 +15,7 @@ function Body({ children }: { children: React.ReactNode }) {
   return (
     <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
       <div className="sm:flex sm:items-start">
-        <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-          {children}
-        </div>
+        <div className="mt-3 sm:mt-0 w-full">{children}</div>
       </div>
     </div>
   );
