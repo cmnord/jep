@@ -73,7 +73,7 @@ function BeforeGamePreview({
             <span />
             <p className="text-center">Play &rarr;</p>
             <div className="flex flex-row-reverse">
-              <SoundControl showSlider={false} theme="light" />
+              <SoundControl showSlider={false} />
             </div>
           </div>
         </Modal.Title>

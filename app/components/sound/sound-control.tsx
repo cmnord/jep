@@ -4,13 +4,7 @@ import { useSoundContext } from "~/utils/use-sound";
 import { MuteToggle } from "./mute-toggle";
 import { VolumeSlider } from "./volume-slider";
 
-export function SoundControl({
-  showSlider = true,
-  theme = "dark",
-}: {
-  showSlider?: boolean;
-  theme?: "dark" | "light";
-}) {
+export function SoundControl({ showSlider = true }: { showSlider?: boolean }) {
   const { mute, setMute, volume, setVolume } = useSoundContext();
   const prevVolume = React.useRef(volume);
 
@@ -27,7 +21,6 @@ export function SoundControl({
             setVolume(prevVolume.current);
           }
         }}
-        theme={theme}
       />
       {showSlider && (
         <VolumeSlider
