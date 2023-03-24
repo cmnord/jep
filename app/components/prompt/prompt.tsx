@@ -105,7 +105,6 @@ function WagerCluePrompt({
 
   return (
     <>
-      <Countdown startTime={undefined} />
       <ReadClueTimer clueDurationMs={0} shouldAnimate={false} />
       <div className="flex justify-between p-4">
         <div className="text-white">
@@ -116,6 +115,7 @@ function WagerCluePrompt({
         <ShinyText text="double down" />
         <WagerForm roomName={roomName} userId={userId} />
       </div>
+      <Countdown startTime={undefined} />
       <Buzzes
         buzzes={buzzes ?? new Map()}
         players={players}
@@ -294,7 +294,6 @@ function ReadCluePrompt({
 
   return (
     <>
-      <Countdown startTime={buzzerOpenAt} />
       <ReadClueTimer
         clueDurationMs={clueDurationMs}
         shouldAnimate={myBuzzDurationMs === undefined}
@@ -317,6 +316,7 @@ function ReadCluePrompt({
         answer={undefined}
       />
       <Lockout active={lockout} />
+      <Countdown startTime={buzzerOpenAt} />
       <Buzzes
         buzzes={optimisticBuzzes}
         players={players}
@@ -371,7 +371,6 @@ function RevealAnswerToBuzzerPrompt({
 
   return (
     <>
-      <Countdown startTime={countdownStartedAt} />
       <ReadClueTimer clueDurationMs={0} shouldAnimate={false} />
       <div className="flex justify-between p-4">
         <div className="text-white">
@@ -407,6 +406,7 @@ function RevealAnswerToBuzzerPrompt({
           </p>
         </div>
       )}
+      <Countdown startTime={countdownStartedAt} />
       <Buzzes
         buzzes={buzzes ?? new Map()}
         players={players}
@@ -444,7 +444,6 @@ function RevealAnswerToAllPrompt({
 
   return (
     <>
-      <Countdown startTime={undefined} />
       <ReadClueTimer clueDurationMs={0} shouldAnimate={false} />
       <div className="flex justify-between p-4">
         <div className="text-white">
@@ -465,6 +464,7 @@ function RevealAnswerToAllPrompt({
         answer={clue?.answer}
       />
       <NextClueForm roomName={roomName} userId={userId} />
+      <Countdown startTime={undefined} />
       <Buzzes
         buzzes={buzzes ?? new Map()}
         players={players}
