@@ -3,8 +3,7 @@ import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 
 import GameComponent from "~/components/game";
-import { GameEngineContext } from "~/engine";
-import { useSoloGameEngine } from "~/engine/use-game-engine";
+import { GameEngineContext, useSoloGameEngine } from "~/engine";
 import { getMockGame } from "~/models/mock.server";
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => ({

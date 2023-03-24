@@ -6,7 +6,6 @@ import { useEngineContext } from "~/engine";
 import type { Board, Clue } from "~/models/convert.server";
 import { useSoloAction } from "~/utils/use-solo-action";
 import useGameSound from "~/utils/use-sound";
-import { getNormalizedClueValue } from "~/utils/utils";
 import { Category } from "./category";
 import { ClueComponent } from "./clue";
 
@@ -19,7 +18,6 @@ function BoardComponent({
   onClickClue,
   onFocusClue,
   onKeyDownClue,
-  round,
   tbodyRef,
 }: {
   board: Board;
@@ -28,7 +26,6 @@ function BoardComponent({
   onClickClue: (i: number, j: number) => void;
   onFocusClue: (i: number, j: number) => void;
   onKeyDownClue: (event: React.KeyboardEvent, i: number, j: number) => void;
-  round: number;
   tbodyRef: React.RefObject<HTMLTableSectionElement>;
 }) {
   const clueRows = new Map<number, Clue[]>();
@@ -36,12 +33,11 @@ function BoardComponent({
     const clues = category.clues;
     for (let i = 0; i < clues.length; i++) {
       const clue = clues[i];
-      const clueValue = getNormalizedClueValue(i, round);
-      const clueRow = clueRows.get(clueValue);
+      const clueRow = clueRows.get(clue.value);
       if (clueRow) {
         clueRow.push(clue);
       } else {
-        clueRows.set(clueValue, [clue]);
+        clueRows.set(clue.value, [clue]);
       }
     }
   }
@@ -102,8 +98,7 @@ export function ConnectedBoardComponent({
   userId: string;
   roomName: string;
 }) {
-  const { board, round, boardControl, isAnswered, soloDispatch } =
-    useEngineContext();
+  const { board, boardControl, isAnswered, soloDispatch } = useEngineContext();
   const fetcher = useFetcher<Action>();
   useSoloAction(fetcher, soloDispatch);
 
@@ -185,7 +180,6 @@ export function ConnectedBoardComponent({
       board={board}
       tbodyRef={tbodyRef}
       hasBoardControl={hasBoardControl}
-      round={round}
       isAnswered={isAnswered}
       onClickClue={handleClickClue}
       onFocusClue={(i, j) => {

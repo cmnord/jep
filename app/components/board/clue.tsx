@@ -2,7 +2,7 @@ import classNames from "classnames";
 import * as React from "react";
 
 import Popover from "~/components/popover";
-import { UNREVEALED_CLUE } from "~/engine/engine";
+import { UNREVEALED_CLUE } from "~/engine";
 import type { Clue } from "~/models/convert.server";
 
 interface Props {
