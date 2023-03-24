@@ -42,19 +42,6 @@ const ClueButton = React.forwardRef<
       }
     }, [answered]);
 
-    const clueText = answered ? (
-      unrevealed ? (
-        <p className="text-sm text-slate-400">{UNREVEALED_CLUE}</p>
-      ) : (
-        <p className="uppercase font-korinna break-words">{clue.answer}</p>
-      )
-    ) : (
-      <p className="flex items-center justify-center gap-1 text-yellow-1000 text-shadow-lg font-impact">
-        <span className="text-sm sm:text-3xl lg:text-4xl">$</span>
-        <span className="text-md sm:text-4xl lg:text-5xl">{value}</span>
-      </p>
-    );
-
     // disabled must not include `answerable` so we can focus on answered clues.
     const disabled = !hasBoardControl || unrevealed || loading;
 
@@ -82,11 +69,9 @@ const ClueButton = React.forwardRef<
           onKeyDown(event);
         }}
         className={classNames(
-          "px-4 py-3 relative h-full w-full bg-blue-1000  transition-colors",
+          "px-4 py-3 relative h-full w-full group bg-blue-1000  transition-colors",
           {
             "hover:bg-blue-700 focus:bg-blue-700": !unrevealed,
-            "text-blue-1000 hover:text-white focus:text-white hover:text-shadow focus:text-shadow transition":
-              answered && !unrevealed,
             "bg-slate-800": unrevealed,
             "border-spin opacity-75": loading,
           }
@@ -94,7 +79,18 @@ const ClueButton = React.forwardRef<
         ref={ref}
         {...rest}
       >
-        {clueText}
+        <p
+          className={classNames(
+            "flex items-center justify-center gap-1 text-yellow-1000 text-shadow-md sm:text-shadow-lg font-impact",
+            {
+              "opacity-0 group-hover:opacity-50 group-focus:opacity-50":
+                answered,
+            }
+          )}
+        >
+          <span className="text-sm sm:text-3xl lg:text-4xl">$</span>
+          <span className="text-md sm:text-4xl lg:text-5xl">{value}</span>
+        </p>
       </button>
     );
   }
@@ -105,7 +101,15 @@ export function ClueComponent(props: Props) {
   return (
     <td className="sm:p-1 h-full">
       {props.answered ? (
-        <Popover content={props.clue.clue}>
+        <Popover
+          content={
+            <p>
+              {props.clue.clue}
+              <br />
+              <span className="uppercase">{props.clue.answer}</span>
+            </p>
+          }
+        >
           <ClueButton {...props} />
         </Popover>
       ) : (
