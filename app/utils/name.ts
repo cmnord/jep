@@ -132,10 +132,13 @@ export function randomWordFromListStartingWithLetter(
   return sortedArray[randomIdx];
 }
 
+/** capitalize capitalizes the first letter of every word in the string. */
 function capitalize(s: string) {
-  s = s.toLowerCase();
-  s = s.slice(0, 1).toUpperCase() + s.slice(1).toLowerCase();
-  return s;
+  return s
+    .toLowerCase()
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 }
 
 /** getRandomName returns a random, alliterative name of Adjective + Noun. */
