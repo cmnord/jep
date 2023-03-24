@@ -110,6 +110,15 @@ function validateGame(game: ConvertedGame) {
             "answer " + i + " in category " + j + " must not be empty"
           );
         }
+        if (clue.longForm && !clue.wagerable) {
+          throw new Error(
+            "long-form clue " +
+              i +
+              " in category " +
+              j +
+              " must also be wagerable"
+          );
+        }
       }
     }
   }

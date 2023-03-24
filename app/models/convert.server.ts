@@ -26,10 +26,11 @@ export interface Category {
 }
 
 export interface Clue {
-  value: number;
   clue: string;
   answer: string;
+  value: number;
   wagerable?: boolean;
+  longForm?: boolean;
 }
 
 // Converts JSON strings to/from your types
@@ -253,10 +254,11 @@ const typeMap: any = {
   ),
   Clue: o(
     [
-      { json: "value", js: "value", typ: 0 },
       { json: "clue", js: "clue", typ: "" },
       { json: "answer", js: "answer", typ: "" },
+      { json: "value", js: "value", typ: 0 },
       { json: "wagerable", js: "wagerable", typ: u(undefined, true) },
+      { json: "longForm", js: "longForm", typ: u(undefined, true) },
     ],
     false
   ),
