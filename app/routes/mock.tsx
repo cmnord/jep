@@ -6,9 +6,15 @@ import GameComponent from "~/components/game";
 import { GameEngineContext, useSoloGameEngine } from "~/engine";
 import { getMockGame } from "~/models/mock.server";
 
-export const meta: MetaFunction<typeof loader> = ({ data }) => ({
-  title: data.game.title,
-});
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  try {
+    return {
+      title: data.game.title,
+    };
+  } catch (error: unknown) {
+    return {};
+  }
+};
 
 export async function loader() {
   const game = await getMockGame();
