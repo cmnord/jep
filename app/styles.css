@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --lime-500: #84cc16;
+}
+
 @layer utilities {
   .text-shadow {
     text-shadow: 1px 1px black;
@@ -55,14 +59,25 @@
     );
     transform: scale(1);
   }
-}
 
-@keyframes growFromLeft {
-  0% {
-    width: 0;
+  @keyframes growFromLeft {
+    0% {
+      width: 0;
+    }
+    100% {
+      width: 100%;
+    }
   }
-  100% {
-    width: 100%;
+
+  /** turnGreen turns the background green in the last frame of the animation. */
+  @keyframes turnGreen {
+    0% {
+      background-color: white;
+      animation-timing-function: steps(1, end);
+    }
+    100% {
+      background-color: var(--lime-500);
+    }
   }
 }
 
