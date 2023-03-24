@@ -11,13 +11,14 @@ export function ReadClueTimer({
 }) {
   return (
     <div
-      className={classNames("h-8 mt-2 bg-white self-start", {
-        "w-0": shouldAnimate,
-        "w-full": !shouldAnimate,
+      className={classNames("h-8 mt-2 self-start", {
+        "w-0 bg-white": shouldAnimate,
+        "w-full bg-lime-500": !shouldAnimate,
       })}
       style={{
         animation: shouldAnimate
-          ? `${clueDurationMs / 1000}s linear 0s 1 growFromLeft forwards`
+          ? `${clueDurationMs / 1000}s linear 0s 1 growFromLeft forwards,
+             ${clueDurationMs / 1000}s linear 0s 1 turnGreen forwards`
           : "none",
       }}
     />
