@@ -3,9 +3,8 @@ import * as React from "react";
 
 import Button from "~/components/button";
 import type { Action, Player } from "~/engine";
-import { useEngineContext } from "~/engine";
+import { getHighestClueValue, useEngineContext } from "~/engine";
 import { useSoloAction } from "~/utils/use-solo-action";
-import { getNormalizedClueValue } from "~/utils/utils";
 
 const formatter = Intl.NumberFormat("en-US", {
   style: "currency",
@@ -100,8 +99,7 @@ export default function ConnectedWagerForm({
   roomName: string;
   userId: string;
 }) {
-  const { board, players, round, soloDispatch, activeClue } =
-    useEngineContext();
+  const { board, players, soloDispatch, activeClue } = useEngineContext();
   const fetcher = useFetcher<Action>();
   useSoloAction(fetcher, soloDispatch);
   const loading = fetcher.state === "loading";
@@ -110,8 +108,10 @@ export default function ConnectedWagerForm({
 
   const score = players.get(userId)?.score ?? 0;
 
-  const numRows = board?.categories[0].clues.length ?? 0;
-  const highestClueValueInRound = getNormalizedClueValue(numRows - 1, round);
+  const highestClueValue = React.useMemo(
+    () => getHighestClueValue(board),
+    [board]
+  );
 
   return (
     <fetcher.Form method="post" action={`/room/${roomName}/wager`}>
@@ -119,7 +119,7 @@ export default function ConnectedWagerForm({
       <input type="hidden" value={i} name="i" />
       <input type="hidden" value={j} name="j" />
       <WagerForm
-        highestClueValue={highestClueValueInRound}
+        highestClueValue={highestClueValue}
         loading={loading}
         players={Array.from(players.values())}
         score={score}

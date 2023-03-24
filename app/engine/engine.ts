@@ -1,5 +1,5 @@
-import type { Game } from "~/models/convert.server";
-import { generateGrid, getNormalizedClueValue } from "~/utils/utils";
+import type { Board, Game } from "~/models/convert.server";
+import { generateGrid } from "~/utils/utils";
 import {
   isAnswerAction,
   isBuzzAction,
@@ -123,7 +123,11 @@ function setIsAnswered(
  */
 export function getClueValue(state: State, [i, j]: [number, number]) {
   const board = state.game.boards.at(state.round);
-  if (board?.categories.at(j)?.clues.at(i)?.wagerable) {
+  const clue = board?.categories.at(j)?.clues.at(i);
+  if (!clue) {
+    throw new Error(`No clue exists at (${i}, ${j})`);
+  }
+  if (clue.wagerable) {
     const wager = state.isAnswered.at(i)?.at(j)?.wager;
     if (wager === undefined) {
       throw new Error(
@@ -132,7 +136,25 @@ export function getClueValue(state: State, [i, j]: [number, number]) {
     }
     return wager;
   }
-  return getNormalizedClueValue(i, state.round);
+  return clue.value;
+}
+
+/** getHighestClueValue gets the highest clue value on the board. */
+export function getHighestClueValue(board: Board | undefined) {
+  if (!board) {
+    return 0;
+  }
+  let max = 0;
+  for (let j = 0; j < board.categories.length; j++) {
+    const category = board.categories[j];
+    for (let i = 0; i < category.clues.length; i++) {
+      const clue = category.clues[i];
+      if (clue.value > max) {
+        max = clue.value;
+      }
+    }
+  }
+  return max;
 }
 
 export function createInitialState(game: Game): State {
@@ -274,12 +296,8 @@ export function gameEngine(state: State, action: Action): State {
         if (wager < 5) {
           throw new Error("Wager must be at least $5");
         }
-        const numRows =
-          state.game.boards.at(state.round)?.categories[0].clues.length ?? 0;
-        const highestClueValueInRound = getNormalizedClueValue(
-          numRows - 1,
-          state.round
-        );
+        const board = state.game.boards.at(state.round);
+        const highestClueValueInRound = getHighestClueValue(board);
         const maxWager = Math.max(
           state.players.get(userId)?.score ?? 0,
           highestClueValueInRound
