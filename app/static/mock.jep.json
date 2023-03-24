@@ -206,7 +206,9 @@
             {
               "clue": "There are at least 50 common exceptions to the rule expressed by this popular rhyming mnemonic couplet",
               "answer": "I before E, except after C",
-              "value": 0
+              "value": 0,
+              "wagerable": true,
+              "longForm": true
             }
           ]
         }

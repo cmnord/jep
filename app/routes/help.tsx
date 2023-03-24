@@ -29,34 +29,41 @@ export default function Help() {
         <CodeBlock
           text={`{
   "categoryNames": [
-    "Category #1",
-    "Category #2"
+    "Apples",
+    "Bananas"
   ],
   "categories": [
     {
-      "name": "Category #1",
+      "name": "Apples",
       "clues": [
         {
-          "clue": "The leaf of a fern is often referred to as this",
-          "answer": "Frond",
+          "clue": "This apple variety is named after a city in New York State",
+          "answer": "Empire",
           "value": 200
         }
         // ... more clues
       ]
     },
     {
-      "name": "Category #2",
+      "name": "Bananas",
       "clues": [ ... clues for category 2 ],
     }
   ]
 }`}
         />
         <p className="mb-4">
-          A clue can be <span className="italic">wagerable</span> or not. The
-          "wagerable" field is not required.
-          <br />
-          In summary:
+          A clue can be <span className="italic">wagerable</span> or not.
+          Wagerable clues allow players to wager on the answer and win or lose
+          that value instead of the clue's value. The "wagerable" field is not
+          required.
         </p>
+        <p className="mb-4">
+          Clues can also be <span className="italic">long-form</span> or not.
+          For long-form clues, all players may write down their answers over a
+          longer time period instead of competing to buzz in. Long-form clues
+          must also be wagerable.
+        </p>
+        <p className="mb-4">In summary:</p>
         <CodeBlock
           text={`interface Game {
   title: string;
@@ -81,6 +88,7 @@ interface Clue {
   answer: string;
   value: number;
   wagerable?: boolean; // default false
+  longForm?: boolean; // default false
 }`}
         />
       </main>
