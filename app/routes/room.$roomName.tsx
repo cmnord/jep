@@ -12,9 +12,15 @@ import { getRoom } from "~/models/room.server";
 import { getOrCreateUserSession } from "~/session.server";
 import { getRandomName } from "~/utils/name";
 
-export const meta: MetaFunction<typeof loader> = ({ data }) => ({
-  title: data.game.title,
-});
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  try {
+    return {
+      title: data.game.title,
+    };
+  } catch (error: unknown) {
+    return {};
+  }
+};
 
 export async function loader({ request, params }: LoaderArgs) {
   const roomName = params.roomName;
