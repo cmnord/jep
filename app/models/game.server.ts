@@ -42,9 +42,20 @@ function dbGameToGame(dbGame: DbGame, clues: DbClue[]): Game {
     );
     if (categoryIdx === -1) {
       board.categoryNames.push(clue.category);
-      board.categories.push({ name: clue.category, clues: [clue] });
+      board.categories.push({
+        name: clue.category,
+        clues: [
+          {
+            ...clue,
+            longForm: clue.long_form,
+          },
+        ],
+      });
     } else {
-      board.categories[categoryIdx].clues.push(clue);
+      board.categories[categoryIdx].clues.push({
+        ...clue,
+        longForm: clue.long_form,
+      });
     }
   }
 
@@ -204,12 +215,12 @@ export async function createGame(inputGame: ConvertedGame) {
 
   const game = gameData[0];
 
-  const clues: Omit<DbClue, "id">[] = [];
+  const cluesToInsert: Omit<ClueTable["Insert"], "id">[] = [];
   for (let round = 0; round < inputGame.boards.length; round++) {
     const board = inputGame.boards[round];
     for (const category of board.categories) {
       for (const clue of category.clues) {
-        clues.push({
+        cluesToInsert.push({
           category: category.name,
           game_id: game.id,
           round,
@@ -217,6 +228,7 @@ export async function createGame(inputGame: ConvertedGame) {
           clue: clue.clue,
           value: clue.value,
           wagerable: clue.wagerable ?? false,
+          long_form: clue.longForm ?? false,
         });
       }
     }
@@ -224,7 +236,7 @@ export async function createGame(inputGame: ConvertedGame) {
 
   const { data: cluesData, error: cluesErr } = await db
     .from<"clues", ClueTable>("clues")
-    .insert<ClueTable["Insert"]>(clues)
+    .insert<ClueTable["Insert"]>(cluesToInsert)
     .select();
 
   // TODO: createGame is not transactional, so if any clue fails to insert the
