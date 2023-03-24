@@ -71,7 +71,7 @@ function GameSettings({ game }: { game: Game }) {
             onSelect={(e) => e.preventDefault()}
           >
             <div className="w-full">
-              <SoundControl theme="light" />
+              <SoundControl />
             </div>
           </DropdownMenu.Item>
           <DropdownMenu.Arrow className="fill-white" />

@@ -16,10 +16,10 @@ export function VolumeSlider({
       step={0.01}
       aria-label="Volume"
     >
-      <SliderPrimitive.Track className="relative grow bg-slate-500 rounded-full h-1">
+      <SliderPrimitive.Track className="relative grow bg-slate-200 rounded-full h-1">
         <SliderPrimitive.Range
           className={
-            "absolute rounded-full h-full bg-slate-200 " +
+            "absolute rounded-full h-full bg-slate-500 " +
             "group-hover:bg-blue-400"
           }
         />

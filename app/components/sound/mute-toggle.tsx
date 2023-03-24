@@ -1,5 +1,4 @@
 import * as TogglePrimitive from "@radix-ui/react-toggle";
-import classNames from "classnames";
 
 function SpeakerXMark() {
   return (
@@ -40,11 +39,9 @@ function SpeakerWave() {
 }
 
 export function MuteToggle({
-  theme = "dark",
   pressed,
   onPressChange,
 }: {
-  theme?: "dark" | "light";
   pressed: boolean;
   onPressChange: (pressed: boolean) => void;
 }) {
@@ -54,14 +51,11 @@ export function MuteToggle({
       onPressedChange={onPressChange}
       aria-label="Mute"
       title="Mute"
-      className={classNames(
-        "flex items-center justify-center p-1 rounded-md",
-        "focus:ring-2 focus:ring-blue-500",
-        {
-          "text-slate-300 group-hover:text-white": theme === "dark",
-          "text-slate-500 group-hover:text-slate-700": theme === "light",
-        }
-      )}
+      className={
+        "flex items-center justify-center p-1 rounded-md " +
+        "focus:ring-2 focus:ring-blue-500 " +
+        "text-slate-500 group-hover:text-slate-700"
+      }
     >
       {pressed ? <SpeakerXMark /> : <SpeakerWave />}
     </TogglePrimitive.Root>
