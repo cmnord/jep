@@ -36,12 +36,6 @@ npm run dev
 
 Open up [http://localhost:3000](http://localhost:3000) and you should be ready to go!
 
-To modify the database schema in Supabase, run:
-
-```sh
-npx supabase gen types typescript --linked > app/models/database.types.ts
-```
-
 ## Local Supabase
 
 To use a local version of Supabase instead of the production URL, set
@@ -50,12 +44,25 @@ To use a local version of Supabase instead of the production URL, set
 View the local Supabase dashboard at
 [http://localhost:54323/](http://localhost:54323/).
 
-- [Make a
-  migration](https://supabase.com/docs/guides/cli/local-development#database-migrations):
-  `npx supabase db diff -f my_migration_name`
-- [Deploy a
-  migration](https://supabase.com/docs/guides/cli/local-development#deploy-database-changes):
-  `npx supabase db push`
+[Make a
+migration](https://supabase.com/docs/guides/cli/local-development#database-migrations):
+
+```sh
+npx supabase db diff -f my_migration_name
+```
+
+[Deploy a
+migration](https://supabase.com/docs/guides/cli/local-development#deploy-database-changes):
+
+```sh
+npx supabase db push
+```
+
+Generate Typescript types from the database schema:
+
+```sh
+npx supabase gen types typescript --linked > app/models/database.types.ts
+```
 
 ## Tools used
 
