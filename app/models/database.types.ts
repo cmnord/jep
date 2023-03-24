@@ -41,6 +41,7 @@ export interface Database {
           clue: string;
           game_id: string;
           id: number;
+          long_form: boolean;
           round: number;
           value: number;
           wagerable: boolean;
@@ -51,6 +52,7 @@ export interface Database {
           clue: string;
           game_id: string;
           id?: number;
+          long_form?: boolean;
           round?: number;
           value: number;
           wagerable?: boolean;
@@ -61,6 +63,7 @@ export interface Database {
           clue?: string;
           game_id?: string;
           id?: number;
+          long_form?: boolean;
           round?: number;
           value?: number;
           wagerable?: boolean;
