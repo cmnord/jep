@@ -5,9 +5,11 @@ import {
   CLUE_TIMEOUT_MS,
   gameEngine,
   GameState,
+  getHighestClueValue,
+  UNREVEALED_CLUE,
 } from "./engine";
 import { GameEngineContext, useEngineContext } from "./use-engine-context";
-import { useGameEngine } from "./use-game-engine";
+import { useGameEngine, useSoloGameEngine } from "./use-game-engine";
 
 export {
   Action,
@@ -17,8 +19,11 @@ export {
   gameEngine,
   GameEngineContext,
   GameState,
+  getHighestClueValue,
   Player,
   State,
+  UNREVEALED_CLUE,
   useEngineContext,
   useGameEngine,
+  useSoloGameEngine,
 };
