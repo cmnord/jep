@@ -117,7 +117,7 @@ function WagerCluePrompt({
         <WagerForm roomName={roomName} userId={userId} />
       </div>
       <Buzzes
-        buzzes={buzzes}
+        buzzes={buzzes ?? new Map()}
         players={players}
         winningBuzzer={undefined}
         showWinner={false}
@@ -408,7 +408,7 @@ function RevealAnswerToBuzzerPrompt({
         </div>
       )}
       <Buzzes
-        buzzes={buzzes}
+        buzzes={buzzes ?? new Map()}
         players={players}
         winningBuzzer={winningBuzzer}
         showWinner={false}
@@ -464,9 +464,9 @@ function RevealAnswerToAllPrompt({
         showAnswer={true}
         answer={clue?.answer}
       />
-      <NextClueForm roomName={roomName} userId={userId} clueIdx={activeClue} />
+      <NextClueForm roomName={roomName} userId={userId} />
       <Buzzes
-        buzzes={buzzes}
+        buzzes={buzzes ?? new Map()}
         players={players}
         winningBuzzer={winningBuzzer}
         showWinner={true}

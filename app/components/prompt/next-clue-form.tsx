@@ -1,21 +1,49 @@
 import { useFetcher } from "@remix-run/react";
+import classNames from "classnames";
 
 import Button from "~/components/button";
 import type { Action } from "~/engine";
 import { useEngineContext } from "~/engine";
 import { useSoloAction } from "~/utils/use-solo-action";
 
+const formatter = Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  maximumFractionDigits: 0, // Round to whole dollars.
+  signDisplay: "always", // Show +/- for positive and negative values.
+});
+
 function NextClue({
   boardControlName,
+  buzzCorrect,
   cluesLeftInRound,
+  clueValue,
   loading,
+  winningBuzzer,
 }: {
   boardControlName: string;
+  buzzCorrect: boolean;
   cluesLeftInRound: number;
+  clueValue: number;
   loading: boolean;
+  winningBuzzer?: string;
 }) {
+  const winningBuzzerName = winningBuzzer ?? "Unknown player";
+  const value = buzzCorrect ? clueValue : -1 * clueValue;
+
   return (
     <div className="p-2 flex flex-col items-center gap-2">
+      <p className="text-white font-bold">
+        {winningBuzzerName}{" "}
+        <span
+          className={classNames("text-shadow", {
+            "text-green-300": buzzCorrect,
+            "text-red-300": !buzzCorrect,
+          })}
+        >
+          {formatter.format(value)}
+        </span>
+      </p>
       {cluesLeftInRound ? (
         <p className="text-slate-300 text-sm">
           {boardControlName} will choose the next clue.
@@ -31,14 +59,26 @@ function NextClue({
 export function NextClueForm({
   roomName,
   userId,
-  clueIdx,
 }: {
   roomName: string;
   userId: string;
-  clueIdx?: [number, number];
 }) {
-  const { players, boardControl, numAnswered, numCluesInBoard, soloDispatch } =
-    useEngineContext();
+  const {
+    activeClue,
+    answeredBy,
+    getClueValue,
+    players,
+    boardControl,
+    numAnswered,
+    numCluesInBoard,
+    soloDispatch,
+    winningBuzzer,
+  } = useEngineContext();
+
+  if (!activeClue) {
+    throw new Error("No active clue");
+  }
+
   const fetcher = useFetcher<Action>();
   useSoloAction(fetcher, soloDispatch);
   const loading = fetcher.state === "loading";
@@ -52,7 +92,12 @@ export function NextClueForm({
 
   const cluesLeftInRound = numCluesInBoard - numAnswered;
 
-  const [i, j] = clueIdx ? clueIdx : [-1, -1];
+  const [i, j] = activeClue;
+  const buzzCorrect = answeredBy(i, j) === winningBuzzer;
+  const winningBuzzerName = winningBuzzer
+    ? players.get(winningBuzzer)?.name
+    : undefined;
+  const clueValue = getClueValue(activeClue);
 
   return (
     <fetcher.Form method="post" action={`/room/${roomName}/next-clue`}>
@@ -63,6 +108,9 @@ export function NextClueForm({
         boardControlName={boardControlName}
         cluesLeftInRound={cluesLeftInRound}
         loading={loading}
+        winningBuzzer={winningBuzzerName}
+        buzzCorrect={buzzCorrect}
+        clueValue={clueValue}
       />
     </fetcher.Form>
   );
