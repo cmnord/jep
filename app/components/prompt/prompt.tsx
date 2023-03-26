@@ -100,7 +100,7 @@ function WagerCluePrompt({
   roomName: string;
   userId: string;
 }) {
-  const { boardControl, buzzes, category, players } = useEngineContext();
+  const { clue, boardControl, buzzes, category, players } = useEngineContext();
 
   const canWager = buzzes?.get(userId) !== CANT_BUZZ_FLAG;
   const wagererName = boardControl
@@ -116,7 +116,7 @@ function WagerCluePrompt({
         </div>
       </div>
       <div className="p-4 max-w-screen-lg mx-auto flex flex-col justify-center grow gap-4">
-        <ShinyText text="double down" />
+        <ShinyText text={clue?.longForm ? "final clue" : "double down"} />
         {canWager ? (
           <WagerForm roomName={roomName} userId={userId} />
         ) : (
