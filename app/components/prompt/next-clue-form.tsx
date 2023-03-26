@@ -97,7 +97,7 @@ export function NextClueForm({
   const winningBuzzerName = winningBuzzer
     ? players.get(winningBuzzer)?.name
     : undefined;
-  const clueValue = getClueValue(activeClue);
+  const clueValue = getClueValue(activeClue, userId);
 
   return (
     <fetcher.Form method="post" action={`/room/${roomName}/next-clue`}>

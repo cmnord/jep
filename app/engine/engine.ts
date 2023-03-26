@@ -21,7 +21,6 @@ export enum GameState {
 interface ClueAnswer {
   isAnswered: boolean;
   answeredBy?: string;
-  wager?: number;
 }
 
 export interface State {
@@ -36,6 +35,7 @@ export interface State {
   numCluesInBoard: number;
   players: Map<string, Player>;
   round: number;
+  wagers: Map<string, number>;
 }
 
 export enum ActionType {
@@ -110,7 +110,6 @@ function setIsAnswered(
       (cell): ClueAnswer => ({
         isAnswered: cell.isAnswered,
         answeredBy: cell.answeredBy,
-        wager: cell.wager,
       })
     )
   );
@@ -118,23 +117,21 @@ function setIsAnswered(
   return deepCopy;
 }
 
-/** getClueValue gets the clue's wagered value if it's wagerable and its
- * normalized value on the board otherwise.
+/** getClueValue gets the clue's wagered value if it's wagerable and its value on
+ * the board otherwise.
  */
-export function getClueValue(state: State, [i, j]: [number, number]) {
+export function getClueValue(
+  state: State,
+  [i, j]: [number, number],
+  userId: string
+) {
   const board = state.game.boards.at(state.round);
   const clue = board?.categories.at(j)?.clues.at(i);
   if (!clue) {
     throw new Error(`No clue exists at (${i}, ${j})`);
   }
   if (clue.wagerable) {
-    const wager = state.isAnswered.at(i)?.at(j)?.wager;
-    if (wager === undefined) {
-      throw new Error(
-        `wager at (${i}, ${j}) must be defined if clue is wagerable`
-      );
-    }
-    return wager;
+    return state.wagers.get(userId) ?? 0;
   }
   return clue.value;
 }
@@ -184,6 +181,7 @@ export function createInitialState(game: Game): State {
     numCluesInBoard,
     players: new Map(),
     round,
+    wagers: new Map(),
   };
 }
 
@@ -259,8 +257,39 @@ export function gameEngine(state: State, action: Action): State {
         }
 
         if (clue.wagerable) {
+          const clue = state.game.boards
+            .at(state.round)
+            ?.categories.at(j)
+            ?.clues.at(i);
+          if (!clue) {
+            throw new Error(
+              `No clue exists at (${i}, ${j}) in round ${state.round}`
+            );
+          }
+          if (!clue.wagerable) {
+            throw new Error(`Clue at (${i}, ${j}) is not wagerable`);
+          }
+
+          // If long-form, anyone with a positive score can buzz. If not, only the
+          // player with board control can buzz.
+          if (!clue.longForm && state.boardControl !== userId) {
+            return state;
+          }
+          const allPlayers = Array.from(state.players.entries());
+          const buzzes = clue.longForm
+            ? new Map(
+                allPlayers
+                  .filter(([, p]) => p.score <= 0)
+                  .map(([pUserId]) => [pUserId, CANT_BUZZ_FLAG])
+              )
+            : new Map(
+                allPlayers
+                  .filter(([pUserId]) => pUserId !== state.boardControl)
+                  .map(([pUserId]) => [pUserId, CANT_BUZZ_FLAG])
+              );
           return {
             ...state,
+            buzzes,
             type: GameState.WagerClue,
             activeClue: [i, j],
           };
@@ -278,19 +307,12 @@ export function gameEngine(state: State, action: Action): State {
         const { userId, i, j, wager } = action.payload;
         if (
           state.type !== GameState.WagerClue ||
-          state.boardControl !== userId ||
           state.activeClue?.[0] !== i ||
-          state.activeClue?.[1] !== j
+          state.activeClue?.[1] !== j ||
+          state.wagers.has(userId)
         ) {
           return state;
         }
-
-        // Mark every other player as ineligible to buzz
-        const buzzes = new Map(
-          Array.from(state.players.entries())
-            .filter(([pUserId]) => pUserId !== userId)
-            .map(([pUserId]) => [pUserId, CANT_BUZZ_FLAG])
-        );
 
         // Validate wager amount
         if (wager < 5) {
@@ -306,14 +328,12 @@ export function gameEngine(state: State, action: Action): State {
           throw new Error(`Wager must be at most $${maxWager}`);
         }
 
+        const wagers = new Map(state.wagers).set(userId, wager);
+
         return {
           ...state,
           type: GameState.ReadClue,
-          buzzes,
-          // set clue value on the board to the wager amount
-          isAnswered: setIsAnswered(state.isAnswered, i, j, (prev) => {
-            prev.wager = wager;
-          }),
+          wagers,
         };
       }
       throw new Error("SetClueWager action must have an associated index");
@@ -394,7 +414,7 @@ export function gameEngine(state: State, action: Action): State {
           throw new Error("Player not found in state");
         }
 
-        const clueValue = getClueValue(state, [i, j]);
+        const clueValue = getClueValue(state, [i, j], userId);
 
         if (correct) {
           // Reveal the answer to everyone, add points, and give the winning
@@ -508,6 +528,7 @@ export function gameEngine(state: State, action: Action): State {
             numCluesInBoard,
             players: state.players,
             round: newRound,
+            wagers: new Map(),
           };
         }
 
@@ -516,6 +537,7 @@ export function gameEngine(state: State, action: Action): State {
           type: GameState.ShowBoard,
           activeClue: undefined,
           buzzes: undefined,
+          wagers: new Map(),
         };
       }
       throw new Error("NextClue action must have an associated user");
