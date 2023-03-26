@@ -41,6 +41,10 @@ function stateToGameEngine(
   const winningBuzz = state.buzzes ? getWinningBuzzer(state.buzzes) : undefined;
   const winningBuzzer = winningBuzz?.userId ?? undefined;
 
+  function getClueValueFn(idx: [number, number], userId: string) {
+    return getClueValue(state, idx, userId);
+  }
+
   return {
     type: state.type,
     activeClue: state.activeClue,
@@ -49,7 +53,7 @@ function stateToGameEngine(
     buzzes: state.buzzes,
     category,
     clue,
-    getClueValue: (idx: [number, number]) => getClueValue(state, idx),
+    getClueValue: getClueValueFn,
     soloDispatch: dispatch,
     isAnswered,
     players: state.players,
