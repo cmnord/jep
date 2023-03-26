@@ -28,22 +28,25 @@ function NextClue({
   loading: boolean;
   winningBuzzer?: string;
 }) {
-  const winningBuzzerName = winningBuzzer ?? "Unknown player";
   const value = buzzCorrect ? clueValue : -1 * clueValue;
 
   return (
     <div className="p-2 flex flex-col items-center gap-2">
-      <p className="text-white font-bold">
-        {winningBuzzerName}{" "}
-        <span
-          className={classNames("text-shadow", {
-            "text-green-300": buzzCorrect,
-            "text-red-300": !buzzCorrect,
-          })}
-        >
-          {formatter.format(value)}
-        </span>
-      </p>
+      {winningBuzzer ? (
+        <p className="text-white font-bold">
+          {winningBuzzer}{" "}
+          <span
+            className={classNames("text-shadow", {
+              "text-green-300": buzzCorrect,
+              "text-red-300": !buzzCorrect,
+            })}
+          >
+            {formatter.format(value)}
+          </span>
+        </p>
+      ) : (
+        <p className="text-slate-300 text-sm">No one won the clue.</p>
+      )}
       {cluesLeftInRound ? (
         <p className="text-slate-300 text-sm">
           {boardControlName} will choose the next clue.
