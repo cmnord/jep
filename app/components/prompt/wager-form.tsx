@@ -63,7 +63,7 @@ function WagerForm({
           id="wager"
           name="wager"
           className={
-            "px-4 text-sm text-slate-900 border border-slate-300 rounded-lg bg-slate-50 " +
+            "px-4 min-w-48 text-sm text-slate-900 border border-slate-300 rounded-lg bg-slate-50 " +
             "focus:ring-blue-500 focus:border-blue-500"
           }
           placeholder="choose wager amount"
