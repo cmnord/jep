@@ -41,16 +41,16 @@ function WagerForm({
         <p className="text-slate-300 text-sm text-center">
           You can wager up to {formatter.format(maxWager)}.
         </p>
-        <div className="text-slate-300 text-sm flex self-start gap-2 w-full overflow-x-scroll">
+        <div className="flex self-start gap-2 w-full overflow-x-scroll text-slate-300 text-sm text-shadow">
           {playerScores.map((p, i) => (
             <div
               className="flex flex-col items-center justify-between"
               key={`player-${i}`}
             >
-              <p className="text-center">
+              <p className="text-center font-mono font-bold">
                 {p.name} {p.userId === userId ? "(you)" : null}
               </p>
-              <p>{formatter.format(p.score)}</p>
+              <p className="text-white">{formatter.format(p.score)}</p>
             </div>
           ))}
         </div>
@@ -86,7 +86,7 @@ function WagerForm({
         loading={loading}
         onClick={() => setInputRequired(false)}
       >
-        True double down ({formatter.format(maxWager)})
+        Wager all ({formatter.format(maxWager)})
       </Button>
     </div>
   );
