@@ -87,6 +87,9 @@ module.exports = {
       maxHeight: {
         "1/2": "50%",
       },
+      minWidth: (theme) => ({
+        48: theme("spacing.48"),
+      }),
       spacing: {
         "1/6": "16.666667%",
       },
