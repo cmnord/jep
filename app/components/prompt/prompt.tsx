@@ -101,7 +101,12 @@ function WagerCluePrompt({
   roomName: string;
   userId: string;
 }) {
-  const { buzzes, category, players } = useEngineContext();
+  const { boardControl, buzzes, category, players } = useEngineContext();
+
+  const canWager = buzzes?.get(userId) !== CANT_BUZZ_FLAG;
+  const wagererName = boardControl
+    ? players.get(boardControl)?.name ?? "winning buzzer"
+    : "winning buzzer";
 
   return (
     <>
@@ -113,7 +118,13 @@ function WagerCluePrompt({
       </div>
       <div className="p-4 max-w-screen-lg mx-auto flex flex-col justify-center grow gap-4">
         <ShinyText text="double down" />
-        <WagerForm roomName={roomName} userId={userId} />
+        {canWager ? (
+          <WagerForm roomName={roomName} userId={userId} />
+        ) : (
+          <p className="p-2 text-center text-white font-bold">
+            Waiting for response from {wagererName}...
+          </p>
+        )}
       </div>
       <Countdown startTime={undefined} />
       <Buzzes
@@ -290,7 +301,7 @@ function ReadCluePrompt({
 
   useKeyPress("Enter", () => handleClick(Date.now()));
 
-  const clueValue = getClueValue(clueIdx ?? [-1, -1]);
+  const clueValue = getClueValue(clueIdx ?? [-1, -1], userId);
 
   return (
     <>
@@ -349,7 +360,7 @@ function RevealAnswerToBuzzerPrompt({
     winningBuzzer,
   } = useEngineContext();
 
-  const clueValue = getClueValue(activeClue ?? [-1, -1]);
+  const clueValue = getClueValue(activeClue ?? [-1, -1], userId);
 
   const canShowAnswer = winningBuzzer === userId;
   const [showAnswer, setShowAnswer] = React.useState(false);
@@ -400,11 +411,9 @@ function RevealAnswerToBuzzerPrompt({
           }
         />
       ) : (
-        <div className="p-2 flex flex-col items-center gap-2">
-          <p className="text-white font-bold">
-            Waiting for response from {winningPlayerName}...
-          </p>
-        </div>
+        <p className="p-2 text-center text-white font-bold">
+          Waiting for response from {winningPlayerName}...
+        </p>
       )}
       <Countdown startTime={countdownStartedAt} />
       <Buzzes
@@ -440,7 +449,7 @@ function RevealAnswerToAllPrompt({
     winningBuzzer,
   } = useEngineContext();
 
-  const clueValue = getClueValue(activeClue ?? [-1, -1]);
+  const clueValue = getClueValue(activeClue ?? [-1, -1], userId);
 
   return (
     <>
