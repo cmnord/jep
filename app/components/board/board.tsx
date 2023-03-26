@@ -130,7 +130,8 @@ export function ConnectedBoardComponent({
   }
 
   function handleClickClue(i: number, j: number) {
-    if (board?.categories.at(j)?.clues.at(i)?.wagerable) {
+    const clue = board?.categories.at(j)?.clues.at(i);
+    if (clue && clue.wagerable && !clue.longForm) {
       playWagerSfx();
     }
     if (hasBoardControl && !isAnswered(i, j)) {
