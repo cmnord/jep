@@ -287,6 +287,20 @@ export function gameEngine(state: State, action: Action): State {
                   .filter(([pUserId]) => pUserId !== state.boardControl)
                   .map(([pUserId]) => [pUserId, CANT_BUZZ_FLAG])
               );
+
+          // If no player has enough points to buzz, just show the clue.
+          if (buzzes.size === state.players.size) {
+            return {
+              ...state,
+              type: GameState.RevealAnswerToAll,
+              activeClue: [i, j],
+              isAnswered: setIsAnswered(state.isAnswered, i, j, (prev) => {
+                prev.isAnswered = true;
+              }),
+              numAnswered: state.numAnswered + 1,
+            };
+          }
+
           return {
             ...state,
             buzzes,
@@ -315,15 +329,15 @@ export function gameEngine(state: State, action: Action): State {
         }
 
         // Validate wager amount
-        if (wager < 5) {
-          throw new Error("Wager must be at least $5");
-        }
         const board = state.game.boards.at(state.round);
         const highestClueValueInRound = getHighestClueValue(board);
         const maxWager = Math.max(
           state.players.get(userId)?.score ?? 0,
           highestClueValueInRound
         );
+        if (maxWager >= 5 && wager < 5) {
+          throw new Error("Wager must be at least $5");
+        }
         if (wager > maxWager) {
           throw new Error(`Wager must be at most $${maxWager}`);
         }

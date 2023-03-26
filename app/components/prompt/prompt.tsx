@@ -300,7 +300,7 @@ function ReadCluePrompt({
 
   useKeyPress("Enter", () => handleClick(Date.now()));
 
-  const clueValue = getClueValue(clueIdx ?? [-1, -1], userId);
+  const clueValue = clueIdx ? getClueValue(clueIdx, userId) : 0;
 
   return (
     <>
@@ -359,7 +359,7 @@ function RevealAnswerToBuzzerPrompt({
     winningBuzzer,
   } = useEngineContext();
 
-  const clueValue = getClueValue(activeClue ?? [-1, -1], userId);
+  const clueValue = activeClue ? getClueValue(activeClue, userId) : 0;
 
   const canShowAnswer = winningBuzzer === userId;
   const [showAnswer, setShowAnswer] = React.useState(false);
@@ -448,7 +448,7 @@ function RevealAnswerToAllPrompt({
     winningBuzzer,
   } = useEngineContext();
 
-  const clueValue = getClueValue(activeClue ?? [-1, -1], userId);
+  const clueValue = activeClue ? getClueValue(activeClue, userId) : 0;
 
   return (
     <>

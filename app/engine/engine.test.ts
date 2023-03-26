@@ -845,6 +845,120 @@ describe("gameEngine", () => {
         round: 1,
       },
     },
+    {
+      name: "If all players have negative scores, advance past long-form clue",
+      state: initialState,
+      actions: [
+        ...TWO_PLAYERS_ROUND_0,
+        {
+          type: ActionType.ChooseClue,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0 },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0, deltaMs: 123 },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: {
+            userId: PLAYER2.userId,
+            i: 0,
+            j: 0,
+            deltaMs: CLUE_TIMEOUT_MS + 1,
+          },
+        },
+        {
+          type: ActionType.Answer,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0, correct: true },
+        },
+        {
+          type: ActionType.NextClue,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0 },
+        },
+        {
+          type: ActionType.ChooseClue,
+          payload: { userId: PLAYER1.userId, i: 0, j: 1 },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: { userId: PLAYER1.userId, i: 0, j: 1, deltaMs: 123 },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: {
+            userId: PLAYER2.userId,
+            i: 0,
+            j: 1,
+            deltaMs: CLUE_TIMEOUT_MS + 1,
+          },
+        },
+        {
+          type: ActionType.Answer,
+          payload: { userId: PLAYER1.userId, i: 0, j: 1, correct: false },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: { userId: PLAYER2.userId, i: 0, j: 1, deltaMs: 123 },
+        },
+        {
+          type: ActionType.Answer,
+          payload: { userId: PLAYER2.userId, i: 0, j: 1, correct: false },
+        },
+        {
+          type: ActionType.NextClue,
+          payload: { userId: PLAYER2.userId, i: 0, j: 1 },
+        },
+        {
+          type: ActionType.StartRound,
+          payload: { round: 1 },
+        },
+        {
+          type: ActionType.ChooseClue,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0 },
+        },
+        {
+          type: ActionType.SetClueWager,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0, wager: 5 },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0, deltaMs: 123 },
+        },
+        {
+          type: ActionType.Answer,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0, correct: true },
+        },
+        {
+          type: ActionType.NextClue,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0 },
+        },
+        {
+          type: ActionType.ChooseClue,
+          payload: { userId: PLAYER2.userId, i: 0, j: 1 },
+        },
+      ],
+      expectedState: {
+        ...initialState,
+        type: GameState.RevealAnswerToAll,
+        activeClue: [0, 1],
+        boardControl: PLAYER2.userId,
+        buzzes: undefined,
+        isAnswered: [
+          [
+            { isAnswered: true, answeredBy: PLAYER2.userId },
+            { isAnswered: true, answeredBy: undefined },
+          ],
+        ],
+        numAnswered: 2,
+        numCluesInBoard: 2,
+        players: new Map([
+          [PLAYER1.userId, { ...PLAYER1, score: 0 }],
+          [PLAYER2.userId, { ...PLAYER2, score: -195 }],
+        ]),
+        round: 1,
+        wagers: new Map(),
+      },
+    },
   ];
 
   for (const tc of testCases) {
