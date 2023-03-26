@@ -43,6 +43,18 @@ export const MOCK_GAME: Game = {
           name: "Round 2, Category 1",
           clues: [{ clue: "e", answer: "f", value: 400, wagerable: true }],
         },
+        {
+          name: "Round 2, Category 2",
+          clues: [
+            {
+              clue: "g",
+              answer: "h",
+              value: 400,
+              wagerable: true,
+              longForm: true,
+            },
+          ],
+        },
       ],
     },
   ],
