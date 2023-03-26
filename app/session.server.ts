@@ -37,7 +37,7 @@ export async function getSessionFormState(
   if (!data) {
     return [{ success: false, error: "" }, headers];
   }
-  return [JSON.parse(data), headers];
+  return [JSON.parse(data) as FormState, headers];
 }
 
 /** flashFormState appends to existing headers if provided. */
