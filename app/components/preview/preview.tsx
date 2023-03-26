@@ -170,12 +170,14 @@ export function Preview({
       );
     case numRounds:
       return <AfterGamePreview clue={finalClue} />;
-    case numRounds - 1:
+    default:
       return (
         <Modal isOpen={isOpen}>
           <Modal.Body>
-            <Modal.Title>Play Final &rarr;</Modal.Title>
-            <p className="text-slate-500">Round done! Click for final prompt</p>
+            <Modal.Title>
+              Play round {round + 1}/{numRounds} &rarr;
+            </Modal.Title>
+            <p className="text-slate-500">Round {round} done!</p>
           </Modal.Body>
           <NextRoundFooter
             roomName={roomName}
@@ -185,23 +187,5 @@ export function Preview({
           />
         </Modal>
       );
-    case 1:
-      return (
-        <Modal isOpen={isOpen}>
-          <Modal.Body>
-            <Modal.Title>Play Double &rarr;</Modal.Title>
-            <p className="text-slate-500">
-              Single round done! Click to play double
-            </p>
-          </Modal.Body>
-          <NextRoundFooter
-            roomName={roomName}
-            round={round}
-            soloDispatch={soloDispatch}
-          />
-        </Modal>
-      );
-    default:
-      return null;
   }
 }
