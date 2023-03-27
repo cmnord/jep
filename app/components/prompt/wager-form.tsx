@@ -33,7 +33,7 @@ function WagerForm({
   const [inputRequired, setInputRequired] = React.useState(true);
 
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="p-2 flex flex-col items-center gap-4">
       <div className="flex flex-col items-center gap-2 w-full">
         <p className="text-white font-bold">
           How much will you wager on this clue?

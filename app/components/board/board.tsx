@@ -50,9 +50,7 @@ function BoardComponent({
     <div className="w-full overflow-x-scroll">
       <div
         className="max-w-screen-lg mx-auto"
-        style={{
-          minWidth: `${board.categoryNames.length * 50}px`,
-        }}
+        style={{ minWidth: `${board.categoryNames.length * 50}px` }}
       >
         <table className="w-full table-fixed h-1 bg-black text-white border-spacing-3">
           <thead>
