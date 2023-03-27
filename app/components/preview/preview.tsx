@@ -81,9 +81,7 @@ function BeforeGamePreview({
           <p className="text-left">
             <span
               className="font-bold border-b-4"
-              style={{
-                borderColor: boardControlColor,
-              }}
+              style={{ borderColor: boardControlColor }}
             >
               {boardControlName}
             </span>{" "}

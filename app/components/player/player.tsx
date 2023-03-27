@@ -46,9 +46,7 @@ export function PlayerIcon({ player }: { player: Player }) {
   return (
     <div
       className="w-8 h-8 rounded-full flex items-center justify-center"
-      style={{
-        backgroundColor: color,
-      }}
+      style={{ backgroundColor: color }}
       title={player.name}
     >
       <div className="text-white text-md font-mono font-bold">

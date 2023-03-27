@@ -70,11 +70,9 @@ function ClueText({
       autoFocus={focusOnBuzz}
     >
       <p
-        className="text-white word-spacing-1 leading-normal w-full max-h-96"
+        className="max-h-96 text-white word-spacing-1 leading-normal w-full"
         ref={ref}
-        style={{
-          fontSize,
-        }}
+        style={{ fontSize }}
       >
         {clue}
         <br />
@@ -101,30 +99,41 @@ function WagerCluePrompt({
   userId: string;
 }) {
   const { clue, boardControl, buzzes, category, players } = useEngineContext();
+  const { ref, fontSize } = useFitText({ minFontSize: 20, maxFontSize: 600 });
 
   const canWager = buzzes?.get(userId) !== CANT_BUZZ_FLAG;
   const wagererName = boardControl
     ? players.get(boardControl)?.name ?? "winning buzzer"
     : "winning buzzer";
+  const longForm = clue?.longForm ?? false;
 
   return (
     <>
       <ReadClueTimer clueDurationMs={0} shouldAnimate={false} />
-      <div className="flex justify-between p-4">
-        <div className="text-white">
-          <span className="font-bold">{category}</span>
-        </div>
-      </div>
-      <div className="p-4 max-w-screen-lg mx-auto flex flex-col justify-center grow gap-4">
-        <ShinyText text={clue?.longForm ? "final clue" : "double down"} />
-        {canWager ? (
-          <WagerForm roomName={roomName} userId={userId} />
+      {longForm ? null : <p className="p-4 text-white font-bold">{category}</p>}
+      <div
+        className="p-4 max-w-screen-lg mx-auto flex flex-col justify-center grow"
+        ref={ref}
+        style={{ fontSize }}
+      >
+        {longForm ? (
+          <div className="flex flex-col max-h-96">
+            <ShinyText text="final clue" />
+            <p className="text-white font-bold text-center uppercase font-korinna text-shadow-md break-words">
+              {category}
+            </p>
+          </div>
         ) : (
-          <p className="p-2 text-center text-white font-bold">
-            Waiting for response from {wagererName}...
-          </p>
+          <ShinyText text="double down" />
         )}
       </div>
+      {canWager ? (
+        <WagerForm roomName={roomName} userId={userId} />
+      ) : (
+        <p className="p-2 text-center text-white font-bold">
+          Waiting for response from {wagererName}...
+        </p>
+      )}
       <Countdown startTime={undefined} />
       <Buzzes
         buzzes={buzzes ?? new Map()}
