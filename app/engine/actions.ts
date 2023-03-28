@@ -73,12 +73,12 @@ export function isBuzzAction(action: Action): action is {
   );
 }
 
-export function isAnswerAction(action: Action): action is {
-  type: ActionType.Answer;
+export function isCheckAction(action: Action): action is {
+  type: ActionType.Check;
   payload: { userId: string; i: number; j: number; correct: boolean };
 } {
   return (
-    action.type === ActionType.Answer &&
+    action.type === ActionType.Check &&
     action.payload !== null &&
     typeof action.payload === "object" &&
     "userId" in action.payload &&
