@@ -42,6 +42,11 @@ const LOCKOUT_MS = 250;
 
 const TIMES_UP_SFX = "/sounds/times-up.mp3";
 
+interface Props {
+  roomName: string;
+  userId: string;
+}
+
 function ClueText({
   answer,
   canBuzz,
@@ -92,13 +97,7 @@ function ClueText({
 /** WagerCluePrompt handles all frontend behavior while the game state is
  * GameState.WagerClue.
  */
-function WagerCluePrompt({
-  roomName,
-  userId,
-}: {
-  roomName: string;
-  userId: string;
-}) {
+function WagerCluePrompt({ roomName, userId }: Props) {
   const { clue, boardControl, buzzes, category, players } = useEngineContext();
   const { ref, fontSize } = useFitText({ minFontSize: 20, maxFontSize: 600 });
 
@@ -151,13 +150,7 @@ function WagerCluePrompt({
 /** ReadCluePrompt handles all frontend behavior while the game state is
  * GameState.ReadClue.
  */
-function ReadCluePrompt({
-  roomName,
-  userId,
-}: {
-  roomName: string;
-  userId: string;
-}) {
+function ReadCluePrompt({ roomName, userId }: Props) {
   const {
     activeClue,
     buzzes,
@@ -169,7 +162,7 @@ function ReadCluePrompt({
   } = useEngineContext();
 
   const [optimisticBuzzes, setOptimisticBuzzes] = React.useState(buzzes);
-  const myBuzzDurationMs = optimisticBuzzes?.get(userId);
+  const myBuzzDurationMs = optimisticBuzzes.get(userId);
 
   const [clueShownAt, setClueShownAt] = React.useState<number | undefined>(
     myBuzzDurationMs !== undefined ? 0 : undefined
@@ -350,13 +343,7 @@ function ReadCluePrompt({
 /** RevealAnswerToBuzzerPrompt handles all frontend behavior while the game state
  * is GameState.ReadAnswerToBuzzer.
  */
-function RevealAnswerToBuzzerPrompt({
-  roomName,
-  userId,
-}: {
-  roomName: string;
-  userId: string;
-}) {
+function RevealAnswerToBuzzerPrompt({ roomName, userId }: Props) {
   const {
     activeClue,
     buzzes,
@@ -438,13 +425,7 @@ function RevealAnswerToBuzzerPrompt({
 /** RevealAnswerToAllPrompt handles all frontend behavior while the game state is
  * GameState.ReadAnswerToAll.
  */
-function RevealAnswerToAllPrompt({
-  roomName,
-  userId,
-}: {
-  roomName: string;
-  userId: string;
-}) {
+function RevealAnswerToAllPrompt({ roomName, userId }: Props) {
   const {
     activeClue,
     answeredBy,
@@ -497,13 +478,7 @@ function RevealAnswerToAllPrompt({
   );
 }
 
-export function ConnectedPrompt({
-  roomName,
-  userId,
-}: {
-  roomName: string;
-  userId: string;
-}) {
+export function ConnectedPrompt({ roomName, userId }: Props) {
   const { type } = useEngineContext();
 
   const isOpen =
