@@ -1,8 +1,8 @@
 import type { Board, Game } from "~/models/convert.server";
 import { generateGrid } from "~/utils/utils";
 import {
-  isAnswerAction,
   isBuzzAction,
+  isCheckAction,
   isClueAction,
   isClueWagerAction,
   isPlayerAction,
@@ -47,7 +47,7 @@ export enum ActionType {
   ChooseClue = "choose_clue",
   SetClueWager = "set_clue_wager",
   Buzz = "buzz",
-  Answer = "answer",
+  Check = "check",
   NextClue = "next_clue",
 }
 
@@ -401,8 +401,8 @@ export function gameEngine(state: State, action: Action): State {
         return { ...state, type: GameState.RevealAnswerToBuzzer, buzzes };
       }
       throw new Error("Buzz action must have an associated index and delta");
-    case ActionType.Answer:
-      if (isAnswerAction(action)) {
+    case ActionType.Check:
+      if (isCheckAction(action)) {
         const { userId, i, j, correct } = action.payload;
         if (
           state.type !== GameState.RevealAnswerToBuzzer ||
@@ -413,7 +413,7 @@ export function gameEngine(state: State, action: Action): State {
           return state;
         }
 
-        // Ignore the answer if it was not from the winning buzzer or it has
+        // Ignore the action if it was not from the winning buzzer or it has
         // already been answered.
         const winningBuzzer = getWinningBuzzer(state.buzzes);
         if (userId !== winningBuzzer?.userId) {
@@ -480,13 +480,13 @@ export function gameEngine(state: State, action: Action): State {
         };
       }
       throw new Error(
-        "Answer action must have an associated index and correct/incorrect"
+        "Check action must have an associated index and correct/incorrect"
       );
     case ActionType.NextClue:
       if (isClueAction(action)) {
         // TODO: make use of user ID?
         const { i, j } = action.payload;
-        // Ignore this answer if the clue is no longer active.
+        // Ignore this action if the clue is no longer active.
         if (
           state.type !== GameState.RevealAnswerToAll ||
           state.activeClue?.[0] !== i ||

@@ -5,7 +5,7 @@ import type { Action } from "~/engine";
 import { useEngineContext } from "~/engine";
 import { useSoloAction } from "~/utils/use-solo-action";
 
-function AnswerForm({ loading }: { loading: boolean }) {
+function CheckForm({ loading }: { loading: boolean }) {
   return (
     <div className="p-2 flex flex-col items-center gap-2">
       <p className="text-white font-bold">Were you right?</p>
@@ -36,10 +36,11 @@ function AnswerForm({ loading }: { loading: boolean }) {
   );
 }
 
-/** ConnectedAnswerForm is shown to the winning buzzer at the bottom of the
- * prompt.  They can reveal the answer, then mark it correct/incorrect.
+/** ConnectedCheckForm is shown to the winning buzzer at the bottom of the
+ * prompt.  They can reveal the answer, then check whether it's correct or
+ * incorrect.
  */
-export function ConnectedAnswerForm({
+export function ConnectedCheckForm({
   roomName,
   userId,
   clueIdx,
@@ -83,11 +84,11 @@ export function ConnectedAnswerForm({
   }
 
   return (
-    <fetcher.Form method="post" action={`/room/${roomName}/answer`}>
+    <fetcher.Form method="post" action={`/room/${roomName}/check`}>
       <input type="hidden" value={userId} name="userId" />
       <input type="hidden" value={i} name="i" />
       <input type="hidden" value={j} name="j" />
-      <AnswerForm loading={loading} />
+      <CheckForm loading={loading} />
     </fetcher.Form>
   );
 }
