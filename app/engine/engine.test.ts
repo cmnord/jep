@@ -644,6 +644,7 @@ describe("gameEngine", () => {
       expectedState: {
         ...initialState,
         type: GameState.PreviewRound,
+        activeClue: undefined,
         boardControl: PLAYER2.userId,
         isAnswered: [
           [
@@ -667,6 +668,7 @@ describe("gameEngine", () => {
       expectedState: {
         ...initialState,
         type: GameState.PreviewRound,
+        activeClue: undefined,
         boardControl: PLAYER2.userId,
         isAnswered: [
           [
