@@ -572,7 +572,6 @@ describe("gameEngine", () => {
         type: GameState.ShowBoard,
         activeClue: undefined,
         boardControl: PLAYER1.userId,
-        buzzes: undefined,
         isAnswered: [
           [
             { isAnswered: true, answeredBy: PLAYER1.userId },
@@ -946,7 +945,6 @@ describe("gameEngine", () => {
         type: GameState.RevealAnswerToAll,
         activeClue: [0, 1],
         boardControl: PLAYER2.userId,
-        buzzes: undefined,
         isAnswered: [
           [
             { isAnswered: true, answeredBy: PLAYER2.userId },
@@ -960,7 +958,6 @@ describe("gameEngine", () => {
           [PLAYER2.userId, { ...PLAYER2, score: -195 }],
         ]),
         round: 1,
-        wagers: new Map(),
       },
     },
   ];

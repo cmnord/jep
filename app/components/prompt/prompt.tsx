@@ -101,7 +101,7 @@ function WagerCluePrompt({
   const { clue, boardControl, buzzes, category, players } = useEngineContext();
   const { ref, fontSize } = useFitText({ minFontSize: 20, maxFontSize: 600 });
 
-  const canWager = buzzes?.get(userId) !== CANT_BUZZ_FLAG;
+  const canWager = buzzes.get(userId) !== CANT_BUZZ_FLAG;
   const wagererName = boardControl
     ? players.get(boardControl)?.name ?? "winning buzzer"
     : "winning buzzer";
@@ -136,7 +136,7 @@ function WagerCluePrompt({
       )}
       <Countdown startTime={undefined} />
       <Buzzes
-        buzzes={buzzes ?? new Map()}
+        buzzes={buzzes}
         players={players}
         winningBuzzer={undefined}
         showWinner={false}
@@ -167,9 +167,7 @@ function ReadCluePrompt({
     soloDispatch,
   } = useEngineContext();
 
-  const [optimisticBuzzes, setOptimisticBuzzes] = React.useState(
-    buzzes ?? new Map<string, number>()
-  );
+  const [optimisticBuzzes, setOptimisticBuzzes] = React.useState(buzzes);
   const myBuzzDurationMs = optimisticBuzzes?.get(userId);
 
   const [clueShownAt, setClueShownAt] = React.useState<number | undefined>(
@@ -221,7 +219,7 @@ function ReadCluePrompt({
   React.useEffect(() => {
     // If a new buzz comes in that's less than the current deltaMs, submit a
     // timeout buzz.
-    if (buzzes && buzzerOpenAt) {
+    if (buzzerOpenAt) {
       const currentDeltaMs = Date.now() - buzzerOpenAt;
       for (const [buzzUserId, buzz] of buzzes) {
         if (
@@ -233,7 +231,7 @@ function ReadCluePrompt({
         }
       }
     }
-    setOptimisticBuzzes(buzzes ?? new Map<string, number>());
+    setOptimisticBuzzes(buzzes);
   }, [buzzes, buzzerOpenAt, userId, submitTimeoutBuzz]);
 
   // Open the buzzer after the clue is done being "read".
@@ -425,7 +423,7 @@ function RevealAnswerToBuzzerPrompt({
       )}
       <Countdown startTime={countdownStartedAt} />
       <Buzzes
-        buzzes={buzzes ?? new Map()}
+        buzzes={buzzes}
         players={players}
         winningBuzzer={winningBuzzer}
         showWinner={false}
@@ -483,7 +481,7 @@ function RevealAnswerToAllPrompt({
       <NextClueForm roomName={roomName} userId={userId} />
       <Countdown startTime={undefined} />
       <Buzzes
-        buzzes={buzzes ?? new Map()}
+        buzzes={buzzes}
         players={players}
         winningBuzzer={winningBuzzer}
         showWinner={true}
