@@ -251,25 +251,10 @@ export function gameEngine(state: State, action: Action): State {
           ?.categories.at(j)
           ?.clues.at(i);
         if (!clue) {
-          throw new Error(
-            `No clue exists at (${i}, ${j}) in round ${state.round}`
-          );
+          return state;
         }
 
         if (clue.wagerable) {
-          const clue = state.game.boards
-            .at(state.round)
-            ?.categories.at(j)
-            ?.clues.at(i);
-          if (!clue) {
-            throw new Error(
-              `No clue exists at (${i}, ${j}) in round ${state.round}`
-            );
-          }
-          if (!clue.wagerable) {
-            throw new Error(`Clue at (${i}, ${j}) is not wagerable`);
-          }
-
           // If long-form, anyone with a positive score can buzz. If not, only the
           // player with board control can buzz.
           if (!clue.longForm && state.boardControl !== userId) {
@@ -425,7 +410,7 @@ export function gameEngine(state: State, action: Action): State {
         const players = new Map(state.players);
         const player = players.get(userId);
         if (!player) {
-          throw new Error("Player not found in state");
+          return state;
         }
 
         const clueValue = getClueValue(state, [i, j], userId);
