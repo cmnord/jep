@@ -71,8 +71,8 @@ export function Buzzes({
   const sortedBuzzes = Array.from(buzzes.entries())
     .filter(([, b]) => showBuzz(b))
     .sort(([aUserId], [bUserId]) => {
-      const aDurationMs = buzzes?.get(aUserId);
-      const bDurationMs = buzzes?.get(bUserId);
+      const aDurationMs = buzzes.get(aUserId);
+      const bDurationMs = buzzes.get(bUserId);
       if (aDurationMs === undefined) {
         return 1;
       } else if (bDurationMs === undefined) {
