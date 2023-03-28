@@ -33,6 +33,7 @@ export interface State {
   isAnswered: ClueAnswer[][];
   numAnswered: number;
   numCluesInBoard: number;
+  numExpectedWagers: number;
   players: Map<string, Player>;
   round: number;
   wagers: Map<string, number>;
@@ -179,6 +180,7 @@ export function createInitialState(game: Game): State {
     }),
     numAnswered: 0,
     numCluesInBoard,
+    numExpectedWagers: 0,
     players: new Map(),
     round,
     wagers: new Map(),
@@ -273,8 +275,9 @@ export function gameEngine(state: State, action: Action): State {
                   .map(([pUserId]) => [pUserId, CANT_BUZZ_FLAG])
               );
 
-          // If no player has enough points to buzz, just show the clue.
-          if (buzzes.size === state.players.size) {
+          const numExpectedWagers = state.players.size - buzzes.size;
+          // If no player has enough points to wager, just show the clue.
+          if (numExpectedWagers === 0) {
             return {
               ...state,
               type: GameState.RevealAnswerToAll,
@@ -291,6 +294,7 @@ export function gameEngine(state: State, action: Action): State {
             buzzes,
             type: GameState.WagerClue,
             activeClue: [i, j],
+            numExpectedWagers,
           };
         }
 
@@ -328,10 +332,22 @@ export function gameEngine(state: State, action: Action): State {
         }
 
         const wagers = new Map(state.wagers).set(userId, wager);
+        const clue = board?.categories.at(j)?.clues.at(i);
+        if (!clue) {
+          return state;
+        }
+
+        // Read the clue once all wagers are in
+        if (wagers.size === state.numExpectedWagers) {
+          return {
+            ...state,
+            type: GameState.ReadClue,
+            wagers,
+          };
+        }
 
         return {
           ...state,
-          type: GameState.ReadClue,
           wagers,
         };
       }
@@ -525,6 +541,7 @@ export function gameEngine(state: State, action: Action): State {
             }),
             numAnswered: 0,
             numCluesInBoard,
+            numExpectedWagers: 0,
             players: state.players,
             round: newRound,
             wagers: new Map(),
@@ -536,6 +553,7 @@ export function gameEngine(state: State, action: Action): State {
           type: GameState.ShowBoard,
           activeClue: undefined,
           buzzes: undefined,
+          numExpectedWagers: 0,
           wagers: new Map(),
         };
       }
