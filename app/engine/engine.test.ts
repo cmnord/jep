@@ -685,7 +685,7 @@ describe("gameEngine", () => {
       },
     },
     {
-      name: "Choose wagerable clue, only player that chose it can wager",
+      name: "Choose wagerable clue, only player who chose it can wager",
       state: initialState,
       actions: [
         ...TWO_PLAYERS_ROUND_1,
