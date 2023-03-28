@@ -72,8 +72,7 @@ export function NextClueForm({
     getClueValue,
     players,
     boardControl,
-    numAnswered,
-    numCluesInBoard,
+    numCluesLeftInRound,
     soloDispatch,
     winningBuzzer,
   } = useEngineContext();
@@ -93,8 +92,6 @@ export function NextClueForm({
       : boardController.name
     : "Unknown player";
 
-  const cluesLeftInRound = numCluesInBoard - numAnswered;
-
   const [i, j] = activeClue;
   const buzzCorrect = answeredBy(i, j) === winningBuzzer;
   const winningBuzzerName = winningBuzzer
@@ -109,7 +106,7 @@ export function NextClueForm({
       <input type="hidden" value={j} name="j" />
       <NextClue
         boardControlName={boardControlName}
-        cluesLeftInRound={cluesLeftInRound}
+        cluesLeftInRound={numCluesLeftInRound}
         loading={loading}
         winningBuzzer={winningBuzzerName}
         buzzCorrect={buzzCorrect}
