@@ -16,8 +16,8 @@ import { useSoloAction } from "~/utils/use-solo-action";
 import useGameSound from "~/utils/use-sound";
 import { useTimeout } from "~/utils/use-timeout";
 
-import { ConnectedAnswerForm as AnswerForm } from "./answer-form";
 import { Buzzes } from "./buzz";
+import { ConnectedCheckForm as CheckForm } from "./check-form";
 import { Countdown } from "./countdown";
 import { Fade } from "./fade";
 import { Kbd } from "./kbd";
@@ -395,7 +395,7 @@ function RevealAnswerToBuzzerPrompt({ roomName, userId }: Props) {
         showAnswer={canShowAnswer && showAnswer}
       />
       {canShowAnswer ? (
-        <AnswerForm
+        <CheckForm
           roomName={roomName}
           userId={userId}
           clueIdx={activeClue}
