@@ -1,12 +1,10 @@
 import classNames from "classnames";
 import * as React from "react";
 
-const NUM_BARS = 9;
-const COUNTDOWN_TIME_SEC = 5;
-const CENTER = (NUM_BARS - 1) / 2;
+const DEFAULT_COUNTDOWN_SEC = 5;
 
-export function shouldShowTick(count: number, i: number) {
-  const distFromCenter = Math.abs(CENTER - i);
+export function shouldShowTick(count: number, i: number, center: number) {
+  const distFromCenter = Math.abs(center - i);
   return distFromCenter < count;
 }
 
@@ -16,19 +14,28 @@ function clamp(value: number, min: number, max: number) {
 
 /** Countdown displays 10 red bars which count down from the outside in once per
  * second for 5 seconds total. */
-export function Countdown({ startTime }: { startTime?: number }) {
-  const [count, setCount] = React.useState(NUM_BARS / 2);
+export function Countdown({
+  startTime,
+  durationSec = DEFAULT_COUNTDOWN_SEC,
+}: {
+  startTime?: number;
+  durationSec?: number;
+}) {
+  const numBars = durationSec * 2 - 1;
+  const center = (numBars - 1) / 2;
+
+  const [count, setCount] = React.useState(numBars / 2);
   const animationRef = React.useRef<number>();
 
   React.useEffect(() => {
     const animate = (timeMs: number) => {
       const elapsedMs = Date.now() - timeMs;
       const elapsedSec = Math.floor(elapsedMs / 1000);
-      const newCount = clamp(COUNTDOWN_TIME_SEC - elapsedSec, 0, NUM_BARS / 2);
+      const newCount = clamp(durationSec - elapsedSec, 0, numBars / 2);
 
       setCount(newCount);
 
-      if (count <= NUM_BARS / 2) {
+      if (count <= numBars / 2) {
         animationRef.current = requestAnimationFrame(() => animate(timeMs));
       }
     };
@@ -38,18 +45,27 @@ export function Countdown({ startTime }: { startTime?: number }) {
     }
 
     return () => cancelAnimationFrame(animationRef.current!);
-  }, [count, startTime]);
+  }, [count, startTime, durationSec, numBars]);
 
-  const bars = Array.from({ length: NUM_BARS }, (_, i) => (
+  const bars = Array.from({ length: numBars }, (_, i) => (
     <div
       key={i}
       className={classNames("h-5", {
-        "bg-red-600": startTime && shouldShowTick(count, i),
-        "bg-slate-500": !startTime || !shouldShowTick(count, i),
+        "bg-red-600": startTime && shouldShowTick(count, i, center),
+        "bg-slate-500": !startTime || !shouldShowTick(count, i, center),
       })}
-      style={{ width: `${100 / NUM_BARS}%` }}
+      style={{ width: `${100 / numBars}%` }}
     />
   ));
 
-  return <div className="flex justify-center gap-2 mt-2">{bars}</div>;
+  return (
+    <div
+      className={classNames("flex justify-center mt-2", {
+        "gap-2": numBars < 10,
+        "gap-1": numBars >= 10,
+      })}
+    >
+      {bars}
+    </div>
+  );
 }
