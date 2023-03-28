@@ -39,7 +39,7 @@ export async function action({ request, params }: ActionArgs) {
 
   if (roomNameAndId === "solo") {
     return json({
-      type: ActionType.Answer,
+      type: ActionType.Check,
       payload: { i, j, userId, correct },
     });
   }
@@ -49,7 +49,7 @@ export async function action({ request, params }: ActionArgs) {
     throw new Response("room not found", { status: 404 });
   }
 
-  await createRoomEvent(room.id, ActionType.Answer, {
+  await createRoomEvent(room.id, ActionType.Check, {
     i,
     j,
     userId,

@@ -60,7 +60,7 @@ const TWO_PLAYERS_ROUND_1: Action[] = [
     },
   },
   {
-    type: ActionType.Answer,
+    type: ActionType.Check,
     payload: { userId: PLAYER1.userId, i: 0, j: 0, correct: true },
   },
   {
@@ -85,7 +85,7 @@ const TWO_PLAYERS_ROUND_1: Action[] = [
     },
   },
   {
-    type: ActionType.Answer,
+    type: ActionType.Check,
     payload: { userId: PLAYER1.userId, i: 0, j: 1, correct: true },
   },
   {
@@ -374,7 +374,7 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER1.userId, i: 0, j: 0, deltaMs: 123 },
         },
         {
-          type: ActionType.Answer,
+          type: ActionType.Check,
           payload: { userId: PLAYER1.userId, i: 0, j: 0, correct: false },
         },
       ],
@@ -417,7 +417,7 @@ describe("gameEngine", () => {
           },
         },
         {
-          type: ActionType.Answer,
+          type: ActionType.Check,
           payload: { userId: PLAYER1.userId, i: 0, j: 0, correct: false },
         },
       ],
@@ -456,7 +456,7 @@ describe("gameEngine", () => {
           },
         },
         {
-          type: ActionType.Answer,
+          type: ActionType.Check,
           payload: { userId: PLAYER1.userId, i: 0, j: 0, correct: false },
         },
         {
@@ -502,7 +502,7 @@ describe("gameEngine", () => {
           },
         },
         {
-          type: ActionType.Answer,
+          type: ActionType.Check,
           payload: { userId: PLAYER1.userId, i: 0, j: 0, correct: false },
         },
         {
@@ -510,7 +510,7 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER2.userId, i: 0, j: 0, deltaMs: 123 },
         },
         {
-          type: ActionType.Answer,
+          type: ActionType.Check,
           payload: { userId: PLAYER2.userId, i: 0, j: 0, correct: true },
         },
       ],
@@ -559,7 +559,7 @@ describe("gameEngine", () => {
           },
         },
         {
-          type: ActionType.Answer,
+          type: ActionType.Check,
           payload: { userId: PLAYER1.userId, i: 0, j: 0, correct: true },
         },
         {
@@ -608,7 +608,7 @@ describe("gameEngine", () => {
           },
         },
         {
-          type: ActionType.Answer,
+          type: ActionType.Check,
           payload: { userId: PLAYER1.userId, i: 0, j: 0, correct: true },
         },
         {
@@ -633,7 +633,7 @@ describe("gameEngine", () => {
           },
         },
         {
-          type: ActionType.Answer,
+          type: ActionType.Check,
           payload: { userId: PLAYER2.userId, i: 0, j: 1, correct: true },
         },
         {
@@ -782,7 +782,7 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER2.userId, i: 0, j: 0, deltaMs: 123 },
         },
         {
-          type: ActionType.Answer,
+          type: ActionType.Check,
           payload: { userId: PLAYER2.userId, i: 0, j: 0, correct: true },
         },
       ],
@@ -871,7 +871,7 @@ describe("gameEngine", () => {
           },
         },
         {
-          type: ActionType.Answer,
+          type: ActionType.Check,
           payload: { userId: PLAYER1.userId, i: 0, j: 0, correct: true },
         },
         {
@@ -896,7 +896,7 @@ describe("gameEngine", () => {
           },
         },
         {
-          type: ActionType.Answer,
+          type: ActionType.Check,
           payload: { userId: PLAYER1.userId, i: 0, j: 1, correct: false },
         },
         {
@@ -904,7 +904,7 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER2.userId, i: 0, j: 1, deltaMs: 123 },
         },
         {
-          type: ActionType.Answer,
+          type: ActionType.Check,
           payload: { userId: PLAYER2.userId, i: 0, j: 1, correct: false },
         },
         {
@@ -928,7 +928,7 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER2.userId, i: 0, j: 0, deltaMs: 123 },
         },
         {
-          type: ActionType.Answer,
+          type: ActionType.Check,
           payload: { userId: PLAYER2.userId, i: 0, j: 0, correct: true },
         },
         {
