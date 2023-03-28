@@ -21,10 +21,10 @@ import { Countdown } from "./countdown";
 import { Fade } from "./fade";
 import { Kbd } from "./kbd";
 import { Lockout } from "./lockout";
-import { NextClueForm } from "./next-clue-form";
+import { ConnectedNextClueForm as NextClueForm } from "./next-clue-form";
 import { ReadClueTimer } from "./read-clue-timer";
 import ShinyText from "./shiny-text";
-import WagerForm from "./wager-form";
+import { ConnectedWagerForm as WagerForm } from "./wager-form";
 
 /** MS_PER_CHARACTER is a heuristic value to scale the amount of time per clue by
  * its length.
