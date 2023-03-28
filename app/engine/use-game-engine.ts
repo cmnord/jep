@@ -38,7 +38,7 @@ function stateToGameEngine(
     return state.isAnswered.at(i)?.at(j)?.answeredBy ?? undefined;
   };
 
-  const winningBuzz = state.buzzes ? getWinningBuzzer(state.buzzes) : undefined;
+  const winningBuzz = getWinningBuzzer(state.buzzes);
   const winningBuzzer = winningBuzz?.userId ?? undefined;
 
   function getClueValueFn(idx: [number, number], userId: string) {

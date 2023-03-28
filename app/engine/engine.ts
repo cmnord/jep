@@ -27,7 +27,7 @@ export interface State {
   type: GameState;
   activeClue?: [number, number];
   boardControl?: string;
-  buzzes?: Map<string, number>;
+  buzzes: Map<string, number>;
   game: Game;
   /** warning! use setIsAnswered to deep-copy instead of mutating State. */
   isAnswered: ClueAnswer[][];
@@ -174,6 +174,7 @@ export function createInitialState(game: Game): State {
 
   return {
     type: GameState.PreviewRound,
+    buzzes: new Map(),
     game: game,
     isAnswered: generateGrid<ClueAnswer>(n, m, {
       isAnswered: false,
@@ -363,9 +364,7 @@ export function gameEngine(state: State, action: Action): State {
           return state;
         }
 
-        const buzzes: Map<string, number> = state.buzzes
-          ? new Map(state.buzzes)
-          : new Map();
+        const buzzes = new Map(state.buzzes);
 
         // Accept this buzz if the user has not already buzzed and the buzz came
         // in before the timeout.
@@ -416,9 +415,7 @@ export function gameEngine(state: State, action: Action): State {
 
         // Ignore the answer if it was not from the winning buzzer or it has
         // already been answered.
-        const winningBuzzer = state.buzzes
-          ? getWinningBuzzer(state.buzzes)
-          : undefined;
+        const winningBuzzer = getWinningBuzzer(state.buzzes);
         if (userId !== winningBuzzer?.userId) {
           return state;
         }
@@ -457,15 +454,12 @@ export function gameEngine(state: State, action: Action): State {
           ...player,
           score: player.score - clueValue,
         });
-        const lockedOutBuzzers = Array.from(state.buzzes ?? []).filter(
+        const lockedOutBuzzers = Array.from(state.buzzes).filter(
           ([, deltaMs]) => deltaMs === CANT_BUZZ_FLAG
         );
-        const newBuzzes = new Map([
-          ...lockedOutBuzzers,
-          [userId, CANT_BUZZ_FLAG],
-        ]);
+        const buzzes = new Map([...lockedOutBuzzers, [userId, CANT_BUZZ_FLAG]]);
         // If everyone has been locked out, reveal the answer to everyone.
-        if (newBuzzes.size === state.players.size) {
+        if (buzzes.size === state.players.size) {
           return {
             ...state,
             type: GameState.RevealAnswerToAll,
@@ -482,7 +476,7 @@ export function gameEngine(state: State, action: Action): State {
           ...state,
           type: GameState.ReadClue,
           players,
-          buzzes: newBuzzes,
+          buzzes,
         };
       }
       throw new Error(
@@ -534,6 +528,7 @@ export function gameEngine(state: State, action: Action): State {
           return {
             type: GameState.PreviewRound,
             boardControl: newBoardControl,
+            buzzes: new Map(),
             game: state.game,
             isAnswered: generateGrid(n, m, {
               isAnswered: false,
@@ -552,7 +547,7 @@ export function gameEngine(state: State, action: Action): State {
           ...state,
           type: GameState.ShowBoard,
           activeClue: undefined,
-          buzzes: undefined,
+          buzzes: new Map(),
           numExpectedWagers: 0,
           wagers: new Map(),
         };
