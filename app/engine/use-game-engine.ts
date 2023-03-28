@@ -34,8 +34,8 @@ function stateToGameEngine(
     return state.isAnswered.at(i)?.at(j)?.isAnswered ?? false;
   };
 
-  const answeredBy = (i: number, j: number) => {
-    return state.isAnswered.at(i)?.at(j)?.answeredBy ?? undefined;
+  const answeredBy = (i: number, j: number, userId: string) => {
+    return state.isAnswered.at(i)?.at(j)?.answeredBy === userId;
   };
 
   const winningBuzz = getWinningBuzzer(state.buzzes);
@@ -48,6 +48,7 @@ function stateToGameEngine(
   return {
     type: state.type,
     activeClue: state.activeClue,
+    /** answeredBy checks whether the user answered the given clue. */
     answeredBy,
     board,
     buzzes: state.buzzes,

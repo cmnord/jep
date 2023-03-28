@@ -37,7 +37,7 @@ function CheckForm({ loading }: { loading: boolean }) {
 }
 
 /** ConnectedCheckForm is shown to the winning buzzer at the bottom of the
- * prompt.  They can reveal the answer, then check whether it's correct or
+ * prompt. They reveal the answer, then check whether it's correct or
  * incorrect.
  */
 export function ConnectedCheckForm({

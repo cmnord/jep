@@ -93,7 +93,7 @@ export function ConnectedNextClueForm({
     : "Unknown player";
 
   const [i, j] = activeClue;
-  const buzzCorrect = answeredBy(i, j) === winningBuzzer;
+  const buzzCorrect = winningBuzzer ? answeredBy(i, j, winningBuzzer) : false;
   const winningBuzzerName = winningBuzzer
     ? players.get(winningBuzzer)?.name
     : undefined;

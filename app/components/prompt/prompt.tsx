@@ -340,7 +340,7 @@ function ReadCluePrompt({ roomName, userId }: Props) {
 }
 
 /** RevealAnswerToBuzzerPrompt handles all frontend behavior while the game state
- * is GameState.ReadAnswerToBuzzer.
+ * is GameState.RevealAnswerToBuzzer.
  */
 function RevealAnswerToBuzzerPrompt({ roomName, userId }: Props) {
   const {
@@ -467,8 +467,8 @@ function RevealAnswerToAllPrompt({ roomName, userId }: Props) {
         winningBuzzer={winningBuzzer}
         showWinner={true}
         buzzCorrect={
-          activeClue
-            ? answeredBy(activeClue[0], activeClue[1]) === winningBuzzer
+          activeClue && winningBuzzer
+            ? answeredBy(activeClue[0], activeClue[1], winningBuzzer)
             : false
         }
         clueValue={clueValue}
