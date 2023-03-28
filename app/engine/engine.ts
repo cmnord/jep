@@ -526,18 +526,17 @@ export function gameEngine(state: State, action: Action): State {
           }
 
           return {
+            ...state,
             type: GameState.PreviewRound,
+            activeClue: undefined,
             boardControl: newBoardControl,
             buzzes: new Map(),
-            game: state.game,
-            isAnswered: generateGrid(n, m, {
+            isAnswered: generateGrid<ClueAnswer>(n, m, {
               isAnswered: false,
-              answeredBy: undefined,
             }),
             numAnswered: 0,
             numCluesInBoard,
             numExpectedWagers: 0,
-            players: state.players,
             round: newRound,
             wagers: new Map(),
           };
