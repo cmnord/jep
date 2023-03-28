@@ -92,7 +92,7 @@ function WagerForm({
   );
 }
 
-export default function ConnectedWagerForm({
+export function ConnectedWagerForm({
   roomName,
   userId,
 }: {

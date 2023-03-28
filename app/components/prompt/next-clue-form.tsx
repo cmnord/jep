@@ -13,7 +13,7 @@ const formatter = Intl.NumberFormat("en-US", {
   signDisplay: "always", // Show +/- for positive and negative values.
 });
 
-function NextClue({
+function NextClueForm({
   boardControlName,
   buzzCorrect,
   cluesLeftInRound,
@@ -59,7 +59,7 @@ function NextClue({
   );
 }
 
-export function NextClueForm({
+export function ConnectedNextClueForm({
   roomName,
   userId,
 }: {
@@ -104,7 +104,7 @@ export function NextClueForm({
       <input type="hidden" value={userId} name="userId" />
       <input type="hidden" value={i} name="i" />
       <input type="hidden" value={j} name="j" />
-      <NextClue
+      <NextClueForm
         boardControlName={boardControlName}
         cluesLeftInRound={numCluesLeftInRound}
         loading={loading}
