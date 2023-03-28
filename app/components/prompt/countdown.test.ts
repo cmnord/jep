@@ -2,6 +2,8 @@ import { expect } from "vitest";
 
 import { shouldShowTick } from "./countdown";
 
+const CENTER = 4;
+
 describe("shouldShowTick", () => {
   interface TestCase {
     countdown: number;
@@ -73,7 +75,7 @@ describe("shouldShowTick", () => {
 
   for (const tc of testCases) {
     it(`should return ${tc.expected} when countdown is ${tc.countdown} and i is ${tc.i}`, () => {
-      const result = shouldShowTick(tc.countdown, tc.i);
+      const result = shouldShowTick(tc.countdown, tc.i, CENTER);
       expect(result).toBe(tc.expected);
     });
   }
