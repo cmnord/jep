@@ -712,6 +712,7 @@ describe("gameEngine", () => {
         ],
         numAnswered: 0,
         numCluesInBoard: 2,
+        numExpectedWagers: 1,
         players: new Map([
           [PLAYER1.userId, { ...PLAYER1, score: 400 }],
           [PLAYER2.userId, { ...PLAYER2, score: 0 }],
@@ -751,6 +752,7 @@ describe("gameEngine", () => {
         ],
         numAnswered: 0,
         numCluesInBoard: 2,
+        numExpectedWagers: 1,
         players: new Map([
           [PLAYER1.userId, { ...PLAYER1, score: 400 }],
           [PLAYER2.userId, { ...PLAYER2, score: 0 }],
@@ -802,6 +804,7 @@ describe("gameEngine", () => {
         ],
         numAnswered: 1,
         numCluesInBoard: 2,
+        numExpectedWagers: 1,
         players: new Map([
           [PLAYER1.userId, { ...PLAYER1, score: 400 }],
           [PLAYER2.userId, { ...PLAYER2, score: 345 }],
@@ -838,6 +841,7 @@ describe("gameEngine", () => {
         ],
         numAnswered: 0,
         numCluesInBoard: 2,
+        numExpectedWagers: 1,
         players: new Map([
           [PLAYER1.userId, { ...PLAYER1, score: 400 }],
           [PLAYER2.userId, { ...PLAYER2, score: 0 }],
