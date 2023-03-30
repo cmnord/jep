@@ -1,17 +1,41 @@
 import { useFetcher } from "@remix-run/react";
+import classNames from "classnames";
 
 import Button from "~/components/button";
 import type { Action } from "~/engine";
 import { useEngineContext } from "~/engine";
 import { useSoloAction } from "~/utils/use-solo-action";
 
-function CheckForm({ loading }: { loading: boolean }) {
+const formatter = Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  maximumFractionDigits: 0, // Round to whole dollars.
+  signDisplay: "always", // Show +/- for positive and negative values.
+});
+
+function CheckForm({
+  answerHiddenFromOthers,
+  loading,
+  myAnswer,
+}: {
+  answerHiddenFromOthers: boolean;
+  loading: boolean;
+  myAnswer?: string;
+}) {
   return (
     <div className="p-2 flex flex-col items-center gap-2">
       <p className="text-white font-bold">Were you right?</p>
-      <p className="text-slate-300 text-sm text-center">
-        (only you can see this answer)
-      </p>
+      {answerHiddenFromOthers && (
+        <p className="text-slate-300 text-sm text-center">
+          (only you can see this answer)
+        </p>
+      )}
+      {myAnswer && (
+        <p className="text-slate-300 text-sm text-center">
+          Your answer:{" "}
+          <span className="font-handwriting text-xl font-bold">{myAnswer}</span>
+        </p>
+      )}
       <div className="flex gap-2">
         <Button
           htmlType="submit"
@@ -43,22 +67,25 @@ function CheckForm({ loading }: { loading: boolean }) {
 export function ConnectedCheckForm({
   roomName,
   userId,
-  clueIdx,
+  answerHiddenFromOthers = true,
   showAnswer,
   onClickShowAnswer,
 }: {
   roomName: string;
   userId: string;
-  clueIdx: [number, number] | undefined;
+  answerHiddenFromOthers?: boolean;
   showAnswer: boolean;
   onClickShowAnswer: () => void;
 }) {
-  const [i, j] = clueIdx ? clueIdx : [-1, -1];
-
-  const { soloDispatch } = useEngineContext();
+  const { activeClue, answers, getClueValue, soloDispatch, answeredBy } =
+    useEngineContext();
   const fetcher = useFetcher<Action>();
   useSoloAction(fetcher, soloDispatch);
   const loading = fetcher.state === "loading";
+
+  if (!activeClue) {
+    throw new Error("No active clue");
+  }
 
   if (!showAnswer) {
     return (
@@ -83,12 +110,41 @@ export function ConnectedCheckForm({
     );
   }
 
+  const [i, j] = activeClue;
+  const myAnswer = answers.get(userId);
+  const checkResult = answeredBy(i, j, userId);
+
+  if (checkResult !== undefined) {
+    const clueValue = getClueValue(activeClue, userId);
+    const value = checkResult ? clueValue : -1 * clueValue;
+
+    return (
+      <div className="p-2 flex flex-col items-center gap-2">
+        <p className="text-white font-bold">
+          You {checkResult ? "won" : "lost"}{" "}
+          <span
+            className={classNames("text-shadow", {
+              "text-green-300": checkResult,
+              "text-red-300": !checkResult,
+            })}
+          >
+            {formatter.format(value)}
+          </span>
+        </p>
+      </div>
+    );
+  }
+
   return (
     <fetcher.Form method="post" action={`/room/${roomName}/check`}>
       <input type="hidden" value={userId} name="userId" />
       <input type="hidden" value={i} name="i" />
       <input type="hidden" value={j} name="j" />
-      <CheckForm loading={loading} />
+      <CheckForm
+        answerHiddenFromOthers={answerHiddenFromOthers}
+        loading={loading}
+        myAnswer={myAnswer}
+      />
     </fetcher.Form>
   );
 }
