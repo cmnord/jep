@@ -962,6 +962,362 @@ describe("gameEngine", () => {
         round: 1,
       },
     },
+    {
+      name: "Choose long-form clue, all players can buzz",
+      state: initialState,
+      actions: [
+        ...TWO_PLAYERS_ROUND_1,
+        {
+          type: ActionType.StartRound,
+          payload: { round: 1 },
+        },
+        {
+          type: ActionType.ChooseClue,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0 },
+        },
+        {
+          type: ActionType.SetClueWager,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0, wager: 400 },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0, deltaMs: 123 },
+        },
+        {
+          type: ActionType.Check,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0, correct: true },
+        },
+        {
+          type: ActionType.NextClue,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0 },
+        },
+        {
+          type: ActionType.ChooseClue,
+          payload: { userId: PLAYER2.userId, i: 0, j: 1 },
+        },
+      ],
+      expectedState: {
+        ...initialState,
+        type: GameState.WagerClue,
+        activeClue: [0, 1],
+        boardControl: PLAYER2.userId,
+        buzzes: new Map(),
+        isAnswered: [
+          [
+            { isAnswered: true, answeredBy: new Set([PLAYER2.userId]) },
+            { isAnswered: false, answeredBy: new Set() },
+          ],
+        ],
+        numAnswered: 1,
+        numCluesInBoard: 2,
+        numExpectedWagers: 2,
+        players: new Map([
+          [PLAYER1.userId, { ...PLAYER1, score: 400 }],
+          [PLAYER2.userId, { ...PLAYER2, score: 400 }],
+        ]),
+        round: 1,
+      },
+    },
+    {
+      name: "Choose long-form clue, wait for 2/2 wagers",
+      state: initialState,
+      actions: [
+        ...TWO_PLAYERS_ROUND_1,
+        {
+          type: ActionType.StartRound,
+          payload: { round: 1 },
+        },
+        {
+          type: ActionType.ChooseClue,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0 },
+        },
+        {
+          type: ActionType.SetClueWager,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0, wager: 400 },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0, deltaMs: 123 },
+        },
+        {
+          type: ActionType.Check,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0, correct: true },
+        },
+        {
+          type: ActionType.NextClue,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0 },
+        },
+        {
+          type: ActionType.ChooseClue,
+          payload: { userId: PLAYER2.userId, i: 0, j: 1 },
+        },
+        {
+          type: ActionType.SetClueWager,
+          payload: { userId: PLAYER1.userId, i: 0, j: 1, wager: 400 },
+        },
+      ],
+      expectedState: {
+        ...initialState,
+        type: GameState.WagerClue,
+        activeClue: [0, 1],
+        boardControl: PLAYER2.userId,
+        buzzes: new Map(),
+        isAnswered: [
+          [
+            { isAnswered: true, answeredBy: new Set([PLAYER2.userId]) },
+            { isAnswered: false, answeredBy: new Set() },
+          ],
+        ],
+        numAnswered: 1,
+        numCluesInBoard: 2,
+        numExpectedWagers: 2,
+        players: new Map([
+          [PLAYER1.userId, { ...PLAYER1, score: 400 }],
+          [PLAYER2.userId, { ...PLAYER2, score: 400 }],
+        ]),
+        round: 1,
+        wagers: new Map([[PLAYER1.userId, 400]]),
+      },
+    },
+    {
+      name: "Choose long-form clue, advance to read clue after wagers",
+      state: initialState,
+      actions: [
+        ...TWO_PLAYERS_ROUND_1,
+        {
+          type: ActionType.StartRound,
+          payload: { round: 1 },
+        },
+        {
+          type: ActionType.ChooseClue,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0 },
+        },
+        {
+          type: ActionType.SetClueWager,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0, wager: 400 },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0, deltaMs: 123 },
+        },
+        {
+          type: ActionType.Check,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0, correct: true },
+        },
+        {
+          type: ActionType.NextClue,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0 },
+        },
+        {
+          type: ActionType.ChooseClue,
+          payload: { userId: PLAYER2.userId, i: 0, j: 1 },
+        },
+        {
+          type: ActionType.SetClueWager,
+          payload: { userId: PLAYER1.userId, i: 0, j: 1, wager: 400 },
+        },
+        {
+          type: ActionType.SetClueWager,
+          payload: { userId: PLAYER2.userId, i: 0, j: 1, wager: 400 },
+        },
+      ],
+      expectedState: {
+        ...initialState,
+        type: GameState.ReadLongFormClue,
+        activeClue: [0, 1],
+        boardControl: PLAYER2.userId,
+        buzzes: new Map(),
+        isAnswered: [
+          [
+            { isAnswered: true, answeredBy: new Set([PLAYER2.userId]) },
+            { isAnswered: false, answeredBy: new Set() },
+          ],
+        ],
+        numAnswered: 1,
+        numCluesInBoard: 2,
+        numExpectedWagers: 2,
+        players: new Map([
+          [PLAYER1.userId, { ...PLAYER1, score: 400 }],
+          [PLAYER2.userId, { ...PLAYER2, score: 400 }],
+        ]),
+        round: 1,
+        wagers: new Map([
+          [PLAYER1.userId, 400],
+          [PLAYER2.userId, 400],
+        ]),
+      },
+    },
+    {
+      name: "Wait for all answers to long-form clue",
+      state: initialState,
+      actions: [
+        ...TWO_PLAYERS_ROUND_1,
+        {
+          type: ActionType.StartRound,
+          payload: { round: 1 },
+        },
+        {
+          type: ActionType.ChooseClue,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0 },
+        },
+        {
+          type: ActionType.SetClueWager,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0, wager: 400 },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0, deltaMs: 123 },
+        },
+        {
+          type: ActionType.Check,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0, correct: true },
+        },
+        {
+          type: ActionType.NextClue,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0 },
+        },
+        {
+          type: ActionType.ChooseClue,
+          payload: { userId: PLAYER2.userId, i: 0, j: 1 },
+        },
+        {
+          type: ActionType.SetClueWager,
+          payload: { userId: PLAYER1.userId, i: 0, j: 1, wager: 400 },
+        },
+        {
+          type: ActionType.SetClueWager,
+          payload: { userId: PLAYER2.userId, i: 0, j: 1, wager: 400 },
+        },
+        {
+          type: ActionType.Answer,
+          payload: {
+            userId: PLAYER1.userId,
+            i: 0,
+            j: 1,
+            answer: "right answer",
+          },
+        },
+      ],
+      expectedState: {
+        ...initialState,
+        type: GameState.ReadLongFormClue,
+        activeClue: [0, 1],
+        answers: new Map([[PLAYER1.userId, "right answer"]]),
+        boardControl: PLAYER2.userId,
+        buzzes: new Map([[PLAYER1.userId, 0]]),
+        isAnswered: [
+          [
+            { isAnswered: true, answeredBy: new Set([PLAYER2.userId]) },
+            { isAnswered: false, answeredBy: new Set() },
+          ],
+        ],
+        numAnswered: 1,
+        numCluesInBoard: 2,
+        numExpectedWagers: 2,
+        players: new Map([
+          [PLAYER1.userId, { ...PLAYER1, score: 400 }],
+          [PLAYER2.userId, { ...PLAYER2, score: 400 }],
+        ]),
+        round: 1,
+        wagers: new Map([
+          [PLAYER1.userId, 400],
+          [PLAYER2.userId, 400],
+        ]),
+      },
+    },
+    {
+      name: "Reveal answer to evaluate long-form clue after all answers in",
+      state: initialState,
+      actions: [
+        ...TWO_PLAYERS_ROUND_1,
+        {
+          type: ActionType.StartRound,
+          payload: { round: 1 },
+        },
+        {
+          type: ActionType.ChooseClue,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0 },
+        },
+        {
+          type: ActionType.SetClueWager,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0, wager: 400 },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0, deltaMs: 123 },
+        },
+        {
+          type: ActionType.Check,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0, correct: true },
+        },
+        {
+          type: ActionType.NextClue,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0 },
+        },
+        {
+          type: ActionType.ChooseClue,
+          payload: { userId: PLAYER2.userId, i: 0, j: 1 },
+        },
+        {
+          type: ActionType.SetClueWager,
+          payload: { userId: PLAYER1.userId, i: 0, j: 1, wager: 400 },
+        },
+        {
+          type: ActionType.SetClueWager,
+          payload: { userId: PLAYER2.userId, i: 0, j: 1, wager: 400 },
+        },
+        {
+          type: ActionType.Answer,
+          payload: {
+            userId: PLAYER1.userId,
+            i: 0,
+            j: 1,
+            answer: "right answer",
+          },
+        },
+        {
+          type: ActionType.Answer,
+          payload: {
+            userId: PLAYER2.userId,
+            i: 0,
+            j: 1,
+            answer: "wrong answer",
+          },
+        },
+      ],
+      expectedState: {
+        ...initialState,
+        type: GameState.RevealAnswerLongForm,
+        activeClue: [0, 1],
+        answers: new Map([
+          [PLAYER1.userId, "right answer"],
+          [PLAYER2.userId, "wrong answer"],
+        ]),
+        boardControl: PLAYER2.userId,
+        buzzes: new Map([
+          [PLAYER1.userId, 0],
+          [PLAYER2.userId, 0],
+        ]),
+        isAnswered: [
+          [
+            { isAnswered: true, answeredBy: new Set([PLAYER2.userId]) },
+            { isAnswered: false, answeredBy: new Set() },
+          ],
+        ],
+        numAnswered: 1,
+        numCluesInBoard: 2,
+        numExpectedWagers: 2,
+        players: new Map([
+          [PLAYER1.userId, { ...PLAYER1, score: 400 }],
+          [PLAYER2.userId, { ...PLAYER2, score: 400 }],
+        ]),
+        round: 1,
+        wagers: new Map([
+          [PLAYER1.userId, 400],
+          [PLAYER2.userId, 400],
+        ]),
+      },
+    },
   ];
 
   for (const tc of testCases) {
