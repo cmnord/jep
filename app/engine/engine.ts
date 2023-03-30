@@ -580,13 +580,13 @@ export function gameEngine(state: State, action: Action): State {
       );
     case ActionType.NextClue:
       if (isClueAction(action)) {
-        // TODO: make use of user ID?
-        const { i, j } = action.payload;
+        const { userId, i, j } = action.payload;
         // Ignore this action if the clue is no longer active.
         if (
           state.type !== GameState.RevealAnswerToAll ||
           state.activeClue?.[0] !== i ||
-          state.activeClue?.[1] !== j
+          state.activeClue?.[1] !== j ||
+          !state.players.has(userId)
         ) {
           return state;
         }
