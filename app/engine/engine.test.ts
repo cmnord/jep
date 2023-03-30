@@ -345,8 +345,8 @@ describe("gameEngine", () => {
         buzzes: new Map([[PLAYER1.userId, CLUE_TIMEOUT_MS + 1]]),
         isAnswered: [
           [
-            { isAnswered: true, answeredBy: undefined },
-            { isAnswered: false, answeredBy: undefined },
+            { isAnswered: true, answeredBy: new Set() },
+            { isAnswered: false, answeredBy: new Set() },
           ],
         ],
         numAnswered: 1,
@@ -386,8 +386,8 @@ describe("gameEngine", () => {
         buzzes: new Map([[PLAYER1.userId, 123]]),
         isAnswered: [
           [
-            { isAnswered: true, answeredBy: undefined },
-            { isAnswered: false, answeredBy: undefined },
+            { isAnswered: true, answeredBy: new Set() },
+            { isAnswered: false, answeredBy: new Set() },
           ],
         ],
         numAnswered: 1,
@@ -520,8 +520,8 @@ describe("gameEngine", () => {
         activeClue: [0, 0],
         isAnswered: [
           [
-            { isAnswered: true, answeredBy: PLAYER2.userId },
-            { isAnswered: false, answeredBy: undefined },
+            { isAnswered: true, answeredBy: new Set(PLAYER2.userId) },
+            { isAnswered: false, answeredBy: new Set() },
           ],
         ],
         boardControl: PLAYER2.userId,
@@ -574,8 +574,8 @@ describe("gameEngine", () => {
         boardControl: PLAYER1.userId,
         isAnswered: [
           [
-            { isAnswered: true, answeredBy: PLAYER1.userId },
-            { isAnswered: false, answeredBy: undefined },
+            { isAnswered: true, answeredBy: new Set(PLAYER1.userId) },
+            { isAnswered: false, answeredBy: new Set() },
           ],
         ],
         numAnswered: 1,
@@ -648,8 +648,8 @@ describe("gameEngine", () => {
         boardControl: PLAYER2.userId,
         isAnswered: [
           [
-            { isAnswered: false, answeredBy: undefined },
-            { isAnswered: false, answeredBy: undefined },
+            { isAnswered: false, answeredBy: new Set() },
+            { isAnswered: false, answeredBy: new Set() },
           ],
         ],
         numAnswered: 0,
@@ -672,8 +672,8 @@ describe("gameEngine", () => {
         boardControl: PLAYER2.userId,
         isAnswered: [
           [
-            { isAnswered: false, answeredBy: undefined },
-            { isAnswered: false, answeredBy: undefined },
+            { isAnswered: false, answeredBy: new Set() },
+            { isAnswered: false, answeredBy: new Set() },
           ],
         ],
         numAnswered: 0,
@@ -707,8 +707,8 @@ describe("gameEngine", () => {
         boardControl: PLAYER2.userId,
         isAnswered: [
           [
-            { isAnswered: false, answeredBy: undefined },
-            { isAnswered: false, answeredBy: undefined },
+            { isAnswered: false, answeredBy: new Set() },
+            { isAnswered: false, answeredBy: new Set() },
           ],
         ],
         numAnswered: 0,
@@ -747,8 +747,8 @@ describe("gameEngine", () => {
         buzzes: new Map([[PLAYER1.userId, CANT_BUZZ_FLAG]]),
         isAnswered: [
           [
-            { isAnswered: false, answeredBy: undefined },
-            { isAnswered: false, answeredBy: undefined },
+            { isAnswered: false, answeredBy: new Set() },
+            { isAnswered: false, answeredBy: new Set() },
           ],
         ],
         numAnswered: 0,
@@ -799,8 +799,8 @@ describe("gameEngine", () => {
         ]),
         isAnswered: [
           [
-            { isAnswered: true, answeredBy: PLAYER2.userId },
-            { isAnswered: false, answeredBy: undefined },
+            { isAnswered: true, answeredBy: new Set(PLAYER2.userId) },
+            { isAnswered: false, answeredBy: new Set() },
           ],
         ],
         numAnswered: 1,
@@ -836,8 +836,8 @@ describe("gameEngine", () => {
         buzzes: new Map([[PLAYER2.userId, CANT_BUZZ_FLAG]]),
         isAnswered: [
           [
-            { isAnswered: false, answeredBy: undefined },
-            { isAnswered: false, answeredBy: undefined },
+            { isAnswered: false, answeredBy: new Set() },
+            { isAnswered: false, answeredBy: new Set() },
           ],
         ],
         numAnswered: 0,
@@ -949,8 +949,8 @@ describe("gameEngine", () => {
         boardControl: PLAYER2.userId,
         isAnswered: [
           [
-            { isAnswered: true, answeredBy: PLAYER2.userId },
-            { isAnswered: true, answeredBy: undefined },
+            { isAnswered: true, answeredBy: new Set(PLAYER2.userId) },
+            { isAnswered: true, answeredBy: new Set() },
           ],
         ],
         numAnswered: 2,
