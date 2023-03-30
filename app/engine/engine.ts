@@ -23,7 +23,7 @@ export enum GameState {
 
 interface ClueAnswer {
   isAnswered: boolean;
-  answeredBy: Set<string>;
+  answeredBy: Map<string, boolean>;
 }
 
 export interface State {
@@ -52,6 +52,9 @@ export enum ActionType {
   SetClueWager = "set_clue_wager",
   Buzz = "buzz",
   Answer = "answer",
+  /** Check marks the player's answer as correct or incorrect and adds/subtracts
+   * points.
+   */
   Check = "check",
   NextClue = "next_clue",
 }
@@ -115,7 +118,7 @@ function setIsAnswered(
     row.map(
       (cell): ClueAnswer => ({
         isAnswered: cell.isAnswered,
-        answeredBy: new Set(cell.answeredBy),
+        answeredBy: new Map(cell.answeredBy),
       })
     )
   );
@@ -184,7 +187,7 @@ export function createInitialState(game: Game): State {
     game: game,
     isAnswered: generateGrid<ClueAnswer>(n, m, {
       isAnswered: false,
-      answeredBy: new Set(),
+      answeredBy: new Map(),
     }),
     numAnswered: 0,
     numCluesInBoard,
@@ -423,7 +426,8 @@ export function gameEngine(state: State, action: Action): State {
         if (
           state.type !== GameState.ReadLongFormClue ||
           state.activeClue?.[0] !== i ||
-          state.activeClue?.[1] !== j
+          state.activeClue?.[1] !== j ||
+          state.buzzes.get(userId) === CANT_BUZZ_FLAG
         ) {
           return state;
         }
@@ -451,60 +455,104 @@ export function gameEngine(state: State, action: Action): State {
     case ActionType.Check:
       if (isCheckAction(action)) {
         const { userId, i, j, correct } = action.payload;
+        const player = state.players.get(userId);
         if (
-          state.type !== GameState.RevealAnswerToBuzzer ||
+          (state.type !== GameState.RevealAnswerToBuzzer &&
+            state.type !== GameState.RevealAnswerLongForm) ||
           state.activeClue?.[0] !== i ||
           state.activeClue?.[1] !== j ||
-          state.isAnswered.at(i)?.at(j)?.isAnswered
+          state.isAnswered.at(i)?.at(j)?.isAnswered ||
+          !player
         ) {
           return state;
         }
+        const isLongForm = state.type === GameState.RevealAnswerLongForm;
 
-        // Ignore the action if it was not from the winning buzzer or it has
-        // already been answered.
-        const winningBuzzer = getWinningBuzzer(state.buzzes);
-        if (userId !== winningBuzzer?.userId) {
-          return state;
+        // Ignore the action if it was from a player who didn't answer the clue.
+        if (isLongForm) {
+          if (!state.answers.has(userId)) {
+            return state;
+          }
+        } else {
+          const winningBuzzer = getWinningBuzzer(state.buzzes);
+          if (userId !== winningBuzzer?.userId) {
+            return state;
+          }
         }
 
         const players = new Map(state.players);
-        const player = players.get(userId);
-        if (!player) {
-          return state;
-        }
-
         const clueValue = getClueValue(state, [i, j], userId);
 
+        let isAnswered = setIsAnswered(state.isAnswered, i, j, (prev) => {
+          prev.answeredBy.set(userId, correct);
+        });
+        const numExpectedChecks = isLongForm ? state.answers.size : 1;
+        const numChecks = isAnswered.at(i)?.at(j)?.answeredBy.size ?? 0;
+
         if (correct) {
-          // Reveal the answer to everyone, add points, and give the winning
-          // buzzer board control.
           players.set(userId, {
             ...player,
             score: player.score + clueValue,
           });
+        } else {
+          players.set(userId, {
+            ...player,
+            score: player.score - clueValue,
+          });
+        }
 
+        // If some players have not yet checked their long-form answer, stay in
+        // the current state.
+        if (numChecks < numExpectedChecks) {
+          return {
+            ...state,
+            type: GameState.RevealAnswerLongForm,
+            players,
+            isAnswered,
+          };
+        }
+
+        if (isLongForm) {
+          // Give board control to the player with the highest score after all
+          // wagers add up.
+          const boardControl = Array.from(players.entries()).sort(
+            ([, a], [, b]) => b.score - a.score
+          )[0][0];
           return {
             ...state,
             type: GameState.RevealAnswerToAll,
-            boardControl: userId,
+            boardControl,
             numAnswered: state.numAnswered + 1,
             players,
-            isAnswered: setIsAnswered(state.isAnswered, i, j, (prev) => {
+            isAnswered: setIsAnswered(isAnswered, i, j, (prev) => {
               prev.isAnswered = true;
-              prev.answeredBy.add(userId);
             }),
           };
         }
 
-        // If the buzzer was wrong, reduce their points.
-        players.set(userId, {
-          ...player,
-          score: player.score - clueValue,
-        });
-        const lockedOutBuzzers = Array.from(state.buzzes).filter(
-          ([, deltaMs]) => deltaMs === CANT_BUZZ_FLAG
+        // Reveal the answer to everyone and give the winning buzzer board
+        // control.
+        if (correct) {
+          return {
+            ...state,
+            type: GameState.RevealAnswerToAll,
+            boardControl: userId,
+            players,
+            numAnswered: state.numAnswered + 1,
+            isAnswered: setIsAnswered(isAnswered, i, j, (prev) => {
+              prev.isAnswered = true;
+            }),
+          };
+        }
+
+        // New buzzes are those previously locked out plus this one.
+        const buzzes = new Map(
+          Array.from(state.buzzes).filter(
+            ([, deltaMs]) => deltaMs === CANT_BUZZ_FLAG
+          )
         );
-        const buzzes = new Map([...lockedOutBuzzers, [userId, CANT_BUZZ_FLAG]]);
+        buzzes.set(userId, CANT_BUZZ_FLAG);
+
         // If everyone has been locked out, reveal the answer to everyone.
         if (buzzes.size === state.players.size) {
           return {
@@ -512,7 +560,7 @@ export function gameEngine(state: State, action: Action): State {
             type: GameState.RevealAnswerToAll,
             players,
             numAnswered: state.numAnswered + 1,
-            isAnswered: setIsAnswered(state.isAnswered, i, j, (prev) => {
+            isAnswered: setIsAnswered(isAnswered, i, j, (prev) => {
               prev.isAnswered = true;
             }),
           };
@@ -524,6 +572,7 @@ export function gameEngine(state: State, action: Action): State {
           type: GameState.ReadClue,
           players,
           buzzes,
+          isAnswered,
         };
       }
       throw new Error(
@@ -581,7 +630,7 @@ export function gameEngine(state: State, action: Action): State {
             buzzes: new Map(),
             isAnswered: generateGrid<ClueAnswer>(n, m, {
               isAnswered: false,
-              answeredBy: new Set(),
+              answeredBy: new Map(),
             }),
             numAnswered: 0,
             numCluesInBoard,
