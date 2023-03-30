@@ -35,7 +35,7 @@ function stateToGameEngine(
   };
 
   const answeredBy = (i: number, j: number, userId: string) => {
-    return state.isAnswered.at(i)?.at(j)?.answeredBy === userId;
+    return state.isAnswered.at(i)?.at(j)?.answeredBy.has(userId) ?? false;
   };
 
   const winningBuzz = getWinningBuzzer(state.buzzes);
