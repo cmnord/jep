@@ -16,6 +16,7 @@ import { useSoloAction } from "~/utils/use-solo-action";
 import useGameSound from "~/utils/use-sound";
 import { useTimeout } from "~/utils/use-timeout";
 
+import { ConnectedAnswerForm as AnswerForm } from "./answer-form";
 import { Buzzes } from "./buzz";
 import { ConnectedCheckForm as CheckForm } from "./check-form";
 import { Countdown } from "./countdown";
@@ -340,6 +341,62 @@ function ReadCluePrompt({ roomName, userId }: Props) {
   );
 }
 
+/** ReadLongFormCluePrompt handles all frontend behavior while the game state is
+ * GameState.ReadLongFormClue.
+ */
+function ReadLongFormCluePrompt({ roomName, userId }: Props) {
+  const {
+    activeClue,
+    buzzes,
+    category,
+    clue,
+    getClueValue,
+    players,
+    soloDispatch,
+  } = useEngineContext();
+
+  const fetcher = useFetcher<Action>();
+  useSoloAction(fetcher, soloDispatch);
+
+  const myBuzzDurationMs = buzzes.get(userId);
+
+  const [countdownStartedAt] = React.useState(
+    myBuzzDurationMs === undefined ? Date.now() : undefined
+  );
+
+  const clueValue = activeClue ? getClueValue(activeClue, userId) : 0;
+
+  return (
+    <>
+      <ReadClueTimer clueDurationMs={0} shouldAnimate={false} />
+      <div className="flex justify-between p-4">
+        <div className="text-white">
+          <span className="font-bold">{category}</span> for{" "}
+          <span className="font-bold">${clueValue}</span>
+        </div>
+      </div>
+      <ClueText
+        clue={clue?.clue}
+        canBuzz={false}
+        onBuzz={() => null}
+        focusOnBuzz={false}
+        showAnswer={false}
+        answer={undefined}
+      />
+      <AnswerForm roomName={roomName} userId={userId} />
+      <Countdown startTime={countdownStartedAt} durationSec={30} />
+      <Buzzes
+        buzzes={buzzes}
+        players={players}
+        winningBuzzer={undefined}
+        showWinner={false}
+        buzzCorrect={false}
+        clueValue={clueValue}
+      />
+    </>
+  );
+}
+
 /** RevealAnswerToBuzzerPrompt handles all frontend behavior while the game state
  * is GameState.RevealAnswerToBuzzer.
  */
@@ -484,6 +541,7 @@ export function ConnectedPrompt({ roomName, userId }: Props) {
   const isOpen =
     type === GameState.WagerClue ||
     type === GameState.ReadClue ||
+    type === GameState.ReadLongFormClue ||
     type === GameState.RevealAnswerToBuzzer ||
     type === GameState.RevealAnswerToAll;
 
@@ -496,6 +554,8 @@ export function ConnectedPrompt({ roomName, userId }: Props) {
         return <WagerCluePrompt roomName={roomName} userId={userId} />;
       case GameState.ReadClue:
         return <ReadCluePrompt roomName={roomName} userId={userId} />;
+      case GameState.ReadLongFormClue:
+        return <ReadLongFormCluePrompt roomName={roomName} userId={userId} />;
       case GameState.RevealAnswerToBuzzer:
         return (
           <RevealAnswerToBuzzerPrompt roomName={roomName} userId={userId} />

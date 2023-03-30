@@ -1,6 +1,7 @@
 import type { Board, Game } from "~/models/convert.server";
 import { generateGrid } from "~/utils/utils";
 import {
+  isAnswerAction,
   isBuzzAction,
   isCheckAction,
   isClueAction,
@@ -14,7 +15,9 @@ export enum GameState {
   ShowBoard = "ShowBoard",
   WagerClue = "WagerClue",
   ReadClue = "ReadClue",
+  ReadLongFormClue = "ReadLongFormClue",
   RevealAnswerToBuzzer = "RevealAnswerToBuzzer",
+  RevealAnswerLongForm = "RevealAnswerLongForm",
   RevealAnswerToAll = "RevealAnswerToAll",
 }
 
@@ -26,6 +29,7 @@ interface ClueAnswer {
 export interface State {
   type: GameState;
   activeClue?: [number, number];
+  answers: Map<string, string>;
   boardControl?: string;
   buzzes: Map<string, number>;
   game: Game;
@@ -47,6 +51,7 @@ export enum ActionType {
   ChooseClue = "choose_clue",
   SetClueWager = "set_clue_wager",
   Buzz = "buzz",
+  Answer = "answer",
   Check = "check",
   NextClue = "next_clue",
 }
@@ -174,6 +179,7 @@ export function createInitialState(game: Game): State {
 
   return {
     type: GameState.PreviewRound,
+    answers: new Map(),
     buzzes: new Map(),
     game: game,
     isAnswered: generateGrid<ClueAnswer>(n, m, {
@@ -310,11 +316,13 @@ export function gameEngine(state: State, action: Action): State {
     case ActionType.SetClueWager:
       if (isClueWagerAction(action)) {
         const { userId, i, j, wager } = action.payload;
+        const player = state.players.get(userId);
         if (
           state.type !== GameState.WagerClue ||
           state.activeClue?.[0] !== i ||
           state.activeClue?.[1] !== j ||
-          state.wagers.has(userId)
+          state.wagers.has(userId) ||
+          !player
         ) {
           return state;
         }
@@ -341,6 +349,13 @@ export function gameEngine(state: State, action: Action): State {
 
         // Read the clue once all wagers are in
         if (wagers.size === state.numExpectedWagers) {
+          if (clue.longForm) {
+            return {
+              ...state,
+              type: GameState.ReadLongFormClue,
+              wagers,
+            };
+          }
           return {
             ...state,
             type: GameState.ReadClue,
@@ -402,6 +417,37 @@ export function gameEngine(state: State, action: Action): State {
         return { ...state, type: GameState.RevealAnswerToBuzzer, buzzes };
       }
       throw new Error("Buzz action must have an associated index and delta");
+    case ActionType.Answer:
+      if (isAnswerAction(action)) {
+        const { userId, i, j, answer } = action.payload;
+        if (
+          state.type !== GameState.ReadLongFormClue ||
+          state.activeClue?.[0] !== i ||
+          state.activeClue?.[1] !== j
+        ) {
+          return state;
+        }
+
+        const buzzes = new Map(state.buzzes);
+        const answers = new Map(state.answers);
+        if (!buzzes.has(userId)) {
+          buzzes.set(userId, 0);
+          answers.set(userId, answer);
+        }
+
+        if (buzzes.size < state.players.size) {
+          return { ...state, answers, buzzes };
+        }
+
+        // All answers are in, so show the answers to all who answered to check them.
+        return {
+          ...state,
+          type: GameState.RevealAnswerLongForm,
+          answers,
+          buzzes,
+        };
+      }
+      throw new Error("Answer action must have an associated index and answer");
     case ActionType.Check:
       if (isCheckAction(action)) {
         const { userId, i, j, correct } = action.payload;
@@ -530,6 +576,7 @@ export function gameEngine(state: State, action: Action): State {
             ...state,
             type: GameState.PreviewRound,
             activeClue: undefined,
+            answers: new Map(),
             boardControl: newBoardControl,
             buzzes: new Map(),
             isAnswered: generateGrid<ClueAnswer>(n, m, {

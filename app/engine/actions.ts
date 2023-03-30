@@ -73,6 +73,21 @@ export function isBuzzAction(action: Action): action is {
   );
 }
 
+export function isAnswerAction(action: Action): action is {
+  type: ActionType.Answer;
+  payload: { userId: string; i: number; j: number; answer: string };
+} {
+  return (
+    action.type === ActionType.Answer &&
+    action.payload !== null &&
+    typeof action.payload === "object" &&
+    "userId" in action.payload &&
+    "i" in action.payload &&
+    "j" in action.payload &&
+    "answer" in action.payload
+  );
+}
+
 export function isCheckAction(action: Action): action is {
   type: ActionType.Check;
   payload: { userId: string; i: number; j: number; correct: boolean };
