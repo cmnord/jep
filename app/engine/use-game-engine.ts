@@ -35,7 +35,7 @@ function stateToGameEngine(
   };
 
   const answeredBy = (i: number, j: number, userId: string) => {
-    return state.isAnswered.at(i)?.at(j)?.answeredBy.has(userId) ?? false;
+    return state.isAnswered.at(i)?.at(j)?.answeredBy.get(userId);
   };
 
   const winningBuzz = getWinningBuzzer(state.buzzes);
@@ -48,8 +48,11 @@ function stateToGameEngine(
   return {
     type: state.type,
     activeClue: state.activeClue,
-    /** answeredBy checks whether the user answered the given clue. */
+    /** answeredBy checks whether the user answered the given clue and whether
+     * they were correct.
+     */
     answeredBy,
+    answers: state.answers,
     board,
     buzzes: state.buzzes,
     category,
@@ -61,6 +64,7 @@ function stateToGameEngine(
     numCluesLeftInRound: state.numCluesInBoard - state.numAnswered,
     round: state.round,
     boardControl: state.boardControl,
+    wagers: state.wagers,
     winningBuzzer,
   };
 }

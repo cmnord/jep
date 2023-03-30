@@ -12,6 +12,34 @@ const formatter = Intl.NumberFormat("en-US", {
   maximumFractionDigits: 0, // Round to whole dollars.
 });
 
+function PlayerScores({
+  players,
+  userId,
+}: {
+  players: Player[];
+  userId: string;
+}) {
+  // Sort from highest to lowest score.
+  const playerScores = players.sort((a, b) => b.score - a.score);
+
+  return (
+    <div className="flex self-start gap-2 w-full overflow-x-scroll text-slate-300 text-sm text-shadow">
+      {playerScores.map((p, i) => (
+        <div
+          className="flex flex-col items-center justify-between"
+          key={`player-${i}`}
+        >
+          <p className="text-center">
+            <span className="font-handwriting text-xl font-bold">{p.name}</span>
+            <span>{p.userId === userId ? " (you)" : null}</span>
+          </p>
+          <p className="text-white">{formatter.format(p.score)}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function WagerForm({
   highestClueValue,
   score,
@@ -27,9 +55,6 @@ function WagerForm({
 }) {
   const maxWager = Math.max(score, highestClueValue);
 
-  // Sort from highest to lowest score.
-  const playerScores = players.sort((a, b) => b.score - a.score);
-
   const [inputRequired, setInputRequired] = React.useState(true);
 
   return (
@@ -41,19 +66,7 @@ function WagerForm({
         <p className="text-slate-300 text-sm text-center">
           You can wager up to {formatter.format(maxWager)}.
         </p>
-        <div className="flex self-start gap-2 w-full overflow-x-scroll text-slate-300 text-sm text-shadow">
-          {playerScores.map((p, i) => (
-            <div
-              className="flex flex-col items-center justify-between"
-              key={`player-${i}`}
-            >
-              <p className="text-center font-mono font-bold">
-                {p.name} {p.userId === userId ? "(you)" : null}
-              </p>
-              <p className="text-white">{formatter.format(p.score)}</p>
-            </div>
-          ))}
-        </div>
+        <PlayerScores players={players} userId={userId} />
       </div>
       <div className="flex gap-2">
         <input
@@ -113,6 +126,23 @@ export function ConnectedWagerForm({
     [board]
   );
 
+  const wager = wagers.get(userId);
+  const playersList = Array.from(players.values());
+
+  if (wager !== undefined) {
+    return (
+      <div className="p-2 flex flex-col items-center gap-4">
+        <p className="text-white font-bold">
+          Your wager:{" "}
+          <span className="font-handwriting text-xl">
+            {formatter.format(wager)}
+          </span>
+        </p>
+        <PlayerScores players={playersList} userId={userId} />
+      </div>
+    );
+  }
+
   return (
     <fetcher.Form method="post" action={`/room/${roomName}/wager`}>
       <input type="hidden" value={userId} name="userId" />
@@ -121,7 +151,7 @@ export function ConnectedWagerForm({
       <WagerForm
         highestClueValue={highestClueValue}
         loading={loading}
-        players={Array.from(players.values())}
+        players={playersList}
         score={score}
         userId={userId}
       />

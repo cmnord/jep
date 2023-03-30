@@ -4,9 +4,28 @@ import { useEngineContext } from "~/engine";
 import { useSoloAction } from "~/utils/use-solo-action";
 import Button from "../button";
 
-function AnswerForm({ loading }: { loading: boolean }) {
+function AnswerForm({
+  submittedAnswer,
+  loading,
+}: {
+  submittedAnswer?: string;
+  loading: boolean;
+}) {
   return (
     <div className="p-2 flex flex-col items-center gap-2">
+      {submittedAnswer ? (
+        <>
+          <p className="text-white font-bold">
+            You answered:{" "}
+            <span className="text-xl font-handwriting font-bold">
+              {submittedAnswer}
+            </span>
+          </p>
+          <p className="text-sm text-slate-300">
+            You can change your answer until the last player submits an answer.
+          </p>
+        </>
+      ) : null}
       <div className="flex gap-2">
         <input
           type="text"
@@ -34,7 +53,7 @@ export function ConnectedAnswerForm({
   roomName: string;
   userId: string;
 }) {
-  const { activeClue, soloDispatch } = useEngineContext();
+  const { activeClue, answers, soloDispatch } = useEngineContext();
   if (!activeClue) {
     throw new Error("No active clue");
   }
@@ -44,13 +63,14 @@ export function ConnectedAnswerForm({
   const loading = fetcher.state === "loading";
 
   const [i, j] = activeClue;
+  const submittedAnswer = answers.get(userId);
 
   return (
     <fetcher.Form method="post" action={`/room/${roomName}/answer`}>
       <input type="hidden" value={userId} name="userId" />
       <input type="hidden" value={i} name="i" />
       <input type="hidden" value={j} name="j" />
-      <AnswerForm loading={loading} />
+      <AnswerForm submittedAnswer={submittedAnswer} loading={loading} />
     </fetcher.Form>
   );
 }

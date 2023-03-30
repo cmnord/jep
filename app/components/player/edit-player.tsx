@@ -111,7 +111,7 @@ export function EditPlayerForm({
       fetcher.submit(formRef.current);
       setOptimisticPlayer((prev) =>
         prev
-          ? { ...prev, name: debouncedName, score: 0 }
+          ? { ...prev, name: debouncedName }
           : { userId, name: debouncedName, score: 0 }
       );
     }
