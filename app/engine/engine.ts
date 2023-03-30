@@ -20,7 +20,7 @@ export enum GameState {
 
 interface ClueAnswer {
   isAnswered: boolean;
-  answeredBy?: string;
+  answeredBy: Set<string>;
 }
 
 export interface State {
@@ -110,7 +110,7 @@ function setIsAnswered(
     row.map(
       (cell): ClueAnswer => ({
         isAnswered: cell.isAnswered,
-        answeredBy: cell.answeredBy,
+        answeredBy: new Set(cell.answeredBy),
       })
     )
   );
@@ -178,6 +178,7 @@ export function createInitialState(game: Game): State {
     game: game,
     isAnswered: generateGrid<ClueAnswer>(n, m, {
       isAnswered: false,
+      answeredBy: new Set(),
     }),
     numAnswered: 0,
     numCluesInBoard,
@@ -444,7 +445,7 @@ export function gameEngine(state: State, action: Action): State {
             players,
             isAnswered: setIsAnswered(state.isAnswered, i, j, (prev) => {
               prev.isAnswered = true;
-              prev.answeredBy = userId;
+              prev.answeredBy.add(userId);
             }),
           };
         }
@@ -533,6 +534,7 @@ export function gameEngine(state: State, action: Action): State {
             buzzes: new Map(),
             isAnswered: generateGrid<ClueAnswer>(n, m, {
               isAnswered: false,
+              answeredBy: new Set(),
             }),
             numAnswered: 0,
             numCluesInBoard,
