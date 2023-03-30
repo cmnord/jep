@@ -13,40 +13,47 @@ const formatter = Intl.NumberFormat("en-US", {
   signDisplay: "always", // Show +/- for positive and negative values.
 });
 
-function NextClueForm({
-  boardControlName,
-  buzzCorrect,
-  cluesLeftInRound,
-  clueValue,
-  loading,
-  winningBuzzer,
+function PlayerScores({
+  answerers,
 }: {
-  boardControlName: string;
-  buzzCorrect: boolean;
-  cluesLeftInRound: number;
-  clueValue: number;
-  loading: boolean;
-  winningBuzzer?: string;
+  answerers: { name: string; correct: boolean; value: number }[];
 }) {
-  const value = buzzCorrect ? clueValue : -1 * clueValue;
-
+  if (!answerers.length) {
+    return <p className="text-slate-300 text-sm">No one won the clue.</p>;
+  }
   return (
-    <div className="p-2 flex flex-col items-center gap-2">
-      {winningBuzzer ? (
-        <p className="text-white font-bold">
-          {winningBuzzer}{" "}
+    <div className="flex gap-2">
+      {answerers.map(({ name, correct, value }, i) => (
+        <p className="text-white font-bold" key={i}>
+          <span className="font-handwriting text-xl">{name} </span>
           <span
             className={classNames("text-shadow", {
-              "text-green-300": buzzCorrect,
-              "text-red-300": !buzzCorrect,
+              "text-green-300": correct,
+              "text-red-300": !correct,
             })}
           >
-            {formatter.format(value)}
+            {formatter.format(correct ? value : -1 * value)}
           </span>
         </p>
-      ) : (
-        <p className="text-slate-300 text-sm">No one won the clue.</p>
-      )}
+      ))}
+    </div>
+  );
+}
+
+function NextClueForm({
+  boardControlName,
+  cluesLeftInRound,
+  loading,
+  answerers,
+}: {
+  boardControlName: string;
+  cluesLeftInRound: number;
+  loading: boolean;
+  answerers: { name: string; correct: boolean; value: number }[];
+}) {
+  return (
+    <div className="p-2 flex flex-col items-center gap-2">
+      <PlayerScores answerers={answerers} />
       {cluesLeftInRound ? (
         <p className="text-slate-300 text-sm">
           {boardControlName} will choose the next clue.
@@ -74,7 +81,6 @@ export function ConnectedNextClueForm({
     boardControl,
     numCluesLeftInRound,
     soloDispatch,
-    winningBuzzer,
   } = useEngineContext();
 
   if (!activeClue) {
@@ -93,11 +99,17 @@ export function ConnectedNextClueForm({
     : "Unknown player";
 
   const [i, j] = activeClue;
-  const buzzCorrect = winningBuzzer ? answeredBy(i, j, winningBuzzer) : false;
-  const winningBuzzerName = winningBuzzer
-    ? players.get(winningBuzzer)?.name
-    : undefined;
-  const clueValue = getClueValue(activeClue, userId);
+
+  const answerers = Array.from(players.values())
+    .map((player) => ({
+      name: player.name,
+      correct: answeredBy(i, j, player.userId),
+      value: getClueValue(activeClue, player.userId),
+    }))
+    .filter(
+      (p): p is { name: string; correct: boolean; value: number } =>
+        p.correct !== undefined
+    );
 
   return (
     <fetcher.Form method="post" action={`/room/${roomName}/next-clue`}>
@@ -108,9 +120,7 @@ export function ConnectedNextClueForm({
         boardControlName={boardControlName}
         cluesLeftInRound={numCluesLeftInRound}
         loading={loading}
-        winningBuzzer={winningBuzzerName}
-        buzzCorrect={buzzCorrect}
-        clueValue={clueValue}
+        answerers={answerers}
       />
     </fetcher.Form>
   );

@@ -8,6 +8,7 @@ export const GameEngineContext = React.createContext<
 >({
   type: GameState.PreviewRound,
   activeClue: undefined,
+  answers: new Map(),
   answeredBy: () => false,
   board: { categories: [], categoryNames: [] },
   boardControl: undefined,
@@ -20,6 +21,7 @@ export const GameEngineContext = React.createContext<
   numCluesLeftInRound: 0,
   players: new Map(),
   round: 0,
+  wagers: new Map(),
   winningBuzzer: undefined,
 });
 
