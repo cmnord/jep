@@ -37,26 +37,21 @@ function dbGameToGame(dbGame: DbGame, clues: DbClue[]): Game {
     if (!boardsMap.has(round)) {
       boardsMap.set(round, board);
     }
-    const categoryIdx = board.categoryNames.findIndex(
+    let categoryIdx = board.categoryNames.findIndex(
       (cn) => cn === clue.category
     );
     if (categoryIdx === -1) {
       board.categoryNames.push(clue.category);
       board.categories.push({
         name: clue.category,
-        clues: [
-          {
-            ...clue,
-            longForm: clue.long_form,
-          },
-        ],
+        clues: [],
       });
-    } else {
-      board.categories[categoryIdx].clues.push({
-        ...clue,
-        longForm: clue.long_form,
-      });
+      categoryIdx = board.categories.length - 1;
     }
+    board.categories[categoryIdx].clues.push({
+      ...clue,
+      longForm: clue.long_form,
+    });
   }
 
   for (let round = 0; round < boardsMap.size; round++) {
@@ -141,7 +136,8 @@ export async function getGame(gameId: string): Promise<Game | null> {
   const { data, error } = await db
     .from<"games", GameTable>("games")
     .select<"*, clues ( * )", GameAndClues>("*, clues ( * )")
-    .eq("id", gameId);
+    .eq("id", gameId)
+    .order("value", { foreignTable: "clues" });
 
   if (error !== null) {
     throw new Error(error.message);
