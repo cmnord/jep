@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import type { Player } from "~/engine";
-import { CANT_BUZZ_FLAG, CLUE_TIMEOUT_MS } from "~/engine";
+import { CANT_BUZZ_FLAG, CLUE_TIMEOUT_MS, useEngineContext } from "~/engine";
 import { PlayerIcon } from "../player";
 
 function showBuzz(durationMs?: number) {
@@ -23,18 +23,18 @@ const formatter = Intl.NumberFormat("en-US", {
 
 function Buzz({
   player,
-  wonBuzz,
+  answered,
   clueValue,
 }: {
   player: Player;
-  wonBuzz: boolean;
+  answered: boolean;
   clueValue: number;
 }) {
-  const clueValueStr = clueValue ? formatter.format(clueValue) : undefined;
+  const clueValueStr = formatter.format(clueValue);
 
   return (
     <div>
-      {wonBuzz && clueValueStr !== undefined ? (
+      {answered ? (
         <span
           className={classNames(
             "absolute -top-5 font-bold animate-bounce text-shadow",
@@ -53,20 +53,26 @@ function Buzz({
 }
 
 export function Buzzes({
-  buzzes,
-  clueValue,
-  players,
+  buzzes: optimisticBuzzes,
   showWinner,
-  winningBuzzer,
-  buzzCorrect,
 }: {
-  buzzes: Map<string, number>;
-  clueValue: number;
-  players: Map<string, Player>;
+  buzzes?: Map<string, number>;
   showWinner: boolean;
-  winningBuzzer?: string;
-  buzzCorrect: boolean;
 }) {
+  const {
+    activeClue,
+    answeredBy,
+    buzzes: serverBuzzes,
+    getClueValue,
+    players,
+  } = useEngineContext();
+
+  if (!activeClue) {
+    throw new Error("No active clue");
+  }
+
+  const buzzes = optimisticBuzzes ?? serverBuzzes;
+
   // sort buzzes by time
   const sortedBuzzes = Array.from(buzzes.entries())
     .filter(([, b]) => showBuzz(b))
@@ -87,14 +93,23 @@ export function Buzzes({
   return (
     <div className="relative">
       <div className="flex gap-4 h-8 m-2 w-full overflow-x-scroll">
-        {sortedPlayers.map((player, i) => (
-          <Buzz
-            key={i}
-            player={player}
-            wonBuzz={winningBuzzer === player.userId && showWinner}
-            clueValue={buzzCorrect ? clueValue : -1 * clueValue}
-          />
-        ))}
+        {sortedPlayers.map((player, i) => {
+          const answer = answeredBy(
+            activeClue[0],
+            activeClue[1],
+            player.userId
+          );
+          const clueValue = getClueValue(activeClue, player.userId);
+          const correct = answer === true;
+          return (
+            <Buzz
+              key={i}
+              player={player}
+              answered={answer !== undefined && showWinner}
+              clueValue={correct ? clueValue : -1 * clueValue}
+            />
+          );
+        })}
       </div>
     </div>
   );
