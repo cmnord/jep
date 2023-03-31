@@ -116,7 +116,8 @@ export function ConnectedWagerForm({
   roomName: string;
   userId: string;
 }) {
-  const { board, players, soloDispatch, activeClue } = useEngineContext();
+  const { board, players, soloDispatch, activeClue, wagers } =
+    useEngineContext();
   const fetcher = useFetcher<Action>();
   useSoloAction(fetcher, soloDispatch);
   const loading = fetcher.state === "loading";

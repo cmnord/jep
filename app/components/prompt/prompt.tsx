@@ -135,14 +135,7 @@ function WagerCluePrompt({ roomName, userId }: Props) {
         </p>
       )}
       <Countdown startTime={undefined} />
-      <Buzzes
-        buzzes={buzzes}
-        players={players}
-        winningBuzzer={undefined}
-        showWinner={false}
-        buzzCorrect={false}
-        clueValue={0}
-      />
+      <Buzzes showWinner={false} />
     </>
   );
 }
@@ -151,15 +144,8 @@ function WagerCluePrompt({ roomName, userId }: Props) {
  * GameState.ReadClue.
  */
 function ReadCluePrompt({ roomName, userId }: Props) {
-  const {
-    activeClue,
-    buzzes,
-    category,
-    clue,
-    getClueValue,
-    players,
-    soloDispatch,
-  } = useEngineContext();
+  const { activeClue, buzzes, category, clue, getClueValue, soloDispatch } =
+    useEngineContext();
 
   const [optimisticBuzzes, setOptimisticBuzzes] = React.useState(buzzes);
   const myBuzzDurationMs = optimisticBuzzes.get(userId);
@@ -322,20 +308,13 @@ function ReadCluePrompt({ roomName, userId }: Props) {
         clue={clue?.clue}
         canBuzz={!lockout && myBuzzDurationMs === undefined}
         onBuzz={() => handleClick(Date.now())}
-        focusOnBuzz={true}
+        focusOnBuzz
         showAnswer={false}
         answer={undefined}
       />
       <Lockout active={lockout} />
       <Countdown startTime={buzzerOpenAt} />
-      <Buzzes
-        buzzes={optimisticBuzzes}
-        players={players}
-        winningBuzzer={undefined}
-        showWinner={false}
-        buzzCorrect={false}
-        clueValue={clueValue}
-      />
+      <Buzzes buzzes={optimisticBuzzes} showWinner={false} />
     </>
   );
 }
@@ -344,15 +323,8 @@ function ReadCluePrompt({ roomName, userId }: Props) {
  * GameState.ReadLongFormClue.
  */
 function ReadLongFormCluePrompt({ roomName, userId }: Props) {
-  const {
-    activeClue,
-    buzzes,
-    category,
-    clue,
-    getClueValue,
-    players,
-    soloDispatch,
-  } = useEngineContext();
+  const { activeClue, buzzes, category, clue, getClueValue, soloDispatch } =
+    useEngineContext();
 
   const fetcher = useFetcher<Action>();
   useSoloAction(fetcher, soloDispatch);
@@ -384,14 +356,7 @@ function ReadLongFormCluePrompt({ roomName, userId }: Props) {
       />
       <AnswerForm roomName={roomName} userId={userId} />
       <Countdown startTime={countdownStartedAt} durationSec={30} />
-      <Buzzes
-        buzzes={buzzes}
-        players={players}
-        winningBuzzer={undefined}
-        showWinner={false}
-        buzzCorrect={false}
-        clueValue={clueValue}
-      />
+      <Buzzes showWinner={false} />
     </>
   );
 }
@@ -400,15 +365,8 @@ function ReadLongFormCluePrompt({ roomName, userId }: Props) {
  * is GameState.RevealAnswerToBuzzer.
  */
 function RevealAnswerToBuzzerPrompt({ roomName, userId }: Props) {
-  const {
-    activeClue,
-    buzzes,
-    category,
-    clue,
-    getClueValue,
-    players,
-    winningBuzzer,
-  } = useEngineContext();
+  const { activeClue, category, clue, getClueValue, players, winningBuzzer } =
+    useEngineContext();
 
   const clueValue = activeClue ? getClueValue(activeClue, userId) : 0;
 
@@ -465,14 +423,7 @@ function RevealAnswerToBuzzerPrompt({ roomName, userId }: Props) {
         </p>
       )}
       <Countdown startTime={countdownStartedAt} />
-      <Buzzes
-        buzzes={buzzes}
-        players={players}
-        winningBuzzer={winningBuzzer}
-        showWinner={false}
-        buzzCorrect={false}
-        clueValue={clueValue}
-      />
+      <Buzzes showWinner={false} />
     </>
   );
 }
@@ -481,16 +432,7 @@ function RevealAnswerToBuzzerPrompt({ roomName, userId }: Props) {
  * GameState.ReadAnswerToAll.
  */
 function RevealAnswerToAllPrompt({ roomName, userId }: Props) {
-  const {
-    activeClue,
-    answeredBy,
-    buzzes,
-    category,
-    clue,
-    getClueValue,
-    players,
-    winningBuzzer,
-  } = useEngineContext();
+  const { activeClue, category, clue, getClueValue } = useEngineContext();
 
   const clueValue = activeClue ? getClueValue(activeClue, userId) : 0;
 
@@ -512,23 +454,12 @@ function RevealAnswerToAllPrompt({ roomName, userId }: Props) {
         canBuzz={false}
         onBuzz={() => null}
         focusOnBuzz={false}
-        showAnswer={true}
+        showAnswer
         answer={clue?.answer}
       />
       <NextClueForm roomName={roomName} userId={userId} />
       <Countdown startTime={undefined} />
-      <Buzzes
-        buzzes={buzzes}
-        players={players}
-        winningBuzzer={winningBuzzer}
-        showWinner={true}
-        buzzCorrect={
-          activeClue && winningBuzzer
-            ? answeredBy(activeClue[0], activeClue[1], winningBuzzer)
-            : false
-        }
-        clueValue={clueValue}
-      />
+      <Buzzes showWinner />
     </>
   );
 }
