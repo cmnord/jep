@@ -22,6 +22,10 @@
   .word-spacing-1 {
     word-spacing: 0.5rem;
   }
+
+  .break-word {
+    word-break: break-word;
+  }
 }
 
 @layer components {

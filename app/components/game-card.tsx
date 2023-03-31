@@ -69,7 +69,9 @@ export default function GameCard({
               {game.title}
             </strong>
             {game.note && (
-              <p className="text-sm text-slate-500 text-left">{game.note}</p>
+              <p className="text-sm text-slate-500 text-left break-word">
+                {game.note}
+              </p>
             )}
           </div>
           <div
