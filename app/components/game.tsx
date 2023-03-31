@@ -89,7 +89,7 @@ export default function GameComponent({
         >
           <p>
             <span
-              className="font-bold border-b-4"
+              className="font-handwriting text-xl font-bold border-b-4"
               style={{ borderColor: boardControlColor }}
             >
               {boardControlName}
