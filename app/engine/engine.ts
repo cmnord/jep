@@ -436,8 +436,8 @@ export function gameEngine(state: State, action: Action): State {
         const answers = new Map(state.answers);
         if (!buzzes.has(userId)) {
           buzzes.set(userId, 0);
-          answers.set(userId, answer);
         }
+        answers.set(userId, answer);
 
         if (buzzes.size < state.players.size) {
           return { ...state, answers, buzzes };

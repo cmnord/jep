@@ -1659,6 +1659,117 @@ describe("gameEngine", () => {
         ]),
       },
     },
+    {
+      name: "Can revise long-form clue answers until all answers are in",
+      state: initialState,
+      actions: [
+        ...TWO_PLAYERS_ROUND_1,
+        {
+          type: ActionType.StartRound,
+          payload: { round: 1 },
+        },
+        {
+          type: ActionType.ChooseClue,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0 },
+        },
+        {
+          type: ActionType.SetClueWager,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0, wager: 400 },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0, deltaMs: 123 },
+        },
+        {
+          type: ActionType.Check,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0, correct: true },
+        },
+        {
+          type: ActionType.NextClue,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0 },
+        },
+        {
+          type: ActionType.ChooseClue,
+          payload: { userId: PLAYER2.userId, i: 0, j: 1 },
+        },
+        {
+          type: ActionType.SetClueWager,
+          payload: { userId: PLAYER1.userId, i: 0, j: 1, wager: 400 },
+        },
+        {
+          type: ActionType.SetClueWager,
+          payload: { userId: PLAYER2.userId, i: 0, j: 1, wager: 400 },
+        },
+        {
+          type: ActionType.Answer,
+          payload: {
+            userId: PLAYER1.userId,
+            i: 0,
+            j: 1,
+            answer: "draft answer 1",
+          },
+        },
+        {
+          type: ActionType.Answer,
+          payload: {
+            userId: PLAYER1.userId,
+            i: 0,
+            j: 1,
+            answer: "revised answer 1",
+          },
+        },
+        {
+          type: ActionType.Answer,
+          payload: {
+            userId: PLAYER2.userId,
+            i: 0,
+            j: 1,
+            answer: "draft answer 2",
+          },
+        },
+        {
+          type: ActionType.Answer,
+          payload: {
+            userId: PLAYER2.userId,
+            i: 0,
+            j: 1,
+            answer: "revised answer 2",
+          },
+        },
+      ],
+      expectedState: {
+        ...initialState,
+        type: GameState.RevealAnswerLongForm,
+        activeClue: [0, 1],
+        answers: new Map([
+          [PLAYER1.userId, "revised answer 1"],
+          [PLAYER2.userId, "draft answer 2"],
+        ]),
+        boardControl: PLAYER2.userId,
+        buzzes: new Map([
+          [PLAYER1.userId, 0],
+          [PLAYER2.userId, 0],
+        ]),
+        isAnswered: [
+          [
+            { isAnswered: true, answeredBy: new Map([[PLAYER2.userId, true]]) },
+            { isAnswered: false, answeredBy: new Map() },
+          ],
+        ],
+        numAnswered: 1,
+        numCluesInBoard: 2,
+        numExpectedWagers: 2,
+        players: new Map([
+          [PLAYER1.userId, { ...PLAYER1, score: 400 }],
+          [PLAYER2.userId, { ...PLAYER2, score: 400 }],
+        ]),
+        round: 1,
+        wagers: new Map([
+          [PLAYER1.userId, 400],
+          [PLAYER2.userId, 400],
+        ]),
+      },
+    },
   ];
 
   for (const tc of testCases) {
