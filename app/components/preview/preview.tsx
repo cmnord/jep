@@ -80,7 +80,7 @@ function BeforeGamePreview({
         <div className="flex flex-col gap-2">
           <p className="text-left">
             <span
-              className="font-bold border-b-4"
+              className="font-handwriting text-xl font-bold border-b-4"
               style={{ borderColor: boardControlColor }}
             >
               {boardControlName}

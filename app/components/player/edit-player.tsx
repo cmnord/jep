@@ -51,7 +51,12 @@ function EditPlayer({
           type="text"
           id="name"
           name="name"
-          className="p-2 bg-transparent rounded-md focus:ring-blue-500 focus:border-blue-500"
+          className={
+            "p-2 font-handwriting text-xl font-bold bg-transparent rounded-md " +
+            "focus:ring-blue-500 focus:border-blue-500 " +
+            "placeholder:font-sans placeholder:text-sm placeholder:font-normal"
+          }
+          placeholder="Enter your name"
           defaultValue={name}
           onChange={(e) => onChangeName(e.target.value)}
           onBlur={onBlur}

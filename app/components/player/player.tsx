@@ -29,7 +29,7 @@ function PlayerScore({
       )}
     >
       <div
-        className="text-sm font-mono font-bold grow"
+        className="font-handwriting text-2xl font-bold grow"
         style={{ color: color }}
       >
         {player.name}
