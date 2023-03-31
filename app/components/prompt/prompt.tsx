@@ -41,6 +41,7 @@ const CLUE_READ_OFFSET = 500;
  */
 const LOCKOUT_MS = 250;
 
+const LONG_FORM_CLUE_DURATION_SEC = 30;
 const TIMES_UP_SFX = "/sounds/times-up.mp3";
 
 interface Props {
@@ -356,7 +357,10 @@ function ReadLongFormCluePrompt({ roomName, userId }: Props) {
         answer={undefined}
       />
       <AnswerForm roomName={roomName} userId={userId} />
-      <Countdown startTime={countdownStartedAt} durationSec={30} />
+      <Countdown
+        startTime={countdownStartedAt}
+        durationSec={LONG_FORM_CLUE_DURATION_SEC}
+      />
       <Buzzes showWinner={false} />
     </>
   );
@@ -429,6 +433,58 @@ function RevealAnswerToBuzzerPrompt({ roomName, userId }: Props) {
   );
 }
 
+function RevealAnswerLongFormPrompt({ roomName, userId }: Props) {
+  const { activeClue, buzzes, category, clue, getClueValue } =
+    useEngineContext();
+
+  const clueValue = activeClue ? getClueValue(activeClue, userId) : 0;
+  const buzzDurationMs = buzzes.get(userId);
+  const canCheckAnswer =
+    buzzDurationMs !== undefined && buzzDurationMs !== CANT_BUZZ_FLAG;
+
+  return (
+    <>
+      <ReadClueTimer clueDurationMs={0} shouldAnimate={false} />
+      <div className="flex justify-between p-4">
+        <div className="text-white">
+          <span className="font-bold">{category}</span> for{" "}
+          <span className="font-bold">${clueValue}</span>
+        </div>
+        <span className="text-sm text-slate-300">
+          Click or press <Kbd>Enter</Kbd> to buzz in
+        </span>
+      </div>
+      <ClueText
+        answer={clue?.answer}
+        canBuzz={false}
+        clue={clue?.clue}
+        focusOnBuzz={false}
+        onBuzz={() => null}
+        showAnswer
+      />
+      {canCheckAnswer ? (
+        <CheckForm
+          roomName={roomName}
+          userId={userId}
+          showAnswer
+          answerHiddenFromOthers={false}
+          onClickShowAnswer={() => null}
+        />
+      ) : (
+        <p className="p-2 text-center text-white font-bold">
+          {/* TODO: which players? */}
+          Waiting for responses from other players...
+        </p>
+      )}
+      <Countdown
+        startTime={undefined}
+        durationSec={LONG_FORM_CLUE_DURATION_SEC}
+      />
+      <Buzzes showWinner={false} />
+    </>
+  );
+}
+
 /** RevealAnswerToAllPrompt handles all frontend behavior while the game state is
  * GameState.ReadAnswerToAll.
  */
@@ -473,6 +529,7 @@ export function ConnectedPrompt({ roomName, userId }: Props) {
     type === GameState.ReadClue ||
     type === GameState.ReadLongFormClue ||
     type === GameState.RevealAnswerToBuzzer ||
+    type === GameState.RevealAnswerLongForm ||
     type === GameState.RevealAnswerToAll;
 
   const screenHeight = use100vh();
@@ -489,6 +546,10 @@ export function ConnectedPrompt({ roomName, userId }: Props) {
       case GameState.RevealAnswerToBuzzer:
         return (
           <RevealAnswerToBuzzerPrompt roomName={roomName} userId={userId} />
+        );
+      case GameState.RevealAnswerLongForm:
+        return (
+          <RevealAnswerLongFormPrompt roomName={roomName} userId={userId} />
         );
       case GameState.RevealAnswerToAll:
         return <RevealAnswerToAllPrompt roomName={roomName} userId={userId} />;
