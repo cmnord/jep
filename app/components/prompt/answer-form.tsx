@@ -34,8 +34,9 @@ function AnswerForm({
           placeholder="What is..."
           required
           className={
-            "px-4 min-w-48 text-sm text-slate-900 border border-slate-300 rounded-lg bg-slate-50 " +
-            "focus:ring-blue-500 focus:border-blue-500"
+            "px-4 min-w-48 text-xl font-handwriting font-bold text-slate-900 border border-slate-300 rounded-lg bg-slate-50 " +
+            "focus:ring-blue-500 focus:border-blue-500 " +
+            "placeholder:font-sans placeholder:text-sm placeholder:font-normal"
           }
         />
         <Button htmlType="submit" type="primary" loading={loading}>

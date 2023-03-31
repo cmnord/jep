@@ -35,6 +35,7 @@ module.exports = {
       fontFamily: {
         korinna: ["Korinna-Agency", "Times New Roman", "Times", "serif"],
         impact: ["Impact", "Times New Roman", "Times", "serif"],
+        handwriting: ["Caveat", "cursive"],
       },
       keyframes: {
         showSweetAlert: {
