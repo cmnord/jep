@@ -36,7 +36,8 @@
     --dark-shadow: #23215a;
 
     background-clip: text;
-    grid-area: overlap;
+    grid-row: 1;
+    grid-column: 1;
     -webkit-text-stroke: 5px transparent;
   }
 
