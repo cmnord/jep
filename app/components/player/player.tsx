@@ -29,12 +29,12 @@ function PlayerScore({
       )}
     >
       <div
-        className="font-handwriting text-2xl font-bold grow"
+        className="w-0.5 sm:w-auto grow font-handwriting text-2xl font-bold"
         style={{ color: color }}
       >
         {player.name}
       </div>
-      <div className="text-white text-xl font-impact text-shadow-md grow">
+      <div className="w-0.5 sm:w-auto grow text-white text-xl font-impact text-shadow-md">
         {formatter.format(player.score)}
       </div>
     </div>
