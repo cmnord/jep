@@ -114,19 +114,25 @@ function WagerCluePrompt({ roomName, userId }: Props) {
       <ReadClueTimer clueDurationMs={0} shouldAnimate={false} />
       {longForm ? null : <p className="p-4 text-white font-bold">{category}</p>}
       <div
-        className="p-4 max-w-screen-lg mx-auto flex flex-col justify-center grow"
+        className="w-screen flex items-center justify-center grow"
         ref={ref}
         style={{ fontSize }}
       >
         {longForm ? (
-          <div className="flex flex-col max-h-96">
+          <div className="p-4 flex flex-col max-h-96 max-w-screen-lg mx-auto">
             <ShinyText text="final clue" />
             <p className="text-white font-bold text-center uppercase font-korinna text-shadow-md break-words">
               {category}
             </p>
           </div>
         ) : (
-          <ShinyText text="double down" />
+          <div className="p-4 relative">
+            <ShinyText text="double down" />
+            {/* Hidden absolute element keeps shiny text from overflowing its grid */}
+            <p className="p-4 absolute top-0 left-0 opacity-0 text-center font-black text-white uppercase">
+              double down
+            </p>
+          </div>
         )}
       </div>
       {canWager ? (
