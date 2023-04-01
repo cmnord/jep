@@ -4,6 +4,7 @@ import type { Clue, Game } from "~/models/convert.server";
 import type { DbRoomEvent } from "~/models/room-event.server";
 import useChannel from "~/utils/use-channel";
 
+import { RealtimePostgresInsertPayload } from "@supabase/supabase-js";
 import type { Action, State } from "./engine";
 import {
   ActionType,
@@ -104,6 +105,7 @@ export function useGameEngine(
   const [seenRoomEvents, setSeenRoomEvents] = React.useState(
     new Set(serverRoomEvents.map((re) => re.id))
   );
+  const hasRoomEvent = seenRoomEvents.has;
 
   // TODO: spectators who cannot buzz
 
@@ -126,23 +128,28 @@ export function useGameEngine(
     setSeenRoomEvents(new Set(serverRoomEvents.map((re) => re.id)));
   }, [serverRoomEvents]);
 
+  const callback = React.useCallback(
+    (payload: RealtimePostgresInsertPayload<DbRoomEvent>) => {
+      const newEvent: DbRoomEvent = payload.new;
+      if (!isTypedRoomEvent(newEvent)) {
+        throw new Error("unhandled room event type from DB: " + newEvent.type);
+      }
+      // Only process events we haven't seen yet
+      if (!hasRoomEvent(newEvent.id)) {
+        setSeenRoomEvents((prev) => new Set(prev).add(newEvent.id));
+        dispatch(newEvent);
+      }
+    },
+    [dispatch, hasRoomEvent]
+  );
+
   useChannel<DbRoomEvent>({
     channelName: `roomId:${roomId}`,
     table: "room_events",
     filter: "room_id=eq." + roomId,
     SUPABASE_URL,
     SUPABASE_ANON_KEY,
-    callback: (payload) => {
-      const newEvent: DbRoomEvent = payload.new;
-      if (!isTypedRoomEvent(newEvent)) {
-        throw new Error("unhandled room event type from DB: " + newEvent.type);
-      }
-      // Only process events we haven't seen yet
-      if (!seenRoomEvents.has(newEvent.id)) {
-        setSeenRoomEvents((prev) => new Set(prev).add(newEvent.id));
-        dispatch(newEvent);
-      }
-    },
+    callback,
   });
 
   return stateToGameEngine(game, state, dispatch);
