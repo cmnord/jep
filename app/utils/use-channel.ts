@@ -15,6 +15,9 @@ export function useChannel<T extends { [key: string]: any }>({
   table: string;
   /** Receive database changes when filter is matched. */
   filter: string;
+  /** Make sure that callback is wrapped in useCallback to prevent unnecessary
+   * cleanup and re-subscription.
+   */
   callback: (payload: RealtimePostgresInsertPayload<T>) => void;
   SUPABASE_URL: string;
   SUPABASE_ANON_KEY: string;
@@ -31,9 +34,8 @@ export function useChannel<T extends { [key: string]: any }>({
     [SUPABASE_ANON_KEY, SUPABASE_URL]
   );
 
-  const channel = client.channel(`realtime:${channelName}`);
-
   React.useEffect(() => {
+    const channel = client.channel(`realtime:${channelName}`);
     if (channel.state !== "closed") {
       return;
     }
@@ -69,7 +71,7 @@ export function useChannel<T extends { [key: string]: any }>({
     } catch (error) {
       console.error(error);
     }
-  }, [channel, filter, table, callback, client]);
+  }, [channelName, filter, table, callback, client]);
 }
 
 export default useChannel;
