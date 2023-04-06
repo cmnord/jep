@@ -87,13 +87,13 @@ export default function GameComponent({
             "flex flex-col gap-4"
           }
         >
-          <p>
+          <p className="p-4 flex gap-2 rounded-md flex-wrap items-baseline bg-yellow-700 text-yellow-100">
             <span
               className="font-handwriting text-xl font-bold border-b-4"
               style={{ borderColor: boardControlColor }}
             >
               {boardControlName}
-            </span>{" "}
+            </span>
             has control of the board.
           </p>
           {(type !== GameState.PreviewRound || round !== 0) && (
