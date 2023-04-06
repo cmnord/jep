@@ -95,9 +95,9 @@ export default function GameComponent({
                 </span>
                 has control of the board.
               </p>
-              {type !== GameState.PreviewRound && round !== 0 && (
+              {type !== GameState.PreviewRound || round !== 0 ? (
                 <EditPlayerForm roomName={roomName} userId={userId} />
-              )}
+              ) : null}
             </>
           )}
           <PlayerScores />
