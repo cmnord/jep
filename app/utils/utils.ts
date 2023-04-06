@@ -7,6 +7,13 @@ const gameWords =
 const SATURATION = 60;
 const LIGHTNESS = 85;
 
+const formatter = Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  maximumFractionDigits: 0, // Round to whole dollars.
+  signDisplay: "always", // Show +/- for positive and negative values.
+});
+
 export function getRandomWord() {
   return gameWords[Math.floor(Math.random() * gameWords.length)];
 }
@@ -15,6 +22,11 @@ export function generateGrid<T>(n: number, m: number, defaultFill: T) {
   return Array.from({ length: n }, () =>
     Array.from({ length: m }, () => defaultFill)
   );
+}
+
+/** formatDollarsWithSign formats a number as a currency string with a +/- sign. */
+export function formatDollarsWithSign(dollars: number) {
+  return formatter.format(dollars);
 }
 
 const cyrb53 = (str: string, seed = 0) => {

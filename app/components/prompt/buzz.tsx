@@ -1,7 +1,9 @@
 import classNames from "classnames";
+
+import { PlayerIcon } from "~/components/player";
 import type { Player } from "~/engine";
 import { CANT_BUZZ_FLAG, CLUE_TIMEOUT_MS, useEngineContext } from "~/engine";
-import { PlayerIcon } from "../player";
+import { formatDollarsWithSign } from "~/utils/utils";
 
 function showBuzz(durationMs?: number) {
   switch (durationMs) {
@@ -14,13 +16,6 @@ function showBuzz(durationMs?: number) {
   }
 }
 
-const formatter = Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  maximumFractionDigits: 0, // Round to whole dollars.
-  signDisplay: "always", // Show +/- for positive and negative values.
-});
-
 function Buzz({
   player,
   answered,
@@ -30,7 +25,7 @@ function Buzz({
   answered: boolean;
   clueValue: number;
 }) {
-  const clueValueStr = formatter.format(clueValue);
+  const clueValueStr = formatDollarsWithSign(clueValue);
 
   return (
     <div>
