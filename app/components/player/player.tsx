@@ -13,9 +13,11 @@ const formatter = Intl.NumberFormat("en-US", {
 function PlayerScore({
   player,
   hasBoardControl,
+  winning,
 }: {
   player: Player;
   hasBoardControl: boolean;
+  winning: boolean;
 }) {
   const color = stringToHslColor(player.userId);
   return (
@@ -23,18 +25,19 @@ function PlayerScore({
       className={classNames(
         "flex sm:flex-col items-center gap-2 p-2 sm:p-3 border-2 bg-blue-1000 bg-gradient-to-b from-blue-800",
         {
-          "border-slate-200 opacity-70": !hasBoardControl,
+          "border-slate-200": !hasBoardControl,
           "border-yellow-400": hasBoardControl,
         }
       )}
     >
       <div
-        className="w-0.5 sm:w-auto grow font-handwriting text-2xl font-bold"
+        className="w-2/3 sm:w-auto grow flex flex-wrap gap-2 font-handwriting text-2xl font-bold"
         style={{ color: color }}
       >
         {player.name}
+        {winning && <div>👑</div>}
       </div>
-      <div className="w-0.5 sm:w-auto grow text-white text-xl font-impact text-shadow-md">
+      <div className="w-1/3 sm:w-auto grow text-white text-xl font-impact text-shadow-md">
         {formatter.format(player.score)}
       </div>
     </div>
@@ -59,6 +62,10 @@ export function PlayerIcon({ player }: { player: Player }) {
 export function PlayerScores() {
   const { players, boardControl } = useEngineContext();
 
+  const maxScore = Math.max(
+    ...Array.from(players.values()).map((p) => p.score)
+  );
+
   return (
     <div className="flex flex-col sm:grid sm:grid-cols-3 gap-2">
       {Array.from(players.values()).map((p, i) => (
@@ -66,6 +73,7 @@ export function PlayerScores() {
           key={i}
           player={p}
           hasBoardControl={p.userId === boardControl}
+          winning={p.score === maxScore}
         />
       ))}
     </div>
