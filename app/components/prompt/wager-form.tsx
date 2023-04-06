@@ -51,16 +51,18 @@ function WagerForm({
   highestClueValue,
   score,
   loading,
+  longForm,
   players,
   userId,
 }: {
   highestClueValue: number;
   score: number;
   loading: boolean;
+  longForm: boolean;
   players: PlayerAndCanWager[];
   userId: string;
 }) {
-  const maxWager = Math.max(score, highestClueValue);
+  const maxWager = longForm ? score : Math.max(score, highestClueValue);
 
   const [inputRequired, setInputRequired] = React.useState(true);
 
@@ -123,7 +125,7 @@ export function ConnectedWagerForm({
   roomName: string;
   userId: string;
 }) {
-  const { activeClue, buzzes, board, players, soloDispatch, wagers } =
+  const { activeClue, buzzes, board, clue, players, soloDispatch, wagers } =
     useEngineContext();
   const fetcher = useFetcher<Action>();
   useSoloAction(fetcher, soloDispatch);
@@ -169,6 +171,7 @@ export function ConnectedWagerForm({
         players={playersList}
         score={score}
         userId={userId}
+        longForm={clue?.longForm ?? false}
       />
     </fetcher.Form>
   );
