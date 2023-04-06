@@ -5,13 +5,7 @@ import Button from "~/components/button";
 import type { Action } from "~/engine";
 import { useEngineContext } from "~/engine";
 import { useSoloAction } from "~/utils/use-solo-action";
-
-const formatter = Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  maximumFractionDigits: 0, // Round to whole dollars.
-  signDisplay: "always", // Show +/- for positive and negative values.
-});
+import { formatDollarsWithSign } from "~/utils/utils";
 
 function CheckForm({
   answerHiddenFromOthers,
@@ -130,7 +124,7 @@ export function ConnectedCheckForm({
               "text-red-300": !checkResult,
             })}
           >
-            {formatter.format(value)}
+            {formatDollarsWithSign(value)}
           </span>
         </p>
       </div>
