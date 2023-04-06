@@ -136,6 +136,15 @@ function WagerCluePrompt({ roomName, userId }: Props) {
       </div>
       {canWager ? (
         <WagerForm roomName={roomName} userId={userId} />
+      ) : longForm ? (
+        <div className="p-2 flex flex-col items-center gap-2">
+          <p className="text-white font-bold">
+            You do not have enough money to wager on this clue.
+          </p>
+          <p className="text-slate-300 text-sm">
+            Waiting for others to submit wagers...
+          </p>
+        </div>
       ) : (
         <p className="p-2 text-center text-white font-bold">
           Waiting for response from {wagererName}...
