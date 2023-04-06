@@ -2,9 +2,6 @@
 
 ## Development
 
-This is a [Remix](https://remix.run/docs) app bootstrapped by
-[create-remix](https://www.npmjs.com/package/create-remix).
-
 To run the app locally, make sure the project's local dependencies are
 installed:
 
@@ -44,21 +41,26 @@ To use a local version of Supabase instead of the production URL, set
 View the local Supabase dashboard at
 [http://localhost:54323/](http://localhost:54323/).
 
-[Make a
-migration](https://supabase.com/docs/guides/cli/local-development#database-migrations):
+> **Warning**
+>
+> Enable Realtime events manually on the `room_events` table for multiplayer
+> games to work:
+>
+> **http://localhost:54323/project/default/database/tables**
+
+### Make a migration[^1]
 
 ```sh
 npx supabase db diff -f my_migration_name
 ```
 
-[Deploy a
-migration](https://supabase.com/docs/guides/cli/local-development#deploy-database-changes):
+### Deploy a migration[^2]
 
 ```sh
 npx supabase db push
 ```
 
-Generate Typescript types from the database schema:
+### Generate Typescript types from the database schema:
 
 ```sh
 npx supabase gen types typescript --linked > app/models/database.types.ts
@@ -66,7 +68,8 @@ npx supabase gen types typescript --linked > app/models/database.types.ts
 
 ## Tools used
 
-- Web framework: [Remix](https://remix.run/)
+- Web framework: [Remix](https://remix.run/) bootstrapped by
+  [create-remix](https://www.npmjs.com/package/create-remix)
 - CSS framework: [Tailwind CSS](https://tailwindcss.com/)
 - Hosting, deployment: [Vercel](https://vercel.com)
 - Database: [Supabase](https://supabase.com/)
@@ -88,3 +91,6 @@ npx supabase gen types typescript --linked > app/models/database.types.ts
 
 [MIT](https://github.com/cmnord/jep/blob/main/LICENSE) ©
 [cmnord](https://github.com/cmnord/)
+
+[^1]: https://supabase.com/docs/guides/cli/local-development#database-migrations
+[^2]: https://supabase.com/docs/guides/cli/local-development#deploy-database-changes
