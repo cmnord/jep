@@ -105,7 +105,13 @@ export function useGameEngine(
   const [seenRoomEvents, setSeenRoomEvents] = React.useState(
     new Set(serverRoomEvents.map((re) => re.id))
   );
-  const hasRoomEvent = seenRoomEvents.has;
+
+  const hasRoomEvent = React.useCallback(
+    (id: number) => {
+      return seenRoomEvents.has(id);
+    },
+    [seenRoomEvents]
+  );
 
   // TODO: spectators who cannot buzz
 
