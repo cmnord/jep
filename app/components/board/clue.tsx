@@ -42,8 +42,9 @@ const ClueButton = React.forwardRef<
       }
     }, [answered]);
 
-    // disabled must not include `answerable` so we can focus on answered clues.
-    const disabled = !hasBoardControl || unrevealed || loading;
+    // disabled must not include `answered` or `hasBoardControl` so we can focus
+    // on clues.
+    const disabled = unrevealed || loading;
 
     return (
       <button
@@ -53,7 +54,7 @@ const ClueButton = React.forwardRef<
           if (disabled) {
             return;
           }
-          if (!answered) {
+          if (!answered && hasBoardControl) {
             setLoading(true);
           }
           onClick(event);
@@ -63,7 +64,7 @@ const ClueButton = React.forwardRef<
           if (disabled) {
             return;
           }
-          if (!answered && event.key === "Enter") {
+          if (!answered && hasBoardControl && event.key === "Enter") {
             setLoading(true);
           }
           onKeyDown(event);
