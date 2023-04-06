@@ -331,26 +331,25 @@ export function gameEngine(state: State, action: Action): State {
           return state;
         }
 
-        // Validate wager amount
         const board = state.game.boards.at(state.round);
-        const highestClueValueInRound = getHighestClueValue(board);
-        const maxWager = Math.max(
-          state.players.get(userId)?.score ?? 0,
-          highestClueValueInRound
-        );
-        if (maxWager >= 5 && wager < 5) {
-          throw new Error("Wager must be at least $5");
-        }
-        if (wager > maxWager) {
-          throw new Error(`Wager must be at most $${maxWager}`);
-        }
-
-        const wagers = new Map(state.wagers).set(userId, wager);
         const clue = board?.categories.at(j)?.clues.at(i);
         if (!clue) {
           return state;
         }
 
+        // Validate wager amount
+        const highestClueValue = getHighestClueValue(board);
+        const maxWager = clue.longForm
+          ? player.score
+          : Math.max(player.score, highestClueValue);
+
+        if (maxWager >= 5 && wager < 5) {
+          throw new Error("Wager must be at least $5");
+        } else if (wager > maxWager) {
+          throw new Error(`Wager must be at most $${maxWager}`);
+        }
+
+        const wagers = new Map(state.wagers).set(userId, wager);
         // Read the clue once all wagers are in
         if (wagers.size === state.numExpectedWagers) {
           if (clue.longForm) {
