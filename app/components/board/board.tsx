@@ -129,15 +129,16 @@ export function ConnectedBoardComponent({
 
   function handleClickClue(i: number, j: number) {
     const clue = board?.categories.at(j)?.clues.at(i);
-    if (clue && clue.wagerable && !clue.longForm) {
+    if (!hasBoardControl || isAnswered(i, j) || !clue) {
+      return;
+    }
+    if (clue.wagerable && !clue.longForm) {
       playWagerSfx();
     }
-    if (hasBoardControl && !isAnswered(i, j)) {
-      return fetcher.submit(
-        { i: i.toString(), j: j.toString(), userId },
-        { method: "post", action: `/room/${roomName}/choose-clue` }
-      );
-    }
+    return fetcher.submit(
+      { i: i.toString(), j: j.toString(), userId },
+      { method: "post", action: `/room/${roomName}/choose-clue` }
+    );
   }
 
   const handleKeyDown = (event: React.KeyboardEvent, i: number, j: number) => {
