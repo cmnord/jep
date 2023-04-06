@@ -33,7 +33,9 @@ function CheckForm({
       {myAnswer && (
         <p className="text-slate-300 text-sm text-center">
           Your answer:{" "}
-          <span className="font-handwriting text-xl font-bold">{myAnswer}</span>
+          <span className="font-handwriting text-2xl font-bold text-white">
+            {myAnswer}
+          </span>
         </p>
       )}
       <div className="flex gap-2">

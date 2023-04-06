@@ -346,6 +346,7 @@ function ReadLongFormCluePrompt({ roomName, userId }: Props) {
   useSoloAction(fetcher, soloDispatch);
 
   const myBuzzDurationMs = buzzes.get(userId);
+  const canAnswer = myBuzzDurationMs !== CANT_BUZZ_FLAG;
 
   const [countdownStartedAt] = React.useState(
     myBuzzDurationMs === undefined ? Date.now() : undefined
@@ -370,7 +371,15 @@ function ReadLongFormCluePrompt({ roomName, userId }: Props) {
         showAnswer={false}
         answer={undefined}
       />
-      <AnswerForm roomName={roomName} userId={userId} />
+      {canAnswer ? (
+        <AnswerForm roomName={roomName} userId={userId} />
+      ) : (
+        <div className="p-2 flex flex-col items-center gap-2">
+          <p className="text-slate-300 text-sm">
+            Waiting for others to answer...
+          </p>
+        </div>
+      )}
       <Countdown
         startTime={countdownStartedAt}
         durationSec={LONG_FORM_CLUE_DURATION_SEC}
@@ -485,9 +494,9 @@ function RevealAnswerLongFormPrompt({ roomName, userId }: Props) {
           onClickShowAnswer={() => null}
         />
       ) : (
-        <p className="p-2 text-center text-white font-bold">
+        <p className="p-2 text-center text-slate-300 text-sm">
           {/* TODO: which players? */}
-          Waiting for responses from other players...
+          Waiting for checks from other players...
         </p>
       )}
       <Countdown
