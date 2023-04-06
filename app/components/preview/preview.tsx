@@ -7,7 +7,6 @@ import { EditPlayerForm, PlayerIcon } from "~/components/player";
 import SoundControl from "~/components/sound";
 import type { Action, Player } from "~/engine";
 import { GameState, useEngineContext } from "~/engine";
-import type { Clue } from "~/models/convert.server";
 import { useSoloAction } from "~/utils/use-solo-action";
 import { stringToHslColor } from "~/utils/utils";
 
@@ -105,43 +104,13 @@ function BeforeGamePreview({
   );
 }
 
-// TODO: game replay
-function AfterGamePreview({ clue }: { clue?: Clue }) {
-  return (
-    <div className="bg-slate-900 text-slate-200 px-3 pt-3 sm:px-6 sm:pt-6 md:px-12 md:pt-12">
-      <h2 className="text-2xl font-semibold mb-4">Game over!</h2>
-      {clue ? (
-        <div className="flex flex-col gap-4 mb-6">
-          <p className="mb-2">The final answer was:</p>
-          <blockquote className="relative border-l-4 pl-4 sm:pl-6">
-            <p className="text-slate-100 sm:text-xl uppercase font-bold">
-              {clue.clue}
-            </p>
-          </blockquote>
-          <p>
-            <em>
-              What is{" "}
-              <span className="uppercase font-bold text-sm bg-cyan-200 text-slate-900 rounded-md p-1.5">
-                {clue?.answer}
-              </span>
-              ?
-            </em>
-          </p>
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
 export function Preview({
   numRounds,
-  finalClue,
   userId,
   roomName,
   onDismiss,
 }: {
   numRounds: number;
-  finalClue?: Clue;
   userId: string;
   roomName: string;
   onDismiss: () => void;
@@ -151,38 +120,35 @@ export function Preview({
 
   const isOpen = type === GameState.PreviewRound;
 
-  switch (round) {
-    case 0:
-      return (
-        <BeforeGamePreview
-          isOpen={isOpen}
-          boardControl={boardControl}
-          userId={userId}
-          roomName={roomName}
-          players={players}
-          round={round}
-          soloDispatch={soloDispatch}
-          onDismiss={onDismiss}
-        />
-      );
-    case numRounds:
-      return <AfterGamePreview clue={finalClue} />;
-    default:
-      return (
-        <Modal isOpen={isOpen}>
-          <Modal.Body>
-            <Modal.Title>
-              Play round {round + 1}/{numRounds} &rarr;
-            </Modal.Title>
-            <p className="text-slate-500">Round {round} done!</p>
-          </Modal.Body>
-          <NextRoundFooter
-            roomName={roomName}
-            round={round}
-            soloDispatch={soloDispatch}
-            onDismiss={onDismiss}
-          />
-        </Modal>
-      );
+  if (round === 0) {
+    return (
+      <BeforeGamePreview
+        isOpen={isOpen}
+        boardControl={boardControl}
+        userId={userId}
+        roomName={roomName}
+        players={players}
+        round={round}
+        soloDispatch={soloDispatch}
+        onDismiss={onDismiss}
+      />
+    );
   }
+
+  return (
+    <Modal isOpen={isOpen}>
+      <Modal.Body>
+        <Modal.Title>
+          Play round {round + 1}/{numRounds} &rarr;
+        </Modal.Title>
+        <p className="text-slate-500">Round {round} done!</p>
+      </Modal.Body>
+      <NextRoundFooter
+        roomName={roomName}
+        round={round}
+        soloDispatch={soloDispatch}
+        onDismiss={onDismiss}
+      />
+    </Modal>
+  );
 }

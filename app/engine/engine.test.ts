@@ -1770,6 +1770,104 @@ describe("gameEngine", () => {
         ]),
       },
     },
+    {
+      name: "Game ends in GameOver state",
+      state: initialState,
+      actions: [
+        ...TWO_PLAYERS_ROUND_1,
+        {
+          type: ActionType.StartRound,
+          payload: { round: 1 },
+        },
+        {
+          type: ActionType.ChooseClue,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0 },
+        },
+        {
+          type: ActionType.SetClueWager,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0, wager: 400 },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0, deltaMs: 123 },
+        },
+        {
+          type: ActionType.Check,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0, correct: true },
+        },
+        {
+          type: ActionType.NextClue,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0 },
+        },
+        {
+          type: ActionType.ChooseClue,
+          payload: { userId: PLAYER2.userId, i: 0, j: 1 },
+        },
+        {
+          type: ActionType.SetClueWager,
+          payload: { userId: PLAYER1.userId, i: 0, j: 1, wager: 400 },
+        },
+        {
+          type: ActionType.SetClueWager,
+          payload: { userId: PLAYER2.userId, i: 0, j: 1, wager: 400 },
+        },
+        {
+          type: ActionType.Answer,
+          payload: {
+            userId: PLAYER1.userId,
+            i: 0,
+            j: 1,
+            answer: "right answer",
+          },
+        },
+        {
+          type: ActionType.Answer,
+          payload: {
+            userId: PLAYER2.userId,
+            i: 0,
+            j: 1,
+            answer: "right answer",
+          },
+        },
+        {
+          type: ActionType.Check,
+          payload: { userId: PLAYER1.userId, i: 0, j: 1, correct: true },
+        },
+        {
+          type: ActionType.Check,
+          payload: { userId: PLAYER2.userId, i: 0, j: 1, correct: true },
+        },
+        {
+          type: ActionType.NextClue,
+          payload: { userId: PLAYER2.userId, i: 0, j: 1 },
+        },
+      ],
+      expectedState: {
+        ...initialState,
+        type: GameState.GameOver,
+        activeClue: undefined,
+        boardControl: undefined,
+        isAnswered: [
+          [
+            { isAnswered: true, answeredBy: new Map([[PLAYER2.userId, true]]) },
+            {
+              isAnswered: true,
+              answeredBy: new Map([
+                [PLAYER1.userId, true],
+                [PLAYER2.userId, true],
+              ]),
+            },
+          ],
+        ],
+        numAnswered: 2,
+        numCluesInBoard: 2,
+        players: new Map([
+          [PLAYER1.userId, { ...PLAYER1, score: 800 }],
+          [PLAYER2.userId, { ...PLAYER2, score: 800 }],
+        ]),
+        round: 1,
+      },
+    },
   ];
 
   for (const tc of testCases) {

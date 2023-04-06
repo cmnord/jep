@@ -2,10 +2,11 @@ import * as React from "react";
 
 import BoardComponent from "~/components/board";
 import PlayerScores, { EditPlayerForm } from "~/components/player";
+import PostGameSummary from "~/components/post-game-summary";
 import Preview from "~/components/preview";
 import Prompt from "~/components/prompt";
 import { GameState, useEngineContext } from "~/engine";
-import type { Clue, Game } from "~/models/convert.server";
+import type { Game } from "~/models/convert.server";
 import useGameSound from "~/utils/use-sound";
 import { stringToHslColor } from "~/utils/utils";
 
@@ -25,11 +26,6 @@ export default function GameComponent({
   const { type, round, activeClue } = useEngineContext();
 
   const [focusedClueIdx, setFocusedClue] = React.useState<[number, number]>();
-
-  const finalBoard = game.boards[game.boards.length - 1];
-  const finalClues =
-    finalBoard.categories[finalBoard.categories.length - 1].clues;
-  const finalClue: Clue | undefined = finalClues[finalClues.length - 1];
 
   // Keep track of the previous value of activeClue. If it changes to undefined,
   // focus on the previous clue.
@@ -65,7 +61,6 @@ export default function GameComponent({
     <>
       <Preview
         numRounds={game.boards.length}
-        finalClue={finalClue}
         userId={userId}
         roomName={roomName}
         onDismiss={
@@ -87,17 +82,21 @@ export default function GameComponent({
             "flex flex-col gap-4"
           }
         >
-          <p className="p-4 flex gap-2 rounded-md flex-wrap items-baseline bg-yellow-700 text-yellow-100">
-            <span
-              className="font-handwriting text-xl font-bold border-b-4"
-              style={{ borderColor: boardControlColor }}
-            >
-              {boardControlName}
-            </span>
-            has control of the board.
-          </p>
-          {(type !== GameState.PreviewRound || round !== 0) && (
-            <EditPlayerForm roomName={roomName} userId={userId} />
+          {type === GameState.GameOver ? (
+            <PostGameSummary />
+          ) : (
+            <>
+              <p className="p-4 rounded-md flex-wrap items-baseline bg-yellow-700 text-yellow-100">
+                <span
+                  className="font-handwriting text-xl font-bold border-b-4 mr-2"
+                  style={{ borderColor: boardControlColor }}
+                >
+                  {boardControlName}
+                </span>
+                has control of the board.
+              </p>
+              <EditPlayerForm roomName={roomName} userId={userId} />
+            </>
           )}
           <PlayerScores />
         </div>

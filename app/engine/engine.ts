@@ -19,6 +19,7 @@ export enum GameState {
   RevealAnswerToBuzzer = "RevealAnswerToBuzzer",
   RevealAnswerLongForm = "RevealAnswerLongForm",
   RevealAnswerToAll = "RevealAnswerToAll",
+  GameOver = "GameOver",
 }
 
 interface ClueAnswer {
@@ -594,6 +595,19 @@ export function gameEngine(state: State, action: Action): State {
         if (state.numAnswered === state.numCluesInBoard) {
           const newRound = state.round + 1;
           const board = state.game.boards.at(newRound);
+
+          if (!board) {
+            return {
+              ...state,
+              type: GameState.GameOver,
+              activeClue: undefined,
+              answers: new Map(),
+              boardControl: undefined,
+              buzzes: new Map(),
+              numExpectedWagers: 0,
+              wagers: new Map(),
+            };
+          }
 
           const numCluesInBoard = board
             ? board.categories.reduce(
