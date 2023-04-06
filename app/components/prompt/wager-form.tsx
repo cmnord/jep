@@ -3,7 +3,11 @@ import * as React from "react";
 
 import Button from "~/components/button";
 import type { Action, Player } from "~/engine";
-import { getHighestClueValue, useEngineContext } from "~/engine";
+import {
+  CANT_BUZZ_FLAG,
+  getHighestClueValue,
+  useEngineContext,
+} from "~/engine";
 import { useSoloAction } from "~/utils/use-solo-action";
 
 const formatter = Intl.NumberFormat("en-US", {
@@ -12,11 +16,13 @@ const formatter = Intl.NumberFormat("en-US", {
   maximumFractionDigits: 0, // Round to whole dollars.
 });
 
+type PlayerAndCanWager = Player & { canWager: boolean };
+
 function PlayerScores({
   players,
   userId,
 }: {
-  players: Player[];
+  players: PlayerAndCanWager[];
   userId: string;
 }) {
   // Sort from highest to lowest score.
@@ -32,6 +38,7 @@ function PlayerScores({
           <p className="text-center">
             <span className="font-handwriting text-xl font-bold">{p.name}</span>
             <span>{p.userId === userId ? " (you)" : null}</span>
+            {p.canWager ? null : <span> (can't wager)</span>}
           </p>
           <p className="text-white">{formatter.format(p.score)}</p>
         </div>
@@ -50,7 +57,7 @@ function WagerForm({
   highestClueValue: number;
   score: number;
   loading: boolean;
-  players: Player[];
+  players: PlayerAndCanWager[];
   userId: string;
 }) {
   const maxWager = Math.max(score, highestClueValue);
@@ -116,7 +123,7 @@ export function ConnectedWagerForm({
   roomName: string;
   userId: string;
 }) {
-  const { board, players, soloDispatch, activeClue, wagers } =
+  const { activeClue, buzzes, board, players, soloDispatch, wagers } =
     useEngineContext();
   const fetcher = useFetcher<Action>();
   useSoloAction(fetcher, soloDispatch);
@@ -132,7 +139,10 @@ export function ConnectedWagerForm({
   );
 
   const wager = wagers.get(userId);
-  const playersList = Array.from(players.values());
+  const playersList = Array.from(players.values()).map((p) => ({
+    ...p,
+    canWager: buzzes.get(p.userId) !== CANT_BUZZ_FLAG,
+  }));
 
   if (wager !== undefined) {
     return (
