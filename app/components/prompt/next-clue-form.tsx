@@ -15,11 +15,31 @@ const formatter = Intl.NumberFormat("en-US", {
 
 function PlayerScores({
   answerers,
+  boardControlName,
+  wagerable,
+  longForm,
 }: {
   answerers: { name: string; correct: boolean; value: number }[];
+  boardControlName: string;
+  wagerable: boolean;
+  longForm: boolean;
 }) {
   if (!answerers.length) {
-    return <p className="text-slate-300 text-sm">No one won the clue.</p>;
+    if (wagerable && longForm) {
+      return (
+        <p className="text-white font-bold">
+          No one has enough money to wager on this clue.
+        </p>
+      );
+    } else if (wagerable) {
+      return (
+        <p className="text-white font-bold">
+          {boardControlName} do(es) not have enough money to wager on this clue.
+        </p>
+      );
+    } else {
+      return <p className="text-white font-bold">No one won the clue.</p>;
+    }
   }
   return (
     <div className="flex gap-2">
@@ -45,15 +65,24 @@ function NextClueForm({
   cluesLeftInRound,
   loading,
   answerers,
+  wagerable,
+  longForm,
 }: {
   boardControlName: string;
   cluesLeftInRound: number;
   loading: boolean;
   answerers: { name: string; correct: boolean; value: number }[];
+  wagerable: boolean;
+  longForm: boolean;
 }) {
   return (
     <div className="p-2 flex flex-col items-center gap-2">
-      <PlayerScores answerers={answerers} />
+      <PlayerScores
+        answerers={answerers}
+        boardControlName={boardControlName}
+        wagerable={wagerable}
+        longForm={longForm}
+      />
       {cluesLeftInRound ? (
         <p className="text-slate-300 text-sm">
           {boardControlName} will choose the next clue.
@@ -76,6 +105,7 @@ export function ConnectedNextClueForm({
   const {
     activeClue,
     answeredBy,
+    clue,
     getClueValue,
     players,
     boardControl,
@@ -121,6 +151,8 @@ export function ConnectedNextClueForm({
         cluesLeftInRound={numCluesLeftInRound}
         loading={loading}
         answerers={answerers}
+        wagerable={clue?.wagerable ?? false}
+        longForm={clue?.longForm ?? false}
       />
     </fetcher.Form>
   );
