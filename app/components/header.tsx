@@ -59,7 +59,7 @@ function GameSettings({ game }: { game: Game }) {
           </DropdownMenu.Label>
           {game.note && (
             <DropdownMenu.Label>
-              <p className="p-1 text-sm">{game.note}</p>
+              <p className="p-1 text-sm break-words">{game.note}</p>
             </DropdownMenu.Label>
           )}
 
