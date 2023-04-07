@@ -47,6 +47,7 @@ const LOCKOUT_MS = 250;
 
 const LONG_FORM_CLUE_DURATION_SEC = 30;
 const TIMES_UP_SFX = "/sounds/times-up.mp3";
+const LONG_FORM_SFX = "/sounds/long-form.mp3";
 
 interface Props {
   roomName: string;
@@ -363,6 +364,13 @@ function ReadLongFormCluePrompt({ roomName, userId }: Props) {
   const [countdownStartedAt] = React.useState(
     myBuzzDurationMs === undefined ? Date.now() : undefined
   );
+
+  // Play the long form sound when the component mounts.
+  const [playLongFormSfx, { stop }] = useGameSound(LONG_FORM_SFX);
+  React.useEffect(() => {
+    playLongFormSfx();
+    return () => stop();
+  }, [playLongFormSfx, stop]);
 
   const clueValue = activeClue ? getClueValue(activeClue, userId) : 0;
 
