@@ -127,6 +127,9 @@ export function ConnectedCheckForm({
             {formatDollarsWithSign(value)}
           </span>
         </p>
+        <p className="text-slate-300 text-sm">
+          Waiting for other players to check...
+        </p>
       </div>
     );
   }
