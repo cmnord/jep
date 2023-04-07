@@ -1,13 +1,11 @@
+import { createClient } from "@supabase/supabase-js";
 import * as React from "react";
 
 import type { Clue, Game } from "~/models/convert.server";
 import type { DbRoomEvent } from "~/models/room-event.server";
-import useChannel from "~/utils/use-channel";
 
-import { RealtimePostgresInsertPayload } from "@supabase/supabase-js";
 import type { Action, State } from "./engine";
 import {
-  ActionType,
   createInitialState,
   gameEngine,
   getClueValue,
@@ -102,16 +100,7 @@ export function useGameEngine(
   SUPABASE_URL: string,
   SUPABASE_ANON_KEY: string
 ) {
-  const [seenRoomEvents, setSeenRoomEvents] = React.useState(
-    new Set(serverRoomEvents.map((re) => re.id))
-  );
-
-  const hasRoomEvent = React.useCallback(
-    (id: number) => {
-      return seenRoomEvents.has(id);
-    },
-    [seenRoomEvents]
-  );
+  const [roomEvents, setRoomEvents] = React.useState(serverRoomEvents);
 
   // TODO: spectators who cannot buzz
 
@@ -122,41 +111,66 @@ export function useGameEngine(
       applyRoomEventsToState(createInitialState(arg.game), arg.serverRoomEvents)
   );
 
-  // When new room events come in, re-process the entire state.
-  React.useEffect(() => {
-    dispatch({ type: ActionType.Reset });
-    for (const re of serverRoomEvents) {
-      if (!isTypedRoomEvent(re)) {
-        throw new Error("unhandled room event type from DB: " + re.type);
-      }
-      dispatch(re);
-    }
-    setSeenRoomEvents(new Set(serverRoomEvents.map((re) => re.id)));
-  }, [serverRoomEvents]);
-
-  const callback = React.useCallback(
-    (payload: RealtimePostgresInsertPayload<DbRoomEvent>) => {
-      const newEvent: DbRoomEvent = payload.new;
-      if (!isTypedRoomEvent(newEvent)) {
-        throw new Error("unhandled room event type from DB: " + newEvent.type);
-      }
-      // Only process events we haven't seen yet
-      if (!hasRoomEvent(newEvent.id)) {
-        setSeenRoomEvents((prev) => new Set(prev).add(newEvent.id));
-        dispatch(newEvent);
-      }
-    },
-    [dispatch, hasRoomEvent]
+  const client = React.useMemo(
+    () =>
+      createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        realtime: {
+          params: {
+            eventsPerSecond: 1,
+          },
+        },
+      }),
+    [SUPABASE_ANON_KEY, SUPABASE_URL]
   );
 
-  useChannel<DbRoomEvent>({
-    channelName: `roomId:${roomId}`,
-    table: "room_events",
-    filter: "room_id=eq." + roomId,
-    SUPABASE_URL,
-    SUPABASE_ANON_KEY,
-    callback,
-  });
+  React.useEffect(() => {
+    const channel = client.channel(`realtime:roomId:${roomId}`);
+    if (channel.state !== "closed") {
+      return;
+    }
+    try {
+      channel
+        .on<DbRoomEvent>(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "room_events",
+            filter: "room_id=eq." + roomId,
+          },
+          (payload) => {
+            const newEvent = payload.new;
+            if (!isTypedRoomEvent(newEvent)) {
+              throw new Error(
+                "unhandled room event type from DB: " + newEvent.type
+              );
+            }
+            // Only process events we haven't seen yet
+            if (!roomEvents.find((re) => re.id === newEvent.id)) {
+              setRoomEvents((prev) => [...prev, newEvent]);
+              dispatch(newEvent);
+            }
+          }
+        )
+        .subscribe((status, err) => {
+          console.info(status);
+          if (err) {
+            throw err;
+          }
+        });
+
+      // cleanup function to unsubscribe from the channel
+      return () => {
+        if (channel.state === "joined") {
+          console.info("unsubscribing from channel", channel.state);
+          channel.unsubscribe();
+          client.removeChannel(channel);
+        }
+      };
+    } catch (error) {
+      console.error(error);
+    }
+  }, [client, roomId, roomEvents]);
 
   return stateToGameEngine(game, state, dispatch);
 }
