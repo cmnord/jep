@@ -67,7 +67,7 @@ export function ConnectedAnswerForm({
   const submittedAnswer = answers.get(userId);
 
   return (
-    <fetcher.Form method="post" action={`/room/${roomName}/answer`}>
+    <fetcher.Form method="POST" action={`/room/${roomName}/answer`}>
       <input type="hidden" value={userId} name="userId" />
       <input type="hidden" value={i} name="i" />
       <input type="hidden" value={j} name="j" />

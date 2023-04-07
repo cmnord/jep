@@ -26,7 +26,7 @@ function NextRoundFooter({
 
   return (
     <Modal.Footer>
-      <fetcher.Form method="post" action={`/room/${roomName}/start`}>
+      <fetcher.Form method="POST" action={`/room/${roomName}/start`}>
         <input type="hidden" name="round" value={round} />
         <Button type="primary" htmlType="submit" onClick={onDismiss}>
           Start round

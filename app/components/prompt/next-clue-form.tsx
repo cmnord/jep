@@ -136,7 +136,7 @@ export function ConnectedNextClueForm({
     );
 
   return (
-    <fetcher.Form method="post" action={`/room/${roomName}/next-clue`}>
+    <fetcher.Form method="POST" action={`/room/${roomName}/next-clue`}>
       <input type="hidden" value={userId} name="userId" />
       <input type="hidden" value={i} name="i" />
       <input type="hidden" value={j} name="j" />

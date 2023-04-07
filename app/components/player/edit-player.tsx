@@ -142,7 +142,7 @@ export function EditPlayerForm({
 
   return (
     <fetcher.Form
-      method="post"
+      method="POST"
       action={`/room/${roomName}/player`}
       ref={formRef}
     >
