@@ -165,7 +165,7 @@ export function ConnectedWagerForm({
   }
 
   return (
-    <fetcher.Form method="post" action={`/room/${roomName}/wager`}>
+    <fetcher.Form method="POST" action={`/room/${roomName}/wager`}>
       <input type="hidden" value={userId} name="userId" />
       <input type="hidden" value={i} name="i" />
       <input type="hidden" value={j} name="j" />

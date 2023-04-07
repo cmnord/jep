@@ -104,7 +104,7 @@ export default function Index() {
   return (
     <main className="max-w-screen-md px-4 pt-8 pb-16 md:pt-16 mx-auto w-full sm:w-auto">
       <h2 className="text-2xl font-semibold mb-4">Games</h2>
-      <Form method="get" ref={searchFormRef}>
+      <Form method="GET" ref={searchFormRef}>
         <Search
           name="q"
           onChange={(s) => setSearch(s)}
@@ -113,7 +113,7 @@ export default function Index() {
         />
         <input type="hidden" name="solo" value={solo ? "on" : "off"} />
       </Form>
-      <Form method="get" className="flex flex-col sm:flex-row mb-4 gap-6">
+      <Form method="GET" className="flex flex-col sm:flex-row mb-4 gap-6">
         <Link to={"/mock"}>
           <Button htmlType="button">Play a mock game</Button>
         </Link>
@@ -157,7 +157,7 @@ export default function Index() {
         ))}
       </div>
       <fetcher.Form
-        method="post"
+        method="POST"
         action="/upload"
         encType="multipart/form-data"
         ref={uploadFormRef}

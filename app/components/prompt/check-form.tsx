@@ -135,7 +135,7 @@ export function ConnectedCheckForm({
   }
 
   return (
-    <fetcher.Form method="post" action={`/room/${roomName}/check`}>
+    <fetcher.Form method="POST" action={`/room/${roomName}/check`}>
       <input type="hidden" value={userId} name="userId" />
       <input type="hidden" value={i} name="i" />
       <input type="hidden" value={j} name="j" />
