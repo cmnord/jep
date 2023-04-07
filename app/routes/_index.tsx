@@ -170,7 +170,7 @@ export default function Index() {
           }}
         />
       </fetcher.Form>
-      {error && <ErrorMessage error={new Error(error)} />}
+      {error && <ErrorMessage message={error} />}
       {showSuccessMsg && <SuccessMessage message={"File Uploaded"} />}
     </main>
   );

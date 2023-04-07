@@ -1,12 +1,13 @@
 import type { LinksFunction, V2_MetaFunction } from "@remix-run/node";
 import {
+  isRouteErrorResponse,
   Links,
   LiveReload,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
-  useCatch,
+  useRouteError,
 } from "@remix-run/react";
 import * as React from "react";
 
@@ -78,8 +79,35 @@ export default function App() {
   );
 }
 
-export function ErrorBoundary({ error }: { error: Error }) {
+export function ErrorBoundary() {
+  const error = useRouteError();
   console.error(error);
+
+  if (isRouteErrorResponse(error)) {
+    return (
+      <html>
+        <head>
+          <title>Oh no!</title>
+          <meta charSet="utf-8" />
+          <meta name="viewport" content="width=device-width,initial-scale=1" />
+          <Meta />
+          <Links />
+        </head>
+        <body className="flex flex-col">
+          <Header />
+          <div className="p-12 flex flex-col gap-4">
+            <h1 className="text-3xl font-bold">Caught error</h1>
+            <p>Status: {error.status}</p>
+            <CodeBlock text={JSON.stringify(error.data, null, 2)} />
+          </div>
+          <ScrollRestoration />
+          <Scripts />
+          <LiveReload />
+        </body>
+      </html>
+    );
+  }
+
   return (
     <html>
       <head>
@@ -91,34 +119,7 @@ export function ErrorBoundary({ error }: { error: Error }) {
       </head>
       <body className="flex flex-col">
         <Header />
-        <DefaultErrorBoundary error={error} />
-        <ScrollRestoration />
-        <Scripts />
-        <LiveReload />
-      </body>
-    </html>
-  );
-}
-
-export function CatchBoundary() {
-  const caught = useCatch();
-
-  return (
-    <html>
-      <head>
-        <title>Oh no!</title>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width,initial-scale=1" />
-        <Meta />
-        <Links />
-      </head>
-      <body className="flex flex-col">
-        <Header />
-        <div className="p-12 flex flex-col gap-4">
-          <h1 className="text-3xl font-bold">Caught</h1>
-          <p>Status: {caught.status}</p>
-          <CodeBlock text={JSON.stringify(caught.data, null, 2)} />
-        </div>
+        <DefaultErrorBoundary />
         <ScrollRestoration />
         <Scripts />
         <LiveReload />
