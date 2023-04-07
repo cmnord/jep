@@ -564,48 +564,35 @@ function RevealAnswerToAllPrompt({ roomName, userId }: Props) {
   );
 }
 
-export function ConnectedPrompt({ roomName, userId }: Props) {
+export function ConnectedPrompt(props: Props) {
   const { type } = useEngineContext();
-
-  const isOpen =
-    type === GameState.WagerClue ||
-    type === GameState.ReadClue ||
-    type === GameState.ReadLongFormClue ||
-    type === GameState.RevealAnswerToBuzzer ||
-    type === GameState.RevealAnswerLongForm ||
-    type === GameState.RevealAnswerToAll;
 
   function getPromptContent() {
     switch (type) {
       case GameState.WagerClue:
-        return <WagerCluePrompt roomName={roomName} userId={userId} />;
+        return <WagerCluePrompt {...props} />;
       case GameState.ReadClue:
-        return <ReadCluePrompt roomName={roomName} userId={userId} />;
+        return <ReadCluePrompt {...props} />;
       case GameState.ReadLongFormClue:
-        return <ReadLongFormCluePrompt roomName={roomName} userId={userId} />;
+        return <ReadLongFormCluePrompt {...props} />;
       case GameState.RevealAnswerToBuzzer:
-        return (
-          <RevealAnswerToBuzzerPrompt roomName={roomName} userId={userId} />
-        );
+        return <RevealAnswerToBuzzerPrompt {...props} />;
       case GameState.RevealAnswerLongForm:
-        return (
-          <RevealAnswerLongFormPrompt roomName={roomName} userId={userId} />
-        );
+        return <RevealAnswerLongFormPrompt {...props} />;
       case GameState.RevealAnswerToAll:
-        return <RevealAnswerToAllPrompt roomName={roomName} userId={userId} />;
+        return <RevealAnswerToAllPrompt {...props} />;
       default:
         return null;
     }
   }
 
+  const promptContent = getPromptContent();
+  const isOpen = promptContent !== null;
+
   return (
     <Fade show={isOpen}>
-      <div
-        className={classNames(
-          "relative h-screen w-screen bg-blue-1000 flex flex-col justify-between"
-        )}
-      >
-        {getPromptContent()}
+      <div className="relative h-screen w-screen bg-blue-1000 flex flex-col justify-between">
+        {promptContent}
       </div>
     </Fade>
   );
