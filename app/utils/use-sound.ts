@@ -15,8 +15,8 @@ interface SoundSettings {
 export const SoundContext = React.createContext<SoundSettings>({
   volume: 1,
   mute: false,
-  setVolume: (volume: number) => null,
-  setMute: (mute: boolean) => null,
+  setVolume: () => null,
+  setMute: () => null,
 });
 
 export function useSoundContext() {
