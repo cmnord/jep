@@ -36,6 +36,11 @@ const MS_PER_CHARACTER = 70;
 /** CLUE_READ_OFFSET is the base amount of time it takes to read a clue. */
 const CLUE_READ_OFFSET = 500;
 
+/** REOPENED_CLUE_READ_MS is the amount of time to "re-read" the clue after a
+ * failed buzz before re-opening the buzzers.
+ */
+const REOPENED_CLUE_READ_MS = 1000;
+
 /** LOCKOUT_MS applies a 250ms lockout if a contestant buzzes before the clue is
  * read.
  */
@@ -182,8 +187,15 @@ function ReadCluePrompt({ roomName, userId }: Props) {
   const submit = fetcher.submit;
 
   const numCharactersInClue = clue?.clue.length ?? 0;
-  const clueDurationMs =
-    CLUE_READ_OFFSET + MS_PER_CHARACTER * numCharactersInClue;
+
+  // If we are reopening the buzzers after a wrong answer, delay a fixed amount
+  // of time before re-opening the buzzers.
+  const hasLockedOutBuzzers = Array.from(optimisticBuzzes.values()).some(
+    (b) => b === CANT_BUZZ_FLAG
+  );
+  const clueDurationMs = hasLockedOutBuzzers
+    ? REOPENED_CLUE_READ_MS
+    : CLUE_READ_OFFSET + MS_PER_CHARACTER * numCharactersInClue;
 
   // Keep activeClue set to the last valid clue index.
   React.useEffect(() => {
