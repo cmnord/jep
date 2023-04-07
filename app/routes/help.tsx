@@ -1,9 +1,7 @@
-import type { MetaFunction } from "@remix-run/node";
+import type { V2_MetaFunction } from "@remix-run/node";
 import Code, { CodeBlock } from "~/components/code";
 
-export const meta: MetaFunction = () => ({
-  title: "jep! - Help",
-});
+export const meta: V2_MetaFunction = () => [{ title: "jep! - Help" }];
 
 export default function Help() {
   return (

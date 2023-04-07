@@ -1,4 +1,4 @@
-import type { LoaderArgs, MetaFunction } from "@remix-run/node";
+import type { LoaderArgs, V2_MetaFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 
@@ -8,13 +8,11 @@ import { getGame } from "~/models/game.server";
 import { getOrCreateUserSession } from "~/session.server";
 import { getRandomName } from "~/utils/name";
 
-export const meta: MetaFunction<typeof loader> = ({ data }) => {
+export const meta: V2_MetaFunction<typeof loader> = ({ data }) => {
   try {
-    return {
-      title: data.game.title,
-    };
+    return [{ title: data.game.title }];
   } catch (error: unknown) {
-    return {};
+    return [];
   }
 };
 

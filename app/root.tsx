@@ -1,4 +1,4 @@
-import type { LinksFunction, MetaFunction } from "@remix-run/node";
+import type { LinksFunction, V2_MetaFunction } from "@remix-run/node";
 import {
   Links,
   LiveReload,
@@ -17,10 +17,11 @@ import Header from "~/components/header";
 import stylesheet from "./styles.css";
 import { SoundContext } from "./utils/use-sound";
 
-export const meta: MetaFunction = () => ({
-  title: "jep!",
-  description: "A J! trivia app",
-});
+export const meta: V2_MetaFunction = () => [
+  { title: "jep!" },
+  { name: "description", content: "A J! trivia app" },
+  { property: "og:title", content: "jep!" },
+];
 
 export const links: LinksFunction = () => [
   {
