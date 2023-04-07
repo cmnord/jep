@@ -1,4 +1,4 @@
-import type { MetaFunction } from "@remix-run/node";
+import type { V2_MetaFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 
@@ -6,13 +6,11 @@ import GameComponent from "~/components/game";
 import { GameEngineContext, useSoloGameEngine } from "~/engine";
 import { getMockGame } from "~/models/mock.server";
 
-export const meta: MetaFunction<typeof loader> = ({ data }) => {
+export const meta: V2_MetaFunction<typeof loader> = ({ data }) => {
   try {
-    return {
-      title: data.game.title,
-    };
+    return [{ title: data.game.title }];
   } catch (error: unknown) {
-    return {};
+    return [];
   }
 };
 

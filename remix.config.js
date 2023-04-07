@@ -7,8 +7,9 @@ module.exports = {
   // publicPath: "/build/",
   future: {
     unstable_tailwind: true,
-    v2_routeConvention: true,
+    v2_meta: true,
     v2_normalizeFormMethod: true,
+    v2_routeConvention: true,
   },
   ignoredRouteFiles: ["**/.*", "**/*.test.{js,jsx,ts,tsx}"],
   // When running locally in development mode, we use the built in remix
