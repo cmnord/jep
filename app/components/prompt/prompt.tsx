@@ -27,21 +27,22 @@ import { ReadClueTimer } from "./read-clue-timer";
 import ShinyText from "./shiny-text";
 import { ConnectedWagerForm as WagerForm } from "./wager-form";
 
-/** MS_PER_CHARACTER is a heuristic value to scale the amount of time per clue by
- * its length.
+/** READ_PER_CHAR_MS is the number of milliseconds to "read" each character of
+ * the clue before the buzzer opens. Longer clues should take longer to read.
  */
-const MS_PER_CHARACTER = 70;
+const READ_PER_CHAR_MS = 70;
 
-/** CLUE_READ_OFFSET is the base amount of time it takes to read a clue. */
-const CLUE_READ_OFFSET = 500;
+/** READ_BASE_MS is the base amount of time it takes to read a clue.
+ */
+const READ_BASE_MS = 1000;
 
-/** REOPENED_CLUE_READ_MS is the amount of time to "re-read" the clue after a
+/** READ_REOPENED_MS is the amount of time to "re-read" the clue after a
  * failed buzz before re-opening the buzzers.
  */
-const REOPENED_CLUE_READ_MS = 1000;
+const READ_REOPENED_MS = 1000;
 
 /** LOCKOUT_MS applies a 250ms lockout if a contestant buzzes before the clue is
- * read.
+ * done being read.
  */
 const LOCKOUT_MS = 250;
 
@@ -194,8 +195,8 @@ function ReadCluePrompt({ roomName, userId }: Props) {
     (b) => b === CANT_BUZZ_FLAG
   );
   const clueDurationMs = hasLockedOutBuzzers
-    ? REOPENED_CLUE_READ_MS
-    : CLUE_READ_OFFSET + MS_PER_CHARACTER * numCharactersInClue;
+    ? READ_REOPENED_MS
+    : READ_BASE_MS + READ_PER_CHAR_MS * numCharactersInClue;
 
   // Keep activeClue set to the last valid clue index.
   React.useEffect(() => {
