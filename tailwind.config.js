@@ -102,6 +102,7 @@ module.exports = {
         "@font-face": {
           "font-family": "Korinna-Agency",
           src: 'url("/fonts/Korinna-Agency.ttf.woff") format("woff"), url("/fonts/Korinna-Agency.ttf.eot") format("eot")',
+          fontDisplay: "swap",
         },
       });
     }),
