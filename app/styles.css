@@ -36,6 +36,7 @@
     --dark-shadow: #23215a;
 
     background-clip: text;
+    -webkit-background-clip: text;
     grid-row: 1;
     grid-column: 1;
     -webkit-text-stroke: 5px transparent;
