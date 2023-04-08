@@ -14,27 +14,39 @@ import * as React from "react";
 import { CodeBlock } from "~/components/code";
 import { DefaultErrorBoundary } from "~/components/error";
 import Header from "~/components/header";
+import { SoundContext } from "~/utils/use-sound";
 
 import stylesheet from "./styles.css";
-import { SoundContext } from "./utils/use-sound";
+
+const META_URL = "https://whatis.club";
+const META_TITLE = "Jep!";
+const META_DESCRIPTION =
+  "A website for sharing J! trivia and playing collaboratively with friends in real time.";
+const META_IMAGE = META_URL + "/images/meta.png";
 
 export const meta: V2_MetaFunction = () => [
-  { title: "jep!" },
-  { name: "description", content: "A J! trivia app" },
-  { property: "og:title", content: "jep!" },
+  { title: META_TITLE },
+  { name: "title", content: META_TITLE },
+  { name: "description", content: META_DESCRIPTION },
+
+  // Open Graph / Facebook
+  { property: "og:type", content: "website" },
+  { property: "og:url", content: META_URL },
+  { property: "og:title", content: META_TITLE },
+  { property: "og:description", content: META_DESCRIPTION },
+  { property: "og:image", content: META_IMAGE },
+
+  // Twitter
+  { property: "twitter:card", content: "summary_large_image" },
+  { property: "twitter:url", content: META_URL },
+  { property: "twitter:title", content: META_TITLE },
+  { property: "twitter:description", content: META_DESCRIPTION },
+  { property: "twitter:image", content: META_IMAGE },
 ];
 
 export const links: LinksFunction = () => [
-  {
-    rel: "icon",
-    href: "/favicon.png",
-    type: "image/png",
-    sizes: "16x16",
-  },
-  {
-    rel: "preconnect",
-    href: "https://fonts.googleapis.com",
-  },
+  { rel: "icon", href: "/favicon.png", type: "image/png", sizes: "16x16" },
+  { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
     rel: "preconnect",
     href: "https://fonts.gstatic.com",
