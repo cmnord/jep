@@ -592,7 +592,12 @@ export function ConnectedPrompt(props: Props) {
 
   return (
     <Fade show={isOpen}>
-      <div className="relative h-screen w-screen bg-blue-1000 flex flex-col justify-between">
+      <div
+        className="relative w-screen bg-blue-1000 flex flex-col justify-between"
+        style={{
+          height: "100dvh",
+        }}
+      >
         {promptContent}
       </div>
     </Fade>
