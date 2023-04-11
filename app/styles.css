@@ -75,6 +75,15 @@
     }
   }
 
+  @keyframes shrinkToLeft {
+    0% {
+      width: 100%;
+    }
+    100% {
+      width: 0;
+    }
+  }
+
   /** turnGreen turns the background green in the last frame of the animation. */
   @keyframes turnGreen {
     0% {
