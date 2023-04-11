@@ -62,7 +62,14 @@ export default function GameCard({
                 <div className="border-l border-slate-200" />
               </div>
               <p className="shrink-0 text-sm text-slate-500 flex items-center">
-                {numRounds} {numRounds === 1 ? "round" : "rounds"}
+                {numRounds} {numRounds === 1 ? "round" : "rounds"} (
+                {game.boards
+                  .map(
+                    (b) =>
+                      `${b.categories.length}x${b.categories[0].clues.length}`
+                  )
+                  .join(", ")}
+                )
               </p>
             </div>
             <strong className="text-left" title={game.title}>
