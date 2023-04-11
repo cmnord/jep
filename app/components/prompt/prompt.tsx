@@ -593,7 +593,10 @@ export function ConnectedPrompt(props: Props) {
   return (
     <Fade show={isOpen}>
       <div
-        className="relative w-screen bg-blue-1000 flex flex-col justify-between"
+        className={
+          "relative w-screen bg-blue-1000 flex flex-col justify-between " +
+          "overflow-x-hidden overflow-y-scroll"
+        }
         style={{
           height: "100dvh",
         }}
