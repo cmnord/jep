@@ -191,9 +191,9 @@ function ReadCluePrompt({ roomName, userId }: Props) {
 
   // If we are reopening the buzzers after a wrong answer, delay a fixed amount
   // of time before re-opening the buzzers.
-  const hasLockedOutBuzzers = Array.from(optimisticBuzzes.values()).some(
-    (b) => b === CANT_BUZZ_FLAG
-  );
+  const hasLockedOutBuzzers =
+    !clue?.wagerable &&
+    Array.from(optimisticBuzzes.values()).some((b) => b === CANT_BUZZ_FLAG);
   const clueDurationMs = hasLockedOutBuzzers
     ? READ_REOPENED_MS
     : READ_BASE_MS + READ_PER_CHAR_MS * numCharactersInClue;
