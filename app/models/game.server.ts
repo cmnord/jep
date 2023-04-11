@@ -10,16 +10,20 @@ export type Game = { id: string } & ConvertedGame;
 type GameTable = Database["public"]["Tables"]["games"];
 type DbGame = GameTable["Row"];
 
+type CategoryTable = Database["public"]["Tables"]["categories"];
+type DbCategory = CategoryTable["Row"];
+
 type ClueTable = Database["public"]["Tables"]["clues"];
 type DbClue = ClueTable["Row"];
 
-type GameAndClues = DbGame & { clues: DbClue[] };
+type CategoryAndClues = DbCategory & { clues: DbClue[] | null };
+type GameAndClues = DbGame & { categories: CategoryAndClues[] | null };
 
 const SEARCHABLE_GAME_COLUMNS = ["title", "author"];
 
 /* Helpers */
 
-function dbGameToGame(dbGame: DbGame, clues: DbClue[]): Game {
+function dbGameToGame(dbGame: GameAndClues): Game {
   const game: Game = {
     id: dbGame.id,
     author: dbGame.author,
@@ -31,27 +35,28 @@ function dbGameToGame(dbGame: DbGame, clues: DbClue[]): Game {
 
   const boardsMap = new Map<number, Board>();
 
-  for (const clue of clues) {
-    const round = clue.round;
+  if (!dbGame.categories) {
+    throw new Error("game must have at least one category");
+  }
+
+  for (const category of dbGame.categories) {
+    if (!category.clues) {
+      throw new Error("category must have at least one clue");
+    }
+    const round = category.round;
     const board = boardsMap.get(round) ?? { categories: [], categoryNames: [] };
     if (!boardsMap.has(round)) {
       boardsMap.set(round, board);
     }
-    let categoryIdx = board.categoryNames.findIndex(
-      (cn) => cn === clue.category
-    );
-    if (categoryIdx === -1) {
-      board.categoryNames.push(clue.category);
-      board.categories.push({
-        name: clue.category,
-        clues: [],
-      });
-      categoryIdx = board.categories.length - 1;
-    }
-    board.categories[categoryIdx].clues.push({
-      ...clue,
-      longForm: clue.long_form,
+    board.categories.push({
+      ...category,
+      note: category.note ?? undefined,
+      clues: category.clues.map((clue) => ({
+        ...clue,
+        longForm: clue.long_form,
+      })),
     });
+    board.categoryNames.push(category.name);
   }
 
   for (let round = 0; round < boardsMap.size; round++) {
@@ -135,9 +140,12 @@ function validateGame(game: ConvertedGame) {
 export async function getGame(gameId: string): Promise<Game | null> {
   const { data, error } = await db
     .from<"games", GameTable>("games")
-    .select<"*, clues ( * )", GameAndClues>("*, clues ( * )")
+    .select<"*, categories ( *, clues ( * ) )", GameAndClues>(
+      "*, categories ( *, clues ( * ) )"
+    )
     .eq("id", gameId)
-    .order("value", { foreignTable: "clues" });
+    .order("created_at", { foreignTable: "categories" })
+    .order("value", { foreignTable: "categories.clues" });
 
   if (error !== null) {
     throw new Error(error.message);
@@ -149,7 +157,7 @@ export async function getGame(gameId: string): Promise<Game | null> {
 
   const gameAndClues = data[0];
 
-  return dbGameToGame(gameAndClues, gameAndClues.clues);
+  return dbGameToGame(gameAndClues);
 }
 
 /** getAllGames gets all games from the database. Search searches the title and
@@ -158,7 +166,9 @@ export async function getGame(gameId: string): Promise<Game | null> {
 export async function getAllGames(search: string | null): Promise<Game[]> {
   let query = db
     .from<"games", GameTable>("games")
-    .select<"*, clues ( * )", GameAndClues>("*, clues ( * )")
+    .select<"*, categories ( *, clues ( * ) )", GameAndClues>(
+      "*, categories ( *, clues ( * ) )"
+    )
     .order("created_at", { ascending: false });
 
   if (search !== null && search.trim() !== "") {
@@ -184,7 +194,7 @@ export async function getAllGames(search: string | null): Promise<Game[]> {
     throw new Error(error.message);
   }
 
-  return data.map((gac) => dbGameToGame(gac, gac.clues));
+  return data.map((gac) => dbGameToGame(gac));
 }
 
 /* Writes */
@@ -211,15 +221,45 @@ export async function createGame(inputGame: ConvertedGame) {
 
   const game = gameData[0];
 
+  const categoriesToInsert: Omit<CategoryTable["Insert"], "id">[] = [];
+  for (let round = 0; round < inputGame.boards.length; round++) {
+    const board = inputGame.boards[round];
+    for (const category of board.categories) {
+      categoriesToInsert.push({
+        game_id: game.id,
+        name: category.name,
+        round,
+      });
+    }
+  }
+
+  const { data: categoryData, error: categoryErr } = await db
+    .from<"categories", CategoryTable>("categories")
+    .insert<CategoryTable["Insert"]>(categoriesToInsert)
+    .select();
+
+  // TODO: createGame is not transactional, so if any category fails to insert
+  // the game will still be created.
+  if (categoryErr !== null) {
+    throw categoryErr;
+  }
+  if (categoryData === null) {
+    throw new Error("category data response must not be null");
+  }
+
   const cluesToInsert: Omit<ClueTable["Insert"], "id">[] = [];
   for (let round = 0; round < inputGame.boards.length; round++) {
     const board = inputGame.boards[round];
     for (const category of board.categories) {
       for (const clue of category.clues) {
+        const dbCategory = categoryData.find((c) => c.name === category.name);
+        if (!dbCategory) {
+          throw new Error(
+            "category " + category.name + " not inserted into database"
+          );
+        }
         cluesToInsert.push({
-          category: category.name,
-          game_id: game.id,
-          round,
+          category_id: dbCategory.id,
           answer: clue.answer,
           clue: clue.clue,
           value: clue.value,

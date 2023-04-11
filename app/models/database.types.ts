@@ -34,37 +34,57 @@ export interface Database {
   };
   public: {
     Tables: {
+      categories: {
+        Row: {
+          created_at: string;
+          game_id: string | null;
+          id: number;
+          name: string;
+          note: string | null;
+          round: number;
+        };
+        Insert: {
+          created_at?: string;
+          game_id?: string | null;
+          id?: number;
+          name: string;
+          note?: string | null;
+          round?: number;
+        };
+        Update: {
+          created_at?: string;
+          game_id?: string | null;
+          id?: number;
+          name?: string;
+          note?: string | null;
+          round?: number;
+        };
+      };
       clues: {
         Row: {
           answer: string;
-          category: string;
+          category_id: number;
           clue: string;
-          game_id: string;
           id: number;
           long_form: boolean;
-          round: number;
           value: number;
           wagerable: boolean;
         };
         Insert: {
           answer: string;
-          category: string;
+          category_id: number;
           clue: string;
-          game_id: string;
           id?: number;
           long_form?: boolean;
-          round?: number;
           value: number;
           wagerable?: boolean;
         };
         Update: {
           answer?: string;
-          category?: string;
+          category_id?: number;
           clue?: string;
-          game_id?: string;
           id?: number;
           long_form?: boolean;
-          round?: number;
           value?: number;
           wagerable?: boolean;
         };
@@ -262,7 +282,7 @@ export interface Database {
         Args: {
           name: string;
         };
-        Returns: string[];
+        Returns: unknown;
       };
       get_size_by_bucket: {
         Args: Record<PropertyKey, never>;
