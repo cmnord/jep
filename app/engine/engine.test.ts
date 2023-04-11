@@ -842,6 +842,62 @@ describe("gameEngine", () => {
       },
     },
     {
+      name: "Not answering wagered clue deducts wager value",
+      state: initialState,
+      actions: [
+        ...TWO_PLAYERS_ROUND_1,
+        {
+          type: ActionType.StartRound,
+          payload: { round: 1 },
+        },
+        {
+          type: ActionType.ChooseClue,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0 },
+        },
+        {
+          type: ActionType.SetClueWager,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0, wager: 345 },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: {
+            userId: PLAYER2.userId,
+            i: 0,
+            j: 0,
+            deltaMs: CLUE_TIMEOUT_MS + 1,
+          },
+        },
+      ],
+      expectedState: {
+        ...initialState,
+        type: GameState.RevealAnswerToAll,
+        activeClue: [0, 0],
+        boardControl: PLAYER2.userId,
+        buzzes: new Map([
+          [PLAYER1.userId, CANT_BUZZ_FLAG],
+          [PLAYER2.userId, CLUE_TIMEOUT_MS + 1],
+        ]),
+        isAnswered: [
+          [
+            {
+              isAnswered: true,
+              answeredBy: new Map([[PLAYER2.userId, false]]),
+            },
+            { isAnswered: false, answeredBy: new Map() },
+          ],
+        ],
+        numAnswered: 1,
+        numCluesInBoard: 2,
+        numExpectedWagers: 1,
+        players: new Map([
+          [PLAYER1.userId, { ...PLAYER1, score: 400 }],
+          [PLAYER2.userId, { ...PLAYER2, score: -345 }],
+        ]),
+        round: 1,
+        wagers: new Map([[PLAYER2.userId, 345]]),
+      },
+    },
+    {
       name: "Choose long-form clue, only players with positive scores can buzz",
       state: initialState,
       actions: [
