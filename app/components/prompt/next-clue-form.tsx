@@ -5,7 +5,14 @@ import Button from "~/components/button";
 import type { Action } from "~/engine";
 import { useEngineContext } from "~/engine";
 import { useSoloAction } from "~/utils/use-solo-action";
-import { formatDollarsWithSign } from "~/utils/utils";
+import { formatDollars, formatDollarsWithSign } from "~/utils/utils";
+
+interface PlayerScore {
+  name: string;
+  correct: boolean;
+  value: number;
+  score: number;
+}
 
 function PlayerScores({
   answerers,
@@ -13,7 +20,7 @@ function PlayerScores({
   wagerable,
   longForm,
 }: {
-  answerers: { name: string; correct: boolean; value: number }[];
+  answerers: PlayerScore[];
   boardControlName: string;
   wagerable: boolean;
   longForm: boolean;
@@ -37,17 +44,19 @@ function PlayerScores({
   }
   return (
     <div className="flex gap-2">
-      {answerers.map(({ name, correct, value }, i) => (
-        <p className="text-white font-bold" key={i}>
+      {answerers.map(({ name, correct, value, score }, i) => (
+        <p className="text-white text-center font-bold text-shadow" key={i}>
           <span className="font-handwriting text-xl">{name} </span>
           <span
-            className={classNames("text-shadow", {
+            className={classNames("font-impact", {
               "text-green-300": correct,
               "text-red-300": !correct,
             })}
           >
             {formatDollarsWithSign(correct ? value : -1 * value)}
           </span>
+          <br />
+          <span className="font-impact text-xl">{formatDollars(score)}</span>
         </p>
       ))}
     </div>
@@ -65,7 +74,7 @@ function NextClueForm({
   boardControlName: string;
   cluesLeftInRound: number;
   loading: boolean;
-  answerers: { name: string; correct: boolean; value: number }[];
+  answerers: PlayerScore[];
   wagerable: boolean;
   longForm: boolean;
 }) {
@@ -128,12 +137,10 @@ export function ConnectedNextClueForm({
     .map((player) => ({
       name: player.name,
       correct: answeredBy(i, j, player.userId),
+      score: player.score,
       value: getClueValue(activeClue, player.userId),
     }))
-    .filter(
-      (p): p is { name: string; correct: boolean; value: number } =>
-        p.correct !== undefined
-    );
+    .filter((p): p is PlayerScore => p.correct !== undefined);
 
   return (
     <fetcher.Form method="POST" action={`/room/${roomName}/next-clue`}>

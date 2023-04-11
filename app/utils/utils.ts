@@ -11,6 +11,12 @@ const formatter = Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD",
   maximumFractionDigits: 0, // Round to whole dollars.
+});
+
+const signFormatter = Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  maximumFractionDigits: 0, // Round to whole dollars.
   signDisplay: "always", // Show +/- for positive and negative values.
 });
 
@@ -24,9 +30,13 @@ export function generateGrid<T>(n: number, m: number, defaultFill: T) {
   );
 }
 
+export function formatDollars(dollars: number) {
+  return formatter.format(dollars);
+}
+
 /** formatDollarsWithSign formats a number as a currency string with a +/- sign. */
 export function formatDollarsWithSign(dollars: number) {
-  return formatter.format(dollars);
+  return signFormatter.format(dollars);
 }
 
 const cyrb53 = (str: string, seed = 0) => {
