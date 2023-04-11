@@ -117,7 +117,11 @@ function WagerCluePrompt({ roomName, userId }: Props) {
 
   return (
     <>
-      <ReadClueTimer clueDurationMs={0} shouldAnimate={false} />
+      <ReadClueTimer
+        clueDurationMs={0}
+        shouldAnimate={false}
+        wonBuzz={canWager}
+      />
       {longForm ? null : <p className="p-4 text-white font-bold">{category}</p>}
       <div
         className="w-screen flex items-center justify-center grow"
@@ -324,6 +328,11 @@ function ReadCluePrompt({ roomName, userId }: Props) {
       <ReadClueTimer
         clueDurationMs={clueDurationMs}
         shouldAnimate={myBuzzDurationMs === undefined}
+        wonBuzz={
+          myBuzzDurationMs !== undefined &&
+          myBuzzDurationMs !== CANT_BUZZ_FLAG &&
+          myBuzzDurationMs < CLUE_TIMEOUT_MS
+        }
       />
       <div className="flex justify-between p-4">
         <div className="text-white">
@@ -343,7 +352,7 @@ function ReadCluePrompt({ roomName, userId }: Props) {
         answer={undefined}
       />
       <Lockout active={lockout} />
-      <Countdown startTime={buzzerOpenAt} />
+      <Countdown startTime={undefined} />
       <Buzzes buzzes={optimisticBuzzes} showWinner={false} />
     </>
   );
@@ -377,7 +386,7 @@ function ReadLongFormCluePrompt({ roomName, userId }: Props) {
 
   return (
     <>
-      <ReadClueTimer clueDurationMs={0} shouldAnimate={false} />
+      <ReadClueTimer clueDurationMs={0} shouldAnimate={false} wonBuzz={false} />
       <div className="flex justify-between p-4">
         <div className="text-white">
           <span className="font-bold">{category}</span> for{" "}
@@ -439,7 +448,11 @@ function RevealAnswerToBuzzerPrompt({ roomName, userId }: Props) {
 
   return (
     <>
-      <ReadClueTimer clueDurationMs={0} shouldAnimate={false} />
+      <ReadClueTimer
+        clueDurationMs={0}
+        shouldAnimate={false}
+        wonBuzz={canShowAnswer}
+      />
       <div className="flex justify-between p-4">
         <div className="text-white">
           <span className="font-bold">{category}</span> for{" "}
@@ -488,7 +501,11 @@ function RevealAnswerLongFormPrompt({ roomName, userId }: Props) {
 
   return (
     <>
-      <ReadClueTimer clueDurationMs={0} shouldAnimate={false} />
+      <ReadClueTimer
+        clueDurationMs={0}
+        shouldAnimate={false}
+        wonBuzz={canCheckAnswer}
+      />
       <div className="flex justify-between p-4">
         <div className="text-white">
           <span className="font-bold">{category}</span> for{" "}
@@ -533,13 +550,21 @@ function RevealAnswerLongFormPrompt({ roomName, userId }: Props) {
  * GameState.ReadAnswerToAll.
  */
 function RevealAnswerToAllPrompt({ roomName, userId }: Props) {
-  const { activeClue, category, clue, getClueValue } = useEngineContext();
+  const { activeClue, answeredBy, category, clue, getClueValue } =
+    useEngineContext();
 
   const clueValue = activeClue ? getClueValue(activeClue, userId) : 0;
+  const wonBuzz = activeClue
+    ? answeredBy(activeClue[0], activeClue[1], userId) === true
+    : false;
 
   return (
     <>
-      <ReadClueTimer clueDurationMs={0} shouldAnimate={false} />
+      <ReadClueTimer
+        clueDurationMs={0}
+        shouldAnimate={false}
+        wonBuzz={wonBuzz}
+      />
       <div className="flex justify-between p-4">
         <div className="text-white">
           <span className="font-bold">{category}</span> for{" "}
