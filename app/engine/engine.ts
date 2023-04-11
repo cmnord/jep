@@ -402,16 +402,35 @@ export function gameEngine(state: State, action: Action): State {
         const winningBuzz = getWinningBuzzer(buzzes);
 
         // If there's no winning buzzer, reveal the answer to everyone and mark
-        // it as answered
+        // it as answered. If the clue was wagerable and the player didn't buzz,
+        // deduct their wager from their score.
         if (!winningBuzz) {
+          const board = state.game.boards.at(state.round);
+          const clue = board?.categories.at(j)?.clues.at(i);
+          const players = new Map(state.players);
+          if (clue?.wagerable) {
+            const clueValue = getClueValue(state, [i, j], userId);
+            const player = state.players.get(userId);
+            if (player) {
+              players.set(userId, {
+                ...player,
+                score: player.score - clueValue,
+              });
+            }
+          }
+
           return {
             ...state,
-            buzzes,
             type: GameState.RevealAnswerToAll,
-            numAnswered: state.numAnswered + 1,
+            buzzes,
             isAnswered: setIsAnswered(state.isAnswered, i, j, (prev) => {
               prev.isAnswered = true;
+              if (clue?.wagerable) {
+                prev.answeredBy.set(userId, false);
+              }
             }),
+            numAnswered: state.numAnswered + 1,
+            players,
           };
         }
 
