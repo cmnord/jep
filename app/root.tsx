@@ -71,7 +71,7 @@ export default function App() {
         <Meta />
         <Links />
       </head>
-      <body className="flex flex-col">
+      <body className="relative flex flex-col">
         <SoundContext.Provider
           value={{
             volume,
