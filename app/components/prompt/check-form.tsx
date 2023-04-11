@@ -8,18 +8,18 @@ import { useSoloAction } from "~/utils/use-solo-action";
 import { formatDollarsWithSign } from "~/utils/utils";
 
 function CheckForm({
-  answerHiddenFromOthers,
+  longForm,
   loading,
   myAnswer,
 }: {
-  answerHiddenFromOthers: boolean;
+  longForm: boolean;
   loading: boolean;
   myAnswer?: string;
 }) {
   return (
     <div className="p-2 flex flex-col items-center gap-2">
       <p className="text-white font-bold">Were you right?</p>
-      {answerHiddenFromOthers && (
+      {!longForm && (
         <p className="text-slate-300 text-sm text-center">
           (only you can see this answer)
         </p>
@@ -63,17 +63,17 @@ function CheckForm({
 export function ConnectedCheckForm({
   roomName,
   userId,
-  answerHiddenFromOthers = true,
+  longForm = false,
   showAnswer,
   onClickShowAnswer,
 }: {
   roomName: string;
   userId: string;
-  answerHiddenFromOthers?: boolean;
+  longForm?: boolean;
   showAnswer: boolean;
   onClickShowAnswer: () => void;
 }) {
-  const { activeClue, answers, getClueValue, soloDispatch, answeredBy } =
+  const { activeClue, answeredBy, answers, getClueValue, soloDispatch } =
     useEngineContext();
   const fetcher = useFetcher<Action>();
   useSoloAction(fetcher, soloDispatch);
@@ -139,11 +139,7 @@ export function ConnectedCheckForm({
       <input type="hidden" value={userId} name="userId" />
       <input type="hidden" value={i} name="i" />
       <input type="hidden" value={j} name="j" />
-      <CheckForm
-        answerHiddenFromOthers={answerHiddenFromOthers}
-        loading={loading}
-        myAnswer={myAnswer}
-      />
+      <CheckForm longForm={longForm} loading={loading} myAnswer={myAnswer} />
     </fetcher.Form>
   );
 }

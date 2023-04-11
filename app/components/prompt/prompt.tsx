@@ -15,6 +15,7 @@ import { useSoloAction } from "~/utils/use-solo-action";
 import useGameSound from "~/utils/use-sound";
 import { useTimeout } from "~/utils/use-timeout";
 
+import { stringToHslColor } from "~/utils/utils";
 import { ConnectedAnswerForm as AnswerForm } from "./answer-form";
 import { Buzzes } from "./buzz";
 import { ConnectedCheckForm as CheckForm } from "./check-form";
@@ -386,7 +387,6 @@ function ReadLongFormCluePrompt({ roomName, userId }: Props) {
 
   return (
     <>
-      <ReadClueTimer clueDurationMs={0} shouldAnimate={false} wonBuzz={false} />
       <div className="flex justify-between p-4">
         <div className="text-white">
           <span className="font-bold">{category}</span> for{" "}
@@ -491,13 +491,21 @@ function RevealAnswerToBuzzerPrompt({ roomName, userId }: Props) {
 }
 
 function RevealAnswerLongFormPrompt({ roomName, userId }: Props) {
-  const { activeClue, buzzes, category, clue, getClueValue } =
+  const { activeClue, answers, buzzes, category, clue, getClueValue, players } =
     useEngineContext();
 
   const clueValue = activeClue ? getClueValue(activeClue, userId) : 0;
   const buzzDurationMs = buzzes.get(userId);
   const canCheckAnswer =
     buzzDurationMs !== undefined && buzzDurationMs !== CANT_BUZZ_FLAG;
+
+  const otherPlayersList = Array.from(players.values())
+    .filter((p) => p.userId !== userId)
+    .map((p) => ({
+      name: p.name,
+      userId: p.userId,
+      answer: answers.get(p.userId),
+    }));
 
   return (
     <>
@@ -528,7 +536,7 @@ function RevealAnswerLongFormPrompt({ roomName, userId }: Props) {
           roomName={roomName}
           userId={userId}
           showAnswer
-          answerHiddenFromOthers={false}
+          longForm={true}
           onClickShowAnswer={() => null}
         />
       ) : (
@@ -537,6 +545,29 @@ function RevealAnswerLongFormPrompt({ roomName, userId }: Props) {
           Waiting for checks from other players...
         </p>
       )}
+      <div className="flex gap-2 w-full overflow-x-scroll">
+        {otherPlayersList.map(({ name, userId, answer }) => {
+          const color = stringToHslColor(userId);
+          return (
+            <div
+              className="flex flex-col items-center justify-between"
+              key={userId}
+            >
+              <p
+                className="font-handwriting text-xl font-bold text-center"
+                style={{ color }}
+              >
+                {name}
+              </p>
+              {answer ? (
+                <p className="text-white">{answer}</p>
+              ) : (
+                <p className="text-slate-300 text-sm">[no answer]</p>
+              )}
+            </div>
+          );
+        })}
+      </div>
       <Countdown
         startTime={undefined}
         durationSec={LONG_FORM_CLUE_DURATION_SEC}
