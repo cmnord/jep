@@ -55,8 +55,12 @@ function BoardComponent({
         <table className="w-full table-fixed h-1 bg-black text-white border-spacing-3">
           <thead>
             <tr className="h-1">
-              {board.categoryNames.map((category) => (
-                <Category key={category} category={category} />
+              {board.categories.map((category) => (
+                <Category
+                  key={category.name}
+                  name={category.name}
+                  note={category.note}
+                />
               ))}
             </tr>
           </thead>
