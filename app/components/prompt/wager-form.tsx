@@ -9,12 +9,7 @@ import {
   useEngineContext,
 } from "~/engine";
 import { useSoloAction } from "~/utils/use-solo-action";
-
-const formatter = Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  maximumFractionDigits: 0, // Round to whole dollars.
-});
+import { formatDollars } from "~/utils/utils";
 
 type PlayerAndCanWager = Player & { canWager: boolean };
 
@@ -40,7 +35,7 @@ function PlayerScores({
             <span>{p.userId === userId ? " (you)" : null}</span>
             {p.canWager ? null : <span> (can't wager)</span>}
           </p>
-          <p className="text-white">{formatter.format(p.score)}</p>
+          <p className="text-white">{formatDollars(p.score)}</p>
         </div>
       ))}
     </div>
@@ -73,7 +68,7 @@ function WagerForm({
           How much will you wager on this clue?
         </p>
         <p className="text-slate-300 text-sm text-center">
-          You can wager up to {formatter.format(maxWager)}.
+          You can wager up to {formatDollars(maxWager)}.
         </p>
         <PlayerScores players={players} userId={userId} />
       </div>
@@ -111,7 +106,7 @@ function WagerForm({
       >
         Wager all:
         <span className="font-handwriting font-xl font-bold">
-          {formatter.format(maxWager)}
+          {formatDollars(maxWager)}
         </span>
       </Button>
     </div>
@@ -152,7 +147,7 @@ export function ConnectedWagerForm({
         <p className="text-white font-bold">
           Your wager:{" "}
           <span className="font-handwriting text-xl">
-            {formatter.format(wager)}
+            {formatDollars(wager)}
           </span>
           <br />
         </p>

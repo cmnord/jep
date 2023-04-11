@@ -2,13 +2,7 @@ import classNames from "classnames";
 
 import type { Player } from "~/engine";
 import { useEngineContext } from "~/engine";
-import { stringToHslColor } from "~/utils/utils";
-
-const formatter = Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  maximumFractionDigits: 0, // Round to whole dollars.
-});
+import { formatDollars, stringToHslColor } from "~/utils/utils";
 
 function PlayerScore({
   player,
@@ -38,7 +32,7 @@ function PlayerScore({
         {winning && <div>👑</div>}
       </div>
       <div className="w-1/3 sm:w-auto grow text-white text-xl font-impact text-shadow-md">
-        {formatter.format(player.score)}
+        {formatDollars(player.score)}
       </div>
     </div>
   );
