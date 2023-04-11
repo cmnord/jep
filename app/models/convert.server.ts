@@ -23,6 +23,7 @@ export interface Board {
 export interface Category {
   name: string;
   clues: Clue[];
+  note?: string;
 }
 
 export interface Clue {
@@ -249,6 +250,7 @@ const typeMap: any = {
     [
       { json: "name", js: "name", typ: "" },
       { json: "clues", js: "clues", typ: a(r("Clue")) },
+      { json: "note", js: "note", typ: u(undefined, "") },
     ],
     false
   ),
