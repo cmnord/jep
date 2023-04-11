@@ -92,6 +92,39 @@ function BeforeGamePreview({
               <PlayerIcon key={i} player={p} />
             ))}
           </div>
+          <div className="bg-yellow-100 rounded-md my-3 p-3 shadow-md">
+            <p className="font-handwriting text-3xl font-black text-yellow-900">
+              how to play
+            </p>
+            <ul className="text-yellow-700 leading-relaxed text-sm">
+              <li>
+                <span className="text-lg">💁</span> Choose the clue when you
+                have board control
+              </li>
+              <li>
+                <span className="text-lg">⏱️</span> Wait for the clue to be read
+              </li>
+              <li>
+                <span className="text-lg">🚨</span> Buzz in when you know the
+                answer
+              </li>
+              <li>
+                <span className="text-lg">🗣️</span> Answer out loud (no typing)
+              </li>
+              <li>
+                <span className="text-lg">🙊</span> Check answers privately
+                (don't say it!)
+              </li>
+              <li>
+                <span className="text-lg">⚡</span> Swoop in when others are
+                wrong
+              </li>
+              <li>
+                <span className="text-lg">⚖️</span> Wager carefully on hidden
+                Double Down clues
+              </li>
+            </ul>
+          </div>
         </div>
       </Modal.Body>
       <NextRoundFooter
