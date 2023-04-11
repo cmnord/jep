@@ -33,6 +33,7 @@ export default function Help() {
   "categories": [
     {
       "name": "Apples",
+      "note": "Name the apple variety.",
       "clues": [
         {
           "clue": "This apple variety is named after a city in New York State",
@@ -79,6 +80,7 @@ interface Board {
 interface Category {
   name: string;
   clues: Clue[];
+  note?: string;
 }
 
 interface Clue {
