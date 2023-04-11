@@ -145,11 +145,16 @@ export function useGameEngine(
                 "unhandled room event type from DB: " + newEvent.type
               );
             }
-            // Only process events we haven't seen yet
-            if (!roomEvents.find((re) => re.id === newEvent.id)) {
-              setRoomEvents((prev) => [...prev, newEvent]);
-              dispatch(newEvent);
-            }
+            // Use setRoomEvents instead of roomEvents directly so roomEvents
+            // is not a dependency of the useEffect hook
+            setRoomEvents((re) => {
+              // Only process events we haven't seen yet
+              if (!re.find((re) => re.id === newEvent.id)) {
+                setRoomEvents((prev) => [...prev, newEvent]);
+                dispatch(newEvent);
+              }
+              return re;
+            });
           }
         )
         .subscribe((status, err) => {
@@ -170,7 +175,7 @@ export function useGameEngine(
     } catch (error) {
       console.error(error);
     }
-  }, [client, roomId, roomEvents]);
+  }, [client, roomId]);
 
   return stateToGameEngine(game, state, dispatch);
 }
