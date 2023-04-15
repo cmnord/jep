@@ -1,8 +1,10 @@
 import { useFetcher } from "@remix-run/react";
+
+import Button from "~/components/button";
+import Input from "~/components/input";
 import type { Action } from "~/engine";
 import { useEngineContext } from "~/engine";
 import { useSoloAction } from "~/utils/use-solo-action";
-import Button from "../button";
 
 function AnswerForm({
   submittedAnswer,
@@ -12,12 +14,12 @@ function AnswerForm({
   loading: boolean;
 }) {
   return (
-    <div className="p-2 flex flex-col items-center gap-2">
+    <div className="flex flex-col items-center gap-2 p-2">
       {submittedAnswer ? (
         <>
-          <p className="text-white font-bold">
+          <p className="font-bold text-white">
             You answered:{" "}
-            <span className="text-xl font-handwriting font-bold">
+            <span className="font-handwriting text-xl font-bold">
               {submittedAnswer}
             </span>
           </p>
@@ -27,19 +29,16 @@ function AnswerForm({
         </>
       ) : null}
       <div className="flex gap-2">
-        <input
+        <Input
           type="text"
           id="answer"
           name="answer"
           placeholder="What is..."
           required
-          className={
-            "px-4 min-w-48 text-xl font-handwriting font-bold text-slate-900 border border-slate-300 rounded-lg bg-slate-50 " +
-            "focus:ring-blue-500 focus:border-blue-500 " +
-            "placeholder:font-sans placeholder:text-sm placeholder:font-normal"
-          }
+          className={`min-w-48 font-handwriting text-xl font-bold
+          placeholder:font-sans placeholder:font-normal`}
         />
-        <Button htmlType="submit" type="primary" loading={loading}>
+        <Button type="primary" htmlType="submit" loading={loading}>
           submit
         </Button>
       </div>
