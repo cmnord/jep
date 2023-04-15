@@ -1,4 +1,5 @@
 import { LoadingSpinner } from "~/components/icons";
+import Input from "~/components/input";
 import { useDebounceEnd } from "~/utils/use-debounce";
 
 export default function Search({
@@ -20,7 +21,7 @@ export default function Search({
         Search
       </label>
       <div className="relative">
-        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
           {/* Heroicon name: outline/magnifying-glass */}
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -28,7 +29,7 @@ export default function Search({
             viewBox="0 0 24 24"
             strokeWidth={1.5}
             stroke="currentColor"
-            className="w-5 h-5"
+            className="h-5 w-5"
             role="img"
             aria-labelledby="search-title"
           >
@@ -40,20 +41,17 @@ export default function Search({
             />
           </svg>
         </div>
-        <input
+        <Input
           type="search"
           id={name}
           name={name}
-          className={
-            "block w-full p-4 pl-10 text-sm text-slate-900 border border-slate-300 rounded-lg bg-slate-50 " +
-            "focus:ring-blue-500 focus:border-blue-500"
-          }
+          className="p-4 pl-10"
           placeholder="Search games..."
           onChange={(e) => onChange(e.target.value)}
           defaultValue={defaultValue}
         />
         {debouncedLoading ? (
-          <div className={"absolute right-2.5 bottom-2.5 p-2 text-blue-600"}>
+          <div className={"absolute bottom-2.5 right-2.5 p-2 text-blue-600"}>
             <LoadingSpinner />
           </div>
         ) : null}

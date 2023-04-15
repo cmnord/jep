@@ -2,6 +2,7 @@ import { useFetcher } from "@remix-run/react";
 import * as React from "react";
 
 import Button from "~/components/button";
+import Input from "~/components/input";
 import type { Action, Player } from "~/engine";
 import {
   CANT_BUZZ_FLAG,
@@ -24,7 +25,7 @@ function PlayerScores({
   const playerScores = players.sort((a, b) => b.score - a.score);
 
   return (
-    <div className="flex self-start gap-2 w-full overflow-x-scroll text-slate-300 text-sm text-shadow">
+    <div className="text-shadow flex w-full gap-2 self-start overflow-x-scroll text-sm text-slate-300">
       {playerScores.map((p, i) => (
         <div
           className="flex flex-col items-center justify-between"
@@ -62,28 +63,25 @@ function WagerForm({
   const [inputRequired, setInputRequired] = React.useState(true);
 
   return (
-    <div className="p-2 flex flex-col items-center gap-4">
-      <div className="flex flex-col items-center gap-2 w-full">
-        <p className="text-white font-bold">
+    <div className="flex flex-col items-center gap-4 p-2">
+      <div className="flex w-full flex-col items-center gap-2">
+        <p className="font-bold text-white">
           How much will you wager on this clue?
         </p>
-        <p className="text-slate-300 text-sm text-center">
+        <p className="text-center text-sm text-slate-300">
           You can wager up to {formatDollars(maxWager)}.
         </p>
         <PlayerScores players={players} userId={userId} />
       </div>
       <div className="flex gap-2">
-        <input
+        <Input
           type="number"
           min={5}
           max={maxWager}
           id="wager"
           name="wager"
-          className={
-            "px-4 min-w-48 text-xl font-handwriting font-bold text-slate-900 border border-slate-300 rounded-lg bg-slate-50 " +
-            "focus:ring-blue-500 focus:border-blue-500 " +
-            "placeholder:font-sans placeholder:text-sm placeholder:font-normal"
-          }
+          className={`min-w-48 font-handwriting text-xl font-bold
+          placeholder:font-sans placeholder:font-normal `}
           placeholder="choose wager amount"
           required={inputRequired}
         />
@@ -105,7 +103,7 @@ function WagerForm({
         onClick={() => setInputRequired(false)}
       >
         Wager all:
-        <span className="font-handwriting font-xl font-bold">
+        <span className="font-xl font-handwriting font-bold">
           {formatDollars(maxWager)}
         </span>
       </Button>
@@ -143,15 +141,15 @@ export function ConnectedWagerForm({
 
   if (wager !== undefined) {
     return (
-      <div className="p-2 flex flex-col items-center gap-4">
-        <p className="text-white font-bold">
+      <div className="flex flex-col items-center gap-4 p-2">
+        <p className="font-bold text-white">
           Your wager:{" "}
           <span className="font-handwriting text-xl">
             {formatDollars(wager)}
           </span>
           <br />
         </p>
-        <p className="text-slate-300 text-sm">
+        <p className="text-sm text-slate-300">
           Waiting for other players to wager...
         </p>
         <PlayerScores players={playersList} userId={userId} />

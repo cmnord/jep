@@ -91,7 +91,7 @@ function NextClueForm({
           {boardControlName} will choose the next clue.
         </p>
       ) : null}
-      <Button htmlType="submit" type="primary" autoFocus loading={loading}>
+      <Button type="primary" htmlType="submit" autoFocus loading={loading}>
         Back to board
       </Button>
     </div>
