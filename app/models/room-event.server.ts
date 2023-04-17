@@ -41,5 +41,9 @@ export async function createRoomEvent(
     throw new Error(error.message);
   }
 
-  return data[0];
+  const roomEvent = data.at(0);
+  if (!roomEvent) {
+    throw new Error("room event not created");
+  }
+  return roomEvent;
 }

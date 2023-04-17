@@ -151,11 +151,10 @@ export async function getGame(gameId: string): Promise<Game | null> {
     throw new Error(error.message);
   }
 
-  if (data.length === 0) {
+  const gameAndClues = data.at(0);
+  if (!gameAndClues) {
     return null;
   }
-
-  const gameAndClues = data[0];
 
   return dbGameToGame(gameAndClues);
 }
@@ -215,11 +214,10 @@ export async function createGame(inputGame: ConvertedGame) {
   if (gameErr !== null) {
     throw gameErr;
   }
-  if (gameData === null) {
+  const game = gameData.at(0);
+  if (!game) {
     throw new Error("game data response must not be null");
   }
-
-  const game = gameData[0];
 
   const categoriesToInsert: Omit<CategoryTable["Insert"], "id">[] = [];
   for (let round = 0; round < inputGame.boards.length; round++) {

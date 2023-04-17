@@ -19,11 +19,12 @@ export async function getRoom(nameAndId: string): Promise<Room | null> {
     throw new Error(error.message);
   }
 
-  if (data.length === 0) {
+  const room = data.at(0);
+  if (!room) {
     return null;
   }
 
-  return data[0];
+  return room;
 }
 
 /* Writes */
@@ -40,5 +41,9 @@ export async function createRoom(gameId: string) {
     throw new Error(error.message);
   }
 
-  return data[0].id + "-" + word;
+  const room = data.at(0);
+  if (!room) {
+    throw new Error("room not created");
+  }
+  return room.id + "-" + word;
 }
