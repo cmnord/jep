@@ -102,8 +102,8 @@ export default function Index() {
   }, [debouncedSearch, submit]);
 
   return (
-    <main className="max-w-screen-md px-4 pt-8 pb-16 md:pt-16 mx-auto w-full sm:w-auto">
-      <h2 className="text-2xl font-semibold mb-4">Games</h2>
+    <main className="mx-auto w-full max-w-screen-md grow px-4 pb-16 pt-8 sm:w-auto md:pt-16">
+      <h2 className="mb-4 text-2xl font-semibold">Games</h2>
       <Form method="GET" ref={searchFormRef}>
         <Search
           name="q"
@@ -113,7 +113,7 @@ export default function Index() {
         />
         <input type="hidden" name="solo" value={solo ? "on" : "off"} />
       </Form>
-      <Form method="GET" className="flex flex-col sm:flex-row mb-4 gap-6">
+      <Form method="GET" className="mb-4 flex flex-col gap-6 sm:flex-row">
         <Link to="/mock">
           <Button htmlType="button">Play a mock game</Button>
         </Link>
@@ -136,10 +136,8 @@ export default function Index() {
               <button>
                 <QuestionMarkCircle
                   outlined
-                  className={
-                    "w-4 h-4 text-slate-400 rounded-md " +
-                    "hover:text-slate-500 hover:bg-slate-100"
-                  }
+                  className={`h-4 w-4 rounded-md text-slate-400
+                  hover:bg-slate-100 hover:text-slate-500`}
                 />
               </button>
             </Popover>
@@ -151,7 +149,7 @@ export default function Index() {
           No games found{search ? ` for search "${debouncedSearch}"` : ""}
         </p>
       )}
-      <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4 mb-4">
+      <div className="mb-4 flex flex-col gap-4 sm:grid sm:grid-cols-2">
         {data.games.map((game, i) => (
           <GameCard key={`game-${i}`} game={game} solo={optimisticSolo} />
         ))}

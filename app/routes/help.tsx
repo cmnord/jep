@@ -6,8 +6,8 @@ export const meta: V2_MetaFunction = () => [{ title: "jep! - Help" }];
 export default function Help() {
   return (
     <div className="max-w-full">
-      <main className="max-w-screen-md px-4 pt-8 pb-16 md:pt-16 mx-auto">
-        <h2 className="text-2xl font-semibold mb-4">.jep.json file format</h2>
+      <main className="mx-auto max-w-screen-md px-4 pt-8 md:pt-16">
+        <h2 className="mb-4 text-2xl font-semibold">.jep.json file format</h2>
         <p className="mb-4">
           A <Code>.jep.json</Code> file has the following format:
         </p>

@@ -13,6 +13,7 @@ import * as React from "react";
 
 import { CodeBlock } from "~/components/code";
 import { DefaultErrorBoundary } from "~/components/error";
+import Footer from "~/components/footer";
 import Header from "~/components/header";
 import { SoundContext } from "~/utils/use-sound";
 
@@ -71,7 +72,7 @@ export default function App() {
         <Meta />
         <Links />
       </head>
-      <body className="relative flex flex-col">
+      <body className="relative flex min-h-screen flex-col">
         <SoundContext.Provider
           value={{
             volume,
@@ -82,6 +83,7 @@ export default function App() {
         >
           <Header />
           <Outlet />
+          <Footer />
           <ScrollRestoration />
           <Scripts />
           <LiveReload />
@@ -107,7 +109,7 @@ export function ErrorBoundary() {
         </head>
         <body className="flex flex-col">
           <Header />
-          <div className="p-12 flex flex-col gap-4">
+          <div className="flex flex-col gap-4 p-12">
             <h1 className="text-3xl font-bold">Caught error</h1>
             <p>Status: {error.status}</p>
             <CodeBlock text={JSON.stringify(error.data, null, 2)} />
