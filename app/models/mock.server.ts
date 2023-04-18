@@ -1,7 +1,7 @@
 import { readFile } from "fs/promises";
-import { Convert } from "./convert.server";
 
-import type { Game } from "./game.server";
+import { Convert } from "~/models/convert.server";
+import type { Game } from "~/models/game.server";
 
 /** Find the absolute path of the json directory.
  *

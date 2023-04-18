@@ -30,9 +30,9 @@ function Item(props: DropdownMenu.MenuItemProps) {
 /** AccountButton shows an avatar for the user and a dropddown to their profile
  * and a logout button.
  */
-function AccountButton({ user }: { user: { id: string; email?: string } }) {
+function AccountButton({ user }: { user: { id: string; email: string } }) {
   const backgroundColor = stringToHslColor(user.id);
-  const email = user.email ?? "Anonymous";
+  const email = user.email;
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>
@@ -186,7 +186,7 @@ function GameSettings({ game }: { game: Game }) {
 export default function Header({
   user,
 }: {
-  user?: { id: string; email?: string };
+  user?: { id: string; email: string };
 }) {
   const matches = useMatches();
   const gameRoute = matches.find((match) => match.data && "game" in match.data);

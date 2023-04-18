@@ -1,6 +1,6 @@
+import { db } from "~/db.server";
 import type { ActionType } from "~/engine";
 import type { Database, Json } from "~/models/database.types";
-import { db } from "~/supabase.server";
 
 type RoomEventTable = Database["public"]["Tables"]["room_events"];
 export type DbRoomEvent = RoomEventTable["Row"];
