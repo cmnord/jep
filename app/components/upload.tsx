@@ -1,5 +1,5 @@
+import { LoadingSpinner } from "~/components/icons";
 import Link from "~/components/link";
-import { LoadingSpinner } from "./icons";
 
 /** Heroicon name: solid/document-arrow-up */
 function UploadIcon() {
@@ -8,7 +8,7 @@ function UploadIcon() {
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
       fill="currentColor"
-      className="w-5 h-5 mb-2"
+      className="mb-2 h-5 w-5"
       role="img"
       aria-labelledby="upload-title"
     >
@@ -36,17 +36,15 @@ export default function Upload({
       <label
         tabIndex={loading ? undefined : 0}
         role={loading ? undefined : "button"}
-        className={
-          "flex rounded-lg text-slate-900 " +
-          "border-2 border-dashed border-blue-600 " +
-          "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-        }
+        className={`flex rounded-lg border-2 border-dashed border-blue-600
+        text-slate-900
+        focus:outline-none focus:ring-2 focus:ring-blue-500
+        focus:ring-offset-2`}
       >
         <div
-          className={
-            "flex flex-col justify-center items-center p-6 text-sm bg-slate-100 rounded-lg transition-colors " +
-            "hover:bg-slate-200 "
-          }
+          className={`flex flex-col items-center justify-center rounded-lg
+          bg-slate-100 p-6 text-sm transition-colors
+          hover:bg-slate-200`}
         >
           {loading ? <LoadingSpinner className="mb-2" /> : <UploadIcon />}
           <p className="font-medium">Upload .jep.json file</p>

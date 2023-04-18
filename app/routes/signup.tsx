@@ -1,16 +1,24 @@
 import type { ActionArgs, LoaderArgs, V2_MetaFunction } from "@remix-run/node";
-import { json } from "@remix-run/node";
+import { json, redirect } from "@remix-run/node";
 import { Form, useActionData, useNavigation } from "@remix-run/react";
 
 import Button from "~/components/button";
 import { ErrorMessage } from "~/components/error";
 import Input from "~/components/input";
 import Link from "~/components/link";
+import { createAuthSession, getAuthSession } from "~/models/auth";
+import {
+  createUserAccount,
+  getUserByEmail,
+} from "~/models/user/service.server";
 
 export const meta: V2_MetaFunction = () => [{ title: "Sign up" }];
 
 export async function loader({ request }: LoaderArgs) {
-  // TODO: if already signed up, redirect to `/login`
+  const authSession = await getAuthSession(request);
+
+  if (authSession) return redirect("/");
+
   return null;
 }
 
@@ -29,10 +37,23 @@ export async function action({ request }: ActionArgs) {
     );
   }
 
-  // TODO: if already signed up, redirect to `/login`
+  const existingUser = await getUserByEmail(email);
 
-  // TODO: sign up user
-  return json({ error: "Not implemented" }, { status: 500 });
+  if (existingUser) {
+    return json({ error: "User already exists" }, { status: 400 });
+  }
+
+  const authSession = await createUserAccount(email, password);
+
+  if (!authSession) {
+    return json({ error: "Unable to create account" }, { status: 500 });
+  }
+
+  return createAuthSession({
+    request,
+    authSession,
+    redirectTo: "/",
+  });
 }
 
 export default function Signup() {

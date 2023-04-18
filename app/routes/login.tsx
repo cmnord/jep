@@ -1,26 +1,45 @@
-import type { ActionArgs, V2_MetaFunction } from "@remix-run/node";
-import { json } from "@remix-run/node";
+import type { ActionArgs, LoaderArgs, V2_MetaFunction } from "@remix-run/node";
+import { json, redirect } from "@remix-run/node";
 import { Form, useActionData, useNavigation } from "@remix-run/react";
 
 import Button from "~/components/button";
 import { ErrorMessage } from "~/components/error";
 import Input from "~/components/input";
 import Link from "~/components/link";
+import {
+  createAuthSession,
+  getAuthSession,
+  signInWithEmail,
+} from "~/models/auth";
+import { assertIsPost } from "~/utils";
 
 export const meta: V2_MetaFunction = () => [{ title: "Login" }];
 
-export async function loader() {
-  // TODO: if already logged in, redirect to `/`
+export async function loader({ request }: LoaderArgs) {
+  const authSession = await getAuthSession(request);
+
+  if (authSession) return redirect("/");
+
   return null;
 }
 
 export async function action({ request }: ActionArgs) {
+  assertIsPost(request);
   const formData = await request.formData();
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
 
-  // TODO: log in user
-  return json({ error: "Not implemented" }, { status: 500 });
+  const authSession = await signInWithEmail(email, password);
+
+  if (!authSession) {
+    return json({ error: "Invalid email or password" }, { status: 400 });
+  }
+
+  return createAuthSession({
+    request,
+    authSession,
+    redirectTo: "/",
+  });
 }
 
 export default function Login() {

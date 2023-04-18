@@ -36,7 +36,8 @@ Open up [http://localhost:3000](http://localhost:3000) and you should be ready t
 ## Local Supabase
 
 To use a local version of Supabase instead of the production URL, set
-`SUPABASE_URL` and `SUPABASE_ANON_KEY` from the results of `npx supabase start`.
+`SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` from the
+results of `npx supabase status`.
 
 View the local Supabase dashboard at
 [http://localhost:54323/](http://localhost:54323/).

@@ -1,4 +1,9 @@
-import type { LinksFunction, V2_MetaFunction } from "@remix-run/node";
+import type {
+  LinksFunction,
+  LoaderArgs,
+  V2_MetaFunction,
+} from "@remix-run/node";
+import { json } from "@remix-run/node";
 import {
   isRouteErrorResponse,
   Links,
@@ -7,6 +12,7 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLoaderData,
   useRouteError,
 } from "@remix-run/react";
 import * as React from "react";
@@ -15,6 +21,8 @@ import { CodeBlock } from "~/components/code";
 import { DefaultErrorBoundary } from "~/components/error";
 import Footer from "~/components/footer";
 import Header from "~/components/header";
+import { getAuthSession } from "~/models/auth";
+import { getUserByEmail } from "~/models/user";
 import { SoundContext } from "~/utils/use-sound";
 
 import stylesheet from "./styles.css";
@@ -60,9 +68,22 @@ export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
 ];
 
+export async function loader({ request }: LoaderArgs) {
+  const authSession = await getAuthSession(request);
+
+  if (authSession) {
+    const user = await getUserByEmail(authSession.email);
+    return json({ user });
+  }
+
+  return json({ user: undefined });
+}
+
 export default function App() {
   const [volume, setVolume] = React.useState(0.5);
   const [mute, setMute] = React.useState(false);
+
+  const { user } = useLoaderData<typeof loader>();
 
   return (
     <html lang="en">
@@ -81,7 +102,7 @@ export default function App() {
             setMute,
           }}
         >
-          <Header />
+          <Header user={user} />
           <Outlet />
           <Footer />
           <ScrollRestoration />
