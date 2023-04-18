@@ -2,11 +2,12 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@supabase/supabase-js";
 
 import type { Database } from "~/models/database.types";
+import { SUPABASE_SERVICE_ROLE_KEY, SUPABASE_URL } from "~/utils";
 
-let db: SupabaseClient;
+let db: SupabaseClient<Database>;
 
 declare global {
-  var __db__: SupabaseClient;
+  var __db__: SupabaseClient<Database>;
 }
 
 // this is needed because in development we don't want to restart
@@ -23,14 +24,7 @@ if (process.env.NODE_ENV === "production") {
 }
 
 function initializeDB() {
-  const { SUPABASE_URL, SUPABASE_ANON_KEY } = process.env;
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-    throw new Error(
-      "SUPABASE_URL or SUPABASE_ANON_KEY not found in process.env"
-    );
-  }
-
-  return createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY);
+  return createClient<Database>(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 }
 
 export { db };

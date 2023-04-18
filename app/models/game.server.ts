@@ -1,6 +1,6 @@
+import { db } from "~/db.server";
 import type { Board, Game as ConvertedGame } from "~/models/convert.server";
 import type { Database } from "~/models/database.types";
-import { db } from "~/supabase.server";
 
 /* Types */
 
