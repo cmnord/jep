@@ -100,7 +100,7 @@ export function useGameEngine(
   SUPABASE_URL: string,
   SUPABASE_ANON_KEY: string
 ) {
-  const [roomEvents, setRoomEvents] = React.useState(serverRoomEvents);
+  const [, setRoomEvents] = React.useState(serverRoomEvents);
 
   // TODO: spectators who cannot buzz
 

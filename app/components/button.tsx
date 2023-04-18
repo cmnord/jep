@@ -4,7 +4,7 @@ import { LoadingSpinner } from "~/components/icons";
 
 interface Props {
   onClick?: () => void;
-  type?: "primary" | "default";
+  type?: "primary" | "default" | "transparent";
   className?: string;
   disabled?: boolean;
   htmlType?: React.ButtonHTMLAttributes<HTMLButtonElement>["type"];
@@ -42,6 +42,8 @@ export default function Button({
             type === "primary",
           "border-blue-600 bg-white text-blue-600 hover:border-blue-700 hover:bg-slate-100 hover:text-blue-700":
             type === "default",
+          "text-white hover:border-blue-300 hover:text-blue-300":
+            type === "transparent",
         }
       )}
       type={htmlType}
@@ -49,7 +51,7 @@ export default function Button({
       value={value}
       autoFocus={autoFocus}
     >
-      <div className="inline-flex justify-center gap-1">
+      <div className="inline-flex items-center justify-center gap-1">
         {loading && <LoadingSpinner />}
         {children}
       </div>
