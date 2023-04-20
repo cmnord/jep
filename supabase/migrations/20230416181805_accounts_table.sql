@@ -21,3 +21,10 @@ as permissive
 for select
 to authenticated
 using ((id = auth.uid()));
+
+create policy "Enable insert for un-authenticated users only"
+on "public"."accounts"
+as permissive
+for insert
+to anon
+with check (true);
