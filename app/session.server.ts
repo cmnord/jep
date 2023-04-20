@@ -1,14 +1,11 @@
 import { createCookieSessionStorage } from "@remix-run/node";
 import { nanoid } from "nanoid";
 
+import { SESSION_SECRET } from "~/utils";
+
 interface FormState {
   success: boolean;
   error: string;
-}
-
-const sessionSecret = process.env.SESSION_SECRET;
-if (!sessionSecret) {
-  throw new Error("process.env.SESSION_SECRET not found");
 }
 
 const FORM_STATE_KEY = "formState";
@@ -21,7 +18,7 @@ const { getSession, commitSession } = createCookieSessionStorage({
     httpOnly: true,
     path: "/",
     sameSite: "lax",
-    secrets: [sessionSecret],
+    secrets: [SESSION_SECRET],
     secure: process.env.NODE_ENV === "production",
   },
 });

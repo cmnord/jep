@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 
+import type { Database } from "~/models/database.types";
 import {
   SUPABASE_ANON_KEY,
   SUPABASE_SERVICE_ROLE_KEY,
@@ -20,7 +21,7 @@ function getSupabaseClient(supabaseKey: string, accessToken?: string) {
       }
     : {};
 
-  return createClient(SUPABASE_URL, supabaseKey, {
+  return createClient<Database>(SUPABASE_URL, supabaseKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
