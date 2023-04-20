@@ -1,19 +1,27 @@
-import { getSupabaseAdmin } from "~/supabase";
+import { getSupabase, getSupabaseAdmin } from "~/supabase";
 import { SUPABASE_URL } from "~/utils/env";
 
 import { mapAuthSession } from "./mappers";
 import type { AuthSession } from "./types";
 
+/** createEmailAuthAccount signs up a user and sends them an email to confirm
+ * their account.
+ */
 export async function createEmailAuthAccount(email: string, password: string) {
-  const { data, error } = await getSupabaseAdmin().auth.admin.createUser({
+  const { data, error } = await getSupabase().auth.signUp({
     email,
     password,
-    email_confirm: true, // FIXME: demo purpose, assert that email is confirmed. For production, check email confirmation
   });
 
-  if (!data.user || error) return null;
+  if (error) {
+    throw new Error(error.message);
+  }
+  const user = data.user;
+  if (!user) {
+    throw new Error("No user returned after signup");
+  }
 
-  return data.user;
+  return user;
 }
 
 export async function signInWithEmail(email: string, password: string) {
@@ -22,7 +30,12 @@ export async function signInWithEmail(email: string, password: string) {
     password,
   });
 
-  if (!data.session || error) return null;
+  if (error) {
+    if (error.message === "Invalid login credentials") {
+      return null;
+    }
+    throw new Error(error.message);
+  }
 
   return mapAuthSession(data.session);
 }
@@ -39,7 +52,9 @@ export async function sendMagicLink(email: string) {
 export async function deleteAuthAccount(userId: string) {
   const { error } = await getSupabaseAdmin().auth.admin.deleteUser(userId);
 
-  if (error) return null;
+  if (error) {
+    throw new Error(error.message);
+  }
 
   return true;
 }
@@ -47,7 +62,9 @@ export async function deleteAuthAccount(userId: string) {
 export async function getAuthAccountByAccessToken(accessToken: string) {
   const { data, error } = await getSupabaseAdmin().auth.getUser(accessToken);
 
-  if (!data.user || error) return null;
+  if (error) {
+    throw new Error(error.message);
+  }
 
   return data.user;
 }

@@ -12,7 +12,7 @@ export async function loader({ request }: LoaderArgs) {
     throw redirect("/login");
   }
 
-  const user = await getUserByEmail(authSession.email);
+  const user = await getUserByEmail(authSession.email, authSession.accessToken);
   return json({ user });
 }
 

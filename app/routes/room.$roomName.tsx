@@ -10,6 +10,7 @@ import { getGame } from "~/models/game.server";
 import { createRoomEvent, getRoomEvents } from "~/models/room-event.server";
 import { getRoom } from "~/models/room.server";
 import { getOrCreateUserSession } from "~/session.server";
+import { SUPABASE_ANON_KEY, SUPABASE_URL } from "~/utils";
 import { getRandomName } from "~/utils/name";
 
 export const meta: V2_MetaFunction<typeof loader> = ({ data }) => {
@@ -52,12 +53,6 @@ export async function loader({ request, params }: LoaderArgs) {
     roomEvents.push(joinEvent);
   }
 
-  const { SUPABASE_URL, SUPABASE_ANON_KEY } = process.env;
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-    throw new Error(
-      "SUPABASE_URL or SUPABASE_ANON_KEY not found in process.env"
-    );
-  }
   const env = { SUPABASE_URL, SUPABASE_ANON_KEY };
 
   return json({ room, roomName, game, roomEvents, userId, env }, { headers });
