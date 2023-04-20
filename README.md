@@ -42,6 +42,9 @@ results of `npx supabase status`.
 View the local Supabase dashboard at
 [http://localhost:54323/](http://localhost:54323/).
 
+View mock emails sent for password reset and email verification at
+[http://localhost:54324/](http://localhost:54324/).
+
 > **Warning**
 >
 > Enable Realtime events manually on the `room_events` table for multiplayer

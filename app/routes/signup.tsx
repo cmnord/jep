@@ -3,13 +3,13 @@ import { json, redirect } from "@remix-run/node";
 import { Form, useActionData, useNavigation } from "@remix-run/react";
 
 import Button from "~/components/button";
-import { ErrorMessage } from "~/components/error";
+import { ErrorMessage, SuccessMessage } from "~/components/error";
 import Input from "~/components/input";
 import Link from "~/components/link";
-import { createAuthSession, getAuthSession } from "~/models/auth";
+import { getAuthSession } from "~/models/auth";
 import {
   createUserAccount,
-  getUserByEmail,
+  getUserExistsByEmailWithoutSession,
 } from "~/models/user/service.server";
 
 export const meta: V2_MetaFunction = () => [{ title: "Sign up" }];
@@ -28,38 +28,49 @@ export async function action({ request }: ActionArgs) {
   const password = formData.get("password") as string;
   const confirmPassword = formData.get("confirmPassword") as string;
   if (password !== confirmPassword) {
-    return json({ error: "Passwords do not match" }, { status: 400 });
+    return json(
+      { success: false, message: "Passwords do not match" },
+      { status: 400 }
+    );
   }
   if (password.length < 6) {
     return json(
-      { error: "Password must be at least 6 characters" },
+      { success: false, message: "Password must be at least 6 characters" },
       { status: 400 }
     );
   }
 
-  const existingUser = await getUserByEmail(email);
-
-  if (existingUser) {
-    return json({ error: "User already exists" }, { status: 400 });
+  const userExists = await getUserExistsByEmailWithoutSession(email);
+  if (userExists) {
+    return json(
+      {
+        success: false,
+        message: "User already exists with this email, sign in instead",
+      },
+      { status: 400 }
+    );
   }
 
-  const authSession = await createUserAccount(email, password);
-
-  if (!authSession) {
-    return json({ error: "Unable to create account" }, { status: 500 });
+  try {
+    await createUserAccount(email, password);
+    return json({
+      success: true,
+      message:
+        "Created user account! Check your email for a verification link.",
+    });
+  } catch (error: unknown) {
+    console.error(error);
+    if (error instanceof Error) {
+      return json({ success: false, message: error.message }, { status: 500 });
+    }
+    throw error;
   }
-
-  return createAuthSession({
-    request,
-    authSession,
-    redirectTo: "/",
-  });
 }
 
 export default function Signup() {
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
-  const disabled = navigation.state !== "idle";
+  const loading = navigation.state !== "idle";
 
   return (
     <div className="max-w-full grow">
@@ -82,7 +93,7 @@ export default function Signup() {
                 aria-label="Email address"
                 autoComplete="email"
                 autoFocus
-                disabled={disabled}
+                disabled={loading}
                 placeholder="Email"
                 required
               />
@@ -101,7 +112,7 @@ export default function Signup() {
                 name="password"
                 id="password"
                 autoComplete="current-password"
-                disabled={disabled}
+                disabled={loading}
                 placeholder="Password"
                 required
               />
@@ -120,17 +131,26 @@ export default function Signup() {
                 name="confirmPassword"
                 id="confirmPassword"
                 autoComplete="current-password"
-                disabled={disabled}
+                disabled={loading}
                 placeholder="Confirm Password"
                 required
               />
             </div>
           </div>
-          <Button type="primary" htmlType="submit" disabled={disabled}>
+          <Button
+            type="primary"
+            htmlType="submit"
+            disabled={loading}
+            loading={loading}
+          >
             Sign up
           </Button>
-          {actionData?.error ? (
-            <ErrorMessage message={actionData.error} />
+          {actionData ? (
+            actionData.success ? (
+              <SuccessMessage message={actionData.message} />
+            ) : (
+              <ErrorMessage message={actionData.message} />
+            )
           ) : null}
           <hr className="my-4" />
           <p>

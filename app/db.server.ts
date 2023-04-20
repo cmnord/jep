@@ -2,7 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@supabase/supabase-js";
 
 import type { Database } from "~/models/database.types";
-import { SUPABASE_SERVICE_ROLE_KEY, SUPABASE_URL } from "~/utils";
+import { SUPABASE_ANON_KEY, SUPABASE_URL } from "~/utils";
 
 let db: SupabaseClient<Database>;
 
@@ -24,7 +24,7 @@ if (process.env.NODE_ENV === "production") {
 }
 
 function initializeDB() {
-  return createClient<Database>(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+  return createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY);
 }
 
 export { db };
