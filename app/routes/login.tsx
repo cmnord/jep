@@ -8,7 +8,7 @@ import Input from "~/components/input";
 import Link from "~/components/link";
 import {
   createAuthSession,
-  getAuthSession,
+  getValidAuthSession,
   signInWithEmail,
 } from "~/models/auth";
 import { assertIsPost } from "~/utils";
@@ -16,7 +16,7 @@ import { assertIsPost } from "~/utils";
 export const meta: V2_MetaFunction = () => [{ title: "Login" }];
 
 export async function loader({ request }: LoaderArgs) {
-  const authSession = await getAuthSession(request);
+  const authSession = await getValidAuthSession(request);
 
   if (authSession) return redirect("/");
 

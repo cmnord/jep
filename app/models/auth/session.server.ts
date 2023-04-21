@@ -57,9 +57,11 @@ async function getSession(request: Request) {
   return sessionStorage.getSession(cookie);
 }
 
-export async function getAuthSession(
-  request: Request
-): Promise<AuthSession | null> {
+/** getAuthSession gets the current auth session whether or not it's expired.
+ * See getValidAuthSession for a function that will refresh the session if it's
+ * expired.
+ */
+async function getAuthSession(request: Request): Promise<AuthSession | null> {
   const session = await getSession(request);
   return session.get(SESSION_KEY);
 }
@@ -116,6 +118,22 @@ async function assertAuthSession(
         },
       }
     );
+  }
+
+  return authSession;
+}
+
+export async function getValidAuthSession(
+  request: Request,
+  { verify }: { verify: boolean } = { verify: false }
+) {
+  const authSession = await getAuthSession(request);
+  if (!authSession) return null;
+
+  const isValidSession = verify ? await verifyAuthSession(authSession) : true;
+
+  if (!isValidSession || isExpiringSoon(authSession.expiresAt)) {
+    return refreshAuthSession(request);
   }
 
   return authSession;

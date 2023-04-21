@@ -21,10 +21,10 @@ import { CodeBlock } from "~/components/code";
 import { DefaultErrorBoundary } from "~/components/error";
 import Footer from "~/components/footer";
 import Header from "~/components/header";
-import { getAuthSession } from "~/models/auth";
 import { getUserByEmail } from "~/models/user";
 import { SoundContext } from "~/utils/use-sound";
 
+import { getValidAuthSession } from "./models/auth/session.server";
 import stylesheet from "./styles.css";
 
 const META_URL = "https://whatis.club";
@@ -69,7 +69,7 @@ export const links: LinksFunction = () => [
 ];
 
 export async function loader({ request }: LoaderArgs) {
-  const authSession = await getAuthSession(request);
+  const authSession = await getValidAuthSession(request);
 
   if (authSession) {
     const user = await getUserByEmail(
