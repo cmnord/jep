@@ -9,7 +9,7 @@ export {
   commitAuthSession,
   createAuthSession,
   destroyAuthSession,
-  getAuthSession,
+  getValidAuthSession,
   requireAuthSession,
 } from "./session.server";
 export * from "./types";

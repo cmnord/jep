@@ -6,7 +6,7 @@ import Button from "~/components/button";
 import { ErrorMessage, SuccessMessage } from "~/components/error";
 import Input from "~/components/input";
 import Link from "~/components/link";
-import { getAuthSession } from "~/models/auth";
+import { getValidAuthSession } from "~/models/auth";
 import {
   createUserAccount,
   getUserExistsByEmailWithoutSession,
@@ -15,7 +15,7 @@ import {
 export const meta: V2_MetaFunction = () => [{ title: "Sign up" }];
 
 export async function loader({ request }: LoaderArgs) {
-  const authSession = await getAuthSession(request);
+  const authSession = await getValidAuthSession(request);
 
   if (authSession) return redirect("/");
 
