@@ -4,7 +4,9 @@ import { useLoaderData } from "@remix-run/react";
 
 import GameComponent from "~/components/game";
 import { GameEngineContext, useSoloGameEngine } from "~/engine";
+import { getValidAuthSession } from "~/models/auth";
 import { getGame } from "~/models/game.server";
+import { getUserByEmail } from "~/models/user";
 import { getOrCreateUserSession } from "~/session.server";
 import { getRandomName } from "~/utils/name";
 
@@ -27,11 +29,22 @@ export async function loader({ request, params }: LoaderArgs) {
     throw new Response("game not found", { status: 404 });
   }
 
-  const headers = new Headers();
-  const userId = await getOrCreateUserSession(request, headers);
+  const authSession = await getValidAuthSession(request);
+  const user = authSession
+    ? await getUserByEmail(authSession.email, authSession.accessToken)
+    : null;
+
   const name = getRandomName();
 
-  return json({ game, userId, name }, { headers });
+  // Add the user to the room. If they are logged in, their ID is their user ID.
+  // If they are a guest, their ID is their guest session ID.
+  if (user) {
+    return json({ game, userId: user.id, name });
+  } else {
+    const headers = new Headers();
+    const userId = await getOrCreateUserSession(request, headers);
+    return json({ game, userId, name }, { headers });
+  }
 }
 
 export default function PlayGame() {
