@@ -1,11 +1,13 @@
 import type { ActionArgs, LoaderArgs, V2_MetaFunction } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { Form, useActionData, useNavigation } from "@remix-run/react";
+import * as React from "react";
 
 import Button from "~/components/button";
 import { ErrorMessage, SuccessMessage } from "~/components/error";
 import Input from "~/components/input";
 import Link from "~/components/link";
+import ShowPasswordButton from "~/components/show-password-button";
 import { getValidAuthSession } from "~/models/auth";
 import {
   createUserAccount,
@@ -26,13 +28,6 @@ export async function action({ request }: ActionArgs) {
   const formData = await request.formData();
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
-  const confirmPassword = formData.get("confirmPassword") as string;
-  if (password !== confirmPassword) {
-    return json(
-      { success: false, message: "Passwords do not match" },
-      { status: 400 }
-    );
-  }
   if (password.length < 6) {
     return json(
       { success: false, message: "Password must be at least 6 characters" },
@@ -72,6 +67,8 @@ export default function Signup() {
   const navigation = useNavigation();
   const loading = navigation.state !== "idle";
 
+  const [showPassword, setShowPassword] = React.useState(false);
+
   return (
     <div className="max-w-full grow">
       <main className="mx-auto max-w-screen-md px-4 pb-16 pt-8 md:pt-16">
@@ -106,9 +103,9 @@ export default function Signup() {
             >
               Password
             </label>
-            <div>
+            <div className="relative">
               <Input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 name="password"
                 id="password"
                 autoComplete="current-password"
@@ -116,24 +113,9 @@ export default function Signup() {
                 placeholder="Password"
                 required
               />
-            </div>
-          </div>
-          <div className="flex flex-col gap-2">
-            <label
-              htmlFor="confirmPassword"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Confirm Password
-            </label>
-            <div>
-              <Input
-                type="password"
-                name="confirmPassword"
-                id="confirmPassword"
-                autoComplete="current-password"
-                disabled={loading}
-                placeholder="Confirm Password"
-                required
+              <ShowPasswordButton
+                showPassword={showPassword}
+                onClick={() => setShowPassword((s) => !s)}
               />
             </div>
           </div>
