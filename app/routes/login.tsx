@@ -1,11 +1,13 @@
 import type { ActionArgs, LoaderArgs, V2_MetaFunction } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { Form, useActionData, useNavigation } from "@remix-run/react";
+import * as React from "react";
 
 import Button from "~/components/button";
 import { ErrorMessage } from "~/components/error";
 import Input from "~/components/input";
 import Link from "~/components/link";
+import ShowPasswordButton from "~/components/show-password-button";
 import {
   createAuthSession,
   getValidAuthSession,
@@ -47,6 +49,8 @@ export default function Login() {
   const navigation = useNavigation();
   const disabled = navigation.state !== "idle";
 
+  const [showPassword, setShowPassword] = React.useState(false);
+
   return (
     <div className="max-w-full grow">
       <main className="mx-auto max-w-screen-md px-4 pb-16 pt-8 md:pt-16">
@@ -80,15 +84,19 @@ export default function Login() {
             >
               Password
             </label>
-            <div>
+            <div className="relative">
               <Input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 name="password"
                 id="password"
                 autoComplete="current-password"
                 disabled={disabled}
                 placeholder="Password"
                 required
+              />
+              <ShowPasswordButton
+                showPassword={showPassword}
+                onClick={() => setShowPassword((s) => !s)}
               />
             </div>
           </div>
