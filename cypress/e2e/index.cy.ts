@@ -4,7 +4,7 @@ describe("landing page", () => {
   });
 
   it("can upload a game", () => {
-    cy.intercept("POST", "/upload*").as("postGame");
+    cy.intercept("POST", "/game*").as("postGame");
 
     cy.findByRole("button", { name: /upload/i }).click();
 

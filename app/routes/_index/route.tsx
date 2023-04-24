@@ -156,7 +156,7 @@ export default function Index() {
       </div>
       <fetcher.Form
         method="POST"
-        action="/upload"
+        action="/game"
         encType="multipart/form-data"
         ref={uploadFormRef}
         replace
