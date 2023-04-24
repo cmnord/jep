@@ -1,5 +1,6 @@
 import type { ActionArgs } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
+
 import { destroyAuthSession } from "~/models/auth";
 import { assertIsPost } from "~/utils";
 
