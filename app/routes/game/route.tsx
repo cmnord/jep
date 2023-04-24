@@ -2,8 +2,9 @@ import type { ActionArgs } from "@remix-run/node";
 import { redirect, unstable_parseMultipartFormData } from "@remix-run/node";
 
 import { flashFormState } from "~/session.server";
-import { uploadHandler } from "~/utils/file-upload-handler.server";
+import { uploadHandler } from "./file-upload-handler.server";
 
+/** POST /game parses and uploads a new game to the server. */
 export async function action({ request }: ActionArgs) {
   try {
     const formData = await unstable_parseMultipartFormData(
