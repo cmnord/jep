@@ -2,7 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@supabase/supabase-js";
 
 import type { Database } from "~/models/database.types";
-import { SUPABASE_ANON_KEY, SUPABASE_URL } from "~/utils";
+import { NODE_ENV, SUPABASE_ANON_KEY, SUPABASE_URL } from "~/utils";
 
 let db: SupabaseClient<Database>;
 
@@ -14,7 +14,7 @@ declare global {
 // the server with every change, but we want to make sure we don't
 // create a new client with every change either.
 // in production we'll have a single client.
-if (process.env.NODE_ENV === "production") {
+if (NODE_ENV === "production") {
   db = initializeDB();
 } else {
   if (!global.__db__) {
