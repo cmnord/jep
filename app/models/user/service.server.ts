@@ -54,7 +54,7 @@ async function createUser({
   return null;
 }
 
-export async function tryCreateUser({
+async function tryCreateUser({
   email,
   userId,
 }: Pick<AuthSession, "userId" | "email">) {

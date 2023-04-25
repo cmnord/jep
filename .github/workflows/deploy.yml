@@ -78,6 +78,8 @@ jobs:
         env:
           CYPRESS_IS_CI: "true"
           PORT: "8811"
+
+          BASE_URL: "http://localhost:8811"
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
