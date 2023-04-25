@@ -114,6 +114,8 @@ export interface Database {
           id: string;
           note: string | null;
           title: string;
+          uploaded_by: string | null;
+          visibility: Database["public"]["Enums"]["game_visibility"];
         };
         Insert: {
           author: string;
@@ -122,6 +124,8 @@ export interface Database {
           id?: string;
           note?: string | null;
           title: string;
+          uploaded_by?: string | null;
+          visibility?: Database["public"]["Enums"]["game_visibility"];
         };
         Update: {
           author?: string;
@@ -130,6 +134,8 @@ export interface Database {
           id?: string;
           note?: string | null;
           title?: string;
+          uploaded_by?: string | null;
+          visibility?: Database["public"]["Enums"]["game_visibility"];
         };
       };
       room_events: {
@@ -180,7 +186,7 @@ export interface Database {
       [_ in never]: never;
     };
     Enums: {
-      [_ in never]: never;
+      game_visibility: "PUBLIC" | "PRIVATE" | "UNLISTED";
     };
     CompositeTypes: {
       [_ in never]: never;
