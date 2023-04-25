@@ -12,6 +12,7 @@ declare global {
 declare global {
   namespace NodeJS {
     interface ProcessEnv {
+      BASE_URL: string;
       SUPABASE_URL: string;
       SUPABASE_SERVICE_ROLE_KEY: string;
       SUPABASE_ANON_KEY: string;
@@ -46,6 +47,7 @@ function getEnv(
  */
 export const SUPABASE_SERVICE_ROLE_KEY = getEnv("SUPABASE_SERVICE_ROLE_KEY");
 export const SESSION_SECRET = getEnv("SESSION_SECRET");
+export const BASE_URL = getEnv("BASE_URL");
 
 /**
  * Shared envs
