@@ -1,9 +1,9 @@
 describe("landing page", () => {
   beforeEach(() => {
-    cy.visit("/");
+    cy.visitAndCheck("/");
   });
 
-  it("can upload a game", () => {
+  it("guest user can upload a game", () => {
     cy.intercept("POST", "/game*").as("postGame");
 
     cy.findByRole("button", { name: /upload/i }).click();
@@ -16,6 +16,8 @@ describe("landing page", () => {
       },
       { force: true }
     );
+
+    cy.findByRole("button", { name: /upload publicly/i }).click();
 
     if (Cypress.env("IS_CI")) {
       // Submit the form -- necessary to pass in CI

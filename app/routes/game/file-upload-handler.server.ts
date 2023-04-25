@@ -1,4 +1,4 @@
-import type { UploadHandler } from "@remix-run/node";
+import type { UploadHandler, UploadHandlerPart } from "@remix-run/node";
 import {
   unstable_composeUploadHandlers,
   unstable_createMemoryUploadHandler,
@@ -6,6 +6,7 @@ import {
 import * as stream from "stream";
 
 import { Convert } from "~/models/convert.server";
+import type { GameVisibility } from "~/models/game.server";
 import { createGame } from "~/models/game.server";
 
 function streamToString(readable: stream.Readable): Promise<string> {
@@ -17,27 +18,36 @@ function streamToString(readable: stream.Readable): Promise<string> {
   });
 }
 
-/** customUploadHandler uploads games to the database. */
-const customUploadHandler: UploadHandler = async ({
-  name,
-  contentType,
-  data,
-}) => {
-  if (name !== "upload" || contentType !== "application/json") {
-    throw new Error("expected upload to be of type application/json");
-  }
+function newGameUploadHandler(
+  visibility: GameVisibility,
+  userId?: string
+): UploadHandler {
+  return async ({ name, contentType, data }: UploadHandlerPart) => {
+    if (name !== "upload" || contentType !== "application/json") {
+      throw new Error("expected upload to be of type application/json");
+    }
 
-  const byteStream = stream.Readable.from(data);
-  const jsonString = await streamToString(byteStream);
+    const byteStream = stream.Readable.from(data);
+    const jsonString = await streamToString(byteStream);
 
-  const game = Convert.toGame(jsonString);
-  const gameId = await createGame(game);
+    const game = Convert.toGame(jsonString);
+    const gameId = await createGame(game, visibility, userId);
 
-  return gameId;
-};
+    return gameId;
+  };
+}
 
-export const uploadHandler = unstable_composeUploadHandlers(
-  customUploadHandler,
-  // Parse everything else into memory
-  unstable_createMemoryUploadHandler()
-);
+/** newUploadHandler creates a function which uploads games to the database.
+ */
+export async function newUploadHandler(
+  visibility: GameVisibility,
+  userId?: string
+) {
+  const uploadHandler = newGameUploadHandler(visibility, userId);
+
+  return unstable_composeUploadHandlers(
+    uploadHandler,
+    // Parse everything else into memory
+    unstable_createMemoryUploadHandler()
+  );
+}

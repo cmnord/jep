@@ -7,6 +7,8 @@ import type { Database } from "~/models/database.types";
 /** Game is the representation of a game within the game engine. */
 export type Game = { id: string } & ConvertedGame;
 
+export type GameVisibility = Database["public"]["Enums"]["game_visibility"];
+
 type GameTable = Database["public"]["Tables"]["games"];
 type DbGame = GameTable["Row"];
 
@@ -198,7 +200,11 @@ export async function getAllGames(search: string | null): Promise<Game[]> {
 
 /* Writes */
 
-export async function createGame(inputGame: ConvertedGame) {
+export async function createGame(
+  inputGame: ConvertedGame,
+  visibility: GameVisibility,
+  uploadedByUserId?: string
+) {
   validateGame(inputGame);
 
   const { data: gameData, error: gameErr } = await db
@@ -208,6 +214,8 @@ export async function createGame(inputGame: ConvertedGame) {
       copyright: inputGame.copyright,
       note: inputGame.note,
       title: inputGame.title,
+      visibility,
+      uploaded_by: uploadedByUserId,
     })
     .select();
 
