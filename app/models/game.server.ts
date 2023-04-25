@@ -11,7 +11,7 @@ export type Game = { id: string } & ConvertedGame;
 export type GameVisibility = Database["public"]["Enums"]["game_visibility"];
 
 type GameTable = Database["public"]["Tables"]["games"];
-type DbGame = GameTable["Row"];
+export type DbGame = GameTable["Row"];
 
 type CategoryTable = Database["public"]["Tables"]["categories"];
 type DbCategory = CategoryTable["Row"];
@@ -165,6 +165,23 @@ export async function getGame(
   return dbGameToGame(gameAndClues);
 }
 
+export async function getGamesForUser(
+  userId: string,
+  accessToken?: AuthSession["accessToken"]
+) {
+  const { data, error } = await getSupabase(accessToken)
+    .from("games")
+    .select()
+    .eq("uploaded_by", userId)
+    .order("created_at", { ascending: false });
+
+  if (error !== null) {
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
 /** getAllGames gets all games from the database. Search searches the title and
  * author fields.
  */
@@ -300,4 +317,33 @@ export async function createGame(
   }
 
   return game.id;
+}
+
+export async function updateGameVisibility(
+  gameId: string,
+  visibility: GameVisibility,
+  accessToken?: AuthSession["accessToken"]
+) {
+  const { error } = await getSupabase(accessToken)
+    .from("games")
+    .update({ visibility })
+    .eq("id", gameId);
+
+  if (error !== null) {
+    throw new Error(error.message);
+  }
+}
+
+export async function deleteGame(
+  gameId: string,
+  accessToken?: AuthSession["accessToken"]
+) {
+  const { error } = await getSupabase(accessToken)
+    .from("games")
+    .delete()
+    .eq("id", gameId);
+
+  if (error !== null) {
+    throw new Error(error.message);
+  }
 }
