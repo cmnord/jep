@@ -23,7 +23,7 @@ export function Fade({
   return shouldRender ? (
     <div
       className={classNames("absolute left-0 top-0 w-screen", {
-        "animate-slideIn": show,
+        "animate-slideInFromTopLeft": show,
         "animate-slideOut": !show,
       })}
       onAnimationEnd={onAnimationEnd}
