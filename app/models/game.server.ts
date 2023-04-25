@@ -1,6 +1,7 @@
-import { db } from "~/db.server";
+import type { AuthSession } from "~/models/auth";
 import type { Board, Game as ConvertedGame } from "~/models/convert.server";
 import type { Database } from "~/models/database.types";
+import { getSupabase } from "~/supabase";
 
 /* Types */
 
@@ -139,8 +140,11 @@ function validateGame(game: ConvertedGame) {
 
 /* Reads */
 
-export async function getGame(gameId: string): Promise<Game | null> {
-  const { data, error } = await db
+export async function getGame(
+  gameId: string,
+  accessToken?: AuthSession["accessToken"]
+): Promise<Game | null> {
+  const { data, error } = await getSupabase(accessToken)
     .from<"games", GameTable>("games")
     .select<"*, categories ( *, clues ( * ) )", GameAndClues>(
       "*, categories ( *, clues ( * ) )"
@@ -164,8 +168,11 @@ export async function getGame(gameId: string): Promise<Game | null> {
 /** getAllGames gets all games from the database. Search searches the title and
  * author fields.
  */
-export async function getAllGames(search: string | null): Promise<Game[]> {
-  let query = db
+export async function getAllGames(
+  search: string | null,
+  accessToken?: AuthSession["accessToken"]
+): Promise<Game[]> {
+  let query = getSupabase(accessToken)
     .from<"games", GameTable>("games")
     .select<"*, categories ( *, clues ( * ) )", GameAndClues>(
       "*, categories ( *, clues ( * ) )"
@@ -203,11 +210,13 @@ export async function getAllGames(search: string | null): Promise<Game[]> {
 export async function createGame(
   inputGame: ConvertedGame,
   visibility: GameVisibility,
-  uploadedByUserId?: string
+  uploadedByUserId?: string,
+  accessToken?: AuthSession["accessToken"]
 ) {
   validateGame(inputGame);
+  const client = getSupabase(accessToken);
 
-  const { data: gameData, error: gameErr } = await db
+  const { data: gameData, error: gameErr } = await client
     .from<"games", GameTable>("games")
     .insert<GameTable["Insert"]>({
       author: inputGame.author,
@@ -239,7 +248,7 @@ export async function createGame(
     }
   }
 
-  const { data: categoryData, error: categoryErr } = await db
+  const { data: categoryData, error: categoryErr } = await client
     .from<"categories", CategoryTable>("categories")
     .insert<CategoryTable["Insert"]>(categoriesToInsert)
     .select();
@@ -276,7 +285,7 @@ export async function createGame(
     }
   }
 
-  const { data: cluesData, error: cluesErr } = await db
+  const { data: cluesData, error: cluesErr } = await client
     .from<"clues", ClueTable>("clues")
     .insert<ClueTable["Insert"]>(cluesToInsert)
     .select();
