@@ -6,7 +6,8 @@ module.exports = {
   theme: {
     extend: {
       animation: {
-        bouncein: "showSweetAlert 0.3s",
+        contentShow: "contentShow 150ms cubic-bezier(0.16, 1, 0.3, 1)",
+        overlayShow: "overlayShow 150ms cubic-bezier(0.16, 1, 0.3, 1)",
         slideIn: "0.5s ease-out 0s 1 slideInFromTopLeft forwards",
         slideOut: "0.5s ease-in 0s 1 slideOutToTopLeft forwards",
         slideDownAndFade:
@@ -38,27 +39,13 @@ module.exports = {
         handwriting: ["Caveat", "cursive"],
       },
       keyframes: {
-        showSweetAlert: {
-          "0%": {
-            "-webkit-transform": "scale(1)",
-            transform: "scale(1)",
-          },
-          "1%": {
-            "-webkit-transform": "scale(0.5)",
-            transform: "scale(0.5)",
-          },
-          "45%": {
-            "-webkit-transform": "scale(1.05)",
-            transform: "scale(1.05)",
-          },
-          "80%": {
-            "-webkit-transform": "scale(0.95)",
-            transform: "scale(0.95)",
-          },
-          to: {
-            "-webkit-transform": "scale(1)",
-            transform: "scale(1)",
-          },
+        contentShow: {
+          from: { opacity: 0, transform: "translate(-50%, -48%) scale(0.96)" },
+          to: { opacity: 1, transform: "translate(-50%, -50%) scale(1)" },
+        },
+        overlayShow: {
+          from: { opacity: 0 },
+          to: { opacity: 1 },
         },
         slideInFromTopLeft: {
           "0%": { transform: "translate(-100%, -100%)" },
