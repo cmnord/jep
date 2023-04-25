@@ -5,7 +5,7 @@ import { NODE_ENV, SESSION_SECRET } from "~/utils";
 
 interface FormState {
   success: boolean;
-  error: string;
+  message: string;
 }
 
 const FORM_STATE_KEY = "formState";
@@ -27,12 +27,12 @@ const { getSession, commitSession } = createCookieSessionStorage({
 export async function getSessionFormState(
   request: Request,
   headers = new Headers()
-): Promise<[FormState, Headers]> {
+): Promise<[FormState | undefined, Headers]> {
   const session = await getSession(request.headers.get("Cookie"));
   const data = session.get("formState");
   headers.append("Set-Cookie", await commitSession(session));
   if (!data) {
-    return [{ success: false, error: "" }, headers];
+    return [undefined, headers];
   }
   return [JSON.parse(data) as FormState, headers];
 }

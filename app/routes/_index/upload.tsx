@@ -28,7 +28,7 @@ export default function Upload({
   onChange,
 }: {
   loading: boolean;
-  onChange?: () => void;
+  onChange: (file?: File) => void;
 }) {
   // TODO: drag and drop with react-dropzone
   return (
@@ -56,7 +56,7 @@ export default function Upload({
             name="upload"
             aria-describedby="upload_help"
             className="hidden"
-            onChange={onChange}
+            onChange={(e) => onChange(e.target.files?.[0])}
           />
         </div>
       </label>
