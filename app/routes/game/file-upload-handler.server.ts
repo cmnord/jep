@@ -5,6 +5,7 @@ import {
 } from "@remix-run/node";
 import * as stream from "stream";
 
+import type { AuthSession } from "~/models/auth";
 import { Convert } from "~/models/convert.server";
 import type { GameVisibility } from "~/models/game.server";
 import { createGame } from "~/models/game.server";
@@ -19,9 +20,11 @@ function streamToString(readable: stream.Readable): Promise<string> {
 }
 
 function newGameUploadHandler(
-  visibility: GameVisibility,
-  userId?: string
+  authSession: AuthSession | null,
+  visibility: GameVisibility
 ): UploadHandler {
+  const userId = authSession?.userId;
+
   return async ({ name, contentType, data }: UploadHandlerPart) => {
     if (name !== "upload" || contentType !== "application/json") {
       throw new Error("expected upload to be of type application/json");
@@ -31,7 +34,12 @@ function newGameUploadHandler(
     const jsonString = await streamToString(byteStream);
 
     const game = Convert.toGame(jsonString);
-    const gameId = await createGame(game, visibility, userId);
+    const gameId = await createGame(
+      game,
+      visibility,
+      userId,
+      authSession?.accessToken
+    );
 
     return gameId;
   };
@@ -40,10 +48,10 @@ function newGameUploadHandler(
 /** newUploadHandler creates a function which uploads games to the database.
  */
 export async function newUploadHandler(
-  visibility: GameVisibility,
-  userId?: string
+  authSession: AuthSession | null,
+  visibility: GameVisibility
 ) {
-  const uploadHandler = newGameUploadHandler(visibility, userId);
+  const uploadHandler = newGameUploadHandler(authSession, visibility);
 
   return unstable_composeUploadHandlers(
     uploadHandler,

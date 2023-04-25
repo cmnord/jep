@@ -34,11 +34,11 @@ import Upload from "./upload";
 export async function loader({ request }: LoaderArgs) {
   const url = new URL(request.url);
   const search = new URLSearchParams(url.search);
-  const games = await getAllGames(search.get("q"));
-
-  const solo = search.get("solo") === "on";
 
   const authSession = await getValidAuthSession(request);
+  const games = await getAllGames(search.get("q"), authSession?.accessToken);
+
+  const solo = search.get("solo") === "on";
 
   const [formState, headers] = await getSessionFormState(request);
 

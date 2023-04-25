@@ -24,12 +24,13 @@ export async function loader({ request, params }: LoaderArgs) {
   if (!gameId) {
     throw new Response("game ID not found", { status: 404 });
   }
-  const game = await getGame(gameId);
+
+  const authSession = await getValidAuthSession(request);
+  const game = await getGame(gameId, authSession?.accessToken);
   if (!game) {
     throw new Response("game not found", { status: 404 });
   }
 
-  const authSession = await getValidAuthSession(request);
   const user = authSession
     ? await getUserByEmail(authSession.email, authSession.accessToken)
     : null;

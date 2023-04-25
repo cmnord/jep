@@ -12,10 +12,7 @@ export async function action({ request }: ActionArgs) {
   const visibility = authSession !== null ? "UNLISTED" : "PUBLIC";
 
   try {
-    const uploadHandler = await newUploadHandler(
-      visibility,
-      authSession?.userId
-    );
+    const uploadHandler = await newUploadHandler(authSession, visibility);
     const formData = await unstable_parseMultipartFormData(
       request,
       uploadHandler
