@@ -1,16 +1,9 @@
-import type { LoaderArgs } from "@remix-run/node";
-import { json, redirect } from "@remix-run/node";
 import type { FetcherWithComponents } from "@remix-run/react";
-import { useFetcher, useLoaderData } from "@remix-run/react";
-import Link from "~/components/link";
 
 import * as DropdownMenu from "~/components/dropdown-menu";
 import { Eye, EyeSlash } from "~/components/icons";
-import { requireAuthSession } from "~/models/auth";
+import Link from "~/components/link";
 import type { DbGame, GameVisibility } from "~/models/game.server";
-import { getGamesForUser } from "~/models/game.server";
-import { getUserByEmail } from "~/models/user/service.server";
-import { BASE_URL } from "~/utils";
 
 const formatter = new Intl.DateTimeFormat("en-US", {
   year: "numeric",
@@ -37,20 +30,26 @@ function EllipsisIcon() {
   );
 }
 
-export async function loader({ request }: LoaderArgs) {
-  const authSession = await requireAuthSession(request);
-
-  if (!authSession) {
-    throw redirect("/login");
+function VisibilityIcon({
+  className,
+  visibility,
+}: {
+  className: string;
+  visibility: GameVisibility;
+}) {
+  switch (visibility) {
+    case "PUBLIC":
+      return (
+        <Eye
+          className={"text-green-600 group-hover:text-green-700 " + className}
+          title="Public"
+        />
+      );
+    case "PRIVATE":
+      return <EyeSlash className={className} title="Private" />;
+    case "UNLISTED":
+      return <Eye className={className} title="Unlisted" />;
   }
-
-  const games = await getGamesForUser(
-    authSession.userId,
-    authSession.accessToken
-  );
-
-  const user = await getUserByEmail(authSession.email, authSession.accessToken);
-  return json({ user, games, env: { BASE_URL } });
 }
 
 function CopyLinkButton({ url }: { url: string }) {
@@ -83,28 +82,6 @@ function CopyLinkButton({ url }: { url: string }) {
   );
 }
 
-function VisibilityIcon({
-  className,
-  visibility,
-}: {
-  className: string;
-  visibility: GameVisibility;
-}) {
-  switch (visibility) {
-    case "PUBLIC":
-      return (
-        <Eye
-          className={"text-green-600 group-hover:text-green-700 " + className}
-          title="Public"
-        />
-      );
-    case "PRIVATE":
-      return <EyeSlash className={className} title="Private" />;
-    case "UNLISTED":
-      return <Eye className={className} title="Unlisted" />;
-  }
-}
-
 function ChangeVisibilityItem({
   fetcher,
   gameId,
@@ -135,10 +112,17 @@ function ChangeVisibilityItem({
   );
 }
 
-function GameInfo({ BASE_URL, game }: { BASE_URL: string; game: DbGame }) {
+export function GameInfo({
+  BASE_URL,
+  game,
+  fetcher,
+}: {
+  BASE_URL: string;
+  game: DbGame;
+  fetcher: FetcherWithComponents<any>;
+}) {
   const url = BASE_URL + "/game/" + game.id + "/play";
   const createdAt = formatter.format(new Date(game.created_at));
-  const fetcher = useFetcher();
 
   return (
     <li>
@@ -220,23 +204,5 @@ function GameInfo({ BASE_URL, game }: { BASE_URL: string; game: DbGame }) {
         </DropdownMenu.Root>
       </div>
     </li>
-  );
-}
-
-export default function Profile() {
-  const data = useLoaderData<typeof loader>();
-  return (
-    <div className="max-w-full grow">
-      <main className="mx-auto max-w-screen-md px-4 pb-16 pt-8 md:pt-16">
-        <h2 className="mb-4 text-2xl font-semibold">Profile</h2>
-        <p className="mb-4">{data.user?.email}</p>
-        <h2 className="mb-4 text-2xl font-semibold">My Games</h2>
-        <ul className="list-inside list-disc text-slate-700">
-          {data.games.map((game) => (
-            <GameInfo key={game.id} BASE_URL={data.env.BASE_URL} game={game} />
-          ))}
-        </ul>
-      </main>
-    </div>
   );
 }

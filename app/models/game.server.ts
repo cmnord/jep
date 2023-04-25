@@ -324,26 +324,42 @@ export async function updateGameVisibility(
   visibility: GameVisibility,
   accessToken?: AuthSession["accessToken"]
 ) {
-  const { error } = await getSupabase(accessToken)
+  const { data, error } = await getSupabase(accessToken)
     .from("games")
     .update({ visibility })
-    .eq("id", gameId);
+    .eq("id", gameId)
+    .select();
 
   if (error !== null) {
     throw new Error(error.message);
   }
+
+  const game = data.at(0);
+  if (!game) {
+    throw new Error("game data response must not be null");
+  }
+
+  return game;
 }
 
 export async function deleteGame(
   gameId: string,
   accessToken?: AuthSession["accessToken"]
 ) {
-  const { error } = await getSupabase(accessToken)
+  const { data, error } = await getSupabase(accessToken)
     .from("games")
     .delete()
-    .eq("id", gameId);
+    .eq("id", gameId)
+    .select();
 
   if (error !== null) {
     throw new Error(error.message);
   }
+
+  const game = data.at(0);
+  if (!game) {
+    throw new Error("game data response must not be null");
+  }
+
+  return game;
 }

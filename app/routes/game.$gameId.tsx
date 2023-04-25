@@ -1,6 +1,9 @@
 import type { ActionArgs } from "@remix-run/node";
+import { redirect } from "@remix-run/node";
+
 import { getValidAuthSession } from "~/models/auth";
 import { deleteGame, updateGameVisibility } from "~/models/game.server";
+import { flashFormState } from "~/session.server";
 
 export async function action({ request, params }: ActionArgs) {
   const gameId = params.gameId;
@@ -12,7 +15,15 @@ export async function action({ request, params }: ActionArgs) {
   const authSession = await getValidAuthSession(request);
 
   if (request.method === "DELETE") {
-    await deleteGame(gameId, authSession?.accessToken);
+    const game = await deleteGame(gameId, authSession?.accessToken);
+
+    const formState = {
+      success: true,
+      message: `Game ${game?.title} deleted.`,
+    };
+    const headers = await flashFormState(request, formState);
+
+    return redirect("/profile", { headers });
   } else if (request.method === "PATCH") {
     const formData = await request.formData();
     const visibility = formData.get("visibility");
@@ -31,10 +42,21 @@ export async function action({ request, params }: ActionArgs) {
         status: 400,
       });
     }
-    await updateGameVisibility(gameId, visibility, authSession?.accessToken);
+
+    const game = await updateGameVisibility(
+      gameId,
+      visibility,
+      authSession?.accessToken
+    );
+
+    const formState = {
+      success: true,
+      message: `Updated game ${game.title} to ${visibility}.`,
+    };
+    const headers = await flashFormState(request, formState);
+
+    return redirect("/profile", { headers });
   } else {
     throw new Response("method not allowed", { status: 405 });
   }
-
-  return null;
 }
