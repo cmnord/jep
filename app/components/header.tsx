@@ -1,7 +1,7 @@
-import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { Form, Link, useMatches } from "@remix-run/react";
 
 import Button from "~/components/button";
+import * as DropdownMenu from "~/components/dropdown-menu";
 import SoundControl from "~/components/sound";
 import type { Game } from "~/models/game.server";
 import { stringToHslColor } from "~/utils/utils";
@@ -11,19 +11,6 @@ function LoginButton() {
     <Link to="/login">
       <Button type="transparent">Log in</Button>
     </Link>
-  );
-}
-
-function Item(props: DropdownMenu.MenuItemProps) {
-  return (
-    <DropdownMenu.Item
-      className={`group relative flex select-none items-center rounded-md p-1
-      text-slate-500 outline-none
-      data-[highlighted]:bg-slate-200 data-[highlighted]:text-slate-700`}
-      {...props}
-    >
-      {props.children}
-    </DropdownMenu.Item>
   );
 }
 
@@ -50,20 +37,12 @@ function AccountButton({ user }: { user: { id: string; email: string } }) {
       </DropdownMenu.Trigger>
 
       <DropdownMenu.Portal>
-        <DropdownMenu.Content
-          className={`w-56 rounded-md bg-white p-1 text-slate-900 shadow-md
-          will-change-[opacity,transform]
-          data-[side=bottom]:animate-slideUpAndFade
-          data-[side=left]:animate-slideRightAndFade
-          data-[side=right]:animate-slideLeftAndFade
-          data-[side=top]:animate-slideDownAndFade`}
-          sideOffset={5}
-        >
+        <DropdownMenu.Content>
           <DropdownMenu.Label className="p-1 font-bold">
             {email}
           </DropdownMenu.Label>
           <DropdownMenu.Separator className="m-1 h-px bg-slate-200" />
-          <Item asChild>
+          <DropdownMenu.Item asChild>
             <Link to="/profile">
               {/* Heroicon name: solid/user */}
               <svg
@@ -80,18 +59,14 @@ function AccountButton({ user }: { user: { id: string; email: string } }) {
               </svg>
               <p className="pl-7">Profile</p>
             </Link>
-          </Item>
-          <Item
+          </DropdownMenu.Item>
+          <DropdownMenu.Item
             asChild
             // Prevent the dropdown menu from closing
             onSelect={(e) => e.preventDefault()}
           >
             <Form method="POST" action="/logout">
-              <button
-                type="submit"
-                className="flex grow items-center"
-                onClick={() => console.log("clicked")}
-              >
+              <button type="submit" className="flex grow items-center">
                 {/* Heroicon name: solid/logout */}
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -108,8 +83,7 @@ function AccountButton({ user }: { user: { id: string; email: string } }) {
                 <p className="pl-7">Log out</p>
               </button>
             </Form>
-          </Item>
-          <DropdownMenu.Arrow className="fill-white" />
+          </DropdownMenu.Item>
         </DropdownMenu.Content>
       </DropdownMenu.Portal>
     </DropdownMenu.Root>
@@ -144,15 +118,7 @@ function GameSettings({ game }: { game: Game }) {
       </DropdownMenu.Trigger>
 
       <DropdownMenu.Portal>
-        <DropdownMenu.Content
-          className={`w-56 rounded-md bg-white p-1 text-slate-900 shadow-md
-          will-change-[opacity,transform]
-          data-[side=bottom]:animate-slideUpAndFade
-          data-[side=left]:animate-slideRightAndFade
-          data-[side=right]:animate-slideLeftAndFade
-          data-[side=top]:animate-slideDownAndFade`}
-          sideOffset={5}
-        >
+        <DropdownMenu.Content>
           <DropdownMenu.Label className="p-1 font-bold">
             {game.title}
           </DropdownMenu.Label>
@@ -176,7 +142,6 @@ function GameSettings({ game }: { game: Game }) {
               <SoundControl />
             </div>
           </DropdownMenu.Item>
-          <DropdownMenu.Arrow className="fill-white" />
         </DropdownMenu.Content>
       </DropdownMenu.Portal>
     </DropdownMenu.Root>
