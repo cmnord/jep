@@ -21,10 +21,10 @@ import { CodeBlock } from "~/components/code";
 import { DefaultErrorBoundary } from "~/components/error";
 import Footer from "~/components/footer";
 import Header from "~/components/header";
+import { getValidAuthSession } from "~/models/auth";
 import { getUserByEmail } from "~/models/user";
 import { SoundContext } from "~/utils/use-sound";
 
-import { getValidAuthSession } from "./models/auth/session.server";
 import stylesheet from "./styles.css";
 
 const META_URL = "https://whatis.club";
