@@ -69,7 +69,7 @@ export default function GameComponent({
             : playBoardFillSfx
         }
       />
-      <div className="flex flex-col bg-slate-900 grow">
+      <div className="flex grow flex-col bg-slate-900">
         <BoardComponent
           focusedClue={focusedClueIdx}
           setFocusedClue={onFocusClue}
@@ -77,18 +77,16 @@ export default function GameComponent({
           roomName={roomName}
         />
         <div
-          className={
-            "p-3 sm:p-6 md:p-12 text-slate-100 w-full max-w-screen-lg mx-auto " +
-            "flex flex-col gap-4"
-          }
+          className={`mx-auto flex w-full max-w-screen-lg flex-col gap-4 p-3
+          text-slate-100 sm:p-6 md:p-12`}
         >
           {type === GameState.GameOver ? (
             <PostGameSummary />
           ) : (
             <>
-              <p className="p-4 rounded-md flex-wrap items-baseline bg-yellow-700 text-yellow-100">
+              <p className="flex-wrap items-baseline rounded-md bg-yellow-700 p-4 text-yellow-100">
                 <span
-                  className="font-handwriting text-xl font-bold border-b-4 mr-2"
+                  className="mr-2 border-b-4 font-handwriting text-xl font-bold"
                   style={{ borderColor: boardControlColor }}
                 >
                   {boardControlName}

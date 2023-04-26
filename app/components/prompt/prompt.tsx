@@ -78,14 +78,12 @@ function ClueText({
       type="button"
       disabled={!canBuzz}
       onClick={() => onBuzz(Date.now())}
-      className={
-        "p-4 w-screen flex flex-col justify-center grow " +
-        "uppercase text-shadow-lg font-korinna font-bold"
-      }
+      className={`text-shadow-lg flex w-screen grow flex-col justify-center p-4
+      font-korinna font-bold uppercase`}
       autoFocus={focusOnBuzz}
     >
       <p
-        className="max-h-96 max-w-screen-lg mx-auto text-white word-spacing-1 leading-normal w-full"
+        className="word-spacing-1 mx-auto max-h-96 w-full max-w-screen-lg leading-normal text-white"
         ref={ref}
         style={{ fontSize }}
       >
@@ -123,24 +121,24 @@ function WagerCluePrompt({ roomName, userId }: Props) {
         shouldAnimate={false}
         wonBuzz={canWager}
       />
-      {longForm ? null : <p className="p-4 text-white font-bold">{category}</p>}
+      {longForm ? null : <p className="p-4 font-bold text-white">{category}</p>}
       <div
-        className="w-screen flex items-center justify-center grow"
+        className="flex w-screen grow items-center justify-center"
         ref={ref}
         style={{ fontSize }}
       >
         {longForm ? (
-          <div className="p-4 flex flex-col max-h-96 max-w-screen-lg mx-auto">
+          <div className="mx-auto flex max-h-96 max-w-screen-lg flex-col p-4">
             <ShinyText text="final clue" />
-            <p className="text-white font-bold text-center uppercase font-korinna text-shadow-md break-words">
+            <p className="text-shadow-md break-words text-center font-korinna font-bold uppercase text-white">
               {category}
             </p>
           </div>
         ) : (
-          <div className="p-4 relative">
+          <div className="relative p-4">
             <ShinyText text="double down" />
             {/* Hidden absolute element keeps shiny text from overflowing its grid */}
-            <p className="p-4 absolute top-0 left-0 opacity-0 text-center font-black text-white uppercase">
+            <p className="absolute left-0 top-0 p-4 text-center font-black uppercase text-white opacity-0">
               double down
             </p>
           </div>
@@ -149,16 +147,16 @@ function WagerCluePrompt({ roomName, userId }: Props) {
       {canWager ? (
         <WagerForm roomName={roomName} userId={userId} />
       ) : longForm ? (
-        <div className="p-2 flex flex-col items-center gap-2">
-          <p className="text-white font-bold">
+        <div className="flex flex-col items-center gap-2 p-2">
+          <p className="font-bold text-white">
             You do not have enough money to wager on this clue.
           </p>
-          <p className="text-slate-300 text-sm">
+          <p className="text-sm text-slate-300">
             Waiting for others to submit wagers...
           </p>
         </div>
       ) : (
-        <p className="p-2 text-center text-white font-bold">
+        <p className="p-2 text-center font-bold text-white">
           Waiting for response from {wagererName}...
         </p>
       )}
@@ -404,8 +402,8 @@ function ReadLongFormCluePrompt({ roomName, userId }: Props) {
       {canAnswer ? (
         <AnswerForm roomName={roomName} userId={userId} />
       ) : (
-        <div className="p-2 flex flex-col items-center gap-2">
-          <p className="text-slate-300 text-sm">
+        <div className="flex flex-col items-center gap-2 p-2">
+          <p className="text-sm text-slate-300">
             Waiting for others to answer...
           </p>
         </div>
@@ -480,7 +478,7 @@ function RevealAnswerToBuzzerPrompt({ roomName, userId }: Props) {
           }
         />
       ) : (
-        <p className="p-2 text-center text-white font-bold">
+        <p className="p-2 text-center font-bold text-white">
           Waiting for response from {winningPlayerName}...
         </p>
       )}
@@ -540,12 +538,12 @@ function RevealAnswerLongFormPrompt({ roomName, userId }: Props) {
           onClickShowAnswer={() => null}
         />
       ) : (
-        <p className="p-2 text-center text-slate-300 text-sm">
+        <p className="p-2 text-center text-sm text-slate-300">
           {/* TODO: which players? */}
           Waiting for checks from other players...
         </p>
       )}
-      <div className="flex gap-2 w-full overflow-x-scroll">
+      <div className="flex w-full gap-2 overflow-x-scroll">
         {otherPlayersList.map(({ name, userId, answer }) => {
           const color = stringToHslColor(userId);
           return (
@@ -554,7 +552,7 @@ function RevealAnswerLongFormPrompt({ roomName, userId }: Props) {
               key={userId}
             >
               <p
-                className="font-handwriting text-xl font-bold text-center"
+                className="text-center font-handwriting text-xl font-bold"
                 style={{ color }}
               >
                 {name}
@@ -562,7 +560,7 @@ function RevealAnswerLongFormPrompt({ roomName, userId }: Props) {
               {answer ? (
                 <p className="text-white">{answer}</p>
               ) : (
-                <p className="text-slate-300 text-sm">[no answer]</p>
+                <p className="text-sm text-slate-300">[no answer]</p>
               )}
             </div>
           );
@@ -649,10 +647,8 @@ export function ConnectedPrompt(props: Props) {
   return (
     <Fade show={isOpen}>
       <div
-        className={
-          "relative w-screen bg-blue-1000 flex flex-col justify-between " +
-          "overflow-x-hidden overflow-y-scroll"
-        }
+        className={`relative flex w-screen flex-col justify-between
+        overflow-x-hidden overflow-y-scroll bg-blue-1000`}
         style={{
           height: "100dvh",
         }}
