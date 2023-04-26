@@ -8,7 +8,7 @@ function SpeakerXMark() {
       viewBox="0 0 24 24"
       strokeWidth={1.5}
       stroke="currentColor"
-      className="w-5 h-5"
+      className="h-5 w-5"
     >
       <path
         strokeLinecap="round"
@@ -27,7 +27,7 @@ function SpeakerWave() {
       viewBox="0 0 24 24"
       strokeWidth={1.5}
       stroke="currentColor"
-      className="w-5 h-5"
+      className="h-5 w-5"
     >
       <path
         strokeLinecap="round"
@@ -51,11 +51,9 @@ export function MuteToggle({
       onPressedChange={onPressChange}
       aria-label="Mute"
       title="Mute"
-      className={
-        "flex items-center justify-center p-1 rounded-md " +
-        "focus:ring-2 focus:ring-blue-500 " +
-        "text-slate-500 group-hover:text-slate-700"
-      }
+      className={`flex items-center justify-center rounded-md p-1 text-slate-500
+      focus:ring-2 focus:ring-blue-500
+      group-hover:text-slate-700`}
     >
       {pressed ? <SpeakerXMark /> : <SpeakerWave />}
     </TogglePrimitive.Root>
