@@ -5,12 +5,10 @@ export function Lockout({ active }: { active: boolean }) {
   }
 
   return (
-    <div className="absolute left-0 top-0 w-full h-full bg-black bg-opacity-50">
+    <div className="absolute left-0 top-0 h-full w-full bg-black bg-opacity-50">
       <div
-        className={
-          "flex flex-col items-center justify-start pt-10 w-full h-full text-white font-bold " +
-          "text-6xl md:text-7xl lg:text-9xl"
-        }
+        className={`flex h-full w-full flex-col items-center justify-start pt-10
+        text-6xl font-bold text-white md:text-7xl lg:text-9xl`}
       >
         LOCKOUT
       </div>
