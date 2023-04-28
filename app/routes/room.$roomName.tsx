@@ -35,7 +35,7 @@ export async function loader({ request, params }: LoaderArgs) {
   }
 
   const authSession = await getValidAuthSession(request);
-  const game = await getGame(room.game_id, authSession?.accessToken);
+  const game = await getGame(room.game_id, authSession?.userId);
   if (!game) {
     throw new Response("game not found", { status: 404 });
   }
