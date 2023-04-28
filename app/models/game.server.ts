@@ -1,7 +1,7 @@
 import type { AuthSession } from "~/models/auth";
 import type { Board, Game as ConvertedGame } from "~/models/convert.server";
 import type { Database } from "~/models/database.types";
-import { getSupabase } from "~/supabase";
+import { getSupabase, getSupabaseAdmin } from "~/supabase";
 
 /* Types */
 
@@ -140,11 +140,14 @@ function validateGame(game: ConvertedGame) {
 
 /* Reads */
 
+/** getGame bypasses RLS and enforces permissions on the server side to get
+ * unlisted games.
+ */
 export async function getGame(
   gameId: string,
-  accessToken?: AuthSession["accessToken"]
+  userId?: string
 ): Promise<Game | null> {
-  const { data, error } = await getSupabase(accessToken)
+  const { data, error } = await getSupabaseAdmin()
     .from<"games", GameTable>("games")
     .select<"*, categories ( *, clues ( * ) )", GameAndClues>(
       "*, categories ( *, clues ( * ) )"
@@ -159,6 +162,13 @@ export async function getGame(
 
   const gameAndClues = data.at(0);
   if (!gameAndClues) {
+    return null;
+  }
+
+  if (
+    gameAndClues.visibility === "PRIVATE" &&
+    gameAndClues.uploaded_by !== userId
+  ) {
     return null;
   }
 
