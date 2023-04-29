@@ -74,12 +74,17 @@ export async function refreshAccessToken(
 ): Promise<AuthSession | null> {
   if (!refreshToken) return null;
 
-  const { data, error } = await getSupabaseAdmin().auth.setSession({
-    access_token: "",
+  const { data, error } = await getSupabaseAdmin().auth.refreshSession({
     refresh_token: refreshToken,
   });
 
-  if (!data.session || error) return null;
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!data.session) {
+    return null;
+  }
 
   return mapAuthSession(data.session);
 }
