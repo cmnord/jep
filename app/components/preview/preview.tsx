@@ -102,14 +102,14 @@ export function Preview({
       isOpen={isOpen}
       title={
         <div className="flex justify-between">
-          <p>
+          <span>
             Start round {round + 1} of {numRounds}
-          </p>
+          </span>
           <SoundControl showSlider={false} />
         </div>
       }
       description={
-        <p>
+        <>
           <span
             className="border-b-4 font-handwriting text-xl font-bold"
             style={{ borderColor }}
@@ -117,7 +117,7 @@ export function Preview({
             {boardControlName}
           </span>{" "}
           will start with control of the board.
-        </p>
+        </>
       }
     >
       {round === 0 ? (

@@ -6,6 +6,7 @@ import { useEngineContext } from "~/engine";
 import type { Board, Clue } from "~/models/convert.server";
 import { useSoloAction } from "~/utils/use-solo-action";
 import useGameSound from "~/utils/use-sound";
+import { generateGrid } from "~/utils/utils";
 import { Category } from "./category";
 import { ClueComponent } from "./clue";
 
@@ -28,31 +29,28 @@ function BoardComponent({
   onKeyDownClue: (event: React.KeyboardEvent, i: number, j: number) => void;
   tbodyRef: React.RefObject<HTMLTableSectionElement>;
 }) {
-  const clueRows = new Map<number, Clue[]>();
-  for (const category of board.categories) {
-    const clues = category.clues;
-    for (let i = 0; i < clues.length; i++) {
-      const clue = clues[i];
-      const clueRow = clueRows.get(clue.value);
-      if (clueRow) {
-        clueRow.push(clue);
-      } else {
-        clueRows.set(clue.value, [clue]);
+  // Transpose the clues so we can render them in a table.
+  const numRows = Math.max(...board.categories.map((c) => c.clues.length));
+  const numCols = board.categories.length;
+
+  const rows = generateGrid<Clue | undefined>(numRows, numCols, undefined);
+
+  for (let i = 0; i < numRows; i++) {
+    for (let j = 0; j < numCols; j++) {
+      const clue = board.categories.at(j)?.clues.at(i);
+      if (clue) {
+        rows[i][j] = clue;
       }
     }
   }
 
-  const sortedClueRows = Array.from(clueRows.entries()).sort(
-    (a, b) => a[0] - b[0]
-  );
-
   return (
     <div className="w-full overflow-x-scroll">
       <div
-        className="max-w-screen-lg mx-auto"
+        className="mx-auto max-w-screen-lg"
         style={{ minWidth: `${board.categoryNames.length * 50}px` }}
       >
-        <table className="w-full table-fixed h-1 bg-black text-white border-spacing-3">
+        <table className="h-1 w-full table-fixed border-spacing-3 bg-black text-white">
           <thead>
             <tr className="h-1">
               {board.categories.map((category) => (
@@ -65,20 +63,23 @@ function BoardComponent({
             </tr>
           </thead>
           <tbody ref={tbodyRef}>
-            {sortedClueRows.map(([value, clues], i) => (
-              <tr key={value}>
-                {clues.map((clue, j) => (
-                  <ClueComponent
-                    key={`clue-${i}-${j}`}
-                    clue={clue}
-                    value={value}
-                    answered={isAnswered(i, j)}
-                    hasBoardControl={hasBoardControl}
-                    onFocus={() => onFocusClue(i, j)}
-                    onClick={() => onClickClue(i, j)}
-                    onKeyDown={(e) => onKeyDownClue(e, i, j)}
-                  />
-                ))}
+            {rows.map((category, i) => (
+              <tr key={i}>
+                {category.map((clue, j) =>
+                  clue ? (
+                    <ClueComponent
+                      key={`clue-${i}-${j}`}
+                      clue={clue}
+                      answered={isAnswered(i, j)}
+                      hasBoardControl={hasBoardControl}
+                      onFocus={() => onFocusClue(i, j)}
+                      onClick={() => onClickClue(i, j)}
+                      onKeyDown={(e) => onKeyDownClue(e, i, j)}
+                    />
+                  ) : (
+                    <td key={`clue-${i}-${j}`} />
+                  )
+                )}
               </tr>
             ))}
           </tbody>

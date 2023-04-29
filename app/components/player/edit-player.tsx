@@ -67,7 +67,7 @@ function EditPlayer({
       </label>
       <div className="relative">
         <Input
-          ref={inputRef}
+          fwdRef={inputRef}
           type="text"
           id="name"
           name="name"
