@@ -3,6 +3,7 @@ import * as React from "react";
 
 import Button from "~/components/button";
 import Dialog from "~/components/dialog";
+import HowToPlay from "~/components/how-to-play";
 import { EditPlayerForm, PlayerIcon } from "~/components/player";
 import SoundControl from "~/components/sound";
 import type { Action } from "~/engine";
@@ -33,42 +34,6 @@ function NextRoundFooter({
         </Button>
       </fetcher.Form>
     </Dialog.Footer>
-  );
-}
-
-function HowToPlay() {
-  return (
-    <div className="mb-4 rounded-md bg-yellow-100 p-3 shadow-md">
-      <p className="font-handwriting text-3xl font-black text-yellow-900">
-        how to play
-      </p>
-      <ul className="text-sm leading-relaxed text-yellow-700">
-        <li>
-          <span className="text-lg">💁</span> Choose the clue when you have
-          board control
-        </li>
-        <li>
-          <span className="text-lg">⏱️</span> Wait for the clue to be read
-        </li>
-        <li>
-          <span className="text-lg">🚨</span> Buzz in when you know the answer
-        </li>
-        <li>
-          <span className="text-lg">🗣️</span> Answer out loud (no typing)
-        </li>
-        <li>
-          <span className="text-lg">🙊</span> Check answers privately (don't say
-          it!)
-        </li>
-        <li>
-          <span className="text-lg">⚡</span> Swoop in when others are wrong
-        </li>
-        <li>
-          <span className="text-lg">⚖️</span> Wager carefully on hidden Double
-          Down clues
-        </li>
-      </ul>
-    </div>
   );
 }
 

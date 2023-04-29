@@ -3,6 +3,7 @@ import classNames from "classnames";
 import * as React from "react";
 
 import Dialog from "~/components/dialog";
+import HowToPlay from "~/components/how-to-play";
 import { Anchor } from "~/components/link";
 
 const GITHUB_URL = "https://github.com/cmnord/jep";
@@ -50,6 +51,7 @@ export default function Footer() {
         description="Jep! is a website for playing trivia puzzles with friends online."
         onClickClose={() => setShowModal(false)}
       >
+        <HowToPlay />
         <p className="text-slate-500">
           This website is open to contributions from developers of any level or
           experience. For more information or to report any issues, check out
