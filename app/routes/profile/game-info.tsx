@@ -1,7 +1,9 @@
 import type { FetcherWithComponents } from "@remix-run/react";
 
 import * as DropdownMenu from "~/components/dropdown-menu";
-import { Eye, EyeSlash } from "~/components/icons";
+import GameVisibilityIcon, {
+  GameVisibilityTag,
+} from "~/components/game-visibility-icon";
 import Link from "~/components/link";
 import type { DbGame, GameVisibility } from "~/models/game.server";
 
@@ -32,28 +34,6 @@ function EllipsisIcon() {
   );
 }
 
-function VisibilityIcon({
-  className,
-  visibility,
-}: {
-  className: string;
-  visibility: GameVisibility;
-}) {
-  switch (visibility) {
-    case "PUBLIC":
-      return (
-        <Eye
-          className={"text-green-600 group-hover:text-green-700 " + className}
-          title="Public"
-        />
-      );
-    case "PRIVATE":
-      return <EyeSlash className={className} title="Private" />;
-    case "UNLISTED":
-      return <Eye className={className} title="Unlisted" />;
-  }
-}
-
 function ChangeVisibilityItem({
   fetcher,
   gameId,
@@ -73,7 +53,7 @@ function ChangeVisibilityItem({
       <fetcher.Form method="PATCH" action={`/game/${gameId}`}>
         <input type="hidden" readOnly name="visibility" value={visibility} />
         <button className="flex grow items-center">
-          <VisibilityIcon
+          <GameVisibilityIcon
             className="absolute left-0 m-1 h-5 w-5"
             visibility={visibility}
           />
@@ -101,16 +81,7 @@ export function GameInfo({
       <Link to={`/game/${game.id}/play`}>{game.title}</Link> by {game.author}{" "}
       <span className="text-sm text-slate-500">{createdAt}</span>
       <div className="ml-2 inline-flex items-center gap-1">
-        <div
-          className={`flex items-center rounded-md border border-slate-200
-          bg-slate-100 px-1 text-slate-500`}
-        >
-          <span className="text-xs">{game.visibility}</span>
-          <VisibilityIcon
-            className="m-1 inline-block h-3 w-3"
-            visibility={game.visibility}
-          />
-        </div>
+        <GameVisibilityTag visibility={game.visibility} />
         <CopyLinkButton url={url} />
         <DropdownMenu.Root>
           <DropdownMenu.Trigger asChild>
