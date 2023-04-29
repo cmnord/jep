@@ -1,11 +1,15 @@
 import { useFetcher } from "@remix-run/react";
 import classNames from "classnames";
+import * as React from "react";
 
 import Button from "~/components/button";
 import type { Action } from "~/engine";
 import { useEngineContext } from "~/engine";
 import { useSoloAction } from "~/utils/use-solo-action";
+import { useTimeout } from "~/utils/use-timeout";
 import { formatDollarsWithSign } from "~/utils/utils";
+
+const REVEAL_ANSWER_DEBOUNCE_MS = 500;
 
 function CheckForm({
   longForm,
@@ -17,15 +21,15 @@ function CheckForm({
   myAnswer?: string;
 }) {
   return (
-    <div className="p-2 flex flex-col items-center gap-2">
-      <p className="text-white font-bold">Were you right?</p>
+    <div className="flex flex-col items-center gap-2 p-2">
+      <p className="font-bold text-white">Were you right?</p>
       {!longForm && (
-        <p className="text-slate-300 text-sm text-center">
+        <p className="text-center text-sm text-slate-300">
           (only you can see this answer)
         </p>
       )}
       {myAnswer && (
-        <p className="text-slate-300 text-sm text-center">
+        <p className="text-center text-sm text-slate-300">
           Your answer:{" "}
           <span className="font-handwriting text-2xl font-bold text-white">
             {myAnswer}
@@ -79,22 +83,38 @@ export function ConnectedCheckForm({
   useSoloAction(fetcher, soloDispatch);
   const loading = fetcher.state === "loading";
 
+  // Disable the "show answer" button briefly on render to prevent
+  // double-clicks.
+  const [disabled, setDisabled] = React.useState(true);
+  useTimeout(
+    () => setDisabled(false),
+    showAnswer ? null : REVEAL_ANSWER_DEBOUNCE_MS
+  );
+
   if (!activeClue) {
     throw new Error("No active clue");
   }
 
   if (!showAnswer) {
     return (
-      <div className="p-2 flex flex-col items-center gap-2">
-        <p className="text-slate-300 text-sm">
+      <div className="flex flex-col items-center gap-2 p-2">
+        <p className="text-sm text-slate-300">
           Answer in the form of a question, then
         </p>
         <div className="relative">
-          <span className="absolute inline-flex top-1/6 left-1/6 h-2/3 w-2/3 rounded-md bg-blue-300 opacity-75 animate-ping"></span>
+          <span
+            className={classNames(
+              "absolute left-1/6 top-1/6 inline-flex h-2/3 w-2/3 rounded-md bg-blue-300 opacity-75",
+              {
+                "animate-ping": !disabled,
+              }
+            )}
+          />
           <Button
             type="primary"
             htmlType="button"
-            autoFocus
+            autoFocus={!disabled}
+            disabled={disabled}
             onClick={onClickShowAnswer}
             loading={loading}
             className="relative"
@@ -115,8 +135,8 @@ export function ConnectedCheckForm({
     const value = checkResult ? clueValue : -1 * clueValue;
 
     return (
-      <div className="p-2 flex flex-col items-center gap-2">
-        <p className="text-white font-bold">
+      <div className="flex flex-col items-center gap-2 p-2">
+        <p className="font-bold text-white">
           You {checkResult ? "won" : "lost"}{" "}
           <span
             className={classNames("text-shadow", {
@@ -127,7 +147,7 @@ export function ConnectedCheckForm({
             {formatDollarsWithSign(value)}
           </span>
         </p>
-        <p className="text-slate-300 text-sm">
+        <p className="text-sm text-slate-300">
           Waiting for other players to check...
         </p>
       </div>
