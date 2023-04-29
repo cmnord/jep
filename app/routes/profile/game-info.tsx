@@ -1,10 +1,11 @@
 import type { FetcherWithComponents } from "@remix-run/react";
+import { Link } from "@remix-run/react";
 
 import * as DropdownMenu from "~/components/dropdown-menu";
 import GameVisibilityIcon, {
   GameVisibilityTag,
 } from "~/components/game-visibility-icon";
-import Link from "~/components/link";
+import StyledLink from "~/components/link";
 import type { DbGame, GameVisibility } from "~/models/game.server";
 
 import { CopyLinkButton } from "./copy-link-button";
@@ -78,8 +79,8 @@ export function GameInfo({
 
   return (
     <li>
-      <Link to={`/game/${game.id}/play`}>{game.title}</Link> by {game.author}{" "}
-      <span className="text-sm text-slate-500">{createdAt}</span>
+      <StyledLink to={`/game/${game.id}/play`}>{game.title}</StyledLink> by{" "}
+      {game.author} <span className="text-sm text-slate-500">{createdAt}</span>
       <div className="ml-2 inline-flex items-center gap-1">
         <GameVisibilityTag visibility={game.visibility} />
         <CopyLinkButton url={url} />
@@ -115,6 +116,27 @@ export function GameInfo({
                   fetcher={fetcher}
                 />
               )}
+              <DropdownMenu.Item asChild>
+                <Link to={"/game/" + game.id} reloadDocument>
+                  {/* Heroicon name: solid/arrow-down-tray */}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="absolute left-0 m-1 h-5 w-5"
+                    role="img"
+                    aria-labelledby="download-title"
+                  >
+                    <title id="download-title">Download</title>
+                    <path
+                      fillRule="evenodd"
+                      d="M12 2.25a.75.75 0 01.75.75v11.69l3.22-3.22a.75.75 0 111.06 1.06l-4.5 4.5a.75.75 0 01-1.06 0l-4.5-4.5a.75.75 0 111.06-1.06l3.22 3.22V3a.75.75 0 01.75-.75zm-9 13.5a.75.75 0 01.75.75v2.25a1.5 1.5 0 001.5 1.5h13.5a1.5 1.5 0 001.5-1.5V16.5a.75.75 0 011.5 0v2.25a3 3 0 01-3 3H5.25a3 3 0 01-3-3V16.5a.75.75 0 01.75-.75z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  <p className="pl-7">Download JSON file</p>
+                </Link>
+              </DropdownMenu.Item>
               <DropdownMenu.Item
                 asChild
                 // Prevent the dropdown menu from closing

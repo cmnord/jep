@@ -4,6 +4,7 @@ import { useFetcher, useLoaderData } from "@remix-run/react";
 import * as React from "react";
 
 import { ErrorMessage, SuccessMessage } from "~/components/error";
+import Link from "~/components/link";
 import { requireAuthSession } from "~/models/auth";
 import { getGamesForUser } from "~/models/game.server";
 import { getUserByEmail } from "~/models/user/service.server";
@@ -61,6 +62,12 @@ export default function Profile() {
         <h2 className="mb-4 text-2xl font-semibold">Profile</h2>
         <p className="mb-4">{data.user?.email}</p>
         <h2 className="mb-4 text-2xl font-semibold">My Games</h2>
+        {data.games.length === 0 ? (
+          <p className="text-sm text-slate-500">
+            No games found. Upload a game from the <Link to="/">home page</Link>
+            .
+          </p>
+        ) : null}
         <ul className="list-inside list-disc text-slate-700">
           {data.games.map((game) => (
             <GameInfo

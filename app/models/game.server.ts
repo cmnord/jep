@@ -1,5 +1,11 @@
 import type { AuthSession } from "~/models/auth";
-import type { Board, Game as ConvertedGame } from "~/models/convert.server";
+import type {
+  Board,
+  Category,
+  Clue,
+  Game as ConvertedGame,
+} from "~/models/convert.server";
+import { Convert } from "~/models/convert.server";
 import type { Database } from "~/models/database.types";
 import { getSupabase, getSupabaseAdmin } from "~/supabase";
 
@@ -72,6 +78,35 @@ function dbGameToGame(dbGame: GameAndClues): Game {
   }
 
   return game;
+}
+
+export function gameToJson(game: Game): string {
+  const gameToConvert: ConvertedGame = {
+    title: game.title,
+    author: game.author,
+    copyright: game.copyright,
+    note: game.note,
+    boards: game.boards.map((board) => ({
+      ...board,
+      categories: board.categories.map(
+        (category): Category => ({
+          name: category.name,
+          note: category.note,
+          clues: category.clues.map(
+            (clue): Clue => ({
+              clue: clue.clue,
+              answer: clue.answer,
+              value: clue.value,
+              wagerable: clue.wagerable,
+              longForm: clue.longForm,
+            })
+          ),
+        })
+      ),
+    })),
+  };
+
+  return Convert.gameToJson(gameToConvert);
 }
 
 /** validateGame validates a game before inserting it into the database. */
