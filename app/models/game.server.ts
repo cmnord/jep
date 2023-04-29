@@ -5,13 +5,13 @@ import { getSupabase, getSupabaseAdmin } from "~/supabase";
 
 /* Types */
 
-/** Game is the representation of a game within the game engine. */
-export type Game = { id: string } & ConvertedGame;
-
-export type GameVisibility = Database["public"]["Enums"]["game_visibility"];
-
 type GameTable = Database["public"]["Tables"]["games"];
 export type DbGame = GameTable["Row"];
+
+/** Game is the representation of a game within the game engine. */
+export type Game = ConvertedGame & Pick<DbGame, "id" | "visibility">;
+
+export type GameVisibility = Database["public"]["Enums"]["game_visibility"];
 
 type CategoryTable = Database["public"]["Tables"]["categories"];
 type DbCategory = CategoryTable["Row"];
@@ -34,6 +34,7 @@ function dbGameToGame(dbGame: GameAndClues): Game {
     copyright: dbGame.copyright ?? "",
     note: dbGame.note ?? "",
     boards: [],
+    visibility: dbGame.visibility,
   };
 
   const boardsMap = new Map<number, Board>();
