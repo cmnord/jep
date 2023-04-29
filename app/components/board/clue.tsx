@@ -8,7 +8,6 @@ import type { Clue } from "~/models/convert.server";
 interface Props {
   answered: boolean;
   clue: Clue;
-  value: number;
   hasBoardControl: boolean;
   onFocus: () => void;
   onClick: (e: React.MouseEvent) => void;
@@ -20,16 +19,7 @@ const ClueButton = React.forwardRef<
   React.ComponentProps<"button"> & Props
 >(
   (
-    {
-      answered,
-      clue,
-      value,
-      hasBoardControl,
-      onFocus,
-      onClick,
-      onKeyDown,
-      ...rest
-    },
+    { answered, clue, hasBoardControl, onFocus, onClick, onKeyDown, ...rest },
     ref
   ) => {
     const [loading, setLoading] = React.useState(false);
@@ -70,7 +60,7 @@ const ClueButton = React.forwardRef<
           onKeyDown(event);
         }}
         className={classNames(
-          "px-4 py-3 relative h-full w-full group bg-blue-1000  transition-colors",
+          "group relative h-full w-full bg-blue-1000 px-4 py-3 transition-colors",
           {
             "hover:bg-blue-700 focus:bg-blue-700": !unrevealed,
             "bg-slate-800": unrevealed,
@@ -82,7 +72,7 @@ const ClueButton = React.forwardRef<
       >
         <p
           className={classNames(
-            "flex items-center justify-center gap-1 text-yellow-1000 text-shadow-md sm:text-shadow-lg font-impact",
+            "text-shadow-md sm:text-shadow-lg flex items-center justify-center gap-1 font-impact text-yellow-1000",
             {
               "opacity-0 group-hover:opacity-50 group-focus:opacity-50":
                 answered,
@@ -90,7 +80,7 @@ const ClueButton = React.forwardRef<
           )}
         >
           <span className="text-sm sm:text-3xl lg:text-4xl">$</span>
-          <span className="text-md sm:text-4xl lg:text-5xl">{value}</span>
+          <span className="text-md sm:text-4xl lg:text-5xl">{clue.value}</span>
         </p>
       </button>
     );
@@ -100,7 +90,7 @@ ClueButton.displayName = "ClueButton";
 
 export function ClueComponent(props: Props) {
   return (
-    <td className="sm:p-1 h-full">
+    <td className="h-full sm:p-1">
       {props.answered ? (
         <Popover
           content={
