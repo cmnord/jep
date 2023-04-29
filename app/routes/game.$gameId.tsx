@@ -1,8 +1,13 @@
-import type { ActionArgs } from "@remix-run/node";
+import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
 
 import { getValidAuthSession } from "~/models/auth";
-import { deleteGame, updateGameVisibility } from "~/models/game.server";
+import {
+  deleteGame,
+  gameToJson,
+  getGame,
+  updateGameVisibility,
+} from "~/models/game.server";
 import { flashFormState } from "~/session.server";
 
 export async function action({ request, params }: ActionArgs) {
@@ -59,4 +64,28 @@ export async function action({ request, params }: ActionArgs) {
   } else {
     throw new Response("method not allowed", { status: 405 });
   }
+}
+
+export async function loader({ request, params }: LoaderArgs) {
+  const gameId = params.gameId;
+
+  if (!gameId) {
+    throw new Response("game ID not found", { status: 404 });
+  }
+
+  const authSession = await getValidAuthSession(request);
+  const game = await getGame(gameId, authSession?.userId);
+
+  if (!game) {
+    throw new Response("game not found", { status: 404 });
+  }
+
+  const json = gameToJson(game);
+
+  return new Response(json, {
+    status: 200,
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
 }
