@@ -9,7 +9,10 @@ function SpeakerXMark() {
       strokeWidth={1.5}
       stroke="currentColor"
       className="h-5 w-5"
+      role="img"
+      aria-labelledby="unmute-title"
     >
+      <title id="mute-title">Unmute</title>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -28,7 +31,10 @@ function SpeakerWave() {
       strokeWidth={1.5}
       stroke="currentColor"
       className="h-5 w-5"
+      role="img"
+      aria-labelledby="mute-title"
     >
+      <title id="mute-title">Mute</title>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"

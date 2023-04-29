@@ -25,7 +25,10 @@ function EllipsisIcon() {
       strokeWidth={1.5}
       stroke="currentColor"
       className="h-6 w-6"
+      role="img"
+      aria-labelledby="more-actions-title"
     >
+      <title id="more-actions-title">More actions</title>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
