@@ -22,6 +22,7 @@ export const MOCK_GAME: Game = {
   author: "",
   copyright: "",
   note: "",
+  visibility: "PUBLIC",
   boards: [
     {
       categoryNames: ["Round 1, Category 1"],
@@ -63,5 +64,5 @@ export const MOCK_GAME: Game = {
 export async function getMockGame(): Promise<Game> {
   const fileContents = await readFile(MOCK_FILE_PATH, "utf8");
   const game = Convert.toGame(fileContents);
-  return { id: "mock", ...game };
+  return { id: "mock", visibility: "PUBLIC", ...game };
 }
