@@ -1,6 +1,12 @@
-export default function Code({ children }: { children: React.ReactNode }) {
+export default function Code({
+  className,
+  children,
+}: {
+  className?: string;
+  children: React.ReactNode;
+}) {
   return (
-    <code className="px-1 py-2 bg-slate-200 rounded-md text-sm">
+    <code className={className + " rounded-md bg-slate-200 px-1 py-2"}>
       {children}
     </code>
   );
@@ -9,7 +15,7 @@ export default function Code({ children }: { children: React.ReactNode }) {
 export function CodeBlock({ text }: { text: string }) {
   return (
     <pre>
-      <code className="block overflow-auto p-4 mb-4 bg-slate-200 rounded-md text-sm">
+      <code className="mb-4 block overflow-auto rounded-md bg-slate-200 p-4 text-sm">
         {text}
       </code>
     </pre>
