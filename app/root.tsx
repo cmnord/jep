@@ -1,3 +1,4 @@
+import * as ToastPrimitive from "@radix-ui/react-toast";
 import type {
   LinksFunction,
   LoaderArgs,
@@ -23,6 +24,7 @@ import Footer from "~/components/footer";
 import Header from "~/components/header";
 import { getValidAuthSession } from "~/models/auth";
 import { getUserByEmail } from "~/models/user";
+import { BASE_URL } from "~/utils";
 import { SoundContext } from "~/utils/use-sound";
 
 import stylesheet from "./styles.css";
@@ -76,17 +78,17 @@ export async function loader({ request }: LoaderArgs) {
       authSession.email,
       authSession.accessToken
     );
-    return json({ user });
+    return json({ user, BASE_URL });
   }
 
-  return json({ user: undefined });
+  return json({ user: undefined, BASE_URL });
 }
 
 export default function App() {
   const [volume, setVolume] = React.useState(0.5);
   const [mute, setMute] = React.useState(false);
 
-  const { user } = useLoaderData<typeof loader>();
+  const data = useLoaderData<typeof loader>();
 
   return (
     <html lang="en">
@@ -105,12 +107,19 @@ export default function App() {
             setMute,
           }}
         >
-          <Header user={user} />
-          <Outlet />
-          <Footer />
-          <ScrollRestoration />
-          <Scripts />
-          <LiveReload />
+          <ToastPrimitive.Provider swipeDirection="right">
+            <ToastPrimitive.Viewport
+              className={`fixed bottom-0 right-0 z-50 m-0 flex w-96 max-w-full
+              list-none flex-col gap-3 p-[var(--viewport-padding)] outline-none
+              [--viewport-padding:_25px]`}
+            />
+            <Header user={data.user} BASE_URL={data.BASE_URL} />
+            <Outlet />
+            <Footer />
+            <ScrollRestoration />
+            <Scripts />
+            <LiveReload />
+          </ToastPrimitive.Provider>
         </SoundContext.Provider>
       </body>
     </html>

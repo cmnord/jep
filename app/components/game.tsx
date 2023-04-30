@@ -18,10 +18,12 @@ export default function GameComponent({
   game,
   userId,
   roomName,
+  url,
 }: {
   game: Game;
   userId: string;
   roomName: string;
+  url: string;
 }) {
   const { type, round, activeClue } = useEngineContext();
 
@@ -68,6 +70,7 @@ export default function GameComponent({
             ? playFinalSfx
             : playBoardFillSfx
         }
+        url={url}
       />
       <div className="flex grow flex-col bg-slate-900">
         <BoardComponent

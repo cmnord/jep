@@ -1,6 +1,7 @@
 import { Form, Link, useMatches } from "@remix-run/react";
 
 import Button from "~/components/button";
+import CopyLinkButton from "~/components/copy-link-button";
 import * as DropdownMenu from "~/components/dropdown-menu";
 import SoundControl from "~/components/sound";
 import type { Game } from "~/models/game.server";
@@ -96,7 +97,7 @@ function AccountButton({ user }: { user: { id: string; email: string } }) {
   );
 }
 
-function GameSettings({ game }: { game: Game }) {
+function GameSettings({ game, url }: { game: Game; url: string }) {
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>
@@ -151,6 +152,16 @@ function GameSettings({ game }: { game: Game }) {
               <SoundControl />
             </div>
           </DropdownMenu.Item>
+          <DropdownMenu.Item
+            // Prevent the dropdown menu from closing
+            onSelect={(e) => e.preventDefault()}
+          >
+            <CopyLinkButton
+              className="grow"
+              url={url}
+              text="Copy link to room"
+            />
+          </DropdownMenu.Item>
         </DropdownMenu.Content>
       </DropdownMenu.Portal>
     </DropdownMenu.Root>
@@ -159,12 +170,15 @@ function GameSettings({ game }: { game: Game }) {
 
 export default function Header({
   user,
+  BASE_URL,
 }: {
   user?: { id: string; email: string };
+  BASE_URL?: string;
 }) {
   const matches = useMatches();
   const gameRoute = matches.find((match) => match.data && "game" in match.data);
   const game = gameRoute ? (gameRoute.data.game as Game) : undefined;
+  const pathname = matches[matches.length - 1].pathname;
 
   return (
     <nav className="bg-blue-1000 p-6">
@@ -176,7 +190,7 @@ export default function Header({
         </Link>
         <div className="flex items-center gap-2">
           {user ? <AccountButton user={user} /> : <LoginButton />}
-          {game && <GameSettings game={game} />}
+          {game && <GameSettings game={game} url={BASE_URL + pathname} />}
         </div>
       </div>
     </nav>

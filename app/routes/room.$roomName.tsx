@@ -1,6 +1,6 @@
 import type { LoaderArgs, V2_MetaFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { useLoaderData, useMatches } from "@remix-run/react";
 
 import GameComponent from "~/components/game";
 import { ActionType, GameEngineContext, useGameEngine } from "~/engine";
@@ -12,7 +12,7 @@ import { createRoomEvent, getRoomEvents } from "~/models/room-event.server";
 import { getRoom } from "~/models/room.server";
 import { getUserByEmail } from "~/models/user";
 import { getOrCreateUserSession } from "~/session.server";
-import { SUPABASE_ANON_KEY, SUPABASE_URL } from "~/utils";
+import { BASE_URL, SUPABASE_ANON_KEY, SUPABASE_URL } from "~/utils";
 import { getRandomName } from "~/utils/name";
 
 export const meta: V2_MetaFunction<typeof loader> = ({ data }) => {
@@ -47,7 +47,7 @@ export async function loader({ request, params }: LoaderArgs) {
   const roomEvents = await getRoomEvents(room.id);
   const typedRoomEvents = roomEvents.filter(isTypedRoomEvent);
 
-  const env = { SUPABASE_URL, SUPABASE_ANON_KEY };
+  const env = { SUPABASE_URL, SUPABASE_ANON_KEY, BASE_URL };
 
   // Add the user to the room if they aren't already in it.
   // If they are logged in, their ID is their user ID.
@@ -84,6 +84,8 @@ export async function loader({ request, params }: LoaderArgs) {
 
 export default function PlayGame() {
   const data = useLoaderData<typeof loader>();
+  const matches = useMatches();
+  const pathname = matches[matches.length - 1].pathname;
 
   const gameReducer = useGameEngine(
     data.game,
@@ -99,6 +101,7 @@ export default function PlayGame() {
         game={data.game}
         userId={data.userId}
         roomName={data.roomName}
+        url={BASE_URL + pathname}
       />
     </GameEngineContext.Provider>
   );

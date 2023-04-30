@@ -1,7 +1,15 @@
 import * as ToastPrimitive from "@radix-ui/react-toast";
 import * as React from "react";
 
-export function CopyLinkButton({ url }: { url: string }) {
+export default function CopyLinkButton({
+  className,
+  url,
+  text,
+}: {
+  url: string;
+  text?: string;
+  className?: string;
+}) {
   const [open, setOpen] = React.useState(false);
   const timerRef = React.useRef(0);
 
@@ -10,12 +18,15 @@ export function CopyLinkButton({ url }: { url: string }) {
   }, []);
 
   return (
-    <ToastPrimitive.Provider swipeDirection="right">
+    <>
       <button
         type="button"
-        className={`inline-flex items-center rounded-md p-1 text-slate-700
-      hover:bg-slate-200
-        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
+        className={
+          className +
+          ` inline-flex items-center rounded-md p-1 text-slate-700
+          hover:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500
+          focus:ring-offset-2`
+        }
         onClick={() => {
           navigator.clipboard.writeText(url);
           setOpen(false);
@@ -42,6 +53,7 @@ export function CopyLinkButton({ url }: { url: string }) {
             d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"
           />
         </svg>
+        {text ? <span className="pl-2 text-sm">{text}</span> : null}
       </button>
 
       <ToastPrimitive.Root
@@ -58,11 +70,6 @@ export function CopyLinkButton({ url }: { url: string }) {
           <p className="text-sm text-slate-700">Copied link to clipboard</p>
         </ToastPrimitive.Description>
       </ToastPrimitive.Root>
-      <ToastPrimitive.Viewport
-        className={`fixed bottom-0 right-0 z-50 m-0 flex w-96 max-w-full
-        list-none flex-col gap-3 p-[var(--viewport-padding)] outline-none
-        [--viewport-padding:_25px]`}
-      />
-    </ToastPrimitive.Provider>
+    </>
   );
 }
