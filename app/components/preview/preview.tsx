@@ -2,6 +2,7 @@ import { useFetcher } from "@remix-run/react";
 import * as React from "react";
 
 import Button from "~/components/button";
+import CopyLinkButton from "~/components/copy-link-button";
 import Dialog from "~/components/dialog";
 import HowToPlay from "~/components/how-to-play";
 import { EditPlayerForm, PlayerIcon } from "~/components/player";
@@ -42,11 +43,13 @@ export function Preview({
   userId,
   roomName,
   onDismiss,
+  url,
 }: {
   numRounds: number;
   userId: string;
   roomName: string;
   onDismiss: () => void;
+  url: string;
 }) {
   const { type, boardControl, players, round, soloDispatch } =
     useEngineContext();
@@ -92,6 +95,9 @@ export function Preview({
             {Array.from(players.values()).map((p, i) => (
               <PlayerIcon key={i} player={p} />
             ))}
+          </div>
+          <div className="flex">
+            <CopyLinkButton url={url} text="Copy link to room" />
           </div>
           <HowToPlay />
         </div>

@@ -1,14 +1,13 @@
 import type { FetcherWithComponents } from "@remix-run/react";
 import { Link } from "@remix-run/react";
 
+import CopyLinkButton from "~/components/copy-link-button";
 import * as DropdownMenu from "~/components/dropdown-menu";
 import GameVisibilityIcon, {
   GameVisibilityTag,
 } from "~/components/game-visibility-icon";
 import StyledLink from "~/components/link";
 import type { DbGame, GameVisibility } from "~/models/game.server";
-
-import { CopyLinkButton } from "./copy-link-button";
 
 const formatter = new Intl.DateTimeFormat("en-US", {
   year: "numeric",
