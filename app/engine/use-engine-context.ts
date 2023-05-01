@@ -1,17 +1,17 @@
 import * as React from "react";
 
-import { GameState } from "./engine";
+import { GameState } from "./state";
 import type { useGameEngine } from "./use-game-engine";
 
 export const GameEngineContext = React.createContext<
   ReturnType<typeof useGameEngine>
 >({
   type: GameState.PreviewRound,
-  activeClue: undefined,
+  activeClue: null,
   answers: new Map(),
   answeredBy: () => false,
   board: { categories: [], categoryNames: [] },
-  boardControl: undefined,
+  boardControl: null,
   buzzes: new Map(),
   category: undefined,
   clue: undefined,

@@ -1,13 +1,14 @@
 import { MOCK_GAME } from "~/models/mock.server";
-import type { Action, Player, State } from "./engine";
+
+import type { Action } from "./engine";
 import {
   ActionType,
   CANT_BUZZ_FLAG,
   CLUE_TIMEOUT_MS,
-  createInitialState,
   gameEngine,
-  GameState,
 } from "./engine";
+import type { Player } from "./state";
+import { GameState, State } from "./state";
 
 const PLAYER1: Player = {
   name: "Player 1",
@@ -102,18 +103,17 @@ describe("gameEngine", () => {
     expectedState: State;
   }
 
-  const initialState = createInitialState(MOCK_GAME);
+  const initialState = State.fromGame(MOCK_GAME);
 
   const testCases: TestCase[] = [
     {
       name: "Player joins",
       state: initialState,
       actions: [PLAYER1_JOIN_ACTION],
-      expectedState: {
-        ...initialState,
+      expectedState: State.copy(initialState, {
         boardControl: PLAYER1.userId,
         players: new Map([[PLAYER1.userId, PLAYER1]]),
-      },
+      }),
     },
     {
       name: "Player joins, chooses name",
@@ -125,26 +125,24 @@ describe("gameEngine", () => {
           payload: { name: "Player New Name", userId: PLAYER1.userId },
         },
       ],
-      expectedState: {
-        ...initialState,
+      expectedState: State.copy(initialState, {
         boardControl: PLAYER1.userId,
         players: new Map([
           [PLAYER1.userId, { ...PLAYER1, name: "Player New Name" }],
         ]),
-      },
+      }),
     },
     {
       name: "Two players join, first gets board control",
       state: initialState,
       actions: [PLAYER1_JOIN_ACTION, PLAYER2_JOIN_ACTION],
-      expectedState: {
-        ...initialState,
+      expectedState: State.copy(initialState, {
         boardControl: PLAYER1.userId,
         players: new Map([
           [PLAYER1.userId, PLAYER1],
           [PLAYER2.userId, PLAYER2],
         ]),
-      },
+      }),
     },
     {
       name: "Round start",
@@ -156,12 +154,11 @@ describe("gameEngine", () => {
           payload: { round: 0 },
         },
       ],
-      expectedState: {
-        ...initialState,
+      expectedState: State.copy(initialState, {
         type: GameState.ShowBoard,
         boardControl: PLAYER1.userId,
         players: new Map([[PLAYER1.userId, PLAYER1]]),
-      },
+      }),
     },
     {
       name: "Choose clue",
@@ -177,13 +174,12 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER1.userId, i: 0, j: 0 },
         },
       ],
-      expectedState: {
-        ...initialState,
+      expectedState: State.copy(initialState, {
         type: GameState.ReadClue,
         activeClue: [0, 0],
         boardControl: PLAYER1.userId,
         players: new Map([[PLAYER1.userId, PLAYER1]]),
-      },
+      }),
     },
     {
       name: "If the only player in the game buzzes in for clue, show them the answer",
@@ -203,14 +199,13 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER1.userId, i: 0, j: 0, deltaMs: 123 },
         },
       ],
-      expectedState: {
-        ...initialState,
+      expectedState: State.copy(initialState, {
         type: GameState.RevealAnswerToBuzzer,
         activeClue: [0, 0],
         boardControl: PLAYER1.userId,
         buzzes: new Map([[PLAYER1.userId, 123]]),
         players: new Map([[PLAYER1.userId, PLAYER1]]),
-      },
+      }),
     },
     {
       name: "If one of multiple players in the game buzzes in for clue, wait for more buzzes",
@@ -226,8 +221,7 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER1.userId, i: 0, j: 0, deltaMs: 123 },
         },
       ],
-      expectedState: {
-        ...initialState,
+      expectedState: State.copy(initialState, {
         type: GameState.ReadClue,
         activeClue: [0, 0],
         boardControl: PLAYER1.userId,
@@ -236,7 +230,7 @@ describe("gameEngine", () => {
           [PLAYER1.userId, PLAYER1],
           [PLAYER2.userId, PLAYER2],
         ]),
-      },
+      }),
     },
     {
       name: "If all players buzz in, reveal answer to winner",
@@ -256,8 +250,7 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER2.userId, i: 0, j: 0, deltaMs: 456 },
         },
       ],
-      expectedState: {
-        ...initialState,
+      expectedState: State.copy(initialState, {
         type: GameState.RevealAnswerToBuzzer,
         activeClue: [0, 0],
         boardControl: PLAYER1.userId,
@@ -269,7 +262,7 @@ describe("gameEngine", () => {
           [PLAYER1.userId, PLAYER1],
           [PLAYER2.userId, PLAYER2],
         ]),
-      },
+      }),
     },
     {
       name: "If one player buzzes in and the rest time out, reveal answer to buzzer",
@@ -294,8 +287,7 @@ describe("gameEngine", () => {
           },
         },
       ],
-      expectedState: {
-        ...initialState,
+      expectedState: State.copy(initialState, {
         type: GameState.RevealAnswerToBuzzer,
         activeClue: [0, 0],
         boardControl: PLAYER1.userId,
@@ -307,7 +299,7 @@ describe("gameEngine", () => {
           [PLAYER1.userId, PLAYER1],
           [PLAYER2.userId, PLAYER2],
         ]),
-      },
+      }),
     },
     {
       name: "If one player times out, ignore further buzzes",
@@ -337,8 +329,7 @@ describe("gameEngine", () => {
           },
         },
       ],
-      expectedState: {
-        ...initialState,
+      expectedState: State.copy(initialState, {
         type: GameState.RevealAnswerToAll,
         activeClue: [0, 0],
         boardControl: PLAYER1.userId,
@@ -354,7 +345,7 @@ describe("gameEngine", () => {
           [PLAYER1.userId, PLAYER1],
           [PLAYER2.userId, PLAYER2],
         ]),
-      },
+      }),
     },
     {
       name: "If single player is incorrect, reveal to all",
@@ -378,8 +369,7 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER1.userId, i: 0, j: 0, correct: false },
         },
       ],
-      expectedState: {
-        ...initialState,
+      expectedState: State.copy(initialState, {
         type: GameState.RevealAnswerToAll,
         activeClue: [0, 0],
         boardControl: PLAYER1.userId,
@@ -395,7 +385,7 @@ describe("gameEngine", () => {
         ],
         numAnswered: 1,
         players: new Map([[PLAYER1.userId, { ...PLAYER1, score: -200 }]]),
-      },
+      }),
     },
     {
       name: "If one of multiple players answers incorrectly, re-open buzzers with prev buzzer locked out",
@@ -424,8 +414,7 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER1.userId, i: 0, j: 0, correct: false },
         },
       ],
-      expectedState: {
-        ...initialState,
+      expectedState: State.copy(initialState, {
         type: GameState.ReadClue,
         activeClue: [0, 0],
         boardControl: PLAYER1.userId,
@@ -443,7 +432,7 @@ describe("gameEngine", () => {
           [PLAYER1.userId, { ...PLAYER1, score: -200 }],
           [PLAYER2.userId, PLAYER2],
         ]),
-      },
+      }),
     },
     {
       name: "Second player can buzz after first is locked out",
@@ -476,8 +465,7 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER2.userId, i: 0, j: 0, deltaMs: 123 },
         },
       ],
-      expectedState: {
-        ...initialState,
+      expectedState: State.copy(initialState, {
         type: GameState.RevealAnswerToBuzzer,
         activeClue: [0, 0],
         boardControl: PLAYER1.userId,
@@ -498,7 +486,7 @@ describe("gameEngine", () => {
           [PLAYER1.userId, { ...PLAYER1, score: -200 }],
           [PLAYER2.userId, PLAYER2],
         ]),
-      },
+      }),
     },
     {
       name: "Second player correct, first is locked out",
@@ -535,8 +523,7 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER2.userId, i: 0, j: 0, correct: true },
         },
       ],
-      expectedState: {
-        ...initialState,
+      expectedState: State.copy(initialState, {
         type: GameState.RevealAnswerToAll,
         activeClue: [0, 0],
         isAnswered: [
@@ -561,7 +548,7 @@ describe("gameEngine", () => {
           [PLAYER1.userId, { ...PLAYER1, score: -200 }],
           [PLAYER2.userId, { ...PLAYER2, score: 200 }],
         ]),
-      },
+      }),
     },
     {
       name: "Dismiss clue to go back to the board (round not yet over)",
@@ -594,10 +581,8 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER1.userId, i: 0, j: 0 },
         },
       ],
-      expectedState: {
-        ...initialState,
+      expectedState: State.copy(initialState, {
         type: GameState.ShowBoard,
-        activeClue: undefined,
         boardControl: PLAYER1.userId,
         isAnswered: [
           [
@@ -610,7 +595,7 @@ describe("gameEngine", () => {
           [PLAYER1.userId, { ...PLAYER1, score: 200 }],
           [PLAYER2.userId, PLAYER2],
         ]),
-      },
+      }),
     },
     {
       name: "Dismiss clue to go back to the board (round over), same scores so existing player keeps board control",
@@ -668,10 +653,8 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER1.userId, i: 0, j: 1 },
         },
       ],
-      expectedState: {
-        ...initialState,
+      expectedState: State.copy(initialState, {
         type: GameState.PreviewRound,
-        activeClue: undefined,
         boardControl: PLAYER2.userId,
         isAnswered: [
           [
@@ -686,16 +669,14 @@ describe("gameEngine", () => {
           [PLAYER2.userId, { ...PLAYER2, score: 200 }],
         ]),
         round: 1,
-      },
+      }),
     },
     {
       name: "Dismiss clue to go back to the board (round over), player with lowest score gets board control",
       state: initialState,
       actions: TWO_PLAYERS_ROUND_1,
-      expectedState: {
-        ...initialState,
+      expectedState: State.copy(initialState, {
         type: GameState.PreviewRound,
-        activeClue: undefined,
         boardControl: PLAYER2.userId,
         isAnswered: [
           [
@@ -710,7 +691,7 @@ describe("gameEngine", () => {
           [PLAYER2.userId, { ...PLAYER2, score: 0 }],
         ]),
         round: 1,
-      },
+      }),
     },
     {
       name: "Choose wagerable clue, only player who chose it can wager",
@@ -726,8 +707,7 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER2.userId, i: 0, j: 0 },
         },
       ],
-      expectedState: {
-        ...initialState,
+      expectedState: State.copy(initialState, {
         type: GameState.WagerClue,
         activeClue: [0, 0],
         buzzes: new Map([[PLAYER1.userId, CANT_BUZZ_FLAG]]),
@@ -746,7 +726,7 @@ describe("gameEngine", () => {
           [PLAYER2.userId, { ...PLAYER2, score: 0 }],
         ]),
         round: 1,
-      },
+      }),
     },
     {
       name: "Set clue wager amount, all other players locked out of buzz",
@@ -766,8 +746,7 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER2.userId, i: 0, j: 0, wager: 345 },
         },
       ],
-      expectedState: {
-        ...initialState,
+      expectedState: State.copy(initialState, {
         type: GameState.ReadClue,
         activeClue: [0, 0],
         boardControl: PLAYER2.userId,
@@ -787,7 +766,7 @@ describe("gameEngine", () => {
         ]),
         round: 1,
         wagers: new Map([[PLAYER2.userId, 345]]),
-      },
+      }),
     },
     {
       name: "Correct answer to wagered clue adds wager value",
@@ -815,8 +794,7 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER2.userId, i: 0, j: 0, correct: true },
         },
       ],
-      expectedState: {
-        ...initialState,
+      expectedState: State.copy(initialState, {
         type: GameState.RevealAnswerToAll,
         activeClue: [0, 0],
         boardControl: PLAYER2.userId,
@@ -839,7 +817,7 @@ describe("gameEngine", () => {
         ]),
         round: 1,
         wagers: new Map([[PLAYER2.userId, 345]]),
-      },
+      }),
     },
     {
       name: "Not answering wagered clue deducts wager value",
@@ -868,8 +846,7 @@ describe("gameEngine", () => {
           },
         },
       ],
-      expectedState: {
-        ...initialState,
+      expectedState: State.copy(initialState, {
         type: GameState.RevealAnswerToAll,
         activeClue: [0, 0],
         boardControl: PLAYER2.userId,
@@ -895,7 +872,7 @@ describe("gameEngine", () => {
         ]),
         round: 1,
         wagers: new Map([[PLAYER2.userId, 345]]),
-      },
+      }),
     },
     {
       name: "Choose long-form clue, only players with positive scores can buzz",
@@ -911,8 +888,7 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER2.userId, i: 0, j: 1 },
         },
       ],
-      expectedState: {
-        ...initialState,
+      expectedState: State.copy(initialState, {
         type: GameState.WagerClue,
         activeClue: [0, 1],
         boardControl: PLAYER2.userId,
@@ -931,7 +907,7 @@ describe("gameEngine", () => {
           [PLAYER2.userId, { ...PLAYER2, score: 0 }],
         ]),
         round: 1,
-      },
+      }),
     },
     {
       name: "If all players have negative scores, advance past long-form clue",
@@ -1025,8 +1001,7 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER2.userId, i: 0, j: 1 },
         },
       ],
-      expectedState: {
-        ...initialState,
+      expectedState: State.copy(initialState, {
         type: GameState.RevealAnswerToAll,
         activeClue: [0, 1],
         boardControl: PLAYER2.userId,
@@ -1043,7 +1018,7 @@ describe("gameEngine", () => {
           [PLAYER2.userId, { ...PLAYER2, score: -195 }],
         ]),
         round: 1,
-      },
+      }),
     },
     {
       name: "Choose long-form clue, all players can buzz",
@@ -1079,8 +1054,7 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER2.userId, i: 0, j: 1 },
         },
       ],
-      expectedState: {
-        ...initialState,
+      expectedState: State.copy(initialState, {
         type: GameState.WagerClue,
         activeClue: [0, 1],
         boardControl: PLAYER2.userId,
@@ -1099,7 +1073,7 @@ describe("gameEngine", () => {
           [PLAYER2.userId, { ...PLAYER2, score: 400 }],
         ]),
         round: 1,
-      },
+      }),
     },
     {
       name: "Choose long-form clue, wait for 2/2 wagers",
@@ -1139,8 +1113,7 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER1.userId, i: 0, j: 1, wager: 400 },
         },
       ],
-      expectedState: {
-        ...initialState,
+      expectedState: State.copy(initialState, {
         type: GameState.WagerClue,
         activeClue: [0, 1],
         boardControl: PLAYER2.userId,
@@ -1160,7 +1133,7 @@ describe("gameEngine", () => {
         ]),
         round: 1,
         wagers: new Map([[PLAYER1.userId, 400]]),
-      },
+      }),
     },
     {
       name: "Choose long-form clue, advance to read clue after wagers",
@@ -1204,8 +1177,7 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER2.userId, i: 0, j: 1, wager: 400 },
         },
       ],
-      expectedState: {
-        ...initialState,
+      expectedState: State.copy(initialState, {
         type: GameState.ReadLongFormClue,
         activeClue: [0, 1],
         boardControl: PLAYER2.userId,
@@ -1228,7 +1200,7 @@ describe("gameEngine", () => {
           [PLAYER1.userId, 400],
           [PLAYER2.userId, 400],
         ]),
-      },
+      }),
     },
     {
       name: "Wait for all answers to long-form clue",
@@ -1281,8 +1253,7 @@ describe("gameEngine", () => {
           },
         },
       ],
-      expectedState: {
-        ...initialState,
+      expectedState: State.copy(initialState, {
         type: GameState.ReadLongFormClue,
         activeClue: [0, 1],
         answers: new Map([[PLAYER1.userId, "right answer"]]),
@@ -1306,7 +1277,7 @@ describe("gameEngine", () => {
           [PLAYER1.userId, 400],
           [PLAYER2.userId, 400],
         ]),
-      },
+      }),
     },
     {
       name: "Reveal answer to evaluate long-form clue after all answers in",
@@ -1368,8 +1339,7 @@ describe("gameEngine", () => {
           },
         },
       ],
-      expectedState: {
-        ...initialState,
+      expectedState: State.copy(initialState, {
         type: GameState.RevealAnswerLongForm,
         activeClue: [0, 1],
         answers: new Map([
@@ -1399,7 +1369,7 @@ describe("gameEngine", () => {
           [PLAYER1.userId, 400],
           [PLAYER2.userId, 400],
         ]),
-      },
+      }),
     },
     {
       name: "1 person evaluates their long-form clue",
@@ -1465,8 +1435,7 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER1.userId, i: 0, j: 1, correct: false },
         },
       ],
-      expectedState: {
-        ...initialState,
+      expectedState: State.copy(initialState, {
         type: GameState.RevealAnswerLongForm,
         activeClue: [0, 1],
         answers: new Map([
@@ -1499,7 +1468,7 @@ describe("gameEngine", () => {
           [PLAYER1.userId, 400],
           [PLAYER2.userId, 400],
         ]),
-      },
+      }),
     },
     {
       name: "All players evaluated their long-form clues, show answer to all",
@@ -1569,8 +1538,7 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER2.userId, i: 0, j: 1, correct: true },
         },
       ],
-      expectedState: {
-        ...initialState,
+      expectedState: State.copy(initialState, {
         type: GameState.RevealAnswerToAll,
         activeClue: [0, 1],
         answers: new Map([
@@ -1606,7 +1574,7 @@ describe("gameEngine", () => {
           [PLAYER1.userId, 400],
           [PLAYER2.userId, 400],
         ]),
-      },
+      }),
     },
     {
       name: "All players evaluated their long-form clues, right then wrong",
@@ -1676,8 +1644,7 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER1.userId, i: 0, j: 1, correct: false },
         },
       ],
-      expectedState: {
-        ...initialState,
+      expectedState: State.copy(initialState, {
         type: GameState.RevealAnswerToAll,
         activeClue: [0, 1],
         answers: new Map([
@@ -1713,7 +1680,7 @@ describe("gameEngine", () => {
           [PLAYER1.userId, 400],
           [PLAYER2.userId, 400],
         ]),
-      },
+      }),
     },
     {
       name: "Can revise long-form clue answers until all answers are in",
@@ -1793,8 +1760,7 @@ describe("gameEngine", () => {
           },
         },
       ],
-      expectedState: {
-        ...initialState,
+      expectedState: State.copy(initialState, {
         type: GameState.RevealAnswerLongForm,
         activeClue: [0, 1],
         answers: new Map([
@@ -1824,7 +1790,7 @@ describe("gameEngine", () => {
           [PLAYER1.userId, 400],
           [PLAYER2.userId, 400],
         ]),
-      },
+      }),
     },
     {
       name: "Game ends in GameOver state",
@@ -1898,11 +1864,8 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER2.userId, i: 0, j: 1 },
         },
       ],
-      expectedState: {
-        ...initialState,
+      expectedState: State.copy(initialState, {
         type: GameState.GameOver,
-        activeClue: undefined,
-        boardControl: undefined,
         isAnswered: [
           [
             { isAnswered: true, answeredBy: new Map([[PLAYER2.userId, true]]) },
@@ -1922,7 +1885,7 @@ describe("gameEngine", () => {
           [PLAYER2.userId, { ...PLAYER2, score: 800 }],
         ]),
         round: 1,
-      },
+      }),
     },
   ];
 

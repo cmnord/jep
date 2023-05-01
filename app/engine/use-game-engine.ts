@@ -4,14 +4,10 @@ import * as React from "react";
 import type { Clue, Game } from "~/models/convert.server";
 import type { DbRoomEvent } from "~/models/room-event.server";
 
-import type { Action, State } from "./engine";
-import {
-  createInitialState,
-  gameEngine,
-  getClueValue,
-  getWinningBuzzer,
-} from "./engine";
+import type { Action } from "./engine";
+import { gameEngine, getWinningBuzzer } from "./engine";
 import { applyRoomEventsToState, isTypedRoomEvent } from "./room-event";
+import { State } from "./state";
 
 function stateToGameEngine(
   game: Game,
@@ -41,7 +37,7 @@ function stateToGameEngine(
   const winningBuzzer = winningBuzz?.userId ?? undefined;
 
   function getClueValueFn(idx: [number, number], userId: string) {
-    return getClueValue(state, idx, userId);
+    return state.getClueValue(idx, userId);
   }
 
   return {
@@ -74,7 +70,7 @@ function stateToGameEngine(
  */
 export function useSoloGameEngine(game: Game, userId: string, name: string) {
   const [state, dispatch] = React.useReducer(gameEngine, game, (arg) => {
-    const init = createInitialState(arg);
+    const init = State.fromGame(arg);
     init.players.set(userId, { name, userId, score: 0 });
     init.boardControl = userId;
     return init;
@@ -108,7 +104,7 @@ export function useGameEngine(
     gameEngine,
     { game, serverRoomEvents },
     (arg) =>
-      applyRoomEventsToState(createInitialState(arg.game), arg.serverRoomEvents)
+      applyRoomEventsToState(State.fromGame(arg.game), arg.serverRoomEvents)
   );
 
   const client = React.useMemo(

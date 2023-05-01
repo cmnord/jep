@@ -1,5 +1,6 @@
-import type { Board, Game } from "~/models/convert.server";
+import type { Board } from "~/models/convert.server";
 import { generateGrid } from "~/utils/utils";
+
 import {
   isAnswerAction,
   isBuzzAction,
@@ -9,40 +10,8 @@ import {
   isPlayerAction,
   isRoundAction,
 } from "./actions";
-
-export enum GameState {
-  PreviewRound = "PreviewRound",
-  ShowBoard = "ShowBoard",
-  WagerClue = "WagerClue",
-  ReadClue = "ReadClue",
-  ReadLongFormClue = "ReadLongFormClue",
-  RevealAnswerToBuzzer = "RevealAnswerToBuzzer",
-  RevealAnswerLongForm = "RevealAnswerLongForm",
-  RevealAnswerToAll = "RevealAnswerToAll",
-  GameOver = "GameOver",
-}
-
-interface ClueAnswer {
-  isAnswered: boolean;
-  answeredBy: Map<string, boolean>;
-}
-
-export interface State {
-  type: GameState;
-  activeClue?: [number, number];
-  answers: Map<string, string>;
-  boardControl?: string;
-  buzzes: Map<string, number>;
-  game: Game;
-  /** warning! use setIsAnswered to deep-copy instead of mutating State. */
-  isAnswered: ClueAnswer[][];
-  numAnswered: number;
-  numCluesInBoard: number;
-  numExpectedWagers: number;
-  players: Map<string, Player>;
-  round: number;
-  wagers: Map<string, number>;
-}
+import type { ClueAnswer } from "./state";
+import { GameState, State } from "./state";
 
 export enum ActionType {
   Reset = "reset",
@@ -65,12 +34,6 @@ export interface Action {
   payload?: unknown;
 }
 
-export interface Player {
-  userId: string;
-  name: string;
-  score: number;
-}
-
 /** CLUE_TIMEOUT_MS is the total amount of time a contestant has to buzz in after
  * the clue is read. */
 export const CLUE_TIMEOUT_MS = 5000;
@@ -78,8 +41,6 @@ export const CLUE_TIMEOUT_MS = 5000;
 /** CANT_BUZZ_FLAG means that the player buzzed in wrong, so they can't try again
  * on this clue. */
 export const CANT_BUZZ_FLAG = -1;
-
-export const UNREVEALED_CLUE = "unrevealed";
 
 export function getWinningBuzzer(buzzes: Map<string, number>):
   | {
@@ -127,25 +88,6 @@ function setIsAnswered(
   return deepCopy;
 }
 
-/** getClueValue gets the clue's wagered value if it's wagerable and its value on
- * the board otherwise.
- */
-export function getClueValue(
-  state: State,
-  [i, j]: [number, number],
-  userId: string
-) {
-  const board = state.game.boards.at(state.round);
-  const clue = board?.categories.at(j)?.clues.at(i);
-  if (!clue) {
-    throw new Error(`No clue exists at (${i}, ${j})`);
-  }
-  if (clue.wagerable) {
-    return state.wagers.get(userId) ?? 0;
-  }
-  return clue.value;
-}
-
 /** getHighestClueValue gets the highest clue value on the board. */
 export function getHighestClueValue(board: Board | undefined) {
   if (!board) {
@@ -164,47 +106,12 @@ export function getHighestClueValue(board: Board | undefined) {
   return max;
 }
 
-export function createInitialState(game: Game): State {
-  const round = 0;
-  const board = game.boards.at(round);
-  if (!board) {
-    throw new Error("board must have at least one round");
-  }
-
-  const numCluesInBoard = board.categories.reduce(
-    (acc, category) =>
-      (acc += category.clues.filter(
-        (c) => c.clue.toLowerCase() !== UNREVEALED_CLUE
-      ).length),
-    0
-  );
-  const n = board.categories[0].clues.length;
-  const m = board.categories.length;
-
-  return {
-    type: GameState.PreviewRound,
-    answers: new Map(),
-    buzzes: new Map(),
-    game: game,
-    isAnswered: generateGrid<ClueAnswer>(n, m, {
-      isAnswered: false,
-      answeredBy: new Map(),
-    }),
-    numAnswered: 0,
-    numCluesInBoard,
-    numExpectedWagers: 0,
-    players: new Map(),
-    round,
-    wagers: new Map(),
-  };
-}
-
 /** gameEngine is the reducer (aka state machine) which implements the game. */
 export function gameEngine(state: State, action: Action): State {
   console.log("-----applying room event", action.type);
   switch (action.type) {
     case ActionType.Reset:
-      return createInitialState(state.game);
+      return State.fromGame(state.game);
     case ActionType.Join:
       if (isPlayerAction(action)) {
         const players = new Map(state.players);
@@ -212,7 +119,7 @@ export function gameEngine(state: State, action: Action): State {
           ...action.payload,
           score: 0,
         });
-        const nextState = { ...state, players };
+        const nextState = State.copy(state, { players });
         // If this is the first player joining, give them board control.
         if (players.size === 1) {
           nextState.boardControl = action.payload.userId;
@@ -233,7 +140,7 @@ export function gameEngine(state: State, action: Action): State {
           ...player,
           name: action.payload.name,
         });
-        return { ...state, players };
+        return State.copy(state, { players });
       }
       throw new Error("PlayerChangeName action must have an associated player");
     case ActionType.StartRound:
@@ -247,7 +154,7 @@ export function gameEngine(state: State, action: Action): State {
           return state;
         }
 
-        return { ...state, type: GameState.ShowBoard };
+        return State.copy(state, { type: GameState.ShowBoard });
       }
       throw new Error("StartRound action must have an associated round number");
     case ActionType.ChooseClue:
@@ -290,31 +197,28 @@ export function gameEngine(state: State, action: Action): State {
           const numExpectedWagers = state.players.size - buzzes.size;
           // If no player has enough points to wager, just show the clue.
           if (numExpectedWagers === 0) {
-            return {
-              ...state,
+            return State.copy(state, {
               type: GameState.RevealAnswerToAll,
               activeClue: [i, j],
               isAnswered: setIsAnswered(state.isAnswered, i, j, (prev) => {
                 prev.isAnswered = true;
               }),
               numAnswered: state.numAnswered + 1,
-            };
+            });
           }
 
-          return {
-            ...state,
+          return State.copy(state, {
             buzzes,
             type: GameState.WagerClue,
             activeClue: [i, j],
             numExpectedWagers,
-          };
+          });
         }
 
-        return {
-          ...state,
+        return State.copy(state, {
           type: GameState.ReadClue,
           activeClue: [i, j],
-        };
+        });
       }
       throw new Error("ClickClue action must have an associated index");
     case ActionType.SetClueWager:
@@ -353,23 +257,15 @@ export function gameEngine(state: State, action: Action): State {
         // Read the clue once all wagers are in
         if (wagers.size === state.numExpectedWagers) {
           if (clue.longForm) {
-            return {
-              ...state,
+            return State.copy(state, {
               type: GameState.ReadLongFormClue,
               wagers,
-            };
+            });
           }
-          return {
-            ...state,
-            type: GameState.ReadClue,
-            wagers,
-          };
+          return State.copy(state, { type: GameState.ReadClue, wagers });
         }
 
-        return {
-          ...state,
-          wagers,
-        };
+        return State.copy(state, { wagers });
       }
       throw new Error("SetClueWager action must have an associated index");
     case ActionType.Buzz:
@@ -394,7 +290,7 @@ export function gameEngine(state: State, action: Action): State {
         // Wait for others to buzz in if we haven't yet received buzzes from all
         // players or a timeout buzz.
         if (deltaMs <= CLUE_TIMEOUT_MS && buzzes.size < state.players.size) {
-          return { ...state, buzzes };
+          return State.copy(state, { buzzes });
         }
 
         // All buzzes are in or we've timed out, so find the winner. If we
@@ -409,7 +305,7 @@ export function gameEngine(state: State, action: Action): State {
           const clue = board?.categories.at(j)?.clues.at(i);
           const players = new Map(state.players);
           if (clue?.wagerable) {
-            const clueValue = getClueValue(state, [i, j], userId);
+            const clueValue = state.getClueValue([i, j], userId);
             const player = state.players.get(userId);
             if (player) {
               players.set(userId, {
@@ -419,8 +315,7 @@ export function gameEngine(state: State, action: Action): State {
             }
           }
 
-          return {
-            ...state,
+          return State.copy(state, {
             type: GameState.RevealAnswerToAll,
             buzzes,
             isAnswered: setIsAnswered(state.isAnswered, i, j, (prev) => {
@@ -431,12 +326,15 @@ export function gameEngine(state: State, action: Action): State {
             }),
             numAnswered: state.numAnswered + 1,
             players,
-          };
+          });
         }
 
         // Reveal the answer to the winning buzzer and let them evaluate its
         // correctness
-        return { ...state, type: GameState.RevealAnswerToBuzzer, buzzes };
+        return State.copy(state, {
+          type: GameState.RevealAnswerToBuzzer,
+          buzzes,
+        });
       }
       throw new Error("Buzz action must have an associated index and delta");
     case ActionType.Answer:
@@ -459,16 +357,15 @@ export function gameEngine(state: State, action: Action): State {
         answers.set(userId, answer);
 
         if (buzzes.size < state.players.size) {
-          return { ...state, answers, buzzes };
+          return State.copy(state, { answers, buzzes });
         }
 
         // All answers are in, so show the answers to all who answered to check them.
-        return {
-          ...state,
+        return State.copy(state, {
           type: GameState.RevealAnswerLongForm,
           answers,
           buzzes,
-        };
+        });
       }
       throw new Error("Answer action must have an associated index and answer");
     case ActionType.Check:
@@ -500,7 +397,7 @@ export function gameEngine(state: State, action: Action): State {
         }
 
         const players = new Map(state.players);
-        const clueValue = getClueValue(state, [i, j], userId);
+        const clueValue = state.getClueValue([i, j], userId);
 
         let isAnswered = setIsAnswered(state.isAnswered, i, j, (prev) => {
           prev.answeredBy.set(userId, correct);
@@ -523,12 +420,11 @@ export function gameEngine(state: State, action: Action): State {
         // If some players have not yet checked their long-form answer, stay in
         // the current state.
         if (numChecks < numExpectedChecks) {
-          return {
-            ...state,
+          return State.copy(state, {
             type: GameState.RevealAnswerLongForm,
             players,
             isAnswered,
-          };
+          });
         }
 
         if (isLongForm) {
@@ -537,8 +433,7 @@ export function gameEngine(state: State, action: Action): State {
           const boardControl = Array.from(players.entries()).sort(
             ([, a], [, b]) => b.score - a.score
           )[0][0];
-          return {
-            ...state,
+          return State.copy(state, {
             type: GameState.RevealAnswerToAll,
             boardControl,
             numAnswered: state.numAnswered + 1,
@@ -546,14 +441,13 @@ export function gameEngine(state: State, action: Action): State {
             isAnswered: setIsAnswered(isAnswered, i, j, (prev) => {
               prev.isAnswered = true;
             }),
-          };
+          });
         }
 
         // Reveal the answer to everyone and give the winning buzzer board
         // control.
         if (correct) {
-          return {
-            ...state,
+          return State.copy(state, {
             type: GameState.RevealAnswerToAll,
             boardControl: userId,
             players,
@@ -561,7 +455,7 @@ export function gameEngine(state: State, action: Action): State {
             isAnswered: setIsAnswered(isAnswered, i, j, (prev) => {
               prev.isAnswered = true;
             }),
-          };
+          });
         }
 
         // New buzzes are those previously locked out plus this one.
@@ -574,25 +468,23 @@ export function gameEngine(state: State, action: Action): State {
 
         // If everyone has been locked out, reveal the answer to everyone.
         if (buzzes.size === state.players.size) {
-          return {
-            ...state,
+          return State.copy(state, {
             type: GameState.RevealAnswerToAll,
             players,
             numAnswered: state.numAnswered + 1,
             isAnswered: setIsAnswered(isAnswered, i, j, (prev) => {
               prev.isAnswered = true;
             }),
-          };
+          });
         }
 
         // If some players have not yet been locked out, re-open the buzzers.
-        return {
-          ...state,
+        return State.copy(state, {
           type: GameState.ReadClue,
           players,
           buzzes,
           isAnswered,
-        };
+        });
       }
       throw new Error(
         "Check action must have an associated index and correct/incorrect"
@@ -615,29 +507,16 @@ export function gameEngine(state: State, action: Action): State {
           const board = state.game.boards.at(newRound);
 
           if (!board) {
-            return {
-              ...state,
+            return State.copy(state, {
               type: GameState.GameOver,
-              activeClue: undefined,
+              activeClue: null,
               answers: new Map(),
-              boardControl: undefined,
+              boardControl: null,
               buzzes: new Map(),
               numExpectedWagers: 0,
               wagers: new Map(),
-            };
+            });
           }
-
-          const numCluesInBoard = board
-            ? board.categories.reduce(
-                (acc, category) =>
-                  (acc += category.clues.filter(
-                    (c) => c.clue.toLowerCase() !== UNREVEALED_CLUE
-                  ).length),
-                0
-              )
-            : 0;
-          const n = board ? board.categories[0].clues.length : 0;
-          const m = board ? board.categories.length : 0;
 
           // Board control goes to the player with the lowest score. In the
           // case of a tie, keep the same player in control.
@@ -653,10 +532,12 @@ export function gameEngine(state: State, action: Action): State {
             }
           }
 
-          return {
-            ...state,
+          const n = board ? board.categories[0].clues.length : 0;
+          const m = board ? board.categories.length : 0;
+
+          return State.copy(state, {
             type: GameState.PreviewRound,
-            activeClue: undefined,
+            activeClue: null,
             answers: new Map(),
             boardControl: newBoardControl,
             buzzes: new Map(),
@@ -665,21 +546,20 @@ export function gameEngine(state: State, action: Action): State {
               answeredBy: new Map(),
             }),
             numAnswered: 0,
-            numCluesInBoard,
+            numCluesInBoard: state.getNumCluesInBoard(newRound),
             numExpectedWagers: 0,
             round: newRound,
             wagers: new Map(),
-          };
+          });
         }
 
-        return {
-          ...state,
+        return State.copy(state, {
           type: GameState.ShowBoard,
-          activeClue: undefined,
+          activeClue: null,
           buzzes: new Map(),
           numExpectedWagers: 0,
           wagers: new Map(),
-        };
+        });
       }
       throw new Error("NextClue action must have an associated user");
   }
