@@ -101,7 +101,7 @@ export default function GameComponent({
               ) : null}
             </>
           )}
-          <PlayerScores />
+          <PlayerScores userId={userId} />
         </div>
         <Prompt roomName={roomName} userId={userId} />
       </div>
