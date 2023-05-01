@@ -1,7 +1,7 @@
 import type { DbRoomEvent } from "~/models/room-event.server";
 
-import type { State } from "./engine";
 import { ActionType, gameEngine } from "./engine";
+import type { State } from "./state";
 
 interface RoomEvent extends DbRoomEvent {
   type: ActionType;
