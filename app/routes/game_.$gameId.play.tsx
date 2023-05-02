@@ -12,5 +12,5 @@ export async function loader({ params }: LoaderArgs) {
 
   const roomName = await createRoom(gameId);
 
-  return redirect("/room/" + roomName);
+  throw redirect(`/room/${roomName}`);
 }

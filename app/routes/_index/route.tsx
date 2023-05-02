@@ -144,8 +144,8 @@ export default function Index() {
         <input type="hidden" name="solo" value={solo ? "on" : "off"} />
       </Form>
       <Form method="GET" className="mb-4 flex flex-col gap-6 sm:flex-row">
-        <Link to="/mock">
-          <Button htmlType="button">Play a mock game</Button>
+        <Link to="/join">
+          <Button htmlType="button">Join an existing game</Button>
         </Link>
         <input type="hidden" name="q" value={debouncedSearch} />
         <div className="inline-flex items-center gap-3">

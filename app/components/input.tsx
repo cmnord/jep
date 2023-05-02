@@ -1,7 +1,7 @@
 export default function Input({
   fwdRef,
   ...rest
-}: JSX.IntrinsicElements["input"] & {
+}: React.InputHTMLAttributes<HTMLInputElement> & {
   fwdRef?: React.MutableRefObject<HTMLInputElement | null>;
 }) {
   return (
