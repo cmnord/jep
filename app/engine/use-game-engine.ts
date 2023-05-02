@@ -70,10 +70,11 @@ function stateToGameEngine(
  */
 export function useSoloGameEngine(game: Game, userId: string, name: string) {
   const [state, dispatch] = React.useReducer(gameEngine, game, (arg) => {
-    const init = State.fromGame(arg);
-    init.players.set(userId, { name, userId, score: 0 });
-    init.boardControl = userId;
-    return init;
+    return new State({
+      boardControl: userId,
+      game: arg,
+      players: new Map([[userId, { name, userId, score: 0 }]]),
+    });
   });
 
   return stateToGameEngine(game, state, dispatch);

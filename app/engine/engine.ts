@@ -14,7 +14,6 @@ import type { ClueAnswer } from "./state";
 import { GameState, State } from "./state";
 
 export enum ActionType {
-  Reset = "reset",
   Join = "join",
   ChangeName = "change_name",
   StartRound = "start_round",
@@ -108,23 +107,23 @@ export function getHighestClueValue(board: Board | undefined) {
 
 /** gameEngine is the reducer (aka state machine) which implements the game. */
 export function gameEngine(state: State, action: Action): State {
-  console.log("-----applying room event", action.type);
   switch (action.type) {
-    case ActionType.Reset:
-      return State.fromGame(state.game);
     case ActionType.Join:
       if (isPlayerAction(action)) {
+        // Don't add players after the game is over.
+        if (state.type === GameState.GameOver) {
+          return state;
+        }
         const players = new Map(state.players);
         players.set(action.payload.userId, {
           ...action.payload,
           score: 0,
         });
-        const nextState = State.copy(state, { players });
-        // If this is the first player joining, give them board control.
-        if (players.size === 1) {
-          nextState.boardControl = action.payload.userId;
-        }
-        return nextState;
+        return State.copy(state, {
+          players,
+          // If this is the first player joining, give them board control.
+          boardControl: players.size === 1 ? action.payload.userId : undefined,
+        });
       }
       throw new Error("PlayerJoin action must have an associated player");
     case ActionType.ChangeName:

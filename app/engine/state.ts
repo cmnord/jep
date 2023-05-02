@@ -27,20 +27,20 @@ export interface Player {
 }
 
 export class State {
-  type: GameState;
-  activeClue: [number, number] | null;
-  answers: Map<string, string>;
-  boardControl: string | null;
-  buzzes: Map<string, number>;
+  readonly type: GameState;
+  readonly activeClue: [number, number] | null;
+  readonly answers: Map<string, string>;
+  readonly boardControl: string | null;
+  readonly buzzes: Map<string, number>;
   readonly game: Game;
   /** warning! use setIsAnswered to deep-copy instead of mutating State. */
-  isAnswered: ClueAnswer[][];
-  numAnswered: number;
-  numCluesInBoard: number;
-  numExpectedWagers: number;
-  players: Map<string, Player>;
-  round: number;
-  wagers: Map<string, number>;
+  readonly isAnswered: ClueAnswer[][];
+  readonly numAnswered: number;
+  readonly numCluesInBoard: number;
+  readonly numExpectedWagers: number;
+  readonly players: Map<string, Player>;
+  readonly round: number;
+  readonly wagers: Map<string, number>;
 
   constructor(prevState: Pick<State, "game"> & Partial<State>) {
     this.type = prevState.type ?? GameState.PreviewRound;
@@ -82,32 +82,36 @@ export class State {
 
   /** copy copies prevState, then adds any fields from newState. */
   public static copy(prevState: State, newState: Partial<State>): State {
-    const state = new State(prevState);
-
-    if (newState.type) state.type = newState.type;
-    if (newState.activeClue !== undefined)
-      state.activeClue = newState.activeClue;
-
-    if (newState.answers) state.answers = newState.answers;
-    if (newState.boardControl !== undefined)
-      state.boardControl = newState.boardControl;
-
-    if (newState.buzzes) state.buzzes = newState.buzzes;
-    if (newState.isAnswered) state.isAnswered = newState.isAnswered;
-    if (newState.numAnswered !== undefined)
-      state.numAnswered = newState.numAnswered;
-
-    if (newState.numCluesInBoard !== undefined)
-      state.numCluesInBoard = newState.numCluesInBoard;
-
-    if (newState.numExpectedWagers !== undefined)
-      state.numExpectedWagers = newState.numExpectedWagers;
-
-    if (newState.players) state.players = newState.players;
-    if (newState.round !== undefined) state.round = newState.round;
-    if (newState.wagers) state.wagers = newState.wagers;
-
-    return state;
+    return new State({
+      type: newState.type ?? prevState.type,
+      activeClue:
+        newState.activeClue !== undefined
+          ? newState.activeClue
+          : prevState.activeClue,
+      answers: newState.answers ?? prevState.answers,
+      boardControl:
+        newState.boardControl !== undefined
+          ? newState.boardControl
+          : prevState.boardControl,
+      buzzes: newState.buzzes ?? prevState.buzzes,
+      game: prevState.game, // game does not change
+      isAnswered: newState.isAnswered ?? prevState.isAnswered,
+      numAnswered:
+        newState.numAnswered !== undefined
+          ? newState.numAnswered
+          : prevState.numAnswered,
+      numCluesInBoard:
+        newState.numCluesInBoard !== undefined
+          ? newState.numCluesInBoard
+          : prevState.numCluesInBoard,
+      numExpectedWagers:
+        newState.numExpectedWagers !== undefined
+          ? newState.numExpectedWagers
+          : prevState.numExpectedWagers,
+      players: newState.players ?? prevState.players,
+      round: newState.round !== undefined ? newState.round : prevState.round,
+      wagers: newState.wagers ?? prevState.wagers,
+    });
   }
 
   /** getClueValue gets the clue's wagered value if it's wagerable and its value
