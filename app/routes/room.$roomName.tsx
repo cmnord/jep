@@ -3,9 +3,14 @@ import { json } from "@remix-run/node";
 import { useLoaderData, useMatches } from "@remix-run/react";
 
 import GameComponent from "~/components/game";
-import { ActionType, GameEngineContext, useGameEngine } from "~/engine";
-import { isPlayerAction } from "~/engine/actions";
-import { isTypedRoomEvent } from "~/engine/room-event";
+import {
+  ActionType,
+  GameEngineContext,
+  GameState,
+  State,
+  useGameEngine,
+} from "~/engine";
+import { applyRoomEventsToState } from "~/engine/room-event";
 import { getValidAuthSession } from "~/models/auth";
 import { getGame } from "~/models/game.server";
 import { createRoomEvent, getRoomEvents } from "~/models/room-event.server";
@@ -45,19 +50,20 @@ export async function loader({ request, params }: LoaderArgs) {
     : null;
 
   const roomEvents = await getRoomEvents(room.id);
-  const typedRoomEvents = roomEvents.filter(isTypedRoomEvent);
+  // Construct the state of the game from the room events on the backend to see
+  // if the game is over.
+  const state = applyRoomEventsToState(State.fromGame(game), roomEvents);
 
   const env = { SUPABASE_URL, SUPABASE_ANON_KEY, BASE_URL };
 
-  // Add the user to the room if they aren't already in it.
-  // If they are logged in, their ID is their user ID.
-  // If they are a guest, their ID is their guest session ID.
+  // Add the user to the room if they aren't already in it and the game isn't
+  // over.
+  // - If they are logged in, their ID is their user ID.
+  // - If they are a guest, their ID is their guest session ID.
   if (user) {
     const userId = user.id;
-    const userInRoom = typedRoomEvents.some(
-      (re) => isPlayerAction(re) && re.payload.userId === userId
-    );
-    if (!userInRoom) {
+    const userInRoom = state.players.get(userId) !== undefined;
+    if (!userInRoom && state.type !== GameState.GameOver) {
       const joinEvent = await createRoomEvent(room.id, ActionType.Join, {
         userId,
         name: getRandomName(),
@@ -69,10 +75,8 @@ export async function loader({ request, params }: LoaderArgs) {
 
   const headers = new Headers();
   const userId = await getOrCreateUserSession(request, headers);
-  const guestInRoom = typedRoomEvents.some(
-    (re) => isPlayerAction(re) && re.payload.userId === userId
-  );
-  if (!guestInRoom) {
+  const guestInRoom = state.players.get(userId) !== undefined;
+  if (!guestInRoom && state.type !== GameState.GameOver) {
     const joinEvent = await createRoomEvent(room.id, ActionType.Join, {
       userId,
       name: getRandomName(),
