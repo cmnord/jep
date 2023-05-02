@@ -1,9 +1,8 @@
-import { useMatches } from "@remix-run/react";
+import { Link, useMatches } from "@remix-run/react";
 import classNames from "classnames";
 import * as React from "react";
 
 import Dialog from "~/components/dialog";
-import HowToPlay from "~/components/how-to-play";
 import { Anchor } from "~/components/link";
 
 const GITHUB_URL = "https://github.com/cmnord/jep";
@@ -29,6 +28,25 @@ function GlobeIcon() {
   );
 }
 
+function LinkItem({
+  isInGame,
+  children,
+}: {
+  isInGame: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      className={classNames("text-sm hover:underline", {
+        "text-slate-300 hover:text-slate-100": isInGame,
+        "text-slate-500 hover:text-slate-700": !isInGame,
+      })}
+    >
+      {children}
+    </div>
+  );
+}
+
 export default function Footer() {
   const [showModal, setShowModal] = React.useState(false);
   const matches = useMatches();
@@ -51,22 +69,28 @@ export default function Footer() {
         description="Jep! is a website for playing trivia puzzles with friends online."
         onClickClose={() => setShowModal(false)}
       >
-        <HowToPlay />
         <p className="text-slate-500">
           This website is open to contributions from developers of any level or
           experience. For more information or to report any issues, check out
           the project on <Anchor href={GITHUB_URL}>GitHub</Anchor>.
         </p>
       </Dialog>
-      <button
-        onClick={() => setShowModal(true)}
-        className={classNames("text-sm hover:underline", {
-          "text-slate-300 hover:text-slate-100": isInGame,
-          "text-slate-500 hover:text-slate-700": !isInGame,
-        })}
-      >
-        About
-      </button>
+      <div className="flex items-center gap-2">
+        <button onClick={() => setShowModal(true)}>
+          <LinkItem isInGame={isInGame}>About</LinkItem>
+        </button>
+        <div
+          className={classNames({
+            "text-slate-300": isInGame,
+            "text-slate-500": !isInGame,
+          })}
+        >
+          &middot;
+        </div>
+        <LinkItem isInGame={isInGame}>
+          <Link to="howto">How to Play</Link>
+        </LinkItem>
+      </div>
     </footer>
   );
 }
