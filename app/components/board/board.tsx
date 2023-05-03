@@ -12,6 +12,7 @@ import { ClueComponent } from "./clue";
 
 const WAGER_SFX = "/sounds/wager.mp3";
 
+/** BoardComponent is purely presentational and renders the board. */
 function BoardComponent({
   board,
   hasBoardControl,
@@ -89,7 +90,6 @@ function BoardComponent({
   );
 }
 
-/** BoardComponent is purely presentational and renders the board. */
 export function ConnectedBoardComponent({
   focusedClue,
   setFocusedClue,
