@@ -1,6 +1,7 @@
 import { useFetcher } from "@remix-run/react";
 
 import Button from "~/components/button";
+import type { RoomProps } from "~/components/game";
 import Input from "~/components/input";
 import type { Action } from "~/engine";
 import { useEngineContext } from "~/engine";
@@ -46,13 +47,7 @@ function AnswerForm({
   );
 }
 
-export function ConnectedAnswerForm({
-  roomName,
-  userId,
-}: {
-  roomName: string;
-  userId: string;
-}) {
+export function ConnectedAnswerForm({ roomId, userId }: RoomProps) {
   const { activeClue, answers, soloDispatch } = useEngineContext();
   if (!activeClue) {
     throw new Error("No active clue");
@@ -66,7 +61,7 @@ export function ConnectedAnswerForm({
   const submittedAnswer = answers.get(userId);
 
   return (
-    <fetcher.Form method="POST" action={`/room/${roomName}/answer`}>
+    <fetcher.Form method="POST" action={`/room/${roomId}/answer`}>
       <input type="hidden" value={userId} name="userId" />
       <input type="hidden" value={i} name="i" />
       <input type="hidden" value={j} name="j" />

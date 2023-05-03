@@ -14,16 +14,16 @@ export async function action({ request, params }: ActionArgs) {
   }
   const round = parseInt(roundStr);
 
-  const roomNameAndId = params.roomName;
-  if (!roomNameAndId) {
+  const roomId = params.roomId ? parseInt(params.roomId) : undefined;
+  if (!roomId) {
     throw new Response("room name not found in URL params", { status: 404 });
   }
 
-  if (roomNameAndId === "solo") {
+  if (roomId === -1) {
     return json({ type: ActionType.StartRound, payload: { round } });
   }
 
-  const room = await getRoom(roomNameAndId);
+  const room = await getRoom(roomId);
   if (!room) {
     throw new Response("room not found", { status: 404 });
   }

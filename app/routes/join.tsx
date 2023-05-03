@@ -9,12 +9,25 @@ import { getRoom } from "~/models/room.server";
 
 export const meta: V2_MetaFunction = () => [{ title: "jep! - Join game" }];
 
+const ROOM_NAME_REGEX = /^\d+-\w+$/;
+
 export async function action({ request }: ActionArgs) {
   const formData = await request.formData();
-  const roomName = formData.get("roomName") as string;
+  const roomName = (formData.get("roomName") as string).trim();
 
-  const room = await getRoom(roomName);
-  if (!room) {
+  if (!ROOM_NAME_REGEX.test(roomName)) {
+    return json(
+      { error: "room name must be in the format of {roomId}-{roomName}" },
+      { status: 400 }
+    );
+  }
+
+  const parts = roomName.split("-");
+  const roomId = parseInt(parts[0]);
+  const name = parts[1];
+
+  const room = await getRoom(roomId);
+  if (!room || room.name !== name) {
     return json({ error: `room "${roomName}" not found` }, { status: 404 });
   }
 

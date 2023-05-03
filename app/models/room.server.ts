@@ -7,13 +7,11 @@ type Room = RoomTable["Row"];
 
 /* Reads */
 
-export async function getRoom(nameAndId: string): Promise<Room | null> {
-  const id = nameAndId.split("-")[0];
-
+export async function getRoom(roomId: number): Promise<Room | null> {
   const { data, error } = await db
     .from<"rooms", RoomTable>("rooms")
     .select("*")
-    .eq("id", id);
+    .eq("id", roomId);
 
   if (error !== null) {
     throw new Error(error.message);

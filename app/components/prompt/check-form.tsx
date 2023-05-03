@@ -3,6 +3,7 @@ import classNames from "classnames";
 import * as React from "react";
 
 import Button from "~/components/button";
+import type { RoomProps } from "~/components/game";
 import type { Action } from "~/engine";
 import { useEngineContext } from "~/engine";
 import { useSoloAction } from "~/utils/use-solo-action";
@@ -72,18 +73,16 @@ function CheckForm({
  * incorrect.
  */
 export function ConnectedCheckForm({
-  roomName,
+  roomId,
   userId,
   longForm = false,
   showAnswer,
   onClickShowAnswer,
 }: {
-  roomName: string;
-  userId: string;
   longForm?: boolean;
   showAnswer: boolean;
   onClickShowAnswer: () => void;
-}) {
+} & RoomProps) {
   const { activeClue, clue, answeredBy, answers, getClueValue, soloDispatch } =
     useEngineContext();
   const fetcher = useFetcher<Action>();
@@ -162,7 +161,7 @@ export function ConnectedCheckForm({
   }
 
   return (
-    <fetcher.Form method="POST" action={`/room/${roomName}/check`}>
+    <fetcher.Form method="POST" action={`/room/${roomId}/check`}>
       <input type="hidden" value={userId} name="userId" />
       <input type="hidden" value={i} name="i" />
       <input type="hidden" value={j} name="j" />

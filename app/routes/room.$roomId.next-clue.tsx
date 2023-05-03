@@ -25,31 +25,24 @@ export async function action({ request, params }: ActionArgs) {
     throw new Response("Invalid userId", { status: 400 });
   }
 
-  const deltaStr = formData.get("deltaMs");
-  if (typeof deltaStr !== "string") {
-    throw new Response("Invalid delta " + deltaStr, { status: 400 });
-  }
-  const deltaMs = parseInt(deltaStr);
-
-  const roomNameAndId = params.roomName;
-  if (!roomNameAndId) {
+  const roomId = params.roomId ? parseInt(params.roomId) : undefined;
+  if (!roomId) {
     throw new Response("room name not found in URL params", { status: 404 });
   }
 
-  if (roomNameAndId === "solo") {
-    return json({ type: ActionType.Buzz, payload: { i, j, userId, deltaMs } });
+  if (roomId === -1) {
+    return json({ type: ActionType.NextClue, payload: { i, j, userId } });
   }
 
-  const room = await getRoom(roomNameAndId);
+  const room = await getRoom(roomId);
   if (!room) {
     throw new Response("room not found", { status: 404 });
   }
 
-  await createRoomEvent(room.id, ActionType.Buzz, {
+  await createRoomEvent(room.id, ActionType.NextClue, {
     i,
     j,
     userId,
-    deltaMs,
   });
 
   return null;

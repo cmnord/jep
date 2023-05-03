@@ -60,8 +60,8 @@ export default function PlayGame() {
     <GameEngineContext.Provider value={gameReducer}>
       <GameComponent
         game={data.game}
+        roomId={-1}
         userId={data.userId}
-        roomName="solo"
         url={data.BASE_URL + pathname}
       />
     </GameEngineContext.Provider>

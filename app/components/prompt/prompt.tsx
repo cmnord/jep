@@ -3,6 +3,7 @@ import classNames from "classnames";
 import * as React from "react";
 import useFitText from "use-fit-text";
 
+import type { RoomProps } from "~/components/game";
 import type { Action } from "~/engine";
 import {
   CANT_BUZZ_FLAG,
@@ -14,8 +15,8 @@ import useKeyPress from "~/utils/use-key-press";
 import { useSoloAction } from "~/utils/use-solo-action";
 import useGameSound from "~/utils/use-sound";
 import { useTimeout } from "~/utils/use-timeout";
-
 import { stringToHslColor } from "~/utils/utils";
+
 import { ConnectedAnswerForm as AnswerForm } from "./answer-form";
 import { Buzzes } from "./buzz";
 import { ConnectedCheckForm as CheckForm } from "./check-form";
@@ -50,11 +51,6 @@ const LOCKOUT_MS = 250;
 const LONG_FORM_CLUE_DURATION_SEC = 30;
 const TIMES_UP_SFX = "/sounds/times-up.mp3";
 const LONG_FORM_SFX = "/sounds/long-form.mp3";
-
-interface Props {
-  roomName: string;
-  userId: string;
-}
 
 function ClueText({
   answer,
@@ -104,7 +100,7 @@ function ClueText({
 /** WagerCluePrompt handles all frontend behavior while the game state is
  * GameState.WagerClue.
  */
-function WagerCluePrompt({ roomName, userId }: Props) {
+function WagerCluePrompt({ roomId, userId }: RoomProps) {
   const { clue, boardControl, buzzes, category, players } = useEngineContext();
   const { ref, fontSize } = useFitText({ minFontSize: 20, maxFontSize: 600 });
 
@@ -145,7 +141,7 @@ function WagerCluePrompt({ roomName, userId }: Props) {
         )}
       </div>
       {canWager ? (
-        <WagerForm roomName={roomName} userId={userId} />
+        <WagerForm roomId={roomId} userId={userId} />
       ) : longForm ? (
         <div className="flex flex-col items-center gap-2 p-2">
           <p className="font-bold text-white">
@@ -169,7 +165,7 @@ function WagerCluePrompt({ roomName, userId }: Props) {
 /** ReadCluePrompt handles all frontend behavior while the game state is
  * GameState.ReadClue.
  */
-function ReadCluePrompt({ roomName, userId }: Props) {
+function ReadCluePrompt({ roomId, userId }: RoomProps) {
   const { activeClue, buzzes, category, clue, getClueValue, soloDispatch } =
     useEngineContext();
 
@@ -224,9 +220,9 @@ function ReadCluePrompt({ roomName, userId }: Props) {
         userId,
         deltaMs: deltaMs.toString(),
       },
-      { method: "post", action: `/room/${roomName}/buzz` }
+      { method: "post", action: `/room/${roomId}/buzz` }
     );
-  }, [submit, roomName, userId, clueIdx]);
+  }, [submit, roomId, userId, clueIdx]);
 
   // Update optimisticBuzzes once buzzes come in from the server.
   React.useEffect(() => {
@@ -314,7 +310,7 @@ function ReadCluePrompt({ roomName, userId }: Props) {
         userId,
         deltaMs: clueDeltaMs.toString(),
       },
-      { method: "post", action: `/room/${roomName}/buzz` }
+      { method: "post", action: `/room/${roomId}/buzz` }
     );
   };
 
@@ -360,7 +356,7 @@ function ReadCluePrompt({ roomName, userId }: Props) {
 /** ReadLongFormCluePrompt handles all frontend behavior while the game state is
  * GameState.ReadLongFormClue.
  */
-function ReadLongFormCluePrompt({ roomName, userId }: Props) {
+function ReadLongFormCluePrompt({ roomId, userId }: RoomProps) {
   const { activeClue, buzzes, category, clue, getClueValue, soloDispatch } =
     useEngineContext();
 
@@ -400,7 +396,7 @@ function ReadLongFormCluePrompt({ roomName, userId }: Props) {
         answer={undefined}
       />
       {canAnswer ? (
-        <AnswerForm roomName={roomName} userId={userId} />
+        <AnswerForm roomId={roomId} userId={userId} />
       ) : (
         <div className="flex flex-col items-center gap-2 p-2">
           <p className="text-sm text-slate-300">
@@ -420,7 +416,7 @@ function ReadLongFormCluePrompt({ roomName, userId }: Props) {
 /** RevealAnswerToBuzzerPrompt handles all frontend behavior while the game state
  * is GameState.RevealAnswerToBuzzer.
  */
-function RevealAnswerToBuzzerPrompt({ roomName, userId }: Props) {
+function RevealAnswerToBuzzerPrompt({ roomId, userId }: RoomProps) {
   const { activeClue, category, clue, getClueValue, players, winningBuzzer } =
     useEngineContext();
 
@@ -470,7 +466,7 @@ function RevealAnswerToBuzzerPrompt({ roomName, userId }: Props) {
       />
       {canShowAnswer ? (
         <CheckForm
-          roomName={roomName}
+          roomId={roomId}
           userId={userId}
           showAnswer={canShowAnswer && showAnswer}
           onClickShowAnswer={
@@ -488,7 +484,7 @@ function RevealAnswerToBuzzerPrompt({ roomName, userId }: Props) {
   );
 }
 
-function RevealAnswerLongFormPrompt({ roomName, userId }: Props) {
+function RevealAnswerLongFormPrompt({ roomId, userId }: RoomProps) {
   const { activeClue, answers, buzzes, category, clue, getClueValue, players } =
     useEngineContext();
 
@@ -531,7 +527,7 @@ function RevealAnswerLongFormPrompt({ roomName, userId }: Props) {
       />
       {canCheckAnswer ? (
         <CheckForm
-          roomName={roomName}
+          roomId={roomId}
           userId={userId}
           showAnswer
           longForm={true}
@@ -578,7 +574,7 @@ function RevealAnswerLongFormPrompt({ roomName, userId }: Props) {
 /** RevealAnswerToAllPrompt handles all frontend behavior while the game state is
  * GameState.ReadAnswerToAll.
  */
-function RevealAnswerToAllPrompt({ roomName, userId }: Props) {
+function RevealAnswerToAllPrompt({ roomId, userId }: RoomProps) {
   const { activeClue, answeredBy, category, clue, getClueValue } =
     useEngineContext();
 
@@ -612,14 +608,14 @@ function RevealAnswerToAllPrompt({ roomName, userId }: Props) {
         showAnswer
         answer={clue?.answer}
       />
-      <NextClueForm roomName={roomName} userId={userId} />
+      <NextClueForm roomId={roomId} userId={userId} />
       <Countdown startTime={undefined} />
       <Buzzes showWinner />
     </>
   );
 }
 
-export function ConnectedPrompt(props: Props) {
+export function ConnectedPrompt(props: RoomProps) {
   const { type } = useEngineContext();
 
   function getPromptContent() {

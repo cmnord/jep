@@ -1,6 +1,7 @@
 import { useFetcher } from "@remix-run/react";
 import * as React from "react";
 
+import type { RoomProps } from "~/components/game";
 import { LoadingSpinner } from "~/components/icons";
 import Input from "~/components/input";
 import type { Action } from "~/engine";
@@ -96,13 +97,7 @@ function EditPlayer({
   );
 }
 
-export function EditPlayerForm({
-  roomName,
-  userId,
-}: {
-  roomName: string;
-  userId: string;
-}) {
+export function EditPlayerForm({ roomId, userId }: RoomProps) {
   const { players, soloDispatch } = useEngineContext();
 
   const fetcher = useFetcher<Action>();
@@ -142,11 +137,7 @@ export function EditPlayerForm({
   }, [editing, debouncedName, optimisticPlayer, userId, fetcher]);
 
   return (
-    <fetcher.Form
-      method="POST"
-      action={`/room/${roomName}/player`}
-      ref={formRef}
-    >
+    <fetcher.Form method="POST" action={`/room/${roomId}/player`} ref={formRef}>
       <input
         type="hidden"
         name="userId"

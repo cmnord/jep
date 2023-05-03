@@ -2,6 +2,7 @@ import { useFetcher } from "@remix-run/react";
 import * as React from "react";
 
 import Button from "~/components/button";
+import type { RoomProps } from "~/components/game";
 import Input from "~/components/input";
 import type { Action, Player } from "~/engine";
 import {
@@ -111,13 +112,7 @@ function WagerForm({
   );
 }
 
-export function ConnectedWagerForm({
-  roomName,
-  userId,
-}: {
-  roomName: string;
-  userId: string;
-}) {
+export function ConnectedWagerForm({ roomId, userId }: RoomProps) {
   const { activeClue, buzzes, board, clue, players, soloDispatch, wagers } =
     useEngineContext();
   const fetcher = useFetcher<Action>();
@@ -158,7 +153,7 @@ export function ConnectedWagerForm({
   }
 
   return (
-    <fetcher.Form method="POST" action={`/room/${roomName}/wager`}>
+    <fetcher.Form method="POST" action={`/room/${roomId}/wager`}>
       <input type="hidden" value={userId} name="userId" />
       <input type="hidden" value={i} name="i" />
       <input type="hidden" value={j} name="j" />

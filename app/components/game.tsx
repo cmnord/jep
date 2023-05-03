@@ -13,18 +13,21 @@ import { stringToHslColor } from "~/utils/utils";
 const BOARD_FILL_SFX = "/sounds/board-fill.mp3";
 const FINAL_CATEGORY_REVEAL_SFX = "/sounds/final-category-reveal.mp3";
 
+export interface RoomProps {
+  roomId: number;
+  userId: string;
+}
+
 /** GameComponent maintains the game state. */
 export default function GameComponent({
   game,
+  roomId,
   userId,
-  roomName,
   url,
 }: {
   game: Game;
-  userId: string;
-  roomName: string;
   url: string;
-}) {
+} & RoomProps) {
   const { type, round, activeClue } = useEngineContext();
 
   const [focusedClueIdx, setFocusedClue] = React.useState<[number, number]>();
@@ -63,8 +66,8 @@ export default function GameComponent({
     <>
       <Preview
         numRounds={game.boards.length}
+        roomId={roomId}
         userId={userId}
-        roomName={roomName}
         onDismiss={
           round > 0 && round === game.boards.length - 1
             ? playFinalSfx
@@ -76,8 +79,8 @@ export default function GameComponent({
         <BoardComponent
           focusedClue={focusedClueIdx}
           setFocusedClue={onFocusClue}
+          roomId={roomId}
           userId={userId}
-          roomName={roomName}
         />
         <div
           className={`mx-auto flex w-full max-w-screen-lg flex-col gap-4 p-3
@@ -97,13 +100,13 @@ export default function GameComponent({
                 has control of the board.
               </p>
               {type !== GameState.PreviewRound || round !== 0 ? (
-                <EditPlayerForm roomName={roomName} userId={userId} />
+                <EditPlayerForm roomId={roomId} userId={userId} />
               ) : null}
             </>
           )}
           <PlayerScores userId={userId} />
         </div>
-        <Prompt roomName={roomName} userId={userId} />
+        <Prompt roomId={roomId} userId={userId} />
       </div>
     </>
   );

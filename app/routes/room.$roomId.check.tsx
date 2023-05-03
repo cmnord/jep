@@ -25,25 +25,36 @@ export async function action({ request, params }: ActionArgs) {
     throw new Response("Invalid userId", { status: 400 });
   }
 
-  const answer = formData.get("answer");
-  if (typeof answer !== "string") {
-    throw new Response("Invalid answer " + answer, { status: 400 });
+  const result = formData.get("result");
+  if (typeof result !== "string") {
+    throw new Response("Invalid result", { status: 400 });
   }
 
-  const roomNameAndId = params.roomName;
-  if (!roomNameAndId) {
+  const correct = result === "correct";
+
+  const roomId = params.roomId ? parseInt(params.roomId) : undefined;
+  if (!roomId) {
     throw new Response("room name not found in URL params", { status: 404 });
   }
 
-  if (roomNameAndId === "solo") {
-    return json({ type: ActionType.Answer, payload: { i, j, userId, answer } });
+  if (roomId === -1) {
+    return json({
+      type: ActionType.Check,
+      payload: { i, j, userId, correct },
+    });
   }
 
-  const room = await getRoom(roomNameAndId);
+  const room = await getRoom(roomId);
   if (!room) {
     throw new Response("room not found", { status: 404 });
   }
 
-  await createRoomEvent(room.id, ActionType.Answer, { i, j, userId, answer });
+  await createRoomEvent(room.id, ActionType.Check, {
+    i,
+    j,
+    userId,
+    correct,
+  });
+
   return null;
 }
