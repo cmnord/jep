@@ -12,21 +12,27 @@ import { formatDollarsWithSign } from "~/utils/utils";
 const REVEAL_ANSWER_DEBOUNCE_MS = 500;
 
 function CheckForm({
+  answer,
   longForm,
   loading,
   myAnswer,
 }: {
+  answer: string;
   longForm: boolean;
   loading: boolean;
   myAnswer?: string;
 }) {
   return (
     <div className="flex flex-col items-center gap-2 p-2">
-      <p className="font-bold text-white">Were you right?</p>
       {!longForm && (
-        <p className="text-center text-sm text-slate-300">
-          (only you can see this answer)
-        </p>
+        <>
+          <p className="text-center font-korinna text-2xl font-bold uppercase text-slate-300 shadow-sm">
+            {answer}
+          </p>
+          <p className="text-center text-sm text-slate-300">
+            (don't spoil the answer for others!)
+          </p>
+        </>
       )}
       {myAnswer && (
         <p className="text-center text-sm text-slate-300">
@@ -36,6 +42,7 @@ function CheckForm({
           </span>
         </p>
       )}
+      <p className="font-bold text-white">Were you right?</p>
       <div className="flex gap-2">
         <Button
           htmlType="submit"
@@ -43,7 +50,7 @@ function CheckForm({
           value="incorrect"
           loading={loading}
         >
-          incorrect!
+          incorrect
         </Button>
         <Button
           htmlType="submit"
@@ -77,7 +84,7 @@ export function ConnectedCheckForm({
   showAnswer: boolean;
   onClickShowAnswer: () => void;
 }) {
-  const { activeClue, answeredBy, answers, getClueValue, soloDispatch } =
+  const { activeClue, clue, answeredBy, answers, getClueValue, soloDispatch } =
     useEngineContext();
   const fetcher = useFetcher<Action>();
   useSoloAction(fetcher, soloDispatch);
@@ -91,7 +98,7 @@ export function ConnectedCheckForm({
     showAnswer ? null : REVEAL_ANSWER_DEBOUNCE_MS
   );
 
-  if (!activeClue) {
+  if (!activeClue || !clue) {
     throw new Error("No active clue");
   }
 
@@ -159,7 +166,12 @@ export function ConnectedCheckForm({
       <input type="hidden" value={userId} name="userId" />
       <input type="hidden" value={i} name="i" />
       <input type="hidden" value={j} name="j" />
-      <CheckForm longForm={longForm} loading={loading} myAnswer={myAnswer} />
+      <CheckForm
+        longForm={longForm}
+        loading={loading}
+        myAnswer={myAnswer}
+        answer={clue.answer}
+      />
     </fetcher.Form>
   );
 }
