@@ -79,7 +79,7 @@ export default function Dialog({
 
 function Footer({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex flex-col justify-end gap-2 sm:flex-row sm:px-6">
+    <div className="flex flex-col justify-end gap-2 sm:flex-row">
       {children}
     </div>
   );

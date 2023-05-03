@@ -1,42 +1,16 @@
 import { useFetcher } from "@remix-run/react";
-import * as React from "react";
 
 import Button from "~/components/button";
 import CopyLinkButton from "~/components/copy-link-button";
 import Dialog from "~/components/dialog";
 import HowToPlay from "~/components/how-to-play";
+import Link from "~/components/link";
 import { EditPlayerForm, PlayerIcon } from "~/components/player";
 import SoundControl from "~/components/sound";
 import type { Action } from "~/engine";
 import { GameState, useEngineContext } from "~/engine";
 import { useSoloAction } from "~/utils/use-solo-action";
 import { stringToHslColor } from "~/utils/utils";
-
-function NextRoundFooter({
-  roomName,
-  round,
-  soloDispatch,
-  onDismiss,
-}: {
-  roomName: string;
-  round: number;
-  soloDispatch: React.Dispatch<Action>;
-  onDismiss?: () => void;
-}) {
-  const fetcher = useFetcher<Action>();
-  useSoloAction(fetcher, soloDispatch);
-
-  return (
-    <Dialog.Footer>
-      <fetcher.Form method="POST" action={`/room/${roomName}/start`}>
-        <input type="hidden" name="round" value={round} />
-        <Button type="primary" htmlType="submit" onClick={onDismiss}>
-          Start round
-        </Button>
-      </fetcher.Form>
-    </Dialog.Footer>
-  );
-}
 
 export function Preview({
   numRounds,
@@ -60,6 +34,9 @@ export function Preview({
   const boardControlName = boardController
     ? boardController.name
     : "Unknown player";
+
+  const fetcher = useFetcher<Action>();
+  useSoloAction(fetcher, soloDispatch);
 
   const borderColor = boardController
     ? stringToHslColor(boardController.userId)
@@ -96,18 +73,21 @@ export function Preview({
               <PlayerIcon key={i} player={p} />
             ))}
           </div>
-          <div className="flex">
-            <CopyLinkButton url={url} text="Copy link to room" />
-          </div>
           <HowToPlay />
+          <Link className="mb-2 text-sm" to="/howto">
+            Practice buzzing &rarr;
+          </Link>
         </div>
       ) : null}
-      <NextRoundFooter
-        roomName={roomName}
-        round={round}
-        soloDispatch={soloDispatch}
-        onDismiss={onDismiss}
-      />
+      <Dialog.Footer>
+        <CopyLinkButton url={url} text="Copy link to room" />
+        <fetcher.Form method="POST" action={`/room/${roomName}/start`}>
+          <input type="hidden" name="round" value={round} />
+          <Button type="primary" htmlType="submit" onClick={onDismiss}>
+            Start round
+          </Button>
+        </fetcher.Form>
+      </Dialog.Footer>
     </Dialog>
   );
 }
