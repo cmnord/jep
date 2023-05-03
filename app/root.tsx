@@ -24,7 +24,7 @@ import Footer from "~/components/footer";
 import Header from "~/components/header";
 import { getValidAuthSession } from "~/models/auth";
 import { getUserByEmail } from "~/models/user";
-import { BASE_URL } from "~/utils";
+import { BASE_URL, getBrowserEnv } from "~/utils";
 import { SoundContext } from "~/utils/use-sound";
 
 import stylesheet from "./styles.css";
@@ -73,15 +73,11 @@ export const links: LinksFunction = () => [
 export async function loader({ request }: LoaderArgs) {
   const authSession = await getValidAuthSession(request);
 
-  if (authSession) {
-    const user = await getUserByEmail(
-      authSession.email,
-      authSession.accessToken
-    );
-    return json({ user, BASE_URL });
-  }
+  const user = authSession
+    ? await getUserByEmail(authSession.email, authSession.accessToken)
+    : undefined;
 
-  return json({ user: undefined, BASE_URL });
+  return json({ user, env: getBrowserEnv(), BASE_URL });
 }
 
 export default function App() {
@@ -117,6 +113,11 @@ export default function App() {
             <Outlet />
             <Footer />
             <ScrollRestoration />
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `window.env = ${JSON.stringify(data.env)}`,
+              }}
+            />
             <Scripts />
             <LiveReload />
           </ToastPrimitive.Provider>
