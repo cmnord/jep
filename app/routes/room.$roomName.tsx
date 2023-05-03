@@ -49,6 +49,7 @@ export async function loader({ request, params }: LoaderArgs) {
   const user = authSession
     ? await getUserByEmail(authSession.email, authSession.accessToken)
     : null;
+  const accessToken = authSession?.accessToken;
 
   const roomEvents = await getRoomEvents(room.id);
   // Construct the state of the game from the room events on the backend to see
@@ -75,6 +76,7 @@ export async function loader({ request, params }: LoaderArgs) {
       roomId,
       userId,
       BASE_URL,
+      accessToken,
     });
   }
 
@@ -88,7 +90,17 @@ export async function loader({ request, params }: LoaderArgs) {
     });
     roomEvents.push(joinEvent);
   }
-  return json({ game, roomEvents, roomId, userId, BASE_URL }, { headers });
+  return json(
+    {
+      game,
+      roomEvents,
+      roomId,
+      accessToken,
+      userId,
+      BASE_URL,
+    },
+    { headers }
+  );
 }
 
 export default function PlayGame() {
@@ -96,7 +108,12 @@ export default function PlayGame() {
   const matches = useMatches();
   const pathname = matches[matches.length - 1].pathname;
 
-  const gameReducer = useGameEngine(data.game, data.roomEvents, data.roomId);
+  const gameReducer = useGameEngine(
+    data.game,
+    data.roomEvents,
+    data.roomId,
+    data.accessToken
+  );
 
   return (
     <GameEngineContext.Provider value={gameReducer}>

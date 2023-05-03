@@ -1,9 +1,9 @@
-import { createClient } from "@supabase/supabase-js";
 import * as React from "react";
 
+import type { AuthSession } from "~/models/auth";
 import type { Clue, Game } from "~/models/convert.server";
 import type { DbRoomEvent } from "~/models/room-event.server";
-import { SUPABASE_ANON_KEY, SUPABASE_URL } from "~/utils";
+import { getSupabase } from "~/supabase";
 
 import type { Action } from "./engine";
 import { gameEngine, getWinningBuzzer } from "./engine";
@@ -94,7 +94,8 @@ export function useSoloGameEngine(game: Game, userId: string, name: string) {
 export function useGameEngine(
   game: Game,
   serverRoomEvents: DbRoomEvent[],
-  roomId: number
+  roomId: number,
+  accessToken?: AuthSession["accessToken"]
 ) {
   const [, setRoomEvents] = React.useState(serverRoomEvents);
 
@@ -107,17 +108,7 @@ export function useGameEngine(
       applyRoomEventsToState(State.fromGame(arg.game), arg.serverRoomEvents)
   );
 
-  const client = React.useMemo(
-    () =>
-      createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-        realtime: {
-          params: {
-            eventsPerSecond: 1,
-          },
-        },
-      }),
-    []
-  );
+  const client = React.useMemo(() => getSupabase(accessToken), [accessToken]);
 
   React.useEffect(() => {
     const channel = client.channel(`realtime:roomId:${roomId}`);

@@ -26,6 +26,11 @@ function getSupabaseClient(supabaseKey: string, accessToken?: string) {
       autoRefreshToken: false,
       persistSession: false,
     },
+    realtime: {
+      params: {
+        eventsPerSecond: 1,
+      },
+    },
     ...global,
   });
 }
