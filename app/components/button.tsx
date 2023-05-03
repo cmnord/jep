@@ -2,35 +2,25 @@ import classNames from "classnames";
 
 import { LoadingSpinner } from "~/components/icons";
 
-interface Props {
-  onClick?: () => void;
+type ButtonProps = React.ComponentProps<"button">;
+
+type Props = {
   type?: "primary" | "default" | "transparent";
-  className?: string;
-  disabled?: boolean;
-  htmlType?: React.ButtonHTMLAttributes<HTMLButtonElement>["type"];
-  children: React.ReactNode;
-  name?: string;
-  value?: string;
-  autoFocus?: boolean;
+  htmlType?: ButtonProps["type"];
   loading?: boolean;
-}
+} & Omit<ButtonProps, "type">;
 
 export default function Button({
-  onClick,
-  children,
-  className,
   type = "default",
-  disabled = false,
   htmlType,
-  name,
-  value,
-  autoFocus,
   loading,
+  className,
+  children,
+  ...rest
 }: Props) {
   return (
     <button
-      disabled={disabled}
-      onClick={onClick}
+      {...rest}
       className={classNames(
         className ? className : null,
         "inline-flex w-full justify-center rounded-md border px-4 py-2 text-base font-medium shadow-sm transition-colors",
@@ -47,9 +37,6 @@ export default function Button({
         }
       )}
       type={htmlType}
-      name={name}
-      value={value}
-      autoFocus={autoFocus}
     >
       <div className="inline-flex items-center justify-center gap-1">
         {loading && <LoadingSpinner />}
