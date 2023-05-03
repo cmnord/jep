@@ -1,12 +1,14 @@
 import { useFetcher } from "@remix-run/react";
 import * as React from "react";
 
+import type { RoomProps } from "~/components/game";
 import type { Action } from "~/engine";
 import { useEngineContext } from "~/engine";
 import type { Board, Clue } from "~/models/convert.server";
 import { useSoloAction } from "~/utils/use-solo-action";
 import useGameSound from "~/utils/use-sound";
 import { generateGrid } from "~/utils/utils";
+
 import { Category } from "./category";
 import { ClueComponent } from "./clue";
 
@@ -93,14 +95,12 @@ function BoardComponent({
 export function ConnectedBoardComponent({
   focusedClue,
   setFocusedClue,
+  roomId,
   userId,
-  roomName,
 }: {
   focusedClue?: [number, number];
   setFocusedClue: (i: number, j: number) => void;
-  userId: string;
-  roomName: string;
-}) {
+} & RoomProps) {
   const { board, boardControl, isAnswered, soloDispatch } = useEngineContext();
   const fetcher = useFetcher<Action>();
   useSoloAction(fetcher, soloDispatch);
@@ -142,7 +142,7 @@ export function ConnectedBoardComponent({
     }
     return fetcher.submit(
       { i: i.toString(), j: j.toString(), userId },
-      { method: "post", action: `/room/${roomName}/choose-clue` }
+      { method: "post", action: `/room/${roomId}/choose-clue` }
     );
   }
 

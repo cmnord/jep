@@ -17,7 +17,7 @@ import { createRoomEvent, getRoomEvents } from "~/models/room-event.server";
 import { getRoom } from "~/models/room.server";
 import { getUserByEmail } from "~/models/user";
 import { getOrCreateUserSession } from "~/session.server";
-import { BASE_URL, SUPABASE_ANON_KEY, SUPABASE_URL } from "~/utils";
+import { BASE_URL } from "~/utils";
 import { getRandomName } from "~/utils/name";
 
 export const meta: V2_MetaFunction<typeof loader> = ({ data }) => {
@@ -34,7 +34,8 @@ export async function loader({ request, params }: LoaderArgs) {
     throw new Response("room name not found in URL params", { status: 404 });
   }
 
-  const room = await getRoom(roomName);
+  const roomId = parseInt(roomName.split("-")[0]);
+  const room = await getRoom(roomId);
   if (!room) {
     throw new Response("room not found", { status: 404 });
   }
@@ -54,8 +55,6 @@ export async function loader({ request, params }: LoaderArgs) {
   // if the game is over.
   const state = applyRoomEventsToState(State.fromGame(game), roomEvents);
 
-  const env = { SUPABASE_URL, SUPABASE_ANON_KEY, BASE_URL };
-
   // Add the user to the room if they aren't already in it and the game isn't
   // over.
   // - If they are logged in, their ID is their user ID.
@@ -70,7 +69,13 @@ export async function loader({ request, params }: LoaderArgs) {
       });
       roomEvents.push(joinEvent);
     }
-    return json({ room, roomName, game, roomEvents, userId, env });
+    return json({
+      game,
+      roomEvents,
+      roomId,
+      userId,
+      BASE_URL,
+    });
   }
 
   const headers = new Headers();
@@ -83,7 +88,7 @@ export async function loader({ request, params }: LoaderArgs) {
     });
     roomEvents.push(joinEvent);
   }
-  return json({ room, roomName, game, roomEvents, userId, env }, { headers });
+  return json({ game, roomEvents, roomId, userId, BASE_URL }, { headers });
 }
 
 export default function PlayGame() {
@@ -91,21 +96,15 @@ export default function PlayGame() {
   const matches = useMatches();
   const pathname = matches[matches.length - 1].pathname;
 
-  const gameReducer = useGameEngine(
-    data.game,
-    data.roomEvents,
-    data.room.id,
-    data.env.SUPABASE_URL,
-    data.env.SUPABASE_ANON_KEY
-  );
+  const gameReducer = useGameEngine(data.game, data.roomEvents, data.roomId);
 
   return (
     <GameEngineContext.Provider value={gameReducer}>
       <GameComponent
         game={data.game}
+        roomId={data.roomId}
         userId={data.userId}
-        roomName={data.roomName}
-        url={BASE_URL + pathname}
+        url={data.BASE_URL + pathname}
       />
     </GameEngineContext.Provider>
   );

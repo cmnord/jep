@@ -3,6 +3,7 @@ import { useFetcher } from "@remix-run/react";
 import Button from "~/components/button";
 import CopyLinkButton from "~/components/copy-link-button";
 import Dialog from "~/components/dialog";
+import type { RoomProps } from "~/components/game";
 import HowToPlay from "~/components/how-to-play";
 import Link from "~/components/link";
 import { EditPlayerForm, PlayerIcon } from "~/components/player";
@@ -14,17 +15,15 @@ import { stringToHslColor } from "~/utils/utils";
 
 export function Preview({
   numRounds,
+  roomId,
   userId,
-  roomName,
   onDismiss,
   url,
 }: {
   numRounds: number;
-  userId: string;
-  roomName: string;
   onDismiss: () => void;
   url: string;
-}) {
+} & RoomProps) {
   const { type, boardControl, players, round, soloDispatch } =
     useEngineContext();
 
@@ -67,7 +66,7 @@ export function Preview({
     >
       {round === 0 ? (
         <div className="flex flex-col gap-2">
-          <EditPlayerForm roomName={roomName} userId={userId} />
+          <EditPlayerForm roomId={roomId} userId={userId} />
           <div className="flex flex-wrap gap-2">
             {Array.from(players.values()).map((p, i) => (
               <PlayerIcon key={i} player={p} />
@@ -81,7 +80,7 @@ export function Preview({
       ) : null}
       <Dialog.Footer>
         <CopyLinkButton url={url} text="Copy link to room" />
-        <fetcher.Form method="POST" action={`/room/${roomName}/start`}>
+        <fetcher.Form method="POST" action={`/room/${roomId}/start`}>
           <input type="hidden" name="round" value={round} />
           <Button type="primary" htmlType="submit" onClick={onDismiss}>
             Start round
