@@ -466,7 +466,7 @@ function RevealAnswerToBuzzerPrompt({ roomName, userId }: Props) {
         clue={clue?.clue}
         focusOnBuzz={false}
         onBuzz={() => null}
-        showAnswer={canShowAnswer && showAnswer}
+        showAnswer={false}
       />
       {canShowAnswer ? (
         <CheckForm
