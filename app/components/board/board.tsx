@@ -134,7 +134,7 @@ export function ConnectedBoardComponent({
 
   function handleClickClue(i: number, j: number) {
     const clue = board?.categories.at(j)?.clues.at(i);
-    if (!hasBoardControl || isAnswered(i, j) || !clue) {
+    if (isAnswered(i, j) || !clue) {
       return;
     }
     if (clue.wagerable && !clue.longForm) {
@@ -180,6 +180,13 @@ export function ConnectedBoardComponent({
     }
   };
 
+  function handleFocusClue(i: number, j: number) {
+    if (focusedClue && focusedClue[0] === i && focusedClue[1] === j) {
+      return;
+    }
+    setFocusedClue(i, j);
+  }
+
   return (
     <BoardComponent
       board={board}
@@ -187,12 +194,7 @@ export function ConnectedBoardComponent({
       hasBoardControl={hasBoardControl}
       isAnswered={isAnswered}
       onClickClue={handleClickClue}
-      onFocusClue={(i, j) => {
-        if (focusedClue && focusedClue[0] === i && focusedClue[1] === j) {
-          return;
-        }
-        setFocusedClue(i, j);
-      }}
+      onFocusClue={handleFocusClue}
       onKeyDownClue={handleKeyDown}
     />
   );
