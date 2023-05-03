@@ -9,7 +9,7 @@ export function Anchor({
 }) {
   return (
     <a
-      className="text-blue-600 hover:text-blue-500 underline transition-colors visited:text-purple-700"
+      className="text-blue-600 underline transition-colors visited:text-purple-700 hover:text-blue-500"
       href={href}
     >
       {children}
@@ -20,13 +20,19 @@ export function Anchor({
 export default function Link({
   to,
   children,
+  className,
 }: {
   to: string;
   children: React.ReactNode;
+  className?: string;
 }) {
   return (
     <RemixLink
-      className="text-blue-600 hover:text-blue-500 underline transition-colors visited:text-purple-700"
+      className={
+        className +
+        ` text-blue-600 underline transition-colors visited:text-purple-700
+        hover:text-blue-500`
+      }
       to={to}
     >
       {children}
