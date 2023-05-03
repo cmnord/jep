@@ -5,8 +5,8 @@ module.exports = {
   // assetsBuildDirectory: "public/build",
   // serverBuildPath: "api/index.js",
   // publicPath: "/build/",
+  tailwind: true,
   future: {
-    unstable_tailwind: true,
     v2_errorBoundary: true,
     v2_meta: true,
     v2_normalizeFormMethod: true,
@@ -18,4 +18,5 @@ module.exports = {
   // so we default back to the standard build output.
   server: process.env.VERCEL ? "./server.js" : undefined,
   serverDependenciesToBundle: ["nanoid"],
+  serverModuleFormat: "cjs",
 };
