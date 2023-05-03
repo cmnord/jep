@@ -5,19 +5,18 @@ import Popover from "~/components/popover";
 import { UNREVEALED_CLUE } from "~/engine";
 import type { Clue } from "~/models/convert.server";
 
+type ButtonProps = React.ComponentProps<"button">;
+
 interface Props {
   answered: boolean;
   clue: Clue;
   hasBoardControl: boolean;
-  onFocus: () => void;
-  onClick: (e: React.MouseEvent) => void;
-  onKeyDown: (e: React.KeyboardEvent) => void;
+  onFocus: NonNullable<ButtonProps["onFocus"]>;
+  onClick: NonNullable<ButtonProps["onClick"]>;
+  onKeyDown: NonNullable<ButtonProps["onKeyDown"]>;
 }
 
-const ClueButton = React.forwardRef<
-  HTMLButtonElement,
-  React.ComponentProps<"button"> & Props
->(
+const ClueButton = React.forwardRef<HTMLButtonElement, ButtonProps & Props>(
   (
     { answered, clue, hasBoardControl, onFocus, onClick, onKeyDown, ...rest },
     ref
