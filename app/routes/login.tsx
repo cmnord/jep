@@ -7,6 +7,7 @@ import Button from "~/components/button";
 import { ErrorMessage } from "~/components/error";
 import Input from "~/components/input";
 import Link from "~/components/link";
+import Main from "~/components/main";
 import ShowPasswordButton from "~/components/show-password-button";
 import {
   createAuthSession,
@@ -53,8 +54,8 @@ export default function Login() {
 
   return (
     <div className="max-w-full grow">
-      <main className="mx-auto max-w-screen-md px-4 pb-16 pt-8 md:pt-16">
-        <h2 className="mb-4 text-2xl font-semibold">Log in</h2>
+      <Main>
+        <h1 className="mb-4 text-2xl font-semibold">Log in</h1>
         <Form method="POST" className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <label
@@ -111,7 +112,7 @@ export default function Login() {
             Don't have an account? <Link to="/signup">Sign up</Link>
           </p>
         </Form>
-      </main>
+      </Main>
     </div>
   );
 }
