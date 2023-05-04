@@ -5,8 +5,8 @@ import Button from "~/components/button";
 import type { RoomProps } from "~/components/game";
 import type { Action } from "~/engine";
 import { useEngineContext } from "~/engine";
-import { useSoloAction } from "~/utils/use-solo-action";
-import { formatDollars, formatDollarsWithSign } from "~/utils/utils";
+import { formatDollars, formatDollarsWithSign } from "~/utils";
+import useSoloAction from "~/utils/use-solo-action";
 
 interface PlayerScore {
   name: string;

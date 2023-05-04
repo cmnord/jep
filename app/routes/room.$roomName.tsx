@@ -17,8 +17,7 @@ import { createRoomEvent, getRoomEvents } from "~/models/room-event.server";
 import { getRoom } from "~/models/room.server";
 import { getUserByEmail } from "~/models/user";
 import { getOrCreateUserSession } from "~/session.server";
-import { BASE_URL } from "~/utils";
-import { getRandomName } from "~/utils/name";
+import { BASE_URL, getRandomName } from "~/utils";
 
 export const meta: V2_MetaFunction<typeof loader> = ({ data }) => {
   try {

@@ -1,5 +1,5 @@
 import type { Board } from "~/models/convert.server";
-import { generateGrid } from "~/utils/utils";
+import { generateGrid } from "~/utils";
 
 import {
   isAnswerAction,

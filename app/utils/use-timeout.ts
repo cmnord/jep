@@ -1,7 +1,10 @@
 import * as React from "react";
 
 /** useTimeout calls callback after delayMs, if provided. */
-export function useTimeout(callback: () => void, delayMs: number | null) {
+export default function useTimeout(
+  callback: () => void,
+  delayMs: number | null
+) {
   const savedCallback = React.useRef<typeof callback>(() => null);
 
   React.useEffect(() => {

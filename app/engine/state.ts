@@ -1,5 +1,5 @@
 import type { Game } from "~/models/convert.server";
-import { generateGrid } from "~/utils/utils";
+import { generateGrid } from "~/utils";
 
 export const UNREVEALED_CLUE = "unrevealed";
 

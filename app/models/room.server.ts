@@ -1,6 +1,6 @@
 import { db } from "~/db.server";
 import type { Database } from "~/models/database.types";
-import { getRandomWord } from "~/utils/utils";
+import { getRandomWord } from "~/utils";
 
 type RoomTable = Database["public"]["Tables"]["rooms"];
 type Room = RoomTable["Row"];

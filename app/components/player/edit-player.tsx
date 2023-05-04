@@ -6,8 +6,8 @@ import { LoadingSpinner } from "~/components/icons";
 import Input from "~/components/input";
 import type { Action } from "~/engine";
 import { useEngineContext } from "~/engine";
-import { useDebounce, useDebounceEnd } from "~/utils/use-debounce";
-import { useSoloAction } from "~/utils/use-solo-action";
+import useDebounce, { useDebounceEnd } from "~/utils/use-debounce";
+import useSoloAction from "~/utils/use-solo-action";
 
 /** Heroicon name: solid/paper-airplane */
 function SendIcon() {

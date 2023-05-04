@@ -10,8 +10,8 @@ import {
   getHighestClueValue,
   useEngineContext,
 } from "~/engine";
-import { useSoloAction } from "~/utils/use-solo-action";
-import { formatDollars } from "~/utils/utils";
+import { formatDollars } from "~/utils";
+import useSoloAction from "~/utils/use-solo-action";
 
 type PlayerAndCanWager = Player & { canWager: boolean };
 

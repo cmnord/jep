@@ -10,8 +10,8 @@ import { EditPlayerForm, PlayerIcon } from "~/components/player";
 import SoundControl from "~/components/sound";
 import type { Action } from "~/engine";
 import { GameState, useEngineContext } from "~/engine";
-import { useSoloAction } from "~/utils/use-solo-action";
-import { stringToHslColor } from "~/utils/utils";
+import { stringToHslColor } from "~/utils";
+import useSoloAction from "~/utils/use-solo-action";
 
 export function Preview({
   numRounds,
