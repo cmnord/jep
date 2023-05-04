@@ -93,9 +93,11 @@ export default function GameComponent({
           {type === GameState.GameOver ? <PostGameSummary /> : null}
           {type !== GameState.GameOver ? (
             isFinalRoundWithOneClue ? (
-              <WarningMessage>Let's go to the final clue!</WarningMessage>
+              <WarningMessage theme="dark">
+                Let's go to the final clue!
+              </WarningMessage>
             ) : (
-              <WarningMessage>
+              <WarningMessage theme="dark">
                 <span
                   className="mr-2 border-b-4 font-handwriting text-xl font-bold"
                   style={{ borderColor: boardControlColor }}
