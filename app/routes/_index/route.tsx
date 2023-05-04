@@ -18,6 +18,7 @@ import {
   DefaultErrorBoundary,
   ErrorMessage,
   SuccessMessage,
+  WarningMessage,
 } from "~/components/error";
 import { QuestionMarkCircle } from "~/components/icons";
 import Popover from "~/components/popover";
@@ -207,9 +208,11 @@ export default function Index() {
           <p className="mb-2 text-slate-500">
             Log in to upload private games, edit games, or delete games.
           </p>
-          <p className="mb-4 rounded-md bg-yellow-100 p-2 italic text-yellow-700">
-            As a guest, you will not be able to edit or delete the game later.
-          </p>
+          <WarningMessage className="mb-4">
+            <span className="italic">
+              As a guest, you will not be able to edit or delete the game later.
+            </span>
+          </WarningMessage>
           <Dialog.Footer>
             <Button
               onClick={() => {
@@ -233,9 +236,9 @@ export default function Index() {
       </fetcher.Form>
       {formState ? (
         formState.success ? (
-          <SuccessMessage message={formState.message} />
+          <SuccessMessage>{formState.message}</SuccessMessage>
         ) : (
-          <ErrorMessage message={formState.message} />
+          <ErrorMessage>{formState.message}</ErrorMessage>
         )
       ) : null}
     </main>

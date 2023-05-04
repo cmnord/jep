@@ -129,9 +129,9 @@ export default function Signup() {
           </Button>
           {actionData ? (
             actionData.success ? (
-              <SuccessMessage message={actionData.message} />
+              <SuccessMessage>{actionData.message}</SuccessMessage>
             ) : (
-              <ErrorMessage message={actionData.message} />
+              <ErrorMessage>{actionData.message}</ErrorMessage>
             )
           ) : null}
           <hr className="my-4" />

@@ -1,6 +1,7 @@
 import * as React from "react";
 
 import BoardComponent from "~/components/board";
+import { WarningMessage } from "~/components/error";
 import PlayerScores, { EditPlayerForm } from "~/components/player";
 import PostGameSummary from "~/components/post-game-summary";
 import Preview from "~/components/preview";
@@ -90,7 +91,7 @@ export default function GameComponent({
             <PostGameSummary />
           ) : (
             <>
-              <p className="flex-wrap items-baseline rounded-md bg-yellow-700 p-4 text-yellow-100">
+              <WarningMessage>
                 <span
                   className="mr-2 border-b-4 font-handwriting text-xl font-bold"
                   style={{ borderColor: boardControlColor }}
@@ -98,7 +99,7 @@ export default function GameComponent({
                   {boardControlName}
                 </span>
                 has control of the board.
-              </p>
+              </WarningMessage>
               {type !== GameState.PreviewRound || round !== 0 ? (
                 <EditPlayerForm roomId={roomId} userId={userId} />
               ) : null}
