@@ -2,7 +2,7 @@ import classNames from "classnames";
 import * as React from "react";
 
 import Popover from "~/components/popover";
-import { UNREVEALED_CLUE } from "~/engine";
+import { clueIsPlayable } from "~/engine";
 import type { Clue } from "~/models/convert.server";
 
 type ButtonProps = React.ComponentProps<"button">;
@@ -23,7 +23,7 @@ const ClueButton = React.forwardRef<HTMLButtonElement, ButtonProps & Props>(
   ) => {
     const [loading, setLoading] = React.useState(false);
 
-    const unrevealed = clue.clue.toLowerCase() === UNREVEALED_CLUE;
+    const playable = clueIsPlayable(clue);
 
     React.useEffect(() => {
       if (answered) {
@@ -33,7 +33,7 @@ const ClueButton = React.forwardRef<HTMLButtonElement, ButtonProps & Props>(
 
     // disabled must not include `answered` or `hasBoardControl` so we can focus
     // on clues.
-    const disabled = unrevealed || loading;
+    const disabled = !playable || loading;
 
     return (
       <button
@@ -61,8 +61,8 @@ const ClueButton = React.forwardRef<HTMLButtonElement, ButtonProps & Props>(
         className={classNames(
           "group relative h-full w-full bg-blue-1000 px-4 py-3 transition-colors",
           {
-            "hover:bg-blue-700 focus:bg-blue-700": !unrevealed,
-            "bg-slate-800": unrevealed,
+            "hover:bg-blue-700 focus:bg-blue-700": playable,
+            "bg-slate-800": !playable,
             "border-spin opacity-75": loading,
           }
         )}

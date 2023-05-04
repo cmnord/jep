@@ -1,7 +1,12 @@
-import type { Game } from "~/models/convert.server";
+import type { Clue, Game } from "~/models/convert.server";
 import { generateGrid } from "~/utils";
 
-export const UNREVEALED_CLUE = "unrevealed";
+/** UNREVEALED_PLACEHOLDER is used when a field was not revealed in the game
+ * playthrough.
+ */
+const UNREVEALED_PLACEHOLDER = "***unrevealed***";
+/** MISSING_PLACEHOLDER is used when a field was not recorded. */
+const MISSING_PLACEHOLDER = "***missing***";
 
 export enum GameState {
   PreviewRound = "PreviewRound",
@@ -24,6 +29,13 @@ export interface Player {
   userId: string;
   name: string;
   score: number;
+}
+
+export function clueIsPlayable(clue: Clue) {
+  const clueText = clue.clue.toLowerCase();
+  return (
+    clueText !== MISSING_PLACEHOLDER && clueText !== UNREVEALED_PLACEHOLDER
+  );
 }
 
 export class State {
@@ -138,9 +150,7 @@ export class State {
     }
     return board.categories.reduce(
       (acc, category) =>
-        (acc += category.clues.filter(
-          (c) => c.clue.toLowerCase() !== UNREVEALED_CLUE
-        ).length),
+        (acc += category.clues.filter((c) => clueIsPlayable(c)).length),
       0
     );
   }
