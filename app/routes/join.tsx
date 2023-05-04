@@ -57,7 +57,7 @@ export default function Join() {
           <Button type="primary" htmlType="submit">
             Join game
           </Button>
-          {data ? <ErrorMessage message={data.error} /> : null}
+          {data ? <ErrorMessage>{data.error}</ErrorMessage> : null}
         </Form>
       </main>
     </div>

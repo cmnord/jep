@@ -172,23 +172,23 @@ export default function HowTo() {
           <div className="my-4 w-full border-b border-b-slate-400" />
           <div className="flex flex-col gap-2">
             {hadLockout ? (
-              <ErrorMessage
-                message={`You were locked out for ${LOCKOUT_MS}ms for buzzing in
-                before the clue was done being "read".`}
-              />
+              <ErrorMessage>
+                You were locked out for {LOCKOUT_MS}ms for buzzing in before the
+                clue was done being "read".
+              </ErrorMessage>
             ) : null}
             {buzzDurationMs && buzzDurationMs > CLUE_TIMEOUT_MS ? (
-              <ErrorMessage
-                message={`You didn't buzz in within ${CLUE_TIMEOUT_MS / 1000}
-                seconds after the clue was done being "read".`}
-              />
+              <ErrorMessage>
+                You didn't buzz in within ${CLUE_TIMEOUT_MS / 1000}
+                seconds after the clue was done being "read".
+              </ErrorMessage>
             ) : null}
             {buzzedAt !== undefined &&
             buzzDurationMs &&
             buzzDurationMs < CLUE_TIMEOUT_MS ? (
-              <SuccessMessage
-                message={`You successfully buzzed in ${buzzDurationMs}ms!`}
-              />
+              <SuccessMessage>
+                You successfully buzzed in ${buzzDurationMs}ms!
+              </SuccessMessage>
             ) : null}
             <div className="flex">
               <Button onClick={handleReset}>Reset</Button>

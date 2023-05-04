@@ -104,7 +104,7 @@ export default function Login() {
             Log in
           </Button>
           {actionData?.error ? (
-            <ErrorMessage message={actionData.error} />
+            <ErrorMessage>{actionData.error}</ErrorMessage>
           ) : null}
           <hr className="my-4" />
           <p>

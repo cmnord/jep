@@ -80,9 +80,9 @@ export default function Profile() {
         </ul>
         {formState ? (
           formState.success ? (
-            <SuccessMessage message={formState.message} />
+            <SuccessMessage>{formState.message}</SuccessMessage>
           ) : (
-            <ErrorMessage message={formState.message} />
+            <ErrorMessage>{formState.message}</ErrorMessage>
           )
         ) : null}
       </main>
