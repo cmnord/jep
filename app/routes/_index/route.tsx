@@ -147,7 +147,6 @@ export default function Index() {
             <Popover content="In solo mode, no other players can join the game. If you refresh the page the game will reset.">
               <button>
                 <QuestionMarkCircle
-                  outlined
                   className={`h-4 w-4 rounded-md text-slate-400
                   hover:bg-slate-100 hover:text-slate-500`}
                 />

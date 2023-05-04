@@ -22,22 +22,20 @@ export default function Search({
       </label>
       <div className="relative">
         <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-          {/* Heroicon name: outline/magnifying-glass */}
+          {/* Heroicon name: solid/magnifying-glass */}
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            fill="none"
             viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
+            fill="currentColor"
             className="h-5 w-5"
             role="img"
             aria-labelledby="search-title"
           >
             <title id="search-title">Search</title>
             <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+              fillRule="evenodd"
+              d="M10.5 3.75a6.75 6.75 0 100 13.5 6.75 6.75 0 000-13.5zM2.25 10.5a8.25 8.25 0 1114.59 5.28l4.69 4.69a.75.75 0 11-1.06 1.06l-4.69-4.69A8.25 8.25 0 012.25 10.5z"
+              clipRule="evenodd"
             />
           </svg>
         </div>
