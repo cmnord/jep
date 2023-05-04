@@ -1,6 +1,5 @@
-import { Eye } from "./eye";
-import { EyeSlash } from "./eye-slash";
-import { LoadingSpinner } from "./loading-spinner";
-import { QuestionMarkCircle } from "./question-mark-circle";
-
-export { QuestionMarkCircle, LoadingSpinner, Eye, EyeSlash };
+export { ExclamationTriangle } from "./exclamation-triangle";
+export { Eye } from "./eye";
+export { EyeSlash } from "./eye-slash";
+export { LoadingSpinner } from "./loading-spinner";
+export { QuestionMarkCircle } from "./question-mark-circle";

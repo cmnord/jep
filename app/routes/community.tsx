@@ -16,8 +16,10 @@ export default function Login() {
         <p className="mb-2">
           Be polite; don't post anything inappropriate.
           <br className="mb-1" />
-          Report any inappropriate game content <Link to="/report">here</Link>.
-          {/* TODO: or by clicking the "Report" button on the game page. */}
+          Report any inappropriate game content <Link to="/report">
+            here
+          </Link>{" "}
+          or by clicking the "Report" button in the game.
         </p>
         <h2 className="mb-4 mt-8 text-xl font-semibold">
           Moderation policy for uploaded games
