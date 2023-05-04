@@ -5,9 +5,9 @@ import type { RoomProps } from "~/components/game";
 import type { Action } from "~/engine";
 import { useEngineContext } from "~/engine";
 import type { Board, Clue } from "~/models/convert.server";
-import { useSoloAction } from "~/utils/use-solo-action";
+import { generateGrid } from "~/utils";
+import useSoloAction from "~/utils/use-solo-action";
 import useGameSound from "~/utils/use-sound";
-import { generateGrid } from "~/utils/utils";
 
 import { Category } from "./category";
 import { ClueComponent } from "./clue";

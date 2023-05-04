@@ -2,11 +2,11 @@ import { createClient } from "@supabase/supabase-js";
 
 import type { Database } from "~/models/database.types";
 import {
+  isBrowser,
   SUPABASE_ANON_KEY,
   SUPABASE_SERVICE_ROLE_KEY,
   SUPABASE_URL,
-} from "~/utils/env";
-import { isBrowser } from "~/utils/is-browser";
+} from "~/utils";
 
 // ⚠️ cloudflare needs you define fetch option : https://github.com/supabase/supabase-js#custom-fetch-implementation
 // Use Remix fetch polyfill for node (See https://remix.run/docs/en/v1/other-api/node)

@@ -27,7 +27,7 @@ import Switch from "~/components/switch";
 import { getValidAuthSession } from "~/models/auth";
 import { getAllGames } from "~/models/game.server";
 import { getSessionFormState } from "~/session.server";
-import { useDebounce } from "~/utils/use-debounce";
+import useDebounce from "~/utils/use-debounce";
 
 import StyledLink from "~/components/link";
 import Main from "~/components/main";

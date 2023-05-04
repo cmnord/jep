@@ -7,7 +7,7 @@ import type { Action } from "~/engine";
  * This handles local play because only solo POST requests get an Action as a
  * response.
  */
-export function useSoloAction(
+export default function useSoloAction(
   fetcher: Fetcher<Action>,
   dispatch: React.Dispatch<Action>
 ) {

@@ -3,7 +3,7 @@ import classNames from "classnames";
 import { PlayerIcon } from "~/components/player";
 import type { Player } from "~/engine";
 import { CANT_BUZZ_FLAG, CLUE_TIMEOUT_MS, useEngineContext } from "~/engine";
-import { formatDollarsWithSign } from "~/utils/utils";
+import { formatDollarsWithSign } from "~/utils";
 
 function showBuzz(durationMs?: number) {
   switch (durationMs) {
@@ -32,7 +32,7 @@ function Buzz({
       {answered ? (
         <span
           className={classNames(
-            "absolute -top-5 font-bold animate-bounce text-shadow",
+            "text-shadow absolute -top-5 animate-bounce font-bold",
             {
               "text-green-300": clueValue >= 0,
               "text-red-300": clueValue < 0,
@@ -87,7 +87,7 @@ export function Buzzes({
 
   return (
     <div className="relative">
-      <div className="flex gap-4 h-8 m-2 w-full overflow-x-scroll">
+      <div className="m-2 flex h-8 w-full gap-4 overflow-x-scroll">
         {sortedPlayers.map((player, i) => {
           const answer = answeredBy(
             activeClue[0],
