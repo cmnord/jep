@@ -63,17 +63,20 @@ export default function GameComponent({
     ? stringToHslColor(boardController.userId)
     : "gray";
 
+  const isFinalRound = round > 0 && round === game.boards.length - 1;
+  const isFinalRoundWithOneClue =
+    isFinalRound &&
+    game.boards[round].categories.length === 1 &&
+    game.boards[round].categories[0].clues.length === 1 &&
+    game.boards[round].categories[0].clues[0].longForm;
+
   return (
     <>
       <Preview
         numRounds={game.boards.length}
         roomId={roomId}
         userId={userId}
-        onDismiss={
-          round > 0 && round === game.boards.length - 1
-            ? playFinalSfx
-            : playBoardFillSfx
-        }
+        onDismiss={isFinalRound ? playFinalSfx : playBoardFillSfx}
         url={url}
       />
       <div className="flex grow flex-col bg-slate-900">
@@ -87,10 +90,11 @@ export default function GameComponent({
           className={`mx-auto flex w-full max-w-screen-lg flex-col gap-4 p-3
           text-slate-100 sm:p-6 md:p-12`}
         >
-          {type === GameState.GameOver ? (
-            <PostGameSummary />
-          ) : (
-            <>
+          {type === GameState.GameOver ? <PostGameSummary /> : null}
+          {type !== GameState.GameOver ? (
+            isFinalRoundWithOneClue ? (
+              <WarningMessage>Let's go to the final clue!</WarningMessage>
+            ) : (
               <WarningMessage>
                 <span
                   className="mr-2 border-b-4 font-handwriting text-xl font-bold"
@@ -100,11 +104,12 @@ export default function GameComponent({
                 </span>
                 has control of the board.
               </WarningMessage>
-              {type !== GameState.PreviewRound || round !== 0 ? (
-                <EditPlayerForm roomId={roomId} userId={userId} />
-              ) : null}
-            </>
-          )}
+            )
+          ) : null}
+          {type !== GameState.GameOver &&
+          (type !== GameState.PreviewRound || round !== 0) ? (
+            <EditPlayerForm roomId={roomId} userId={userId} />
+          ) : null}
           <PlayerScores userId={userId} />
         </div>
         <Prompt roomId={roomId} userId={userId} />

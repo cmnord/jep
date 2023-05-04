@@ -11,6 +11,7 @@ import { generateGrid } from "~/utils/utils";
 
 import { Category } from "./category";
 import { ClueComponent } from "./clue";
+import { FinalClue } from "./final-clue";
 
 const WAGER_SFX = "/sounds/wager.mp3";
 
@@ -185,6 +186,23 @@ export function ConnectedBoardComponent({
       return;
     }
     setFocusedClue(i, j);
+  }
+
+  const isFinalBoard =
+    board.categories.length === 1 &&
+    board.categories[0].clues.length === 1 &&
+    board.categories[0].clues[0].longForm;
+
+  if (isFinalBoard) {
+    return (
+      <FinalClue
+        category={board.categories[0].name}
+        answered={isAnswered(0, 0)}
+        onFocus={() => handleFocusClue(0, 0)}
+        onClick={() => handleClickClue(0, 0)}
+        onKeyDown={(e) => handleKeyDown(e, 0, 0)}
+      />
+    );
   }
 
   return (
