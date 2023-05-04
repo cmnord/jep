@@ -9,6 +9,7 @@ import Link, { Anchor } from "~/components/link";
 import Main from "~/components/main";
 import { getValidAuthSession } from "~/models/auth";
 import { getGame } from "~/models/game.server";
+import { insertReport } from "~/models/report.server";
 import { getRoom } from "~/models/room.server";
 import { BASE_URL, GITHUB_URL } from "~/utils";
 
@@ -34,7 +35,9 @@ export async function action({ request }: ActionArgs) {
     );
   }
 
+  const authSession = await getValidAuthSession(request);
   const pathname = url.pathname;
+
   if (pathname.startsWith("/room/")) {
     const roomNameAndId = pathname.slice("/room/".length);
 
@@ -61,8 +64,7 @@ export async function action({ request }: ActionArgs) {
     }
 
     const reason = formData.get("reason") as string;
-    // TODO: insert game report
-    console.log("report", room.game_id, reason);
+    await insertReport(room.game_id, reason, authSession?.userId);
 
     return json({
       success: true,
@@ -70,7 +72,6 @@ export async function action({ request }: ActionArgs) {
     });
   } else if (pathname.startsWith("/game/")) {
     const gameIdAndSubpath = pathname.slice("/game/".length);
-    const authSession = await getValidAuthSession(request);
     const gameId = gameIdAndSubpath.split("/")[0];
 
     const game = await getGame(gameId, authSession?.userId);
@@ -82,8 +83,7 @@ export async function action({ request }: ActionArgs) {
     }
 
     const reason = formData.get("reason") as string;
-    // TODO: insert game report
-    console.log("report", gameId, reason);
+    await insertReport(gameId, reason, authSession?.userId);
 
     return json(
       { success: true, message: `Reported game ${gameId}.` },
