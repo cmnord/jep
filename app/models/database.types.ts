@@ -138,6 +138,29 @@ export interface Database {
           visibility?: Database["public"]["Enums"]["game_visibility"];
         };
       };
+      reports: {
+        Row: {
+          created_at: string;
+          created_by: string | null;
+          game_id: string;
+          id: number;
+          reason: string;
+        };
+        Insert: {
+          created_at?: string;
+          created_by?: string | null;
+          game_id: string;
+          id?: number;
+          reason: string;
+        };
+        Update: {
+          created_at?: string;
+          created_by?: string | null;
+          game_id?: string;
+          id?: number;
+          reason?: string;
+        };
+      };
       room_events: {
         Row: {
           id: number;
