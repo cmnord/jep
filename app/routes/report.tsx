@@ -1,4 +1,4 @@
-import type { ActionArgs, V2_MetaFunction } from "@remix-run/node";
+import type { ActionArgs, LoaderArgs, V2_MetaFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Form, useActionData, useLoaderData } from "@remix-run/react";
 
@@ -17,8 +17,12 @@ export const meta: V2_MetaFunction = () => [{ title: "Report a game" }];
 
 const ROOM_NAME_REGEX = /^\d+-\w+$/;
 
-export async function loader() {
-  return json({ BASE_URL });
+export async function loader({ request }: LoaderArgs) {
+  const url = new URL(request.url);
+  const search = new URLSearchParams(url.search);
+  const gameId = search.get("gameId");
+
+  return json({ BASE_URL, gameId });
 }
 
 export async function action({ request }: ActionArgs) {
@@ -74,12 +78,22 @@ export async function action({ request }: ActionArgs) {
     const gameIdAndSubpath = pathname.slice("/game/".length);
     const gameId = gameIdAndSubpath.split("/")[0];
 
-    const game = await getGame(gameId, authSession?.userId);
-    if (!game) {
-      return json(
-        { success: false, message: `game "${gameId}" not found` },
-        { status: 404 }
-      );
+    try {
+      const game = await getGame(gameId, authSession?.userId);
+      if (!game) {
+        return json(
+          { success: false, message: `game "${gameId}" not found` },
+          { status: 404 }
+        );
+      }
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return json(
+          { success: false, message: `Error fetching game: ${error.message}` },
+          { status: 404 }
+        );
+      }
+      throw error;
     }
 
     const reason = formData.get("reason") as string;
@@ -111,7 +125,6 @@ export default function Report() {
           <br className="mb-1" />
           For anything else, please submit an issue on the{" "}
           <Anchor href={GITHUB_URL}>GitHub</Anchor> project.
-          {/* TODO: You can also click the "Report" button on the game page. */}
         </p>
         <Form method="POST" className="flex flex-col gap-2">
           <label
@@ -126,6 +139,9 @@ export default function Report() {
             name="url"
             placeholder={`${data.BASE_URL}/room/... or ${data.BASE_URL}/game/...`}
             required
+            defaultValue={
+              data.gameId ? `${data.BASE_URL}/game/${data.gameId}` : undefined
+            }
           />
           <label
             htmlFor="reason"

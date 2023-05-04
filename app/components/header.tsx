@@ -6,6 +6,7 @@ import * as DropdownMenu from "~/components/dropdown-menu";
 import SoundControl from "~/components/sound";
 import type { Game } from "~/models/game.server";
 import { stringToHslColor } from "~/utils";
+import { ExclamationTriangle } from "./icons";
 
 function LoginButton() {
   return (
@@ -161,6 +162,15 @@ function GameSettings({ game, url }: { game: Game; url: string }) {
               url={url}
               text="Copy link to room"
             />
+          </DropdownMenu.Item>
+          <DropdownMenu.Item>
+            <Link to={`/report?gameId=${game.id}`}>
+              <ExclamationTriangle
+                title="Report"
+                className="absolute left-0 m-1 h-5 w-5"
+              />
+              <p className="pl-7">Report game</p>
+            </Link>
           </DropdownMenu.Item>
         </DropdownMenu.Content>
       </DropdownMenu.Portal>
