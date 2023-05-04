@@ -4,6 +4,7 @@ import * as React from "react";
 import Button from "~/components/button";
 import { ErrorMessage, SuccessMessage } from "~/components/error";
 import HowToPlay from "~/components/how-to-play";
+import Main from "~/components/main";
 import { Kbd } from "~/components/prompt/kbd";
 import { Lockout } from "~/components/prompt/lockout";
 import { ReadClueTimer } from "~/components/prompt/read-clue-timer";
@@ -11,7 +12,7 @@ import { CLUE_TIMEOUT_MS } from "~/engine";
 import useKeyPress from "~/utils/use-key-press";
 import { useTimeout } from "~/utils/use-timeout";
 
-export const meta: V2_MetaFunction = () => [{ title: "Jep! - How to Play" }];
+export const meta: V2_MetaFunction = () => [{ title: "How to Play" }];
 
 const CLUE_DURATION_MS = 5000;
 const LOCKOUT_MS = 250;
@@ -102,10 +103,10 @@ export default function HowTo() {
 
   return (
     <div className="max-w-full grow">
-      <main className="mx-auto max-w-screen-md">
+      <Main>
         <div className="px-4 pt-8 md:pt-16">
           <HowToPlay />
-          <h2 className="mb-4 text-2xl font-semibold">Buzzer practice</h2>
+          <h1 className="mb-4 text-2xl font-semibold">Buzzer practice</h1>
         </div>
         <button
           className="relative w-full bg-blue-1000 py-2"
@@ -195,7 +196,7 @@ export default function HowTo() {
             </div>
           </div>
         </div>
-      </main>
+      </Main>
     </div>
   );
 }

@@ -7,6 +7,7 @@ import Button from "~/components/button";
 import { ErrorMessage, SuccessMessage } from "~/components/error";
 import Input from "~/components/input";
 import Link from "~/components/link";
+import Main from "~/components/main";
 import ShowPasswordButton from "~/components/show-password-button";
 import { getValidAuthSession } from "~/models/auth";
 import {
@@ -71,9 +72,12 @@ export default function Signup() {
 
   return (
     <div className="max-w-full grow">
-      <main className="mx-auto max-w-screen-md px-4 pb-16 pt-8 md:pt-16">
-        <h2 className="mb-4 text-2xl font-semibold">Sign up</h2>
-        {/* TODO: explain what signing up is for */}
+      <Main>
+        <h1 className="mb-4 text-2xl font-semibold">Sign up</h1>
+        <p className="mb-4">
+          Sign up to upload unlisted or private games, edit games, or delete
+          games.
+        </p>
         <Form method="POST" className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <label
@@ -139,7 +143,7 @@ export default function Signup() {
             Have an account? <Link to="/login">Log in</Link>
           </p>
         </Form>
-      </main>
+      </Main>
     </div>
   );
 }

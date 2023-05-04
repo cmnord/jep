@@ -29,6 +29,7 @@ import { getAllGames } from "~/models/game.server";
 import { getSessionFormState } from "~/session.server";
 import { useDebounce } from "~/utils/use-debounce";
 
+import Main from "~/components/main";
 import GameCard from "./game-card";
 import Upload from "./upload";
 
@@ -133,8 +134,8 @@ export default function Index() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-screen-md grow px-4 pb-16 pt-8 sm:w-auto md:pt-16">
-      <h2 className="mb-4 text-2xl font-semibold">Games</h2>
+    <Main className="grow">
+      <h1 className="mb-4 text-2xl font-semibold">Games</h1>
       <Form method="GET" ref={searchFormRef}>
         <Search
           name="q"
@@ -209,9 +210,9 @@ export default function Index() {
             Log in to upload private games, edit games, or delete games.
           </p>
           <WarningMessage className="mb-4">
-            <span className="italic">
+            <em>
               As a guest, you will not be able to edit or delete the game later.
-            </span>
+            </em>
           </WarningMessage>
           <Dialog.Footer>
             <Button
@@ -241,7 +242,7 @@ export default function Index() {
           <ErrorMessage>{formState.message}</ErrorMessage>
         )
       ) : null}
-    </main>
+    </Main>
   );
 }
 

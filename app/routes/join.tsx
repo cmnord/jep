@@ -5,9 +5,10 @@ import { Form, useActionData } from "@remix-run/react";
 import Button from "~/components/button";
 import { ErrorMessage } from "~/components/error";
 import Input from "~/components/input";
+import Main from "~/components/main";
 import { getRoom } from "~/models/room.server";
 
-export const meta: V2_MetaFunction = () => [{ title: "jep! - Join game" }];
+export const meta: V2_MetaFunction = () => [{ title: "Join game" }];
 
 const ROOM_NAME_REGEX = /^\d+-\w+$/;
 
@@ -38,8 +39,8 @@ export default function Join() {
   const data = useActionData<typeof action>();
   return (
     <div className="max-w-full grow">
-      <main className="mx-auto max-w-screen-md px-4 pt-8 md:pt-16">
-        <h2 className="mb-4 text-2xl font-semibold">Join game</h2>
+      <Main>
+        <h1 className="mb-4 text-2xl font-semibold">Join game</h1>
         <Form method="POST" className="flex flex-col gap-2">
           <label
             htmlFor="roomName"
@@ -59,7 +60,7 @@ export default function Join() {
           </Button>
           {data ? <ErrorMessage>{data.error}</ErrorMessage> : null}
         </Form>
-      </main>
+      </Main>
     </div>
   );
 }
