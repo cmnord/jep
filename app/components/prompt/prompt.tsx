@@ -11,11 +11,11 @@ import {
   GameState,
   useEngineContext,
 } from "~/engine";
+import { stringToHslColor } from "~/utils";
 import useKeyPress from "~/utils/use-key-press";
-import { useSoloAction } from "~/utils/use-solo-action";
+import useSoloAction from "~/utils/use-solo-action";
 import useGameSound from "~/utils/use-sound";
-import { useTimeout } from "~/utils/use-timeout";
-import { stringToHslColor } from "~/utils/utils";
+import useTimeout from "~/utils/use-timeout";
 
 import { ConnectedAnswerForm as AnswerForm } from "./answer-form";
 import { Buzzes } from "./buzz";

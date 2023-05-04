@@ -5,7 +5,7 @@ import type { RoomProps } from "~/components/game";
 import Input from "~/components/input";
 import type { Action } from "~/engine";
 import { useEngineContext } from "~/engine";
-import { useSoloAction } from "~/utils/use-solo-action";
+import useSoloAction from "~/utils/use-solo-action";
 
 function AnswerForm({
   submittedAnswer,

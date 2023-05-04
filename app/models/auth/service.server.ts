@@ -1,5 +1,5 @@
 import { getSupabase, getSupabaseAdmin } from "~/supabase";
-import { SUPABASE_URL } from "~/utils/env";
+import { SUPABASE_URL } from "~/utils";
 
 import { mapAuthSession } from "./mappers";
 import type { AuthSession } from "./types";

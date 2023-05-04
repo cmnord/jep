@@ -2,7 +2,7 @@ import classNames from "classnames";
 
 import type { Player } from "~/engine";
 import { useEngineContext } from "~/engine";
-import { formatDollars, stringToHslColor } from "~/utils/utils";
+import { formatDollars, stringToHslColor } from "~/utils";
 
 function PlayerScore({
   player,

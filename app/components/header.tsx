@@ -5,7 +5,7 @@ import CopyLinkButton from "~/components/copy-link-button";
 import * as DropdownMenu from "~/components/dropdown-menu";
 import SoundControl from "~/components/sound";
 import type { Game } from "~/models/game.server";
-import { stringToHslColor } from "~/utils/utils";
+import { stringToHslColor } from "~/utils";
 
 function LoginButton() {
   return (

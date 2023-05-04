@@ -10,7 +10,7 @@ import { Lockout } from "~/components/prompt/lockout";
 import { ReadClueTimer } from "~/components/prompt/read-clue-timer";
 import { CLUE_TIMEOUT_MS } from "~/engine";
 import useKeyPress from "~/utils/use-key-press";
-import { useTimeout } from "~/utils/use-timeout";
+import useTimeout from "~/utils/use-timeout";
 
 export const meta: V2_MetaFunction = () => [{ title: "How to Play" }];
 

@@ -1,6 +1,7 @@
 import * as React from "react";
 
 import { useSoundContext } from "~/utils/use-sound";
+
 import { MuteToggle } from "./mute-toggle";
 import { VolumeSlider } from "./volume-slider";
 
@@ -9,7 +10,7 @@ export function SoundControl({ showSlider = true }: { showSlider?: boolean }) {
   const prevVolume = React.useRef(volume);
 
   return (
-    <form className="flex items-center gap-2 group">
+    <form className="group flex items-center gap-2">
       <MuteToggle
         pressed={mute}
         onPressChange={(pressed) => {

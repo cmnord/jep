@@ -8,8 +8,8 @@ import Preview from "~/components/preview";
 import Prompt from "~/components/prompt";
 import { GameState, useEngineContext } from "~/engine";
 import type { Game } from "~/models/convert.server";
+import { stringToHslColor } from "~/utils";
 import useGameSound from "~/utils/use-sound";
-import { stringToHslColor } from "~/utils/utils";
 
 const BOARD_FILL_SFX = "/sounds/board-fill.mp3";
 const FINAL_CATEGORY_REVEAL_SFX = "/sounds/final-category-reveal.mp3";
