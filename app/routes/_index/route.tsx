@@ -29,6 +29,7 @@ import { getAllGames } from "~/models/game.server";
 import { getSessionFormState } from "~/session.server";
 import { useDebounce } from "~/utils/use-debounce";
 
+import StyledLink from "~/components/link";
 import Main from "~/components/main";
 import GameCard from "./game-card";
 import Upload from "./upload";
@@ -206,14 +207,16 @@ export default function Index() {
             file?.name ?? "unknown"
           }" publicly?`}
         >
-          <p className="mb-2 text-slate-500">
-            Log in to upload private games, edit games, or delete games.
-          </p>
-          <WarningMessage className="mb-4">
-            <em>
+          <div className="mb-4 flex flex-col gap-2 text-sm text-slate-500">
+            <WarningMessage>
               As a guest, you will not be able to edit or delete the game later.
-            </em>
-          </WarningMessage>
+            </WarningMessage>
+            <p>Log in to upload private games, edit games, or delete games.</p>
+            <p>
+              Games must follow our{" "}
+              <StyledLink to="/community">community guidelines</StyledLink>.
+            </p>
+          </div>
           <Dialog.Footer>
             <Button
               onClick={() => {

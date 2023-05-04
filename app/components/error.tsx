@@ -1,4 +1,5 @@
 import { useRouteError } from "@remix-run/react";
+import classNames from "classnames";
 
 export function DefaultErrorBoundary() {
   const error = useRouteError();
@@ -31,19 +32,20 @@ export function ErrorMessage({ children }: { children: React.ReactNode }) {
 }
 
 export function WarningMessage({
-  className,
+  theme = "light",
   children,
 }: {
-  className?: string;
+  theme?: "dark" | "light";
   children: React.ReactNode;
 }) {
   return (
     <div
-      className={
-        className + " flex-wrap items-baseline rounded-md bg-yellow-700 p-3"
-      }
+      className={classNames("flex-wrap items-baseline rounded-md p-3", {
+        "bg-yellow-700 text-yellow-100": theme === "dark",
+        "bg-yellow-100 text-yellow-700": theme === "light",
+      })}
     >
-      <p className="text-sm text-yellow-100">{children}</p>
+      <p className="text-sm">{children}</p>
     </div>
   );
 }

@@ -4,8 +4,7 @@ import * as React from "react";
 
 import Dialog from "~/components/dialog";
 import { Anchor } from "~/components/link";
-
-const GITHUB_URL = "https://github.com/cmnord/jep";
+import { GITHUB_URL } from "~/utils";
 
 /** Heroicon name: solid/globe-americas */
 function GlobeIcon() {
@@ -47,6 +46,19 @@ function LinkItem({
   );
 }
 
+function Dot({ isInGame }: { isInGame: boolean }) {
+  return (
+    <div
+      className={classNames({
+        "text-slate-300": isInGame,
+        "text-slate-500": !isInGame,
+      })}
+    >
+      &middot;
+    </div>
+  );
+}
+
 export default function Footer() {
   const [showModal, setShowModal] = React.useState(false);
   const matches = useMatches();
@@ -79,16 +91,13 @@ export default function Footer() {
         <button onClick={() => setShowModal(true)}>
           <LinkItem isInGame={isInGame}>About</LinkItem>
         </button>
-        <div
-          className={classNames({
-            "text-slate-300": isInGame,
-            "text-slate-500": !isInGame,
-          })}
-        >
-          &middot;
-        </div>
+        <Dot isInGame={isInGame} />
         <LinkItem isInGame={isInGame}>
           <Link to="howto">How to Play</Link>
+        </LinkItem>
+        <Dot isInGame={isInGame} />
+        <LinkItem isInGame={isInGame}>
+          <Link to="community">Community Guidelines</Link>
         </LinkItem>
       </div>
     </footer>
