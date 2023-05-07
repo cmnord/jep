@@ -30,6 +30,7 @@ import Main from "~/components/main";
 import Popover from "~/components/popover";
 import Search from "~/components/search";
 import Switch from "~/components/switch";
+import Upload from "~/components/upload";
 import { getValidAuthSession } from "~/models/auth";
 import { getGames } from "~/models/game.server";
 import { getSessionFormState } from "~/session.server";
@@ -37,7 +38,6 @@ import useDebounce from "~/utils/use-debounce";
 import useScrollToBottom from "~/utils/use-scroll";
 
 import GameCard from "./game-card";
-import Upload from "./upload";
 
 export async function loader({ request }: LoaderArgs) {
   const authSession = await getValidAuthSession(request);
