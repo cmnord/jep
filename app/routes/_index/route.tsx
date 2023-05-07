@@ -20,39 +20,47 @@ import {
   SuccessMessage,
   WarningMessage,
 } from "~/components/error";
-import { ExclamationTriangle, QuestionMarkCircle } from "~/components/icons";
+import {
+  ExclamationTriangle,
+  LoadingSpinner,
+  QuestionMarkCircle,
+} from "~/components/icons";
+import StyledLink from "~/components/link";
+import Main from "~/components/main";
 import Popover from "~/components/popover";
 import Search from "~/components/search";
 import Switch from "~/components/switch";
 import { getValidAuthSession } from "~/models/auth";
-import { getAllGames } from "~/models/game.server";
+import { getGames } from "~/models/game.server";
 import { getSessionFormState } from "~/session.server";
 import useDebounce from "~/utils/use-debounce";
+import useScrollToBottom from "~/utils/use-scroll";
 
-import StyledLink from "~/components/link";
-import Main from "~/components/main";
 import GameCard from "./game-card";
 import Upload from "./upload";
 
 export async function loader({ request }: LoaderArgs) {
-  const url = new URL(request.url);
-  const search = new URLSearchParams(url.search);
-
   const authSession = await getValidAuthSession(request);
-  const games = await getAllGames(search.get("q"), authSession?.accessToken);
 
-  const solo = search.get("solo") === "on";
+  const searchParams = new URL(request.url).searchParams;
+  const pageStr = searchParams.get("page");
+  const page = pageStr ? Number(pageStr) : 1;
+
+  const serverGames = await getGames(
+    { page, search: searchParams.get("q") },
+    authSession?.accessToken
+  );
 
   const [formState, headers] = await getSessionFormState(request);
 
-  return json({ games, formState, solo, authSession }, { headers });
+  return json({ serverGames, formState, authSession }, { headers });
 }
 
 export default function Index() {
   const data = useLoaderData<typeof loader>();
-  const fetcher = useFetcher();
 
   // Upload
+  const uploadFetcher = useFetcher();
   const uploadFormRef = React.useRef<HTMLFormElement | null>(null);
   // The success and error messages are shown even if JavaScript is not
   // available.
@@ -73,16 +81,54 @@ export default function Index() {
   const solo = params.get("solo") === "on";
   const [optimisticSolo, setOptimisticSolo] = React.useState(solo);
 
+  // Pagination
+  const gameFetcher = useFetcher<typeof loader>();
+  const [games, setGames] = React.useState(data.serverGames);
+  // Start with two because 1 was pre-loaded
+  const [page, setPage] = React.useState(2);
+  const [shouldLoadMore, setShouldLoadMore] = React.useState(true);
+
+  useScrollToBottom(() => {
+    if (!shouldLoadMore) return;
+    const qParam = debouncedSearch ? `&q=${debouncedSearch}` : "";
+    const soloParam = optimisticSolo ? "&solo=on" : "";
+    gameFetcher.load(`/?index${qParam}&page=${page}${soloParam}`);
+
+    setShouldLoadMore(false);
+  });
+
+  React.useEffect(() => {
+    if (!gameFetcher.data) {
+      return;
+    }
+    const newGames = gameFetcher.data.serverGames;
+    if (newGames.length === 0) {
+      setShouldLoadMore(false);
+      return;
+    }
+
+    setGames((prevGames) => [...prevGames, ...newGames]);
+    setPage((prevPage) => prevPage + 1);
+    setShouldLoadMore(true);
+  }, [gameFetcher.data]);
+
+  // Reset the games and page when the data from the server changes
+  React.useEffect(() => {
+    setGames(data.serverGames);
+    setPage(2);
+    setShouldLoadMore(true);
+  }, [data.serverGames]);
+
   React.useEffect(() => {
     setOptimisticSolo(solo);
   }, [solo]);
 
   React.useEffect(() => {
-    if (fetcher.state === "submitting") {
+    if (uploadFetcher.state === "submitting") {
       // JavaScript to clean messages when submitting
       setFormState(undefined);
     }
-  }, [fetcher.state]);
+  }, [uploadFetcher.state]);
 
   React.useEffect(() => {
     setFormState(data.formState);
@@ -121,7 +167,7 @@ export default function Index() {
           name="q"
           onChange={(s) => setSearch(s)}
           defaultValue={initialSearch}
-          loading={fetcher.state === "loading"}
+          loading={navigation.state === "loading"}
         />
         <input type="hidden" name="solo" value={solo ? "on" : "off"} />
       </Form>
@@ -155,17 +201,22 @@ export default function Index() {
           </div>
         </div>
       </Form>
-      {data.games.length === 0 && (
+      {games.length === 0 && (
         <p className="text-sm text-slate-500">
           No games found{search ? ` for search "${debouncedSearch}"` : ""}
         </p>
       )}
       <div className="mb-4 flex flex-col gap-4 sm:grid sm:grid-cols-2">
-        {data.games.map((game, i) => (
+        {games.map((game, i) => (
           <GameCard key={`game-${i}`} game={game} solo={optimisticSolo} />
         ))}
       </div>
-      <fetcher.Form
+      {gameFetcher.state === "loading" && (
+        <div className="flex h-5 justify-center">
+          <LoadingSpinner />
+        </div>
+      )}
+      <uploadFetcher.Form
         method="POST"
         action="/game"
         encType="multipart/form-data"
@@ -212,10 +263,10 @@ export default function Index() {
           </Dialog.Footer>
         </Dialog>
         <Upload
-          loading={navigation.state === "submitting"}
+          loading={uploadFetcher.state === "submitting"}
           onChange={handleChangeUpload}
         />
-      </fetcher.Form>
+      </uploadFetcher.Form>
       {formState ? (
         formState.success ? (
           <SuccessMessage>{formState.message}</SuccessMessage>
