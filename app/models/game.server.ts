@@ -28,7 +28,11 @@ type DbClue = ClueTable["Row"];
 type CategoryAndClues = DbCategory & { clues: DbClue[] | null };
 type GameAndClues = DbGame & { categories: CategoryAndClues[] | null };
 
+/** SEARCHABLE_GAME_COLUMNS are the columns of {@link DbGame} that are searched
+ * on in {@link getGames}.
+ */
 const SEARCHABLE_GAME_COLUMNS = ["title", "author"];
+const RESULTS_PER_PAGE = 10;
 
 /* Helpers */
 
@@ -174,6 +178,18 @@ function validateGame(game: ConvertedGame) {
   }
 }
 
+/** getPagination returns the from and to indices for the given page and page
+ * size.
+ *
+ * @example getPagination(1, 20) // { from: 0, to: 19 }
+ * @example getPagination(2, 20) // { from: 20, to: 39 }
+ */
+function getPagination(page: number, pageSize: number = RESULTS_PER_PAGE) {
+  const from = (page - 1) * pageSize;
+  const to = page * pageSize - 1;
+  return { from, to };
+}
+
 /* Reads */
 
 /** getGame bypasses RLS and enforces permissions on the server side to get
@@ -228,21 +244,28 @@ export async function getGamesForUser(
   return data;
 }
 
-/** getAllGames gets all games from the database. Search searches the title and
- * author fields.
+/** getGames gets all games from the database. Search searches the title and
+ * author fields (see {@link SEARCHABLE_GAME_COLUMNS}).
  */
-export async function getAllGames(
-  search: string | null,
+export async function getGames(
+  options: {
+    page: number;
+    search: string | null;
+  },
   accessToken?: AuthSession["accessToken"]
 ): Promise<Game[]> {
+  const { search, page } = options;
+  const { from, to } = getPagination(page);
+
   let query = getSupabase(accessToken)
     .from<"games", GameTable>("games")
     .select<"*, categories ( *, clues ( * ) )", GameAndClues>(
       "*, categories ( *, clues ( * ) )"
     )
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range(from, to);
 
-  if (search !== null && search.trim() !== "") {
+  if (search && search.trim() !== "") {
     // .or doesn't accept variables, so sanitize the search string to prevent
     // SQL injection
     const sanitizedSearch = search.trim().replace(/[^a-zA-Z0-9\s]/g, "");

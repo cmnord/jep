@@ -18,9 +18,8 @@ export const meta: V2_MetaFunction = () => [{ title: "Report a game" }];
 const ROOM_NAME_REGEX = /^\d+-\w+$/;
 
 export async function loader({ request }: LoaderArgs) {
-  const url = new URL(request.url);
-  const search = new URLSearchParams(url.search);
-  const gameId = search.get("gameId");
+  const searchParams = new URL(request.url).searchParams;
+  const gameId = searchParams.get("gameId");
 
   return json({ BASE_URL, gameId });
 }
