@@ -169,35 +169,33 @@ export default function Index() {
           defaultValue={initialSearch}
           loading={navigation.state === "loading"}
         />
-        <input type="hidden" name="solo" value={solo ? "on" : "off"} />
-      </Form>
-      <Form method="GET" className="mb-4 flex flex-col gap-6 sm:flex-row">
-        <Link to="/join">
-          <Button htmlType="button">Join an existing game</Button>
-        </Link>
-        <input type="hidden" name="q" value={debouncedSearch} />
-        <div className="inline-flex items-center gap-3">
-          <Switch
-            name="solo"
-            checked={optimisticSolo}
-            onClick={(checked) => setOptimisticSolo(checked)}
-          />
-          <div className="inline-flex gap-0.5">
-            <p
-              className={classNames("text-sm text-slate-500", {
-                "font-bold": optimisticSolo,
-              })}
-            >
-              Solo mode {optimisticSolo ? "on" : "off"}
-            </p>
-            <Popover content="In solo mode, no other players can join the game. If you refresh the page the game will reset.">
-              <button>
-                <QuestionMarkCircle
-                  className={`h-4 w-4 rounded-md text-slate-400
+        <div className="mb-4 flex flex-col gap-6 sm:flex-row">
+          <Link to="/join">
+            <Button htmlType="button">Join an existing game</Button>
+          </Link>
+          <div className="inline-flex items-center gap-3">
+            <Switch
+              name="solo"
+              checked={optimisticSolo}
+              onClick={(checked) => setOptimisticSolo(checked)}
+            />
+            <div className="inline-flex gap-0.5">
+              <p
+                className={classNames("text-sm text-slate-500", {
+                  "font-bold": optimisticSolo,
+                })}
+              >
+                Solo mode {optimisticSolo ? "on" : "off"}
+              </p>
+              <Popover content="In solo mode, no other players can join the game. If you refresh the page the game will reset.">
+                <button>
+                  <QuestionMarkCircle
+                    className={`h-4 w-4 rounded-md text-slate-400
                   hover:bg-slate-100 hover:text-slate-500`}
-                />
-              </button>
-            </Popover>
+                  />
+                </button>
+              </Popover>
+            </div>
           </div>
         </div>
       </Form>
