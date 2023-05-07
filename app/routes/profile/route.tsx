@@ -4,8 +4,8 @@ import { useFetcher, useLoaderData } from "@remix-run/react";
 import * as React from "react";
 
 import { ErrorMessage, SuccessMessage } from "~/components/error";
-import Link from "~/components/link";
 import Main from "~/components/main";
+import Upload from "~/components/upload";
 import { requireAuthSession } from "~/models/auth";
 import { getGamesForUser } from "~/models/game.server";
 import { getUserByEmail } from "~/models/user/service.server";
@@ -29,20 +29,34 @@ export async function loader({ request }: LoaderArgs) {
   const [formState, headers] = await getSessionFormState(request);
 
   const user = await getUserByEmail(authSession.email, authSession.accessToken);
-  return json({ user, formState, games, env: { BASE_URL } }, { headers });
+  return json(
+    { user, formState, games, env: { BASE_URL }, authSession },
+    { headers }
+  );
 }
 
 export default function Profile() {
   const data = useLoaderData<typeof loader>();
-  const fetcher = useFetcher();
+
+  const patchGame = useFetcher<never>();
+  const uploadGame = useFetcher<never>();
+  const uploadFormRef = React.useRef<HTMLFormElement | null>(null);
+
   const [formState, setFormState] = React.useState(data.formState);
 
   React.useEffect(() => {
-    if (fetcher.state === "submitting") {
+    if (patchGame.state === "submitting") {
       // JavaScript to clean messages when submitting
       setFormState(undefined);
     }
-  }, [fetcher.state]);
+  }, [patchGame.state]);
+
+  React.useEffect(() => {
+    if (uploadGame.state === "submitting") {
+      // JavaScript to clean messages when submitting
+      setFormState(undefined);
+    }
+  }, [uploadGame.state]);
 
   React.useEffect(() => {
     setFormState(data.formState);
@@ -63,11 +77,14 @@ export default function Profile() {
         <h1 className="mb-4 text-2xl font-semibold">Profile</h1>
         <p className="mb-4">{data.user?.email}</p>
         <h1 className="mb-4 text-2xl font-semibold">My Games</h1>
+        <Upload
+          fetcher={uploadGame}
+          formRef={uploadFormRef}
+          loggedIn={data.authSession !== null}
+          redirectTo="/profile"
+        />
         {data.games.length === 0 ? (
-          <p className="text-sm text-slate-500">
-            No games found. Upload a game from the <Link to="/">home page</Link>
-            .
-          </p>
+          <p className="text-sm text-slate-500">No games found.</p>
         ) : null}
         <ul className="list-inside list-disc text-slate-700">
           {data.games.map((game) => (
@@ -75,7 +92,7 @@ export default function Profile() {
               key={game.id}
               BASE_URL={data.env.BASE_URL}
               game={game}
-              fetcher={fetcher}
+              fetcher={patchGame}
             />
           ))}
         </ul>

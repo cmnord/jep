@@ -41,7 +41,7 @@ function ChangeVisibilityItem({
   gameId,
   visibility,
 }: {
-  fetcher: FetcherWithComponents<any>;
+  fetcher: FetcherWithComponents<never>;
   gameId: string;
   visibility: GameVisibility;
 }) {
@@ -73,7 +73,7 @@ export function GameInfo({
 }: {
   BASE_URL: string;
   game: DbGame;
-  fetcher: FetcherWithComponents<any>;
+  fetcher: FetcherWithComponents<never>;
 }) {
   const url = BASE_URL + "/game/" + game.id + "/play";
   const createdAt = formatter.format(new Date(game.created_at));

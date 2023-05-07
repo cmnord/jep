@@ -12,19 +12,12 @@ import {
 import classNames from "classnames";
 import * as React from "react";
 
-import Button from "~/components/button";
-import Dialog from "~/components/dialog";
 import {
   DefaultErrorBoundary,
   ErrorMessage,
   SuccessMessage,
-  WarningMessage,
 } from "~/components/error";
-import {
-  ExclamationTriangle,
-  LoadingSpinner,
-  QuestionMarkCircle,
-} from "~/components/icons";
+import { LoadingSpinner, QuestionMarkCircle } from "~/components/icons";
 import StyledLink from "~/components/link";
 import Main from "~/components/main";
 import Popover from "~/components/popover";
@@ -58,24 +51,22 @@ export async function loader({ request }: LoaderArgs) {
 
 export default function Index() {
   const data = useLoaderData<typeof loader>();
+  const [params] = useSearchParams();
 
   // Upload
-  const uploadFetcher = useFetcher();
+  const uploadFetcher = useFetcher<never>();
   const uploadFormRef = React.useRef<HTMLFormElement | null>(null);
   // The success and error messages are shown even if JavaScript is not
   // available.
   const [formState, setFormState] = React.useState(data.formState);
-  const submit = useSubmit();
-  const navigation = useNavigation();
-  const [showModal, setShowModal] = React.useState(false);
-  const [file, setFile] = React.useState<File | undefined>();
 
   // Search
-  const [params] = useSearchParams();
   const searchFormRef = React.useRef<HTMLFormElement | null>(null);
   const initialSearch = params.get("q") ?? undefined;
   const [search, setSearch] = React.useState(initialSearch);
   const debouncedSearch = useDebounce(search, 500);
+  const submit = useSubmit();
+  const navigation = useNavigation();
 
   // Solo toggle
   const solo = params.get("solo") === "on";
@@ -150,15 +141,6 @@ export default function Index() {
     }
   }, [debouncedSearch, submit]);
 
-  function handleChangeUpload(newFile?: File) {
-    if (data.authSession) {
-      submit(uploadFormRef.current);
-      return;
-    }
-    setShowModal(true);
-    setFile(newFile);
-  }
-
   return (
     <Main className="grow">
       <h1 className="mb-4 text-2xl font-semibold">Games</h1>
@@ -199,6 +181,19 @@ export default function Index() {
           </div>
         </div>
       </Form>
+      <Upload
+        fetcher={uploadFetcher}
+        formRef={uploadFormRef}
+        loggedIn={data.authSession !== null}
+        redirectTo="/"
+      />
+      {formState ? (
+        formState.success ? (
+          <SuccessMessage>{formState.message}</SuccessMessage>
+        ) : (
+          <ErrorMessage>{formState.message}</ErrorMessage>
+        )
+      ) : null}
       {games.length === 0 && (
         <p className="text-sm text-slate-500">
           No games found{search ? ` for search "${debouncedSearch}"` : ""}
@@ -214,64 +209,6 @@ export default function Index() {
           <LoadingSpinner />
         </div>
       )}
-      <uploadFetcher.Form
-        method="POST"
-        action="/game"
-        encType="multipart/form-data"
-        ref={uploadFormRef}
-        replace
-      >
-        <Dialog
-          isOpen={showModal}
-          title={
-            <div className="flex items-center gap-4">
-              <ExclamationTriangle title="Warning" className="h-8 w-8" />
-              <p>Confirm public upload</p>
-            </div>
-          }
-          onClickClose={() => setShowModal(false)}
-          description={`Do you want to upload the game "${
-            file?.name ?? "unknown"
-          }" publicly?`}
-        >
-          <div className="mb-4 flex flex-col gap-2 text-sm text-slate-500">
-            <WarningMessage>
-              As a guest, you will not be able to edit or delete the game later.
-            </WarningMessage>
-            <p>Log in to upload private games, edit games, or delete games.</p>
-            <p>
-              Games must follow the{" "}
-              <StyledLink to="/community">community guidelines</StyledLink>.
-            </p>
-          </div>
-          <Dialog.Footer>
-            <Button
-              onClick={() => {
-                submit(uploadFormRef.current);
-                setShowModal(false);
-              }}
-            >
-              Upload publicly
-            </Button>
-            <Link to="/login">
-              <Button type="primary" htmlType="button" autoFocus>
-                Log in
-              </Button>
-            </Link>
-          </Dialog.Footer>
-        </Dialog>
-        <Upload
-          loading={uploadFetcher.state === "submitting"}
-          onChange={handleChangeUpload}
-        />
-      </uploadFetcher.Form>
-      {formState ? (
-        formState.success ? (
-          <SuccessMessage>{formState.message}</SuccessMessage>
-        ) : (
-          <ErrorMessage>{formState.message}</ErrorMessage>
-        )
-      ) : null}
     </Main>
   );
 }

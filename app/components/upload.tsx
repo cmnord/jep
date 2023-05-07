@@ -1,4 +1,11 @@
-import { LoadingSpinner } from "~/components/icons";
+import type { FetcherWithComponents } from "@remix-run/react";
+import { useSubmit } from "@remix-run/react";
+import * as React from "react";
+
+import Button from "~/components/button";
+import Dialog from "~/components/dialog";
+import { WarningMessage } from "~/components/error";
+import { ExclamationTriangle, LoadingSpinner } from "~/components/icons";
 import Link from "~/components/link";
 
 /** Heroicon name: solid/document-arrow-up */
@@ -23,7 +30,7 @@ function UploadIcon() {
   );
 }
 
-export default function Upload({
+function UploadBox({
   loading,
   onChange,
 }: {
@@ -65,5 +72,84 @@ export default function Upload({
         </p>
       </Link>
     </div>
+  );
+}
+
+export default function Upload({
+  fetcher,
+  formRef,
+  loggedIn,
+  redirectTo,
+}: {
+  fetcher: FetcherWithComponents<never>;
+  formRef: React.RefObject<HTMLFormElement>;
+  loggedIn: boolean;
+  redirectTo: string;
+}) {
+  const [showModal, setShowModal] = React.useState(false);
+  const [file, setFile] = React.useState<File | undefined>();
+  const submit = useSubmit();
+
+  function handleChangeUpload(newFile?: File) {
+    if (loggedIn) {
+      submit(formRef.current);
+      return;
+    }
+    setShowModal(true);
+    setFile(newFile);
+  }
+
+  return (
+    <fetcher.Form
+      method="POST"
+      action={`/game?redirectTo=${redirectTo}`}
+      encType="multipart/form-data"
+      ref={formRef}
+      replace
+    >
+      <Dialog
+        isOpen={showModal}
+        title={
+          <div className="flex items-center gap-4">
+            <ExclamationTriangle title="Warning" className="h-8 w-8" />
+            <p>Confirm public upload</p>
+          </div>
+        }
+        onClickClose={() => setShowModal(false)}
+        description={`Do you want to upload the game "${
+          file?.name ?? "unknown"
+        }" publicly?`}
+      >
+        <div className="mb-4 flex flex-col gap-2 text-sm text-slate-500">
+          <WarningMessage>
+            As a guest, you will not be able to edit or delete the game later.
+          </WarningMessage>
+          <p>Log in to upload private games, edit games, or delete games.</p>
+          <p>
+            Games must follow the{" "}
+            <Link to="/community">community guidelines</Link>.
+          </p>
+        </div>
+        <Dialog.Footer>
+          <Button
+            onClick={() => {
+              submit(formRef.current);
+              setShowModal(false);
+            }}
+          >
+            Upload publicly
+          </Button>
+          <Link to="/login">
+            <Button type="primary" htmlType="button" autoFocus>
+              Log in
+            </Button>
+          </Link>
+        </Dialog.Footer>
+      </Dialog>
+      <UploadBox
+        loading={fetcher.state === "submitting"}
+        onChange={handleChangeUpload}
+      />
+    </fetcher.Form>
   );
 }
