@@ -1,4 +1,4 @@
-import type { UploadHandler, UploadHandlerPart } from "@remix-run/node";
+import type { UploadHandler } from "@remix-run/node";
 import {
   unstable_composeUploadHandlers,
   unstable_createMemoryUploadHandler,
@@ -22,12 +22,12 @@ function streamToString(readable: stream.Readable): Promise<string> {
 function newGameUploadHandler(
   authSession: AuthSession | null,
   visibility: GameVisibility
-): UploadHandler {
+) {
   const userId = authSession?.userId;
 
-  return async ({ name, contentType, data }: UploadHandlerPart) => {
+  const handler: UploadHandler = async ({ name, contentType, data }) => {
     if (name !== "upload" || contentType !== "application/json") {
-      throw new Error("expected upload to be of type application/json");
+      return undefined;
     }
 
     const byteStream = stream.Readable.from(data);
@@ -43,6 +43,8 @@ function newGameUploadHandler(
 
     return gameId;
   };
+
+  return handler;
 }
 
 /** newUploadHandler creates a function which uploads games to the database.

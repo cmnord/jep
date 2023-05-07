@@ -21,7 +21,7 @@ export const meta: V2_MetaFunction = () => [{ title: "Login" }];
 export async function loader({ request }: LoaderArgs) {
   const authSession = await getValidAuthSession(request);
 
-  if (authSession) return redirect("/");
+  if (authSession) throw redirect("/");
 
   return null;
 }

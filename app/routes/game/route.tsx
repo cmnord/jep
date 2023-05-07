@@ -3,13 +3,15 @@ import { redirect, unstable_parseMultipartFormData } from "@remix-run/node";
 
 import { getValidAuthSession } from "~/models/auth";
 import { flashFormState } from "~/session.server";
-import { BASE_URL } from "~/utils";
+import { BASE_URL, getRedirectTo, safeRedirect } from "~/utils";
+
 import { newUploadHandler } from "./file-upload-handler.server";
 
 /** POST /game parses and uploads a new game to the server. */
 export async function action({ request }: ActionArgs) {
   const authSession = await getValidAuthSession(request);
   const visibility = authSession !== null ? "UNLISTED" : "PUBLIC";
+  const redirectTo = getRedirectTo(request);
 
   try {
     const uploadHandler = await newUploadHandler(authSession, visibility);
@@ -20,8 +22,16 @@ export async function action({ request }: ActionArgs) {
     // formData.get will return the type our upload handler returns.
     const gameKey = formData.get("upload")?.toString();
 
-    const gameUrl = BASE_URL + "/game/" + gameKey + "/play";
+    if (!gameKey) {
+      const formState = {
+        success: false,
+        message: "Error uploading game: no game key returned.",
+      };
+      const headers = await flashFormState(request, formState);
+      return redirect(safeRedirect(redirectTo), { headers });
+    }
 
+    const gameUrl = BASE_URL + "/game/" + gameKey + "/play";
     const formState = {
       success: true,
       message:
@@ -30,7 +40,7 @@ export async function action({ request }: ActionArgs) {
           : `Created new unlisted game. You may now visit the link ${gameUrl} to play the new game.`,
     };
     const headers = await flashFormState(request, formState);
-    return redirect("/", { headers });
+    return redirect(safeRedirect(redirectTo), { headers });
   } catch (error: unknown) {
     if (error instanceof Error) {
       const formState = {
@@ -38,7 +48,7 @@ export async function action({ request }: ActionArgs) {
         message: "Error uploading game: " + error.message,
       };
       const headers = await flashFormState(request, formState);
-      return redirect("/", { headers });
+      return redirect(safeRedirect(redirectTo), { headers });
     }
     throw error;
   }
