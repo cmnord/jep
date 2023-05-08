@@ -2,7 +2,6 @@ import type { LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import {
   Form,
-  Link,
   useFetcher,
   useLoaderData,
   useNavigation,
@@ -143,7 +142,6 @@ export default function Index() {
 
   return (
     <Main className="grow">
-      <h1 className="mb-4 text-2xl font-semibold">Games</h1>
       <Form method="GET" ref={searchFormRef}>
         <Search
           name="q"
@@ -151,10 +149,10 @@ export default function Index() {
           defaultValue={initialSearch}
           loading={navigation.state === "loading"}
         />
-        <div className="mb-4 flex flex-col gap-6 sm:flex-row">
-          <Link to="/join">
-            <Button htmlType="button">Join an existing game</Button>
-          </Link>
+        <div className="mb-4 flex flex-col flex-wrap justify-between gap-2 sm:flex-row">
+          <StyledLink to="/join" className="text-sm">
+            Join an existing game
+          </StyledLink>
           <div className="inline-flex items-center gap-3">
             <Switch
               name="solo"
@@ -170,7 +168,7 @@ export default function Index() {
                 Solo mode {optimisticSolo ? "on" : "off"}
               </p>
               <Popover content="In solo mode, no other players can join the game. If you refresh the page the game will reset.">
-                <button>
+                <button type="button">
                   <QuestionMarkCircle
                     className={`h-4 w-4 rounded-md text-slate-400
                   hover:bg-slate-100 hover:text-slate-500`}
