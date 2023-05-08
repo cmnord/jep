@@ -28,7 +28,7 @@ export async function action({ request }: ActionArgs) {
         message: "Error uploading game: no game key returned.",
       };
       const headers = await flashFormState(request, formState);
-      return redirect(safeRedirect(redirectTo), { headers });
+      return redirect(safeRedirect(redirectTo), { headers, status: 400 });
     }
 
     const gameUrl = BASE_URL + "/game/" + gameKey + "/play";
@@ -48,7 +48,7 @@ export async function action({ request }: ActionArgs) {
         message: "Error uploading game: " + error.message,
       };
       const headers = await flashFormState(request, formState);
-      return redirect(safeRedirect(redirectTo), { headers });
+      return redirect(safeRedirect(redirectTo), { headers, status: 400 });
     }
     throw error;
   }
