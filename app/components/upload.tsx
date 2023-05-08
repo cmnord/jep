@@ -38,11 +38,14 @@ function UploadBox({
   onChange: (file?: File) => void;
 }) {
   // TODO: drag and drop with react-dropzone
+  const inputRef = React.useRef<HTMLInputElement>(null);
+
   return (
     <div className="my-2 flex flex-col items-center">
-      <label
-        tabIndex={0}
-        role="button"
+      <button
+        id="upload-button"
+        type="button"
+        onClick={() => inputRef.current?.click()}
         className={`flex flex-col items-center justify-center rounded-lg
         border-2 border-dashed border-blue-600 p-6 text-sm text-slate-900
         shadow-sm transition-colors
@@ -60,9 +63,10 @@ function UploadBox({
           name="upload"
           aria-describedby="upload_help"
           className="hidden"
+          ref={inputRef}
           onChange={(e) => onChange(e.target.files?.[0])}
         />
-      </label>
+      </button>
       <Link to="/help">
         <p id="upload_help" className="mt-1 text-sm">
           File format help
