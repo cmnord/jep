@@ -189,7 +189,7 @@ export default function Header({
   const pathname = matches[matches.length - 1].pathname;
 
   return (
-    <nav className="bg-blue-1000 p-6">
+    <nav className="bg-blue-1000 p-4">
       <div className="flex items-center justify-between">
         <Link to="/">
           <h1 className="text-shadow-md font-korinna text-2xl font-bold text-white">

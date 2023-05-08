@@ -39,7 +39,7 @@ function UploadBox({
 }) {
   // TODO: drag and drop with react-dropzone
   return (
-    <div className="flex flex-col items-center">
+    <div className="my-2 flex flex-col items-center">
       <label
         tabIndex={loading ? undefined : 0}
         role={loading ? undefined : "button"}
