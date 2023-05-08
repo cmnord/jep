@@ -322,7 +322,7 @@ export async function createGame(
     throw new Error("game data response must not be null");
   }
 
-  const categoriesToInsert: Omit<CategoryTable["Insert"], "id">[] = [];
+  const categoriesToInsert: CategoryTable["Insert"][] = [];
   for (let round = 0; round < inputGame.boards.length; round++) {
     const board = inputGame.boards[round];
     for (const category of board.categories) {
@@ -348,17 +348,17 @@ export async function createGame(
     throw new Error("category data response must not be null");
   }
 
-  const cluesToInsert: Omit<ClueTable["Insert"], "id">[] = [];
+  const cluesToInsert: ClueTable["Insert"][] = [];
   for (let round = 0; round < inputGame.boards.length; round++) {
     const board = inputGame.boards[round];
     for (const category of board.categories) {
+      const dbCategory = categoryData.find((c) => c.name === category.name);
+      if (!dbCategory) {
+        throw new Error(
+          "category " + category.name + " not inserted into database"
+        );
+      }
       for (const clue of category.clues) {
-        const dbCategory = categoryData.find((c) => c.name === category.name);
-        if (!dbCategory) {
-          throw new Error(
-            "category " + category.name + " not inserted into database"
-          );
-        }
         cluesToInsert.push({
           category_id: dbCategory.id,
           answer: clue.answer,
@@ -371,18 +371,14 @@ export async function createGame(
     }
   }
 
-  const { data: cluesData, error: cluesErr } = await client
+  const { error: cluesErr } = await client
     .from<"clues", ClueTable>("clues")
-    .insert<ClueTable["Insert"]>(cluesToInsert)
-    .select();
+    .insert<ClueTable["Insert"]>(cluesToInsert);
 
   // TODO: createGame is not transactional, so if any clue fails to insert the
   // game will still be created.
   if (cluesErr !== null) {
     throw cluesErr;
-  }
-  if (cluesData === null) {
-    throw new Error("clues data must not be null");
   }
 
   return game.id;

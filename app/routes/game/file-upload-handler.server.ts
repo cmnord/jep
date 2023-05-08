@@ -11,11 +11,12 @@ import type { GameVisibility } from "~/models/game.server";
 import { createGame } from "~/models/game.server";
 
 function streamToString(readable: stream.Readable): Promise<string> {
-  const chunks: Buffer[] = [];
+  const chunks: string[] = [];
   return new Promise((resolve, reject) => {
-    readable.on("data", (chunk) => chunks.push(Buffer.from(chunk)));
+    readable.setEncoding("utf8");
+    readable.on("data", (chunk) => chunks.push(chunk));
     readable.on("error", (err) => reject(err));
-    readable.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
+    readable.on("end", () => resolve(chunks.join("")));
   });
 }
 
@@ -27,6 +28,7 @@ function newGameUploadHandler(
 
   const handler: UploadHandler = async ({ name, contentType, data }) => {
     if (name !== "upload" || contentType !== "application/json") {
+      console.warn(`Invalid upload: name=${name}, contentType=${contentType}`);
       return undefined;
     }
 
