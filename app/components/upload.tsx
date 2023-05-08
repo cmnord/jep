@@ -41,30 +41,27 @@ function UploadBox({
   return (
     <div className="my-2 flex flex-col items-center">
       <label
-        tabIndex={loading ? undefined : 0}
-        role={loading ? undefined : "button"}
-        className={`group flex rounded-lg border-2 border-dashed border-blue-600
-        text-slate-900 transition-colors hover:border-blue-700
-        focus:outline-none focus:ring-2 focus:ring-blue-500
+        tabIndex={0}
+        role="button"
+        className={`flex flex-col items-center justify-center rounded-lg
+        border-2 border-dashed border-blue-600 p-6 text-sm text-slate-900
+        shadow-sm transition-colors
+        hover:border-blue-700 hover:shadow-md
+        focus:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500
         focus:ring-offset-2`}
       >
-        <div
-          className={`flex flex-col items-center justify-center rounded-lg p-6
-          text-sm shadow-sm group-hover:shadow-md group-focus:shadow-md`}
-        >
-          {loading ? <LoadingSpinner className="mb-2" /> : <UploadIcon />}
-          <p>Upload .jep.json file</p>
-          <input
-            id="upload"
-            type="file"
-            disabled={loading}
-            accept=".jep.json,application/json"
-            name="upload"
-            aria-describedby="upload_help"
-            className="hidden"
-            onChange={(e) => onChange(e.target.files?.[0])}
-          />
-        </div>
+        {loading ? <LoadingSpinner className="mb-2" /> : <UploadIcon />}
+        <p>Upload .jep.json file</p>
+        <input
+          id="upload"
+          type="file"
+          disabled={loading}
+          accept=".jep.json,application/json"
+          name="upload"
+          aria-describedby="upload_help"
+          className="hidden"
+          onChange={(e) => onChange(e.target.files?.[0])}
+        />
       </label>
       <Link to="/help">
         <p id="upload_help" className="mt-1 text-sm">
