@@ -161,9 +161,15 @@ export function gameEngine(state: State, action: Action): State {
         const { userId, i, j } = action.payload;
         if (
           state.type !== GameState.ShowBoard ||
-          state.boardControl !== userId ||
           state.isAnswered.at(i)?.at(j)?.isAnswered
         ) {
+          return state;
+        }
+        // Any player can choose the final clue.
+        const isFinalClue =
+          state.round == state.game.boards.length - 1 &&
+          state.numCluesInBoard == 1;
+        if (!isFinalClue && state.boardControl !== userId) {
           return state;
         }
         const clue = state.game.boards
