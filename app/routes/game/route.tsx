@@ -7,6 +7,10 @@ import { BASE_URL, getRedirectTo, safeRedirect } from "~/utils";
 
 import { newUploadHandler } from "./file-upload-handler.server";
 
+export async function loader() {
+  throw redirect("/");
+}
+
 /** POST /game parses and uploads a new game to the server. */
 export async function action({ request }: ActionArgs) {
   const authSession = await getValidAuthSession(request);

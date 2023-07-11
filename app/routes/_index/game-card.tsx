@@ -3,17 +3,15 @@ import * as React from "react";
 
 import { GameVisibilityTag } from "~/components/game-visibility-icon";
 import { LoadingSpinner } from "~/components/icons";
-import type { Game } from "~/models/game.server";
+import type { DbGame } from "~/models/game.server";
 
 export default function GameCard({
   game,
   solo,
 }: {
-  game: Game;
+  game: DbGame;
   solo: boolean;
 }) {
-  const numRounds = game.boards.length;
-
   const [loading, setLoading] = React.useState(false);
   const to = solo ? `/game/${game.id}/solo` : `/game/${game.id}/play`;
 
@@ -46,16 +44,6 @@ export default function GameCard({
             {game.visibility !== "PUBLIC" && (
               <GameVisibilityTag visibility={game.visibility} />
             )}
-            <p className="text-sm text-slate-500">
-              {numRounds} {numRounds === 1 ? "round" : "rounds"} (
-              {game.boards
-                .map(
-                  (b) =>
-                    `${b.categories.length}x${b.categories[0].clues.length}`
-                )
-                .join(", ")}
-              )
-            </p>
           </div>
         </div>
       </Link>

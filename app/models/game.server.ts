@@ -253,15 +253,13 @@ export async function getGames(
     search: string | null;
   },
   accessToken?: AuthSession["accessToken"]
-): Promise<Game[]> {
+) {
   const { search, page } = options;
   const { from, to } = getPagination(page);
 
   let query = getSupabase(accessToken)
-    .from<"games", GameTable>("games")
-    .select<"*, categories ( *, clues ( * ) )", GameAndClues>(
-      "*, categories ( *, clues ( * ) )"
-    )
+    .from("games")
+    .select()
     .order("created_at", { ascending: false })
     .range(from, to);
 
@@ -288,7 +286,7 @@ export async function getGames(
     throw new Error(error.message);
   }
 
-  return data.map((gac) => dbGameToGame(gac));
+  return data;
 }
 
 /* Writes */
