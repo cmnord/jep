@@ -93,27 +93,20 @@ function BoardComponent({
   );
 }
 
-export function ConnectedBoardComponent({
-  focusedClue,
-  setFocusedClue,
-  roomId,
-  userId,
-}: {
-  focusedClue?: [number, number];
-  setFocusedClue: (i: number, j: number) => void;
-} & RoomProps) {
+export function ConnectedBoardComponent({ roomId, userId }: RoomProps) {
   const { board, boardControl, isAnswered, soloDispatch } = useEngineContext();
   const fetcher = useFetcher<Action>();
   useSoloAction(fetcher, soloDispatch);
 
   const tbodyRef = React.useRef<HTMLTableSectionElement | null>(null);
+  const [focusedClueIdx, setFocusedClue] = React.useState<[number, number]>();
 
   React.useEffect(() => {
-    if (focusedClue) {
-      const [i, j] = focusedClue;
+    if (focusedClueIdx) {
+      const [i, j] = focusedClueIdx;
       focusCell(i, j);
     }
-  }, [focusedClue]);
+  }, [focusedClueIdx]);
 
   const [playWagerSfx] = useGameSound(WAGER_SFX);
 
@@ -182,10 +175,10 @@ export function ConnectedBoardComponent({
   };
 
   function handleFocusClue(i: number, j: number) {
-    if (focusedClue && focusedClue[0] === i && focusedClue[1] === j) {
+    if (focusedClueIdx && focusedClueIdx[0] === i && focusedClueIdx[1] === j) {
       return;
     }
-    setFocusedClue(i, j);
+    setFocusedClue([i, j]);
   }
 
   const isFinalBoard =
