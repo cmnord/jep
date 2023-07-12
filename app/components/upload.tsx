@@ -8,6 +8,8 @@ import { WarningMessage } from "~/components/error";
 import { ExclamationTriangle, LoadingSpinner } from "~/components/icons";
 import Link from "~/components/link";
 
+const UPLOAD_TEXT = "Upload new game";
+
 /** Heroicon name: solid/document-arrow-up */
 function UploadIcon() {
   return (
@@ -19,7 +21,7 @@ function UploadIcon() {
       role="img"
       aria-labelledby="upload-title"
     >
-      <title id="upload-title">Upload .jep.json file</title>
+      <title id="upload-title">{UPLOAD_TEXT}</title>
       <path
         fillRule="evenodd"
         d="M5.625 1.5H9a3.75 3.75 0 013.75 3.75v1.875c0 1.036.84 1.875 1.875 1.875H16.5a3.75 3.75 0 013.75 3.75v7.875c0 1.035-.84 1.875-1.875 1.875H5.625a1.875 1.875 0 01-1.875-1.875V3.375c0-1.036.84-1.875 1.875-1.875zm6.905 9.97a.75.75 0 00-1.06 0l-3 3a.75.75 0 101.06 1.06l1.72-1.72V18a.75.75 0 001.5 0v-4.19l1.72 1.72a.75.75 0 101.06-1.06l-3-3z"
@@ -54,7 +56,7 @@ function UploadBox({
         focus:ring-offset-2`}
       >
         {loading ? <LoadingSpinner className="mb-2" /> : <UploadIcon />}
-        <p>Upload .jep.json file</p>
+        <p>{UPLOAD_TEXT}</p>
         <input
           id="upload"
           type="file"

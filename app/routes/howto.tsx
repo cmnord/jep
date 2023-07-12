@@ -180,8 +180,8 @@ export default function HowTo() {
             ) : null}
             {buzzDurationMs && buzzDurationMs > CLUE_TIMEOUT_MS ? (
               <ErrorMessage>
-                You didn't buzz in within ${CLUE_TIMEOUT_MS / 1000}
-                seconds after the clue was done being "read".
+                You didn't buzz in within {CLUE_TIMEOUT_MS / 1000} seconds after
+                the clue was done being "read".
               </ErrorMessage>
             ) : null}
             {buzzedAt !== undefined &&
