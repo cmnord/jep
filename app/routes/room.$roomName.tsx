@@ -21,7 +21,7 @@ import { BASE_URL, getRandomName } from "~/utils";
 
 export const meta: V2_MetaFunction<typeof loader> = ({ data }) => {
   try {
-    return [{ title: data.game.title }];
+    return [{ title: data?.game.title }];
   } catch (error: unknown) {
     return [];
   }
@@ -98,7 +98,7 @@ export async function loader({ request, params }: LoaderArgs) {
       userId,
       BASE_URL,
     },
-    { headers }
+    { headers },
   );
 }
 
@@ -111,7 +111,7 @@ export default function PlayGame() {
     data.game,
     data.roomEvents,
     data.roomId,
-    data.accessToken
+    data.accessToken,
   );
 
   return (

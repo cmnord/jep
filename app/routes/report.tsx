@@ -34,7 +34,7 @@ export async function action({ request }: ActionArgs) {
         success: false,
         message: `URL must be from ${BASE_URL}`,
       },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -50,7 +50,7 @@ export async function action({ request }: ActionArgs) {
           success: false,
           message: "room name must be in the format of {roomId}-{roomName}",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -62,7 +62,7 @@ export async function action({ request }: ActionArgs) {
     if (!room || room.name !== name) {
       return json(
         { success: false, message: `room "${roomNameAndId}" not found` },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -82,14 +82,14 @@ export async function action({ request }: ActionArgs) {
       if (!game) {
         return json(
           { success: false, message: `game "${gameId}" not found` },
-          { status: 404 }
+          { status: 404 },
         );
       }
     } catch (error: unknown) {
       if (error instanceof Error) {
         return json(
           { success: false, message: `Error fetching game: ${error.message}` },
-          { status: 404 }
+          { status: 404 },
         );
       }
       throw error;
@@ -100,13 +100,13 @@ export async function action({ request }: ActionArgs) {
 
     return json(
       { success: true, message: `Reported game ${gameId}.` },
-      { status: 404 }
+      { status: 404 },
     );
   }
 
   return json(
     { success: false, message: "Could not find /game/ or /room/ in URL." },
-    { status: 400 }
+    { status: 400 },
   );
 }
 

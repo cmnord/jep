@@ -74,7 +74,7 @@ export async function commitAuthSession(
   }: {
     authSession?: AuthSession | null;
     flashErrorMessage?: string | null;
-  } = {}
+  } = {},
 ) {
   const session = await getSession(request);
 
@@ -101,7 +101,7 @@ export async function destroyAuthSession(request: Request) {
 
 async function assertAuthSession(
   request: Request,
-  { onFailRedirectTo }: { onFailRedirectTo?: string } = {}
+  { onFailRedirectTo }: { onFailRedirectTo?: string } = {},
 ) {
   const authSession = await getAuthSession(request);
 
@@ -116,7 +116,7 @@ async function assertAuthSession(
             flashErrorMessage: "no-user-session",
           }),
         },
-      }
+      },
     );
   }
 
@@ -125,7 +125,7 @@ async function assertAuthSession(
 
 export async function getValidAuthSession(
   request: Request,
-  { verify }: { verify: boolean } = { verify: false }
+  { verify }: { verify: boolean } = { verify: false },
 ) {
   const authSession = await getAuthSession(request);
   if (!authSession) return null;
@@ -157,7 +157,7 @@ export async function requireAuthSession(
   {
     onFailRedirectTo,
     verify,
-  }: { onFailRedirectTo?: string; verify: boolean } = { verify: false }
+  }: { onFailRedirectTo?: string; verify: boolean } = { verify: false },
 ): Promise<AuthSession> {
   // hello there
   const authSession = await assertAuthSession(request, {
@@ -186,7 +186,7 @@ async function refreshAuthSession(request: Request): Promise<AuthSession> {
   const authSession = await getAuthSession(request);
 
   const refreshedAuthSession = await refreshAccessToken(
-    authSession?.refreshToken
+    authSession?.refreshToken,
   );
 
   // 👾 game over, log in again

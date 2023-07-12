@@ -13,7 +13,7 @@ describe("randomWordFromListStartingWithLetter", () => {
       it(`adjectives list should return a random word starting with ${char}`, () => {
         const word = randomWordFromListStartingWithLetter(
           positiveAdjectivesList,
-          char
+          char,
         );
         expect(word).toBeDefined();
         if (!word.startsWith(char)) {

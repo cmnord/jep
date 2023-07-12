@@ -34,7 +34,7 @@ export default function Button({
             type === "default",
           "text-white hover:border-blue-300 hover:text-blue-300":
             type === "transparent",
-        }
+        },
       )}
       type={htmlType}
     >

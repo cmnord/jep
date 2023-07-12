@@ -173,12 +173,12 @@ function ReadCluePrompt({ roomId, userId }: RoomProps) {
   const myBuzzDurationMs = optimisticBuzzes.get(userId);
 
   const [clueShownAt, setClueShownAt] = React.useState<number | undefined>(
-    myBuzzDurationMs !== undefined ? 0 : undefined
+    myBuzzDurationMs !== undefined ? 0 : undefined,
   );
   const [clueIdx, setClueIdx] = React.useState(activeClue);
 
   const [buzzerOpenAt, setBuzzerOpenAt] = React.useState<number | undefined>(
-    myBuzzDurationMs !== undefined ? 0 : undefined
+    myBuzzDurationMs !== undefined ? 0 : undefined,
   );
   const [lockout, setLockout] = React.useState(false);
 
@@ -220,7 +220,7 @@ function ReadCluePrompt({ roomId, userId }: RoomProps) {
         userId,
         deltaMs: deltaMs.toString(),
       },
-      { method: "post", action: `/room/${roomId}/buzz` }
+      { method: "post", action: `/room/${roomId}/buzz` },
     );
   }, [submit, roomId, userId, clueIdx]);
 
@@ -264,7 +264,7 @@ function ReadCluePrompt({ roomId, userId }: RoomProps) {
     },
     buzzerOpenAt !== undefined && myBuzzDurationMs === undefined && clueIdx
       ? CLUE_TIMEOUT_MS
-      : null
+      : null,
   );
 
   // Play the "time's up" sound after 5 seconds if no one buzzed in.
@@ -273,10 +273,10 @@ function ReadCluePrompt({ roomId, userId }: RoomProps) {
     playTimesUpSfx,
     buzzerOpenAt !== undefined &&
       !Array.from(optimisticBuzzes.values()).some(
-        (v) => v !== CANT_BUZZ_FLAG && v < CLUE_TIMEOUT_MS
+        (v) => v !== CANT_BUZZ_FLAG && v < CLUE_TIMEOUT_MS,
       )
       ? CLUE_TIMEOUT_MS
-      : null
+      : null,
   );
 
   const handleClick = (clickedAtMs: number) => {
@@ -310,7 +310,7 @@ function ReadCluePrompt({ roomId, userId }: RoomProps) {
         userId,
         deltaMs: clueDeltaMs.toString(),
       },
-      { method: "post", action: `/room/${roomId}/buzz` }
+      { method: "post", action: `/room/${roomId}/buzz` },
     );
   };
 
@@ -367,7 +367,7 @@ function ReadLongFormCluePrompt({ roomId, userId }: RoomProps) {
   const canAnswer = myBuzzDurationMs !== CANT_BUZZ_FLAG;
 
   const [countdownStartedAt] = React.useState(
-    myBuzzDurationMs === undefined ? Date.now() : undefined
+    myBuzzDurationMs === undefined ? Date.now() : undefined,
   );
 
   // Play the long form sound when the component mounts.
@@ -430,10 +430,10 @@ function RevealAnswerToBuzzerPrompt({ roomId, userId }: RoomProps) {
   const [playTimesUpSfx] = useGameSound(TIMES_UP_SFX);
   useTimeout(
     playTimesUpSfx,
-    canShowAnswer && !showAnswer ? CLUE_TIMEOUT_MS : null
+    canShowAnswer && !showAnswer ? CLUE_TIMEOUT_MS : null,
   );
   const [countdownStartedAt] = React.useState(
-    canShowAnswer && !showAnswer ? Date.now() : undefined
+    canShowAnswer && !showAnswer ? Date.now() : undefined,
   );
 
   const winningPlayerName = winningBuzzer

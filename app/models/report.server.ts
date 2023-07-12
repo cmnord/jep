@@ -8,7 +8,7 @@ type ReportTable = Database["public"]["Tables"]["reports"];
 export async function insertReport(
   gameId: string,
   reason: string,
-  userId?: string
+  userId?: string,
 ) {
   const { data, error } = await db
     .from<"reports", ReportTable>("reports")

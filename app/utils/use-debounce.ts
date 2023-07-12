@@ -18,7 +18,7 @@ export default function useDebounce<T>(value: T, delayMs: number) {
         clearTimeout(handler);
       };
     },
-    [value, delayMs] // Only re-call effect if value or delay changes
+    [value, delayMs], // Only re-call effect if value or delay changes
   );
 
   return debouncedValue;

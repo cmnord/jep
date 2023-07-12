@@ -19,7 +19,7 @@ interface Props {
 const ClueButton = React.forwardRef<HTMLButtonElement, ButtonProps & Props>(
   (
     { answered, clue, hasBoardControl, onFocus, onClick, onKeyDown, ...rest },
-    ref
+    ref,
   ) => {
     const [loading, setLoading] = React.useState(false);
 
@@ -64,7 +64,7 @@ const ClueButton = React.forwardRef<HTMLButtonElement, ButtonProps & Props>(
             "hover:bg-blue-700 focus:bg-blue-700": playable,
             "bg-slate-800": !playable,
             "border-spin opacity-75": loading,
-          }
+          },
         )}
         ref={ref}
         {...rest}
@@ -75,7 +75,7 @@ const ClueButton = React.forwardRef<HTMLButtonElement, ButtonProps & Props>(
             {
               "opacity-0 group-hover:opacity-50 group-focus:opacity-50":
                 answered,
-            }
+            },
           )}
         >
           <span className="text-sm sm:text-3xl lg:text-4xl">$</span>
@@ -83,7 +83,7 @@ const ClueButton = React.forwardRef<HTMLButtonElement, ButtonProps & Props>(
         </p>
       </button>
     );
-  }
+  },
 );
 ClueButton.displayName = "ClueButton";
 

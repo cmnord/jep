@@ -56,7 +56,7 @@ function getSupabase(accessToken?: string) {
 function getSupabaseAdmin() {
   if (isBrowser)
     throw new Error(
-      "getSupabaseAdmin is not available in browser and should NOT be used in insecure environments"
+      "getSupabaseAdmin is not available in browser and should NOT be used in insecure environments",
     );
 
   return getSupabaseClient(SUPABASE_SERVICE_ROLE_KEY);

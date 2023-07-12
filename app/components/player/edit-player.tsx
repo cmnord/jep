@@ -108,7 +108,7 @@ export function EditPlayerForm({ roomId, userId }: RoomProps) {
   const formRef = React.useRef<HTMLFormElement | null>(null);
 
   const [optimisticPlayer, setOptimisticPlayer] = React.useState(
-    players.get(userId)
+    players.get(userId),
   );
 
   const [name, setName] = React.useState(optimisticPlayer?.name ?? "You");
@@ -131,7 +131,7 @@ export function EditPlayerForm({ roomId, userId }: RoomProps) {
       setOptimisticPlayer((prev) =>
         prev
           ? { ...prev, name: debouncedName }
-          : { userId, name: debouncedName, score: 0 }
+          : { userId, name: debouncedName, score: 0 },
       );
     }
   }, [editing, debouncedName, optimisticPlayer, userId, fetcher]);

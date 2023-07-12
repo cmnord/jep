@@ -14,7 +14,7 @@ export function isTypedRoomEvent(re: DbRoomEvent): re is RoomEvent {
 /** applyRoomEventsToState mutates State to account for each room event. */
 export function applyRoomEventsToState(
   state: State,
-  serverRoomEvents: DbRoomEvent[]
+  serverRoomEvents: DbRoomEvent[],
 ) {
   for (const re of serverRoomEvents) {
     if (!isTypedRoomEvent(re)) {

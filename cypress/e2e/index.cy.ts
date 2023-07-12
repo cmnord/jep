@@ -14,7 +14,7 @@ describe("landing page", () => {
         fileName: "incomplete-board.jep.json",
         contents: { name: "test board" },
       },
-      { force: true }
+      { force: true },
     );
 
     cy.findByRole("button", { name: /upload publicly/i }).click();

@@ -9,7 +9,7 @@ import type { Action } from "~/engine";
  */
 export default function useSoloAction(
   fetcher: Fetcher<Action>,
-  dispatch: React.Dispatch<Action>
+  dispatch: React.Dispatch<Action>,
 ) {
   React.useEffect(() => {
     const action = fetcher.data;

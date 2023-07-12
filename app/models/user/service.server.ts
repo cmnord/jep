@@ -9,7 +9,7 @@ type User = Database["public"]["Tables"]["accounts"]["Row"];
  * exists. This method is only used in signup.
  */
 export async function getUserExistsByEmailWithoutSession(
-  email: User["email"]
+  email: User["email"],
 ): Promise<boolean> {
   const { data, error } = await getSupabaseAdmin()
     .from("accounts")
@@ -25,7 +25,7 @@ export async function getUserExistsByEmailWithoutSession(
 
 export async function getUserByEmail(
   email: User["email"],
-  accessToken: AuthSession["accessToken"]
+  accessToken: AuthSession["accessToken"],
 ) {
   const { data, error } = await getSupabase(accessToken)
     .from("accounts")

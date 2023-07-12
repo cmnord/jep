@@ -42,7 +42,7 @@ export default function HowTo() {
   // Open the buzzers after the clue is done being "read".
   useTimeout(
     () => setBuzzerOpenAt(Date.now()),
-    buzzedAt === undefined ? CLUE_DURATION_MS : null
+    buzzedAt === undefined ? CLUE_DURATION_MS : null,
   );
 
   // Remove the lockout after 500ms.
@@ -56,7 +56,7 @@ export default function HowTo() {
     },
     buzzerOpenAt !== undefined && buzzedAt === undefined
       ? CLUE_TIMEOUT_MS
-      : null
+      : null,
   );
 
   function handleClick(clickedAtMs: number) {

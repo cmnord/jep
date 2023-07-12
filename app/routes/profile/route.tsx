@@ -23,7 +23,7 @@ export async function loader({ request }: LoaderArgs) {
 
   const games = await getGamesForUser(
     authSession.userId,
-    authSession.accessToken
+    authSession.accessToken,
   );
 
   const [formState, headers] = await getSessionFormState(request);
@@ -31,7 +31,7 @@ export async function loader({ request }: LoaderArgs) {
   const user = await getUserByEmail(authSession.email, authSession.accessToken);
   return json(
     { user, formState, games, env: { BASE_URL }, authSession },
-    { headers }
+    { headers },
   );
 }
 

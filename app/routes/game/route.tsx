@@ -21,7 +21,7 @@ export async function action({ request }: ActionArgs) {
     const uploadHandler = await newUploadHandler(authSession, visibility);
     const formData = await unstable_parseMultipartFormData(
       request,
-      uploadHandler
+      uploadHandler,
     );
     // formData.get will return the type our upload handler returns.
     const gameKey = formData.get("upload")?.toString();

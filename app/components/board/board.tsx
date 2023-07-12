@@ -82,7 +82,7 @@ function BoardComponent({
                     />
                   ) : (
                     <td key={`clue-${i}-${j}`} />
-                  )
+                  ),
                 )}
               </tr>
             ))}
@@ -136,7 +136,7 @@ export function ConnectedBoardComponent({ roomId, userId }: RoomProps) {
     }
     return fetcher.submit(
       { i: i.toString(), j: j.toString(), userId },
-      { method: "post", action: `/room/${roomId}/choose-clue` }
+      { method: "post", action: `/room/${roomId}/choose-clue` },
     );
   }
 

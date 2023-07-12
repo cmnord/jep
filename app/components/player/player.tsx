@@ -21,7 +21,7 @@ function PlayerScore({
         {
           "border-slate-200": !hasBoardControl,
           "border-yellow-400": hasBoardControl,
-        }
+        },
       )}
     >
       <div

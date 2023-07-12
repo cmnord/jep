@@ -103,9 +103,9 @@ export function gameToJson(game: Game): string {
               value: clue.value,
               wagerable: clue.wagerable,
               longForm: clue.longForm,
-            })
+            }),
           ),
-        })
+        }),
       ),
     })),
   };
@@ -132,7 +132,7 @@ function validateGame(game: ConvertedGame) {
     }
     if (board.categoryNames.length === 0) {
       throw new Error(
-        "board " + round + " must have at least one category name"
+        "board " + round + " must have at least one category name",
       );
     }
     if (board.categoryNames.length !== board.categories.length) {
@@ -156,12 +156,12 @@ function validateGame(game: ConvertedGame) {
         const clue = category.clues[i];
         if (clue.clue.trim() === "") {
           throw new Error(
-            "clue " + i + " in category " + j + " must not be empty"
+            "clue " + i + " in category " + j + " must not be empty",
           );
         }
         if (clue.answer.trim() === "") {
           throw new Error(
-            "answer " + i + " in category " + j + " must not be empty"
+            "answer " + i + " in category " + j + " must not be empty",
           );
         }
         if (clue.longForm && !clue.wagerable) {
@@ -170,7 +170,7 @@ function validateGame(game: ConvertedGame) {
               i +
               " in category " +
               j +
-              " must also be wagerable"
+              " must also be wagerable",
           );
         }
       }
@@ -197,12 +197,12 @@ function getPagination(page: number, pageSize: number = RESULTS_PER_PAGE) {
  */
 export async function getGame(
   gameId: string,
-  userId?: string
+  userId?: string,
 ): Promise<Game | null> {
   const { data, error } = await getSupabaseAdmin()
     .from<"games", GameTable>("games")
     .select<"*, categories ( *, clues ( * ) )", GameAndClues>(
-      "*, categories ( *, clues ( * ) )"
+      "*, categories ( *, clues ( * ) )",
     )
     .eq("id", gameId)
     .order("created_at", { foreignTable: "categories" })
@@ -229,7 +229,7 @@ export async function getGame(
 
 export async function getGamesForUser(
   userId: string,
-  accessToken?: AuthSession["accessToken"]
+  accessToken?: AuthSession["accessToken"],
 ) {
   const { data, error } = await getSupabase(accessToken)
     .from("games")
@@ -252,7 +252,7 @@ export async function getGames(
     page: number;
     search: string | null;
   },
-  accessToken?: AuthSession["accessToken"]
+  accessToken?: AuthSession["accessToken"],
 ) {
   const { search, page } = options;
   const { from, to } = getPagination(page);
@@ -295,7 +295,7 @@ export async function createGame(
   inputGame: ConvertedGame,
   visibility: GameVisibility,
   uploadedByUserId?: string,
-  accessToken?: AuthSession["accessToken"]
+  accessToken?: AuthSession["accessToken"],
 ) {
   validateGame(inputGame);
   const client = getSupabase(accessToken);
@@ -353,7 +353,7 @@ export async function createGame(
       const dbCategory = categoryData.find((c) => c.name === category.name);
       if (!dbCategory) {
         throw new Error(
-          "category " + category.name + " not inserted into database"
+          "category " + category.name + " not inserted into database",
         );
       }
       for (const clue of category.clues) {
@@ -385,7 +385,7 @@ export async function createGame(
 export async function updateGameVisibility(
   gameId: string,
   visibility: GameVisibility,
-  accessToken?: AuthSession["accessToken"]
+  accessToken?: AuthSession["accessToken"],
 ) {
   const { data, error } = await getSupabase(accessToken)
     .from("games")
@@ -407,7 +407,7 @@ export async function updateGameVisibility(
 
 export async function deleteGame(
   gameId: string,
-  accessToken?: AuthSession["accessToken"]
+  accessToken?: AuthSession["accessToken"],
 ) {
   const { data, error } = await getSupabase(accessToken)
     .from("games")

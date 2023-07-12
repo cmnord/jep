@@ -5,7 +5,7 @@ import * as React from "react";
  */
 export default function useScrollToBottom(
   callback: () => void,
-  thresholdPx: number = 50
+  thresholdPx: number = 50,
 ) {
   const [isNearBottom, setIsNearBottom] = React.useState(false);
 

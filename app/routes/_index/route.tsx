@@ -36,7 +36,7 @@ export async function loader({ request }: LoaderArgs) {
 
   const serverGames = await getGames(
     { page, search: searchParams.get("q") },
-    authSession?.accessToken
+    authSession?.accessToken,
   );
 
   const [formState, headers] = await getSessionFormState(request);

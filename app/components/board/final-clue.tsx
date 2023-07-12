@@ -55,7 +55,7 @@ export function FinalClue({
           "group relative h-full w-full grow border-8 border-black bg-blue-1000 px-6 py-8 transition-colors hover:bg-blue-700 focus:bg-blue-700",
           {
             "border-spin opacity-75": loading,
-          }
+          },
         )}
       >
         <p
@@ -66,7 +66,7 @@ export function FinalClue({
             {
               "opacity-0 group-hover:opacity-50 group-focus:opacity-50":
                 answered,
-            }
+            },
           )}
           style={{ fontSize }}
         >

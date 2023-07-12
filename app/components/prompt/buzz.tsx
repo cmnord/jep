@@ -36,7 +36,7 @@ function Buzz({
             {
               "text-green-300": clueValue >= 0,
               "text-red-300": clueValue < 0,
-            }
+            },
           )}
         >
           {clueValueStr}
@@ -92,7 +92,7 @@ export function Buzzes({
           const answer = answeredBy(
             activeClue[0],
             activeClue[1],
-            player.userId
+            player.userId,
           );
           const clueValue = getClueValue(activeClue, player.userId);
           const correct = answer === true;

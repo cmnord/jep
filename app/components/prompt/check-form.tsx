@@ -94,7 +94,7 @@ export function ConnectedCheckForm({
   const [disabled, setDisabled] = React.useState(true);
   useTimeout(
     () => setDisabled(false),
-    showAnswer ? null : REVEAL_ANSWER_DEBOUNCE_MS
+    showAnswer ? null : REVEAL_ANSWER_DEBOUNCE_MS,
   );
 
   if (!activeClue || !clue) {
@@ -113,7 +113,7 @@ export function ConnectedCheckForm({
               "absolute left-1/6 top-1/6 inline-flex h-2/3 w-2/3 rounded-md bg-blue-300 opacity-75",
               {
                 "animate-ping": !disabled,
-              }
+              },
             )}
           />
           <Button

@@ -58,7 +58,7 @@ export function getWinningBuzzer(buzzes: Map<string, number>):
       }
       return acc;
     },
-    { userId: "", deltaMs: Number.MAX_SAFE_INTEGER }
+    { userId: "", deltaMs: Number.MAX_SAFE_INTEGER },
   );
 
   if (result.userId === "") {
@@ -73,15 +73,15 @@ function setIsAnswered(
   isAnswered: ClueAnswer[][],
   i: number,
   j: number,
-  setFn: (prev: ClueAnswer) => void
+  setFn: (prev: ClueAnswer) => void,
 ) {
   const deepCopy: ClueAnswer[][] = isAnswered.map((row) =>
     row.map(
       (cell): ClueAnswer => ({
         isAnswered: cell.isAnswered,
         answeredBy: new Map(cell.answeredBy),
-      })
-    )
+      }),
+    ),
   );
   setFn(deepCopy[i][j]);
   return deepCopy;
@@ -191,12 +191,12 @@ export function gameEngine(state: State, action: Action): State {
             ? new Map(
                 allPlayers
                   .filter(([, p]) => p.score <= 0)
-                  .map(([pUserId]) => [pUserId, CANT_BUZZ_FLAG])
+                  .map(([pUserId]) => [pUserId, CANT_BUZZ_FLAG]),
               )
             : new Map(
                 allPlayers
                   .filter(([pUserId]) => pUserId !== state.boardControl)
-                  .map(([pUserId]) => [pUserId, CANT_BUZZ_FLAG])
+                  .map(([pUserId]) => [pUserId, CANT_BUZZ_FLAG]),
               );
 
           const numExpectedWagers = state.players.size - buzzes.size;
@@ -436,7 +436,7 @@ export function gameEngine(state: State, action: Action): State {
           // Give board control to the player with the highest score after all
           // wagers add up.
           const boardControl = Array.from(players.entries()).sort(
-            ([, a], [, b]) => b.score - a.score
+            ([, a], [, b]) => b.score - a.score,
           )[0][0];
           return State.copy(state, {
             type: GameState.RevealAnswerToAll,
@@ -466,8 +466,8 @@ export function gameEngine(state: State, action: Action): State {
         // New buzzes are those previously locked out plus this one.
         const buzzes = new Map(
           Array.from(state.buzzes).filter(
-            ([, deltaMs]) => deltaMs === CANT_BUZZ_FLAG
-          )
+            ([, deltaMs]) => deltaMs === CANT_BUZZ_FLAG,
+          ),
         );
         buzzes.set(userId, CANT_BUZZ_FLAG);
 
@@ -492,7 +492,7 @@ export function gameEngine(state: State, action: Action): State {
         });
       }
       throw new Error(
-        "Check action must have an associated index and correct/incorrect"
+        "Check action must have an associated index and correct/incorrect",
       );
     case ActionType.NextClue:
       if (isClueAction(action)) {
@@ -526,7 +526,7 @@ export function gameEngine(state: State, action: Action): State {
           // Board control goes to the player with the lowest score. In the
           // case of a tie, keep the same player in control.
           const lowestScoringPlayer = Array.from(state.players.values()).sort(
-            (a, b) => a.score - b.score
+            (a, b) => a.score - b.score,
           )[0];
 
           let newBoardControl = lowestScoringPlayer.userId;

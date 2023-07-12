@@ -3,7 +3,7 @@ import type { SupabaseAuthSession } from "~/supabase";
 import type { AuthSession } from "./types";
 
 export function mapAuthSession(
-  supabaseAuthSession: SupabaseAuthSession | null
+  supabaseAuthSession: SupabaseAuthSession | null,
 ): AuthSession | null {
   if (!supabaseAuthSession) return null;
 

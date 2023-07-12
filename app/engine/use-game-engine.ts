@@ -13,7 +13,7 @@ import { State } from "./state";
 function stateToGameEngine(
   game: Game,
   state: State,
-  dispatch: React.Dispatch<Action>
+  dispatch: React.Dispatch<Action>,
 ) {
   // Board may be undefined
   const board = game.boards.at(state.round);
@@ -95,7 +95,7 @@ export function useGameEngine(
   game: Game,
   serverRoomEvents: DbRoomEvent[],
   roomId: number,
-  accessToken?: AuthSession["accessToken"]
+  accessToken?: AuthSession["accessToken"],
 ) {
   const [, setRoomEvents] = React.useState(serverRoomEvents);
 
@@ -105,7 +105,7 @@ export function useGameEngine(
     gameEngine,
     { game, serverRoomEvents },
     (arg) =>
-      applyRoomEventsToState(State.fromGame(arg.game), arg.serverRoomEvents)
+      applyRoomEventsToState(State.fromGame(arg.game), arg.serverRoomEvents),
   );
 
   const client = React.useMemo(() => getSupabase(accessToken), [accessToken]);
@@ -129,7 +129,7 @@ export function useGameEngine(
             const newEvent = payload.new;
             if (!isTypedRoomEvent(newEvent)) {
               throw new Error(
-                "unhandled room event type from DB: " + newEvent.type
+                "unhandled room event type from DB: " + newEvent.type,
               );
             }
             // Use setRoomEvents instead of roomEvents directly so roomEvents
@@ -142,7 +142,7 @@ export function useGameEngine(
               }
               return re;
             });
-          }
+          },
         )
         .subscribe((status, err) => {
           console.info(status);

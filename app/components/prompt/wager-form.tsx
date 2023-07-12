@@ -125,7 +125,7 @@ export function ConnectedWagerForm({ roomId, userId }: RoomProps) {
 
   const highestClueValue = React.useMemo(
     () => getHighestClueValue(board),
-    [board]
+    [board],
   );
 
   const wager = wagers.get(userId);

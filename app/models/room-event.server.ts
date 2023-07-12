@@ -26,7 +26,7 @@ export async function getRoomEvents(roomId: number): Promise<DbRoomEvent[]> {
 export async function createRoomEvent(
   roomId: number,
   type: ActionType,
-  payload?: Json
+  payload?: Json,
 ) {
   const { data, error } = await db
     .from<"room_events", RoomEventTable>("room_events")

@@ -32,7 +32,7 @@ export async function action({ request }: ActionArgs) {
   if (password.length < 6) {
     return json(
       { success: false, message: "Password must be at least 6 characters" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -43,7 +43,7 @@ export async function action({ request }: ActionArgs) {
         success: false,
         message: "User already exists with this email, sign in instead",
       },
-      { status: 400 }
+      { status: 400 },
     );
   }
 

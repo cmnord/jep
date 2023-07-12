@@ -37,7 +37,7 @@ function badRequest(message: string) {
 
 export function getRequiredParam(
   params: Record<string, string | undefined>,
-  key: string
+  key: string,
 ) {
   const value = params[key];
 
@@ -56,7 +56,7 @@ export function assertIsPost(request: Request, message = "Method not allowed") {
 
 export function assertIsDelete(
   request: Request,
-  message = "Method not allowed"
+  message = "Method not allowed",
 ) {
   if (!isDelete(request)) {
     throw notAllowedMethod(message);
@@ -72,7 +72,7 @@ export function assertIsDelete(
  */
 export function safeRedirect(
   to: FormDataEntryValue | string | null | undefined,
-  defaultRedirect = "/"
+  defaultRedirect = "/",
 ) {
   if (
     !to ||

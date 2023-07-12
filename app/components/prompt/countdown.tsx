@@ -60,7 +60,7 @@ export function Countdown({
 
   return (
     <div
-      className={classNames("flex justify-center mt-2", {
+      className={classNames("mt-2 flex justify-center", {
         "gap-2": numBars < 10,
         "gap-1": numBars >= 10,
       })}

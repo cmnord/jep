@@ -51,7 +51,7 @@ export async function action({ request, params }: ActionArgs) {
     const game = await updateGameVisibility(
       gameId,
       visibility,
-      authSession?.accessToken
+      authSession?.accessToken,
     );
 
     const formState = {

@@ -6,7 +6,7 @@ import * as React from "react";
  */
 export function useKeyPress(
   targetKey: KeyboardEvent["key"],
-  callback: () => void
+  callback: () => void,
 ) {
   React.useEffect(() => {
     function handleKeyPress(event: KeyboardEvent) {

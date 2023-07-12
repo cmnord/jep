@@ -22,7 +22,7 @@ function streamToString(readable: stream.Readable): Promise<string> {
 
 function newGameUploadHandler(
   authSession: AuthSession | null,
-  visibility: GameVisibility
+  visibility: GameVisibility,
 ) {
   const userId = authSession?.userId;
 
@@ -40,7 +40,7 @@ function newGameUploadHandler(
       game,
       visibility,
       userId,
-      authSession?.accessToken
+      authSession?.accessToken,
     );
 
     return gameId;
@@ -53,13 +53,13 @@ function newGameUploadHandler(
  */
 export async function newUploadHandler(
   authSession: AuthSession | null,
-  visibility: GameVisibility
+  visibility: GameVisibility,
 ) {
   const uploadHandler = newGameUploadHandler(authSession, visibility);
 
   return unstable_composeUploadHandlers(
     uploadHandler,
     // Parse everything else into memory
-    unstable_createMemoryUploadHandler()
+    unstable_createMemoryUploadHandler(),
   );
 }

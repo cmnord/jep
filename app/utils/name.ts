@@ -40,7 +40,7 @@ function makeCombinedPdf(...arrays: string[][]) {
   for (const pdf of pdfs) {
     if (pdf.length !== len) {
       throw new Error(
-        `pdfs must be the same length ${len}, but one is ${pdfs.length}`
+        `pdfs must be the same length ${len}, but one is ${pdfs.length}`,
       );
     }
   }
@@ -119,7 +119,7 @@ function randomInRange(min: number, max: number) {
 
 export function randomWordFromListStartingWithLetter(
   sortedArray: string[],
-  char: string
+  char: string,
 ) {
   const range = binarySearchRange(sortedArray, char);
   if (!range) {
@@ -159,7 +159,7 @@ export function getRandomNameWithSample(sample: number) {
 
   const adjective = randomWordFromListStartingWithLetter(
     positiveAdjectivesList,
-    char
+    char,
   );
   const noun = randomWordFromListStartingWithLetter(pokeNamesList, char);
 

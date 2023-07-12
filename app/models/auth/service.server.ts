@@ -70,7 +70,7 @@ export async function getAuthAccountByAccessToken(accessToken: string) {
 }
 
 export async function refreshAccessToken(
-  refreshToken?: string
+  refreshToken?: string,
 ): Promise<AuthSession | null> {
   if (!refreshToken) return null;
 
@@ -91,7 +91,7 @@ export async function refreshAccessToken(
 
 export async function verifyAuthSession(authSession: AuthSession) {
   const authAccount = await getAuthAccountByAccessToken(
-    authSession.accessToken
+    authSession.accessToken,
   );
 
   return Boolean(authAccount);

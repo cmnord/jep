@@ -151,7 +151,7 @@ export class State {
     return board.categories.reduce(
       (acc, category) =>
         (acc += category.clues.filter((c) => clueIsPlayable(c)).length),
-      0
+      0,
     );
   }
 }

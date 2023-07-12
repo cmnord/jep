@@ -26,7 +26,7 @@ const { getSession, commitSession } = createCookieSessionStorage({
 /** getSessionFormState appends to existing headers if provided. */
 export async function getSessionFormState(
   request: Request,
-  headers = new Headers()
+  headers = new Headers(),
 ): Promise<[FormState | undefined, Headers]> {
   const session = await getSession(request.headers.get("Cookie"));
   const data = session.get("formState");
@@ -41,7 +41,7 @@ export async function getSessionFormState(
 export async function flashFormState(
   request: Request,
   data: FormState,
-  headers = new Headers()
+  headers = new Headers(),
 ): Promise<Headers> {
   const session = await getSession(request.headers.get("Cookie"));
   session.flash(FORM_STATE_KEY, JSON.stringify(data));
@@ -62,7 +62,7 @@ async function getUserSession(request: Request) {
 async function createUserSession(
   request: Request,
   userId: string,
-  headers = new Headers()
+  headers = new Headers(),
 ) {
   const session = await getSession(request.headers.get("Cookie"));
   session.set(USER_SESSION_KEY, userId);
@@ -73,7 +73,7 @@ async function createUserSession(
 /** getOrCreateUserSession appends to existing headers if provided. */
 export async function getOrCreateUserSession(
   request: Request,
-  headers = new Headers()
+  headers = new Headers(),
 ) {
   let userId = await getUserSession(request);
   if (!userId) {

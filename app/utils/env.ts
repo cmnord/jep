@@ -27,7 +27,7 @@ type EnvOptions = {
 };
 function getEnv(
   name: string,
-  { isRequired, isSecret }: EnvOptions = { isSecret: true, isRequired: true }
+  { isRequired, isSecret }: EnvOptions = { isSecret: true, isRequired: true },
 ) {
   if (isBrowser && isSecret) return "";
 
