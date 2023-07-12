@@ -17,7 +17,6 @@ import {
   SuccessMessage,
 } from "~/components/error";
 import { LoadingSpinner, QuestionMarkCircle } from "~/components/icons";
-import StyledLink from "~/components/link";
 import Main from "~/components/main";
 import Popover from "~/components/popover";
 import Search from "~/components/search";
@@ -150,9 +149,6 @@ export default function Index() {
           loading={navigation.state === "loading"}
         />
         <div className="mb-4 flex flex-col flex-wrap justify-between gap-2 sm:flex-row">
-          <StyledLink to="/join" className="text-sm">
-            Join an existing game
-          </StyledLink>
           <div className="inline-flex items-center gap-3">
             <Switch
               name="solo"
