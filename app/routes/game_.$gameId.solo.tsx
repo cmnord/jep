@@ -48,7 +48,10 @@ export async function loader({ request, params }: LoaderArgs) {
   }
 }
 
-export default function PlayGame() {
+/** SoloGame lets a single user play a game without others being able to join. If
+ * they refresh the page, the game will reset.
+ */
+export default function SoloGame() {
   const data = useLoaderData<typeof loader>();
   const matches = useMatches();
   const pathname = matches[matches.length - 1].pathname;

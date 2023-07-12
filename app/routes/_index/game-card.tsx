@@ -5,15 +5,9 @@ import { GameVisibilityTag } from "~/components/game-visibility-icon";
 import { LoadingSpinner } from "~/components/icons";
 import type { DbGame } from "~/models/game.server";
 
-export default function GameCard({
-  game,
-  solo,
-}: {
-  game: DbGame;
-  solo: boolean;
-}) {
+export default function GameCard({ game }: { game: DbGame }) {
   const [loading, setLoading] = React.useState(false);
-  const to = solo ? `/game/${game.id}/solo` : `/game/${game.id}/play`;
+  const to = `/game/${game.id}/play`;
 
   return (
     <button
