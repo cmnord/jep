@@ -71,7 +71,7 @@ function UploadBox({
       </button>
       <Link to="/help">
         <p id="upload_help" className="mt-1 text-sm">
-          File format help
+          Upload help
         </p>
       </Link>
     </div>

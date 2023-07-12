@@ -29,7 +29,7 @@ export default function Link({
   return (
     <RemixLink
       className={
-        className +
+        (className ?? "") +
         ` text-blue-600 underline transition-colors visited:text-purple-700
         hover:text-blue-500`
       }
