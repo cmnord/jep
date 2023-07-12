@@ -8,7 +8,6 @@ import {
   useSearchParams,
   useSubmit,
 } from "@remix-run/react";
-import classNames from "classnames";
 import * as React from "react";
 
 import {
@@ -16,11 +15,9 @@ import {
   ErrorMessage,
   SuccessMessage,
 } from "~/components/error";
-import { LoadingSpinner, QuestionMarkCircle } from "~/components/icons";
+import { LoadingSpinner } from "~/components/icons";
 import Main from "~/components/main";
-import Popover from "~/components/popover";
 import Search from "~/components/search";
-import Switch from "~/components/switch";
 import Upload from "~/components/upload";
 import { getValidAuthSession } from "~/models/auth";
 import { getGames } from "~/models/game.server";
@@ -66,10 +63,6 @@ export default function Index() {
   const submit = useSubmit();
   const navigation = useNavigation();
 
-  // Solo toggle
-  const solo = params.get("solo") === "on";
-  const [optimisticSolo, setOptimisticSolo] = React.useState(solo);
-
   // Pagination
   const gameFetcher = useFetcher<typeof loader>();
   const [games, setGames] = React.useState(data.serverGames);
@@ -80,8 +73,7 @@ export default function Index() {
   useScrollToBottom(() => {
     if (!shouldLoadMore) return;
     const qParam = debouncedSearch ? `&q=${debouncedSearch}` : "";
-    const soloParam = optimisticSolo ? "&solo=on" : "";
-    gameFetcher.load(`/?index${qParam}&page=${page}${soloParam}`);
+    gameFetcher.load(`/?index${qParam}&page=${page}`);
 
     setShouldLoadMore(false);
   });
@@ -107,10 +99,6 @@ export default function Index() {
     setPage(2);
     setShouldLoadMore(true);
   }, [data.serverGames]);
-
-  React.useEffect(() => {
-    setOptimisticSolo(solo);
-  }, [solo]);
 
   React.useEffect(() => {
     if (uploadFetcher.state === "submitting") {
@@ -148,32 +136,6 @@ export default function Index() {
           defaultValue={initialSearch}
           loading={navigation.state === "loading"}
         />
-        <div className="mb-4 flex flex-col flex-wrap justify-between gap-2 sm:flex-row">
-          <div className="inline-flex items-center gap-3">
-            <Switch
-              name="solo"
-              checked={optimisticSolo}
-              onClick={(checked) => setOptimisticSolo(checked)}
-            />
-            <div className="inline-flex gap-0.5">
-              <p
-                className={classNames("text-sm text-slate-500", {
-                  "font-bold": optimisticSolo,
-                })}
-              >
-                Solo mode {optimisticSolo ? "on" : "off"}
-              </p>
-              <Popover content="In solo mode, no other players can join the game. If you refresh the page the game will reset.">
-                <button type="button">
-                  <QuestionMarkCircle
-                    className={`h-4 w-4 rounded-md text-slate-400
-                  hover:bg-slate-100 hover:text-slate-500`}
-                  />
-                </button>
-              </Popover>
-            </div>
-          </div>
-        </div>
       </Form>
       <Upload
         fetcher={uploadFetcher}
@@ -195,7 +157,7 @@ export default function Index() {
       )}
       <div className="mb-4 flex flex-col gap-4 sm:grid sm:grid-cols-2">
         {games.map((game, i) => (
-          <GameCard key={`game-${i}`} game={game} solo={optimisticSolo} />
+          <GameCard key={`game-${i}`} game={game} />
         ))}
       </div>
       {gameFetcher.state === "loading" && (
