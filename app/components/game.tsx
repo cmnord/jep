@@ -1,5 +1,3 @@
-import * as React from "react";
-
 import BoardComponent from "~/components/board";
 import { WarningMessage } from "~/components/error";
 import PlayerScores, { EditPlayerForm } from "~/components/player";
@@ -29,28 +27,10 @@ export default function GameComponent({
   game: Game;
   url: string;
 } & RoomProps) {
-  const { type, round, activeClue } = useEngineContext();
-
-  const [focusedClueIdx, setFocusedClue] = React.useState<[number, number]>();
-
-  // Keep track of the previous value of activeClue. If it changes to undefined,
-  // focus on the previous clue.
-  const prevClueRef = React.useRef(activeClue);
-  React.useEffect(() => {
-    const prevClue = prevClueRef.current;
-    if (!activeClue && prevClue) {
-      const [i, j] = prevClue;
-      setFocusedClue([i, j]);
-    }
-    prevClueRef.current = activeClue;
-  }, [activeClue]);
+  const { type, round } = useEngineContext();
 
   const [playBoardFillSfx] = useGameSound(BOARD_FILL_SFX);
   const [playFinalSfx] = useGameSound(FINAL_CATEGORY_REVEAL_SFX);
-
-  const onFocusClue = (i: number, j: number) => {
-    setFocusedClue([i, j]);
-  };
 
   const { players, boardControl } = useEngineContext();
 
@@ -80,12 +60,7 @@ export default function GameComponent({
         url={url}
       />
       <div className="flex grow flex-col bg-slate-900">
-        <BoardComponent
-          focusedClue={focusedClueIdx}
-          setFocusedClue={onFocusClue}
-          roomId={roomId}
-          userId={userId}
-        />
+        <BoardComponent roomId={roomId} userId={userId} />
         <div
           className={`mx-auto flex w-full max-w-screen-lg flex-col gap-4 p-3
           text-slate-100 sm:p-6 md:p-12`}
