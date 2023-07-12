@@ -22,7 +22,7 @@ export default function CopyLinkButton({
       <button
         type="button"
         className={
-          className +
+          (className ?? "") +
           ` inline-flex items-center rounded-md p-1 text-slate-700
           hover:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500
           focus:ring-offset-2`

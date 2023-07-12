@@ -6,7 +6,7 @@ export default function Code({
   children: React.ReactNode;
 }) {
   return (
-    <code className={className + " rounded-md bg-slate-200 px-1 py-2"}>
+    <code className={(className ?? "") + " rounded-md bg-slate-200 px-1 py-2"}>
       {children}
     </code>
   );
