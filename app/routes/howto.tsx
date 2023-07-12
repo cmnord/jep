@@ -4,6 +4,7 @@ import * as React from "react";
 import Button from "~/components/button";
 import { ErrorMessage, SuccessMessage } from "~/components/error";
 import HowToPlay from "~/components/how-to-play";
+import { Anchor } from "~/components/link";
 import Main from "~/components/main";
 import { Kbd } from "~/components/prompt/kbd";
 import { Lockout } from "~/components/prompt/lockout";
@@ -104,10 +105,45 @@ export default function HowTo() {
   return (
     <div className="max-w-full grow">
       <Main>
-        <div className="px-4 pt-8 md:pt-16">
-          <HowToPlay />
-          <h1 className="mb-4 text-2xl font-semibold">Buzzer practice</h1>
+        <HowToPlay />
+        <h1 className="mb-4 text-2xl font-semibold">No typing required</h1>
+        <p className="mb-4">
+          Jep! is a fast-paced, high-trust group party game.
+        </p>
+        <p className="mb-4">
+          Join the same room or voice call while playing so you can speak the
+          answers out loud to one another instead of typing. This keeps the game
+          fast.
+        </p>
+        <p className="mb-4">
+          We trust the guesser to honestly check their answers as right or
+          wrong. All players in the room or voice call will hear the guess.
+          Then, the guesser sees the correct answer and checks themselves.
+        </p>
+        <div className="p-2">
+          <img src="/images/card.jpg" alt="Looking at cards privately" />
+          <p className="text-center text-sm">
+            Photo by{" "}
+            <Anchor href="https://unsplash.com/fr/@samgoh_">Sam Goh</Anchor> on{" "}
+            <Anchor href="https://unsplash.com/photos/Wfe_gWCpciU">
+              Unsplash
+            </Anchor>
+          </p>
         </div>
+        <p className="mb-4">
+          If they say they were wrong, the buzzers re-open for other people to
+          buzz in and guess. Don't spoil the correct answer by reading it out
+          loud before other people have a chance to guess!
+        </p>
+        <p className="mb-4">
+          If they say they were right, the answer is revealed to everyone. If
+          they were lying about being right earlier, don't play with them again!
+        </p>
+        <p className="mb-4">
+          If no one buzzes in, the answer is revealed to everyone.
+        </p>
+
+        <h1 className="mb-4 text-2xl font-semibold">Buzzer practice</h1>
         <button
           className="relative w-full bg-blue-1000 py-2"
           onClick={() => handleClick(Date.now())}
@@ -188,7 +224,7 @@ export default function HowTo() {
             buzzDurationMs &&
             buzzDurationMs < CLUE_TIMEOUT_MS ? (
               <SuccessMessage>
-                You successfully buzzed in ${buzzDurationMs}ms!
+                You successfully buzzed in {buzzDurationMs}ms!
               </SuccessMessage>
             ) : null}
             <div className="flex">

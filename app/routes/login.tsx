@@ -56,6 +56,10 @@ export default function Login() {
     <div className="max-w-full grow">
       <Main>
         <h1 className="mb-4 text-2xl font-semibold">Log in</h1>
+        <p className="mb-4">
+          Log in to upload unlisted or private games, edit games, or delete
+          games.
+        </p>
         <Form method="POST" className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <label
