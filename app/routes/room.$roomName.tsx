@@ -21,7 +21,7 @@ import { BASE_URL, getRandomName } from "~/utils";
 
 export const meta: V2_MetaFunction<typeof loader> = ({ data }) => {
   try {
-    return [{ title: data.game.title }];
+    return [{ title: data?.game.title }];
   } catch (error: unknown) {
     return [];
   }
