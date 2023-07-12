@@ -128,7 +128,7 @@ export function ConnectedBoardComponent({ roomId, userId }: RoomProps) {
 
   function handleClickClue(i: number, j: number) {
     const clue = board?.categories.at(j)?.clues.at(i);
-    if (isAnswered(i, j) || !clue) {
+    if (isAnswered(i, j) || !clue || !hasBoardControl) {
       return;
     }
     if (clue.wagerable && !clue.longForm) {

@@ -40,20 +40,20 @@ const ClueButton = React.forwardRef<HTMLButtonElement, ButtonProps & Props>(
         type="submit"
         disabled={disabled}
         onClick={(event) => {
-          if (disabled || !hasBoardControl) {
+          if (disabled) {
             return;
           }
-          if (!answered) {
+          if (!answered && hasBoardControl) {
             setLoading(true);
           }
           onClick(event);
         }}
         onFocus={onFocus}
         onKeyDown={(event) => {
-          if (disabled || !hasBoardControl) {
+          if (disabled) {
             return;
           }
-          if (!answered && event.key === "Enter") {
+          if (!answered && event.key === "Enter" && hasBoardControl) {
             setLoading(true);
           }
           onKeyDown(event);
