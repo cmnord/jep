@@ -24,7 +24,7 @@ import Footer from "~/components/footer";
 import Header from "~/components/header";
 import { getValidAuthSession } from "~/models/auth";
 import { getUserByEmail } from "~/models/user";
-import { BASE_URL, getBrowserEnv } from "~/utils";
+import { BASE_URL, getBrowserEnv, NODE_ENV } from "~/utils";
 import { SoundContext } from "~/utils/use-sound";
 
 import stylesheet from "./styles.css";
@@ -77,7 +77,7 @@ export async function loader({ request }: LoaderArgs) {
     ? await getUserByEmail(authSession.email, authSession.accessToken)
     : undefined;
 
-  return json({ user, env: getBrowserEnv(), BASE_URL });
+  return json({ user, env: getBrowserEnv(), BASE_URL, NODE_ENV });
 }
 
 export default function App() {
@@ -95,6 +95,25 @@ export default function App() {
         <Links />
       </head>
       <body className="relative flex min-h-screen flex-col">
+        {data.NODE_ENV === "production" && data.env.GA_TRACKING_ID ? (
+          <>
+            <script
+              async
+              src={`https://www.googletagmanager.com/gtag/js?id=${data.env.GA_TRACKING_ID}`}
+            />
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+
+                gtag('config', '${data.env.GA_TRACKING_ID}');
+              `,
+              }}
+            />
+          </>
+        ) : null}
         <SoundContext.Provider
           value={{
             volume,
