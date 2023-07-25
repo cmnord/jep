@@ -131,14 +131,17 @@ function GameSettings({ game, url }: { game: Game; url: string }) {
           <DropdownMenu.Label className="p-1 font-bold">
             {game.title}
           </DropdownMenu.Label>
-          <DropdownMenu.Label className="p-1">
-            by {game.author}
+          <DropdownMenu.Label className="p-1 text-slate-700">
+            {game.author} &middot; {game.copyright}
           </DropdownMenu.Label>
           {game.note && (
             <DropdownMenu.Label>
               <p className="break-words p-1 text-sm">{game.note}</p>
             </DropdownMenu.Label>
           )}
+          <DropdownMenu.Label className="p-1 text-sm text-slate-700">
+            {game.boards.length} round{game.boards.length === 1 ? "" : "s"}
+          </DropdownMenu.Label>
 
           <DropdownMenu.Separator className="m-1 h-px bg-slate-200" />
 
