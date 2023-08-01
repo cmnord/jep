@@ -478,7 +478,7 @@ function RevealAnswerToBuzzerPrompt({ roomId, userId }: RoomProps) {
           Waiting for response from {winningPlayerName}...
         </p>
       )}
-      <Countdown startTime={countdownStartedAt} />
+      <Countdown startTime={showAnswer ? undefined : countdownStartedAt} />
       <Buzzes showWinner={false} />
     </>
   );
