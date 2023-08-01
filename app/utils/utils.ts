@@ -7,7 +7,7 @@ const gameWords =
   );
 
 const SATURATION = 60;
-const LIGHTNESS = 85;
+const LIGHTNESS = 60;
 
 const formatter = Intl.NumberFormat("en-US", {
   style: "currency",
