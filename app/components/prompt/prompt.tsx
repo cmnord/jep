@@ -87,7 +87,7 @@ function ClueText({
         <br />
         <span
           className={classNames("text-cyan-300", {
-            "opacity-0": !showAnswer,
+            invisible: !showAnswer,
           })}
         >
           {answer}
@@ -134,7 +134,7 @@ function WagerCluePrompt({ roomId, userId }: RoomProps) {
           <div className="relative p-4">
             <ShinyText text="double down" />
             {/* Hidden absolute element keeps shiny text from overflowing its grid */}
-            <p className="absolute left-0 top-0 p-4 text-center font-black uppercase text-white opacity-0">
+            <p className="invisible absolute left-0 top-0 p-4 text-center font-black uppercase text-white">
               double down
             </p>
           </div>
