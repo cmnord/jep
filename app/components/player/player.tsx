@@ -66,7 +66,9 @@ export function PlayerScores({ userId }: { userId: string }) {
     .filter((p) => p.userId !== userId)
     .sort((a, b) => b.score - a.score);
 
-  const maxScore = sortedOtherPlayers[0] ? sortedOtherPlayers[0].score : 0;
+  const maxScore = sortedOtherPlayers[0]
+    ? sortedOtherPlayers[0].score
+    : yourPlayer.score;
 
   return (
     <div className="flex flex-col gap-2 sm:grid sm:grid-cols-3">
