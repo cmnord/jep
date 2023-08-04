@@ -51,7 +51,7 @@ function newGameUploadHandler(
 
 /** newUploadHandler creates a function which uploads games to the database.
  */
-export async function newUploadHandler(
+export function newUploadHandler(
   authSession: AuthSession | null,
   visibility: GameVisibility,
 ) {

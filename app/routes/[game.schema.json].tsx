@@ -79,7 +79,7 @@ const SCHEMA = {
   required: ["title", "author", "copyright", "note", "boards"],
 };
 
-export async function loader() {
+export function loader() {
   const schemaStr = JSON.stringify(SCHEMA, null, 2);
 
   return new Response(schemaStr, {

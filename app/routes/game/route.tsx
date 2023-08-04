@@ -7,7 +7,7 @@ import { BASE_URL, getRedirectTo, safeRedirect } from "~/utils";
 
 import { newUploadHandler } from "./file-upload-handler.server";
 
-export async function loader() {
+export function loader() {
   throw redirect("/");
 }
 
@@ -18,7 +18,7 @@ export async function action({ request }: ActionArgs) {
   const redirectTo = getRedirectTo(request);
 
   try {
-    const uploadHandler = await newUploadHandler(authSession, visibility);
+    const uploadHandler = newUploadHandler(authSession, visibility);
     const formData = await unstable_parseMultipartFormData(
       request,
       uploadHandler,
