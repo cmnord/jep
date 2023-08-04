@@ -1,7 +1,7 @@
 import { BASE_URL } from "~/utils";
 
 /** SCHEMA is the JSON schema for *.jep.json files. */
-export const SCHEMA = {
+const SCHEMA = {
   $schema: "http://json-schema.org/draft-07/schema#",
   $id: BASE_URL + "/game.schema.json",
   additionalProperties: false,
@@ -78,3 +78,14 @@ export const SCHEMA = {
   },
   required: ["title", "author", "copyright", "note", "boards"],
 };
+
+export async function loader() {
+  const schemaStr = JSON.stringify(SCHEMA, null, 2);
+
+  return new Response(schemaStr, {
+    status: 200,
+    headers: {
+      "Content-Type": "application/schema+json",
+    },
+  });
+}
