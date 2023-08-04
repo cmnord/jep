@@ -1,6 +1,7 @@
 import type { LoaderArgs, V2_MetaFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useLoaderData, useMatches } from "@remix-run/react";
+import isbot from "isbot";
 
 import GameComponent from "~/components/game";
 import {
@@ -51,6 +52,20 @@ export async function loader({ request, params }: LoaderArgs) {
   const accessToken = authSession?.accessToken;
 
   const roomEvents = await getRoomEvents(room.id);
+
+  // Do not add bots to the room.
+  const isBot = isbot(request.headers.get("User-Agent"));
+  if (isBot) {
+    return json({
+      game,
+      roomEvents,
+      roomId,
+      accessToken,
+      userId: "bot",
+      BASE_URL,
+    });
+  }
+
   // Construct the state of the game from the room events on the backend to see
   // if the game is over.
   const state = applyRoomEventsToState(State.fromGame(game), roomEvents);
