@@ -1,5 +1,11 @@
 # Jep!
 
+Play Jeopardy! online with your friends at [Jep!][jep]. Choose from past games or make your own. Just share the link to play with friends.
+
+:earth_americas: Play a game: [https://whatis.club][jep]
+
+:newspaper: Read the blog post: [https://clairenord.com/jep.html][blog]
+
 ## Development
 
 To run the app locally, make sure the project's local dependencies are
@@ -95,6 +101,9 @@ npx supabase gen types typescript --linked > app/models/database.types.ts
 
 [MIT](https://github.com/cmnord/jep/blob/main/LICENSE) ©
 [cmnord](https://github.com/cmnord/)
+
+[jep]: https://whatis.club
+[blog]: https://clairenord.com/jep.html
 
 [^1]: https://supabase.com/docs/guides/cli/local-development#database-migrations
 [^2]: https://supabase.com/docs/guides/cli/local-development#deploy-database-changes
