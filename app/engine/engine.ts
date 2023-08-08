@@ -286,14 +286,13 @@ export function gameEngine(state: State, action: Action): State {
 
         const buzzes = new Map(state.buzzes);
 
-        // Accept this buzz if the user has not already buzzed and the buzz came
-        // in before the timeout.
+        // Accept this buzz if the user has not already buzzed.
         if (!buzzes.has(userId)) {
           buzzes.set(userId, deltaMs);
         }
 
-        // Wait for others to buzz in if we haven't yet received buzzes from all
-        // players or a timeout buzz.
+        // Wait for others to buzz in if we haven't yet received a timeout buzz
+        // and not everyone has buzzed in yet.
         if (deltaMs <= CLUE_TIMEOUT_MS && buzzes.size < state.players.size) {
           return State.copy(state, { buzzes });
         }

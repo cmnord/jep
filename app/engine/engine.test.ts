@@ -283,7 +283,7 @@ describe("gameEngine", () => {
             userId: PLAYER2.userId,
             i: 0,
             j: 0,
-            deltaMs: CLUE_TIMEOUT_MS,
+            deltaMs: CLUE_TIMEOUT_MS + 1,
           },
         },
       ],
@@ -293,8 +293,42 @@ describe("gameEngine", () => {
         boardControl: PLAYER1.userId,
         buzzes: new Map([
           [PLAYER1.userId, 123],
-          [PLAYER2.userId, CLUE_TIMEOUT_MS],
+          [PLAYER2.userId, CLUE_TIMEOUT_MS + 1],
         ]),
+        players: new Map([
+          [PLAYER1.userId, PLAYER1],
+          [PLAYER2.userId, PLAYER2],
+        ]),
+      }),
+    },
+    {
+      name: "If one player buzzes in and then times out without a response from the other player, reveal answer to buzzer",
+      state: initialState,
+      actions: [
+        ...TWO_PLAYERS_ROUND_0,
+        {
+          type: ActionType.ChooseClue,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0 },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0, deltaMs: 123 },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: {
+            userId: PLAYER1.userId,
+            i: 0,
+            j: 0,
+            deltaMs: CLUE_TIMEOUT_MS + 1,
+          },
+        },
+      ],
+      expectedState: State.copy(initialState, {
+        type: GameState.RevealAnswerToBuzzer,
+        activeClue: [0, 0],
+        boardControl: PLAYER1.userId,
+        buzzes: new Map([[PLAYER1.userId, 123]]),
         players: new Map([
           [PLAYER1.userId, PLAYER1],
           [PLAYER2.userId, PLAYER2],

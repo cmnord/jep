@@ -250,8 +250,8 @@ function ReadCluePrompt({ roomId, userId }: RoomProps) {
   // Remove the lockout after 500ms.
   useTimeout(() => setLockout(false), lockout ? LOCKOUT_MS : null);
 
-  // If the contestant doesn't buzz for 5 seconds, close the buzzer and send a
-  // 5-second "non-buzz" buzz to the server.
+  // If nothing happens for 5 seconds after the buzzer opens, close the buzzer
+  // and send a 5-second "non-buzz" buzz to the server.
   useTimeout(
     () => {
       setOptimisticBuzzes((old) => {
@@ -262,21 +262,18 @@ function ReadCluePrompt({ roomId, userId }: RoomProps) {
       });
       submitTimeoutBuzz();
     },
-    buzzerOpenAt !== undefined && myBuzzDurationMs === undefined && clueIdx
-      ? CLUE_TIMEOUT_MS
-      : null,
+    buzzerOpenAt === undefined ? null : CLUE_TIMEOUT_MS,
   );
 
-  // Play the "time's up" sound after 5 seconds if no one buzzed in.
+  // Play the "time's up" sound after 5 seconds if no one buzzed in after the
+  // buzzer opened.
   const [playTimesUpSfx] = useGameSound(TIMES_UP_SFX);
+  const someoneBuzzed = Array.from(optimisticBuzzes.values()).some(
+    (v) => v !== CANT_BUZZ_FLAG && v < CLUE_TIMEOUT_MS,
+  );
   useTimeout(
     playTimesUpSfx,
-    buzzerOpenAt !== undefined &&
-      !Array.from(optimisticBuzzes.values()).some(
-        (v) => v !== CANT_BUZZ_FLAG && v < CLUE_TIMEOUT_MS,
-      )
-      ? CLUE_TIMEOUT_MS
-      : null,
+    buzzerOpenAt === undefined || someoneBuzzed ? null : CLUE_TIMEOUT_MS,
   );
 
   const handleClick = (clickedAtMs: number) => {
