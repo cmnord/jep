@@ -181,12 +181,12 @@ export function ConnectedBoardComponent({ roomId, userId }: RoomProps) {
     setFocusedClue([i, j]);
   }
 
-  const isFinalBoard =
+  const isSingleLongFormClue =
     board.categories.length === 1 &&
     board.categories[0].clues.length === 1 &&
     board.categories[0].clues[0].longForm;
 
-  if (isFinalBoard) {
+  if (isSingleLongFormClue) {
     return (
       <FinalClue
         category={board.categories[0].name}

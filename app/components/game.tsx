@@ -43,12 +43,11 @@ export default function GameComponent({
     ? stringToHslColor(boardController.userId)
     : "gray";
 
-  const isFinalRound = round > 0 && round === game.boards.length - 1;
-  const isFinalRoundWithOneClue =
-    isFinalRound &&
-    game.boards[round].categories.length === 1 &&
-    game.boards[round].categories[0].clues.length === 1 &&
-    game.boards[round].categories[0].clues[0].longForm;
+  const board = game.boards[round];
+  const isSingleLongFormClue =
+    board.categories.length === 1 &&
+    board.categories[0].clues.length === 1 &&
+    board.categories[0].clues[0].longForm;
 
   return (
     <>
@@ -56,7 +55,7 @@ export default function GameComponent({
         numRounds={game.boards.length}
         roomId={roomId}
         userId={userId}
-        onDismiss={isFinalRound ? playFinalSfx : playBoardFillSfx}
+        onDismiss={isSingleLongFormClue ? playFinalSfx : playBoardFillSfx}
         url={url}
       />
       <div className="flex grow flex-col bg-slate-900">
@@ -67,7 +66,7 @@ export default function GameComponent({
         >
           {type === GameState.GameOver ? <PostGameSummary /> : null}
           {type !== GameState.GameOver ? (
-            isFinalRoundWithOneClue ? (
+            isSingleLongFormClue ? (
               <WarningMessage theme="dark">
                 Let's go to the final clue!
               </WarningMessage>

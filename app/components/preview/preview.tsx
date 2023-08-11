@@ -24,7 +24,7 @@ export function Preview({
   onDismiss: () => void;
   url: string;
 } & RoomProps) {
-  const { type, boardControl, players, round, soloDispatch } =
+  const { type, board, boardControl, players, round, soloDispatch } =
     useEngineContext();
 
   const isOpen = type === GameState.PreviewRound;
@@ -36,6 +36,13 @@ export function Preview({
 
   const fetcher = useFetcher<Action>();
   useSoloAction(fetcher, soloDispatch);
+
+  if (!board) return null;
+
+  const isSingleLongFormClue =
+    board.categories.length === 1 &&
+    board.categories[0].clues.length === 1 &&
+    board.categories[0].clues[0].longForm;
 
   const borderColor = boardController
     ? stringToHslColor(boardController.userId)
@@ -53,15 +60,17 @@ export function Preview({
         </div>
       }
       description={
-        <>
-          <span
-            className="border-b-4 font-handwriting text-xl font-bold"
-            style={{ borderColor }}
-          >
-            {boardControlName}
-          </span>{" "}
-          will start with control of the board.
-        </>
+        isSingleLongFormClue ? null : (
+          <>
+            <span
+              className="border-b-4 font-handwriting text-xl font-bold"
+              style={{ borderColor }}
+            >
+              {boardControlName}
+            </span>{" "}
+            will start with control of the board.
+          </>
+        )
       }
     >
       {round === 0 ? (

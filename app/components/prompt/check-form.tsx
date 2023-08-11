@@ -25,7 +25,7 @@ function CheckForm({
 }) {
   return (
     <div className="flex flex-col items-center gap-2 p-2">
-      {!longForm && (
+      {longForm ? null : (
         <>
           <p className="text-center font-korinna text-2xl font-bold uppercase text-slate-300 shadow-sm">
             {answer}

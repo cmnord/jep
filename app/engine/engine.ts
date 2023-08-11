@@ -166,10 +166,12 @@ export function gameEngine(state: State, action: Action): State {
           return state;
         }
         // Any player can choose the final clue.
-        const isFinalClue =
-          state.round == state.game.boards.length - 1 &&
-          state.numCluesInBoard == 1;
-        if (!isFinalClue && state.boardControl !== userId) {
+        const board = state.game.boards[state.round];
+        const isSingleLongFormClue =
+          board.categories.length === 1 &&
+          board.categories[0].clues.length === 1 &&
+          board.categories[0].clues[0].longForm;
+        if (!isSingleLongFormClue && state.boardControl !== userId) {
           return state;
         }
         const clue = state.game.boards
