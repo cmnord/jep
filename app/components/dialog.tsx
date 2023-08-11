@@ -39,39 +39,39 @@ export default function Dialog({
     <DialogPrimitive.Root open={isOpen}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay
-          className={`fixed inset-0 bg-slate-500 bg-opacity-75 transition-opacity
-          data-[state=open]:animate-overlayShow`}
-        />
-        <DialogPrimitive.Content
-          className={`fixed left-1/2 top-1/2 w-11/12 -translate-x-1/2
-          -translate-y-1/2 overflow-y-auto rounded-md bg-white p-4 shadow-xl
-          focus:outline-none
-          data-[state=open]:animate-contentShow sm:max-w-lg`}
+          className={`fixed bottom-0 left-0 right-0 top-0 grid
+          place-items-center overflow-y-auto bg-slate-500 bg-opacity-75
+          transition-opacity data-[state=open]:animate-overlayShow`}
         >
-          <DialogPrimitive.Title className="mb-4 text-2xl font-medium leading-6 text-blue-1000">
-            {title}
-          </DialogPrimitive.Title>
-          <DialogPrimitive.Description className="mb-5 mt-3 text-slate-500">
-            {description}
-          </DialogPrimitive.Description>
-          {children}
-          {onClickClose ? (
-            <DialogPrimitive.Close asChild>
-              <button
-                className={`absolute right-3 top-3 inline-flex h-6 w-6
+          <DialogPrimitive.Content
+            className={`rounded-md bg-white p-4 shadow-xl focus:outline-none
+            data-[state=open]:animate-contentShow sm:max-w-lg`}
+          >
+            <DialogPrimitive.Title className="mb-4 text-2xl font-medium leading-6 text-blue-1000">
+              {title}
+            </DialogPrimitive.Title>
+            <DialogPrimitive.Description className="mb-5 mt-3 text-slate-500">
+              {description}
+            </DialogPrimitive.Description>
+            {children}
+            {onClickClose ? (
+              <DialogPrimitive.Close asChild>
+                <button
+                  className={`absolute right-3 top-3 inline-flex h-6 w-6
               items-center justify-center rounded-full
               text-blue-600
               hover:bg-slate-100
                 focus:outline-none focus:ring-2 focus:ring-blue-500
                 focus:ring-offset-2`}
-                aria-label="Close"
-                onClick={onClickClose}
-              >
-                <XMarkIcon />
-              </button>
-            </DialogPrimitive.Close>
-          ) : null}
-        </DialogPrimitive.Content>
+                  aria-label="Close"
+                  onClick={onClickClose}
+                >
+                  <XMarkIcon />
+                </button>
+              </DialogPrimitive.Close>
+            ) : null}
+          </DialogPrimitive.Content>
+        </DialogPrimitive.Overlay>
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>
   );
