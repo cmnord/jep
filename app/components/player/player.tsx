@@ -67,7 +67,7 @@ export function PlayerScores({ userId }: { userId: string }) {
     .sort((a, b) => b.score - a.score);
 
   const maxScore = sortedOtherPlayers[0]
-    ? sortedOtherPlayers[0].score
+    ? Math.max(sortedOtherPlayers[0].score, yourPlayer.score)
     : yourPlayer.score;
 
   return (
