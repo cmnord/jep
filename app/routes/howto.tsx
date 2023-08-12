@@ -151,7 +151,7 @@ export default function HowTo() {
           <ReadClueTimer
             clueDurationMs={CLUE_DURATION_MS}
             shouldAnimate={buzzedAt === undefined}
-            wonBuzz={buzzedAt !== undefined && buzzedAt < CLUE_TIMEOUT_MS}
+            wonBuzz={buzzedAt !== undefined && buzzedAt <= CLUE_TIMEOUT_MS}
           />
           <div className="flex flex-col p-2">
             <div className="flex justify-between p-4">
@@ -222,7 +222,7 @@ export default function HowTo() {
             ) : null}
             {buzzedAt !== undefined &&
             buzzDurationMs &&
-            buzzDurationMs < CLUE_TIMEOUT_MS ? (
+            buzzDurationMs <= CLUE_TIMEOUT_MS ? (
               <SuccessMessage>
                 You successfully buzzed in {buzzDurationMs}ms!
               </SuccessMessage>

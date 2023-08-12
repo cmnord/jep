@@ -52,7 +52,7 @@ export function getWinningBuzzer(buzzes: Map<string, number>):
       if (
         deltaMs !== CANT_BUZZ_FLAG &&
         deltaMs < acc.deltaMs &&
-        deltaMs < CLUE_TIMEOUT_MS
+        deltaMs <= CLUE_TIMEOUT_MS
       ) {
         return { userId, deltaMs };
       }

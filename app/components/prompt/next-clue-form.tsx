@@ -111,7 +111,7 @@ export function ConnectedNextClueForm({ roomId, userId }: RoomProps) {
     soloDispatch,
   } = useEngineContext();
 
-  if (!activeClue) {
+  if (!activeClue || !clue) {
     throw new Error("No active clue");
   }
 
@@ -147,8 +147,8 @@ export function ConnectedNextClueForm({ roomId, userId }: RoomProps) {
         cluesLeftInRound={numCluesLeftInRound}
         loading={loading}
         answerers={answerers}
-        wagerable={clue?.wagerable ?? false}
-        longForm={clue?.longForm ?? false}
+        wagerable={clue.wagerable ?? false}
+        longForm={clue.longForm ?? false}
       />
     </fetcher.Form>
   );

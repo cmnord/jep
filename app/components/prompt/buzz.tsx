@@ -6,10 +6,10 @@ import { CANT_BUZZ_FLAG, CLUE_TIMEOUT_MS, useEngineContext } from "~/engine";
 import { formatDollarsWithSign } from "~/utils";
 
 function showBuzz(durationMs?: number) {
-  switch (durationMs) {
-    case undefined:
-    case CANT_BUZZ_FLAG:
-    case CLUE_TIMEOUT_MS + 1:
+  switch (true) {
+    case durationMs === undefined:
+    case durationMs === CANT_BUZZ_FLAG:
+    case durationMs && durationMs > CLUE_TIMEOUT_MS:
       return false;
     default:
       return true;

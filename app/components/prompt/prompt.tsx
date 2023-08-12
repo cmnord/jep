@@ -60,9 +60,9 @@ function ClueText({
   onBuzz,
   showAnswer,
 }: {
-  answer?: string;
+  answer: string;
   canBuzz: boolean;
-  clue?: string;
+  clue: string;
   focusOnBuzz: boolean;
   onBuzz: (buzzedAt: number) => void;
   showAnswer: boolean;
@@ -186,12 +186,13 @@ function ReadCluePrompt({ roomId, userId }: RoomProps) {
   useSoloAction(fetcher, soloDispatch);
   const submit = fetcher.submit;
 
-  const numCharactersInClue = clue?.clue.length ?? 0;
+  if (!clue) throw new Error("No clue found");
+  const numCharactersInClue = clue.clue.length ?? 0;
 
   // If we are reopening the buzzers after a wrong answer, delay a fixed amount
   // of time before re-opening the buzzers.
   const hasLockedOutBuzzers =
-    !clue?.wagerable &&
+    !clue.wagerable &&
     Array.from(optimisticBuzzes.values()).some((b) => b === CANT_BUZZ_FLAG);
   const clueDurationMs = hasLockedOutBuzzers
     ? READ_REOPENED_MS
@@ -209,39 +210,41 @@ function ReadCluePrompt({ roomId, userId }: RoomProps) {
     }
   }, [activeClue, myBuzzDurationMs]);
 
-  /** submitTimeoutBuzz submits a buzz of CLUE_TIMEOUT_MS + 1 to the server. */
-  const submitTimeoutBuzz = React.useCallback(() => {
-    const deltaMs = CLUE_TIMEOUT_MS + 1;
-    const [i, j] = clueIdx ?? [-1, -1];
-    return submit(
-      {
-        i: i.toString(),
-        j: j.toString(),
-        userId,
-        deltaMs: deltaMs.toString(),
-      },
-      { method: "post", action: `/room/${roomId}/buzz` },
-    );
-  }, [submit, roomId, userId, clueIdx]);
+  /** submitBuzz submits a buzz of deltaMs to the server. */
+  const submitBuzz = React.useCallback(
+    (deltaMs: number) => {
+      const [i, j] = clueIdx ?? [-1, -1];
+      return submit(
+        {
+          i: i.toString(),
+          j: j.toString(),
+          userId,
+          deltaMs: deltaMs.toString(),
+        },
+        { method: "post", action: `/room/${roomId}/buzz` },
+      );
+    },
+    [submit, roomId, userId, clueIdx],
+  );
 
   // Update optimisticBuzzes once buzzes come in from the server.
   React.useEffect(() => {
     // If a new buzz comes in that's less than the current deltaMs, submit a
     // timeout buzz.
     if (buzzerOpenAt) {
-      const currentDeltaMs = Date.now() - buzzerOpenAt;
+      const deltaMs = Date.now() - buzzerOpenAt;
       for (const [buzzUserId, buzz] of buzzes) {
         if (
           buzzUserId !== userId &&
           buzz !== CANT_BUZZ_FLAG &&
-          buzz < currentDeltaMs
+          buzz < deltaMs
         ) {
-          submitTimeoutBuzz();
+          submitBuzz(CLUE_TIMEOUT_MS + 1);
         }
       }
     }
     setOptimisticBuzzes(buzzes);
-  }, [buzzes, buzzerOpenAt, userId, submitTimeoutBuzz]);
+  }, [buzzes, buzzerOpenAt, userId, submitBuzz]);
 
   // Open the buzzer after the clue is done being "read".
   const delayMs = myBuzzDurationMs === undefined ? clueDurationMs : null;
@@ -254,13 +257,15 @@ function ReadCluePrompt({ roomId, userId }: RoomProps) {
   // and send a 5-second "non-buzz" buzz to the server.
   useTimeout(
     () => {
+      if (!buzzerOpenAt) return;
+      const deltaMs = Date.now() - buzzerOpenAt;
       setOptimisticBuzzes((old) => {
         if (old.has(userId)) {
           return old;
         }
-        return new Map([...old, [userId, CLUE_TIMEOUT_MS + 1]]);
+        return new Map([...old, [userId, deltaMs]]);
       });
-      submitTimeoutBuzz();
+      submitBuzz(deltaMs);
     },
     buzzerOpenAt === undefined ? null : CLUE_TIMEOUT_MS,
   );
@@ -269,7 +274,7 @@ function ReadCluePrompt({ roomId, userId }: RoomProps) {
   // buzzer opened.
   const [playTimesUpSfx] = useGameSound(TIMES_UP_SFX);
   const someoneBuzzed = Array.from(optimisticBuzzes.values()).some(
-    (v) => v !== CANT_BUZZ_FLAG && v < CLUE_TIMEOUT_MS,
+    (v) => v !== CANT_BUZZ_FLAG && v <= CLUE_TIMEOUT_MS,
   );
   useTimeout(
     playTimesUpSfx,
@@ -295,20 +300,11 @@ function ReadCluePrompt({ roomId, userId }: RoomProps) {
     }
 
     // Contestant buzzed, so submit their buzz time
-    const [i, j] = clueIdx;
-    const clueDeltaMs = clickedAtMs - buzzerOpenAt;
+    const deltaMs = clickedAtMs - buzzerOpenAt;
 
-    setOptimisticBuzzes((old) => old.set(userId, clueDeltaMs));
+    setOptimisticBuzzes((old) => old.set(userId, deltaMs));
 
-    return fetcher.submit(
-      {
-        i: i.toString(),
-        j: j.toString(),
-        userId,
-        deltaMs: clueDeltaMs.toString(),
-      },
-      { method: "post", action: `/room/${roomId}/buzz` },
-    );
+    return submitBuzz(deltaMs);
   };
 
   useKeyPress("Enter", () => handleClick(Date.now()));
@@ -323,7 +319,7 @@ function ReadCluePrompt({ roomId, userId }: RoomProps) {
         wonBuzz={
           myBuzzDurationMs !== undefined &&
           myBuzzDurationMs !== CANT_BUZZ_FLAG &&
-          myBuzzDurationMs < CLUE_TIMEOUT_MS
+          myBuzzDurationMs <= CLUE_TIMEOUT_MS
         }
       />
       <div className="flex justify-between p-4">
@@ -336,12 +332,12 @@ function ReadCluePrompt({ roomId, userId }: RoomProps) {
         </span>
       </div>
       <ClueText
-        clue={clue?.clue}
+        clue={clue.clue}
         canBuzz={!lockout && myBuzzDurationMs === undefined}
         onBuzz={() => handleClick(Date.now())}
         focusOnBuzz
         showAnswer={false}
-        answer={undefined}
+        answer={clue.answer}
       />
       <Lockout active={lockout} />
       <Countdown startTime={undefined} />
@@ -356,6 +352,7 @@ function ReadCluePrompt({ roomId, userId }: RoomProps) {
 function ReadLongFormCluePrompt({ roomId, userId }: RoomProps) {
   const { activeClue, buzzes, category, clue, getClueValue, soloDispatch } =
     useEngineContext();
+  if (!clue) throw new Error("clue is undefined");
 
   const fetcher = useFetcher<Action>();
   useSoloAction(fetcher, soloDispatch);
@@ -385,12 +382,12 @@ function ReadLongFormCluePrompt({ roomId, userId }: RoomProps) {
         </div>
       </div>
       <ClueText
-        clue={clue?.clue}
+        clue={clue.clue}
         canBuzz={false}
         onBuzz={() => null}
         focusOnBuzz={false}
         showAnswer={false}
-        answer={undefined}
+        answer={clue.answer}
       />
       {canAnswer ? (
         <AnswerForm roomId={roomId} userId={userId} />
@@ -416,8 +413,13 @@ function ReadLongFormCluePrompt({ roomId, userId }: RoomProps) {
 function RevealAnswerToBuzzerPrompt({ roomId, userId }: RoomProps) {
   const { activeClue, category, clue, getClueValue, players, winningBuzzer } =
     useEngineContext();
+  if (!clue) throw new Error("clue is undefined");
+  if (!activeClue) throw new Error("activeClue is undefined");
+  if (!winningBuzzer) throw new Error("winningBuzzer is undefined");
 
-  const clueValue = activeClue ? getClueValue(activeClue, userId) : 0;
+  const clueValue = clue.wagerable
+    ? getClueValue(activeClue, winningBuzzer)
+    : getClueValue(activeClue, userId);
 
   const canShowAnswer = winningBuzzer === userId;
   const [showAnswer, setShowAnswer] = React.useState(false);
@@ -454,9 +456,9 @@ function RevealAnswerToBuzzerPrompt({ roomId, userId }: RoomProps) {
         </span>
       </div>
       <ClueText
-        answer={clue?.answer}
+        answer={clue.answer}
         canBuzz={false}
-        clue={clue?.clue}
+        clue={clue.clue}
         focusOnBuzz={false}
         onBuzz={() => null}
         showAnswer={false}
@@ -484,6 +486,7 @@ function RevealAnswerToBuzzerPrompt({ roomId, userId }: RoomProps) {
 function RevealAnswerLongFormPrompt({ roomId, userId }: RoomProps) {
   const { activeClue, answers, buzzes, category, clue, getClueValue, players } =
     useEngineContext();
+  if (!clue) throw new Error("clue is undefined");
 
   const clueValue = activeClue ? getClueValue(activeClue, userId) : 0;
   const buzzDurationMs = buzzes.get(userId);
@@ -515,9 +518,9 @@ function RevealAnswerLongFormPrompt({ roomId, userId }: RoomProps) {
         </span>
       </div>
       <ClueText
-        answer={clue?.answer}
+        answer={clue.answer}
         canBuzz={false}
-        clue={clue?.clue}
+        clue={clue.clue}
         focusOnBuzz={false}
         onBuzz={() => null}
         showAnswer
@@ -574,6 +577,7 @@ function RevealAnswerLongFormPrompt({ roomId, userId }: RoomProps) {
 function RevealAnswerToAllPrompt({ roomId, userId }: RoomProps) {
   const { activeClue, answeredBy, category, clue, getClueValue } =
     useEngineContext();
+  if (!clue) throw new Error("clue is undefined");
 
   const clueValue = activeClue ? getClueValue(activeClue, userId) : 0;
   const wonBuzz = activeClue
@@ -598,12 +602,12 @@ function RevealAnswerToAllPrompt({ roomId, userId }: RoomProps) {
       </div>
 
       <ClueText
-        clue={clue?.clue}
+        clue={clue.clue}
         canBuzz={false}
         onBuzz={() => null}
         focusOnBuzz={false}
         showAnswer
-        answer={clue?.answer}
+        answer={clue.answer}
       />
       <NextClueForm roomId={roomId} userId={userId} />
       <Countdown startTime={undefined} />
