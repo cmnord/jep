@@ -781,7 +781,7 @@ describe("gameEngine", () => {
         },
       ],
       expectedState: State.copy(initialState, {
-        type: GameState.ReadClue,
+        type: GameState.ReadWagerableClue,
         activeClue: [0, 0],
         boardControl: PLAYER2.userId,
         buzzes: new Map([[PLAYER1.userId, CANT_BUZZ_FLAG]]),

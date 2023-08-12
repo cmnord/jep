@@ -162,6 +162,124 @@ function WagerCluePrompt({ roomId, userId }: RoomProps) {
   );
 }
 
+/** ReadWagerableCluePrompt handles all frontend behavior while the game
+ * state is GameState.ReadWagerableClue.
+ */
+function ReadWagerableCluePrompt({ roomId, userId }: RoomProps) {
+  const {
+    activeClue,
+    boardControl,
+    buzzes,
+    category,
+    clue,
+    getClueValue,
+    soloDispatch,
+  } = useEngineContext();
+
+  if (!boardControl) throw new Error("No board control found");
+  if (!clue) throw new Error("No clue found");
+  if (!activeClue) throw new Error("No active clue found");
+
+  const buzzDurationMs = buzzes.get(boardControl);
+  const [buzzerOpenAt, setBuzzerOpenAt] = React.useState<number | undefined>(
+    buzzDurationMs !== undefined ? 0 : undefined,
+  );
+
+  const fetcher = useFetcher<Action>();
+  useSoloAction(fetcher, soloDispatch);
+  const submit = fetcher.submit;
+
+  const numCharactersInClue = clue.clue.length ?? 0;
+  const clueDurationMs = READ_BASE_MS + READ_PER_CHAR_MS * numCharactersInClue;
+
+  /** submitBuzz submits a buzz of deltaMs to the server. */
+  const submitBuzz = React.useCallback(
+    (deltaMs: number) => {
+      const [i, j] = activeClue;
+      return submit(
+        {
+          i: i.toString(),
+          j: j.toString(),
+          userId,
+          deltaMs: deltaMs.toString(),
+        },
+        { method: "post", action: `/room/${roomId}/buzz` },
+      );
+    },
+    [submit, roomId, userId, activeClue],
+  );
+
+  // Open the buzzer after the clue is done being "read".
+  const delayMs = buzzDurationMs === undefined ? clueDurationMs : null;
+  useTimeout(() => setBuzzerOpenAt(Date.now()), delayMs);
+
+  // If the player with board control does nothing for 5 seconds after the
+  // buzzer opens, close the buzzer and send a 5-second timeout to the server.
+  useTimeout(
+    () => {
+      if (!buzzerOpenAt) return;
+      submitBuzz(Date.now() - buzzerOpenAt);
+    },
+    buzzerOpenAt !== undefined && boardControl === userId
+      ? CLUE_TIMEOUT_MS
+      : null,
+  );
+
+  // Play the "time's up" sound after 5 seconds if no one buzzed in after the
+  // buzzer opened.
+  const [playTimesUpSfx] = useGameSound(TIMES_UP_SFX);
+  useTimeout(
+    playTimesUpSfx,
+    buzzerOpenAt === undefined || buzzDurationMs ? null : CLUE_TIMEOUT_MS,
+  );
+
+  const handleClick = (clickedAtMs: number) => {
+    if (buzzDurationMs !== undefined || buzzerOpenAt === undefined) {
+      return;
+    }
+
+    // Contestant buzzed, so submit their buzz time
+    return submitBuzz(clickedAtMs - buzzerOpenAt);
+  };
+
+  useKeyPress("Enter", () => handleClick(Date.now()));
+
+  const clueValue = getClueValue(activeClue, boardControl);
+
+  return (
+    <>
+      <ReadClueTimer
+        clueDurationMs={clueDurationMs}
+        shouldAnimate={buzzDurationMs === undefined}
+        wonBuzz={
+          buzzDurationMs !== undefined &&
+          buzzDurationMs !== CANT_BUZZ_FLAG &&
+          buzzDurationMs < CLUE_TIMEOUT_MS
+        }
+      />
+      <div className="flex justify-between p-4">
+        <div className="text-white">
+          <span className="font-bold">{category}</span> for{" "}
+          <span className="font-bold">${clueValue}</span>
+        </div>
+        <span className="text-sm text-slate-300">
+          Click or press <Kbd>Enter</Kbd> to buzz in
+        </span>
+      </div>
+      <ClueText
+        clue={clue.clue}
+        canBuzz={boardControl === userId}
+        onBuzz={() => handleClick(Date.now())}
+        focusOnBuzz
+        showAnswer={false}
+        answer={clue.answer}
+      />
+      <Countdown startTime={undefined} />
+      <Buzzes buzzes={buzzes} showWinner={false} />
+    </>
+  );
+}
+
 /** ReadCluePrompt handles all frontend behavior while the game state is
  * GameState.ReadClue.
  */
@@ -625,6 +743,8 @@ export function ConnectedPrompt(props: RoomProps) {
         return <WagerCluePrompt {...props} />;
       case GameState.ReadClue:
         return <ReadCluePrompt {...props} />;
+      case GameState.ReadWagerableClue:
+        return <ReadWagerableCluePrompt {...props} />;
       case GameState.ReadLongFormClue:
         return <ReadLongFormCluePrompt {...props} />;
       case GameState.RevealAnswerToBuzzer:

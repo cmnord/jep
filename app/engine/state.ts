@@ -13,6 +13,7 @@ export enum GameState {
   ShowBoard = "ShowBoard",
   WagerClue = "WagerClue",
   ReadClue = "ReadClue",
+  ReadWagerableClue = "ReadWagerableClue",
   ReadLongFormClue = "ReadLongFormClue",
   RevealAnswerToBuzzer = "RevealAnswerToBuzzer",
   RevealAnswerLongForm = "RevealAnswerLongForm",

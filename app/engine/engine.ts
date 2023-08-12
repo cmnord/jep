@@ -269,7 +269,10 @@ export function gameEngine(state: State, action: Action): State {
               wagers,
             });
           }
-          return State.copy(state, { type: GameState.ReadClue, wagers });
+          return State.copy(state, {
+            type: GameState.ReadWagerableClue,
+            wagers,
+          });
         }
 
         return State.copy(state, { wagers });
@@ -279,7 +282,8 @@ export function gameEngine(state: State, action: Action): State {
       if (isBuzzAction(action)) {
         const { userId, i, j, deltaMs } = action.payload;
         if (
-          state.type !== GameState.ReadClue ||
+          (state.type !== GameState.ReadClue &&
+            state.type !== GameState.ReadWagerableClue) ||
           state.activeClue?.[0] !== i ||
           state.activeClue?.[1] !== j
         ) {
