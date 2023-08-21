@@ -1,7 +1,8 @@
 /** @type {import('eslint').Linter.Config} */
 module.exports = {
-  extends: ["plugin:react-hooks/recommended", "prettier"],
+  extends: ["eslint:recommended", "plugin:react-hooks/recommended", "prettier"],
   env: {
+    node: true,
     "cypress/globals": true,
   },
   plugins: ["cypress"],
