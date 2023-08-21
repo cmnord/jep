@@ -1,12 +1,6 @@
 /** @type {import('eslint').Linter.Config} */
 module.exports = {
-  extends: [
-    "@remix-run/eslint-config",
-    "@remix-run/eslint-config/node",
-    "@remix-run/eslint-config/jest-testing-library",
-    "plugin:react-hooks/recommended",
-    "prettier",
-  ],
+  extends: ["plugin:react-hooks/recommended", "prettier"],
   env: {
     "cypress/globals": true,
   },
