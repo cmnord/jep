@@ -39,7 +39,6 @@
   },
   "devDependencies": {
     "@remix-run/dev": "^1.18.1",
-    "@remix-run/eslint-config": "^1.18.1",
     "@remix-run/serve": "^1.18.1",
     "@testing-library/cypress": "^9.0.0",
     "@testing-library/jest-dom": "^5.16.5",
