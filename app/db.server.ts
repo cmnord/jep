@@ -7,6 +7,7 @@ import { NODE_ENV, SUPABASE_ANON_KEY, SUPABASE_URL } from "~/utils";
 let db: SupabaseClient<Database>;
 
 declare global {
+  // eslint-disable-next-line no-var
   var __db__: SupabaseClient<Database>;
 }
 

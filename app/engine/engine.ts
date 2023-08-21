@@ -412,7 +412,7 @@ export function gameEngine(state: State, action: Action): State {
         const players = new Map(state.players);
         const clueValue = state.getClueValue([i, j], userId);
 
-        let isAnswered = setIsAnswered(state.isAnswered, i, j, (prev) => {
+        const isAnswered = setIsAnswered(state.isAnswered, i, j, (prev) => {
           prev.answeredBy.set(userId, correct);
         });
         const numExpectedChecks = isLongForm ? state.answers.size : 1;
