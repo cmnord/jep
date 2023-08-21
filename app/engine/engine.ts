@@ -47,19 +47,22 @@ export function getWinningBuzzer(buzzes: Map<string, number>):
       deltaMs: number;
     }
   | undefined {
-  const result = Array.from(buzzes.entries()).reduce(
-    (acc, [userId, deltaMs]) => {
-      if (
-        deltaMs !== CANT_BUZZ_FLAG &&
-        deltaMs < acc.deltaMs &&
-        deltaMs <= CLUE_TIMEOUT_MS
-      ) {
-        return { userId, deltaMs };
-      }
-      return acc;
-    },
-    { userId: "", deltaMs: Number.MAX_SAFE_INTEGER },
-  );
+  const result = Array.from(buzzes.entries())
+    // Sort buzzes by user ID for deterministic results in case of a tie.
+    .sort(([aUserId], [bUserId]) => (aUserId > bUserId ? 1 : -1))
+    .reduce(
+      (acc, [userId, deltaMs]) => {
+        if (
+          deltaMs !== CANT_BUZZ_FLAG &&
+          deltaMs < acc.deltaMs &&
+          deltaMs <= CLUE_TIMEOUT_MS
+        ) {
+          return { userId, deltaMs };
+        }
+        return acc;
+      },
+      { userId: "", deltaMs: Number.MAX_SAFE_INTEGER },
+    );
 
   if (result.userId === "") {
     return undefined;
