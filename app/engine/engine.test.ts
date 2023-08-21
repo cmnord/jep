@@ -6,6 +6,7 @@ import {
   CANT_BUZZ_FLAG,
   CLUE_TIMEOUT_MS,
   gameEngine,
+  getWinningBuzzer,
 } from "./engine";
 import type { Player } from "./state";
 import { GameState, State } from "./state";
@@ -1934,4 +1935,19 @@ describe("gameEngine", () => {
       expect(state).toStrictEqual(tc.expectedState);
     });
   }
+});
+
+describe("getWinningBuzzer", () => {
+  it("returns the buzz of the lower user ID in case of a tie", () => {
+    // NB: Maps iterate over keys in insertion order
+    let buzzes = new Map();
+    buzzes.set(PLAYER1.userId, 100);
+    buzzes.set(PLAYER2.userId, 100);
+    expect(getWinningBuzzer(buzzes)?.userId).toBe(PLAYER1.userId);
+
+    buzzes = new Map();
+    buzzes.set(PLAYER2.userId, 100);
+    buzzes.set(PLAYER1.userId, 100);
+    expect(getWinningBuzzer(buzzes)?.userId).toBe(PLAYER1.userId);
+  });
 });
