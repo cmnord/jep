@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-prototype-builtins */
+/* eslint-disable no-empty */
 // To parse this data:
 //
 //   import { Convert, Game } from "./file";

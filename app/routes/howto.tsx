@@ -32,7 +32,7 @@ export default function HowTo() {
   const [lockout, setLockout] = React.useState(false);
   const [hadLockout, setHadLockout] = React.useState(false);
   const [msLeft, setMsLeft] = React.useState<number | undefined>();
-  const animationRef = React.useRef<number>();
+  const animationRef = React.useRef(0);
 
   const buzzDurationMs =
     buzzedAt !== undefined && buzzerOpenAt !== undefined
@@ -99,7 +99,7 @@ export default function HowTo() {
       animationRef.current = requestAnimationFrame(() => animate(buzzerOpenAt));
     }
 
-    return () => cancelAnimationFrame(animationRef.current!);
+    return () => cancelAnimationFrame(animationRef.current);
   }, [buzzerOpenAt, buzzedAt]);
 
   return (

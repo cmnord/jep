@@ -8,9 +8,7 @@ declare global {
       SUPABASE_ANON_KEY: string;
     };
   }
-}
 
-declare global {
   namespace NodeJS {
     interface ProcessEnv {
       BASE_URL: string;

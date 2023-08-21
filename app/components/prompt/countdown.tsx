@@ -25,7 +25,7 @@ export function Countdown({
   const center = (numBars - 1) / 2;
 
   const [count, setCount] = React.useState(numBars / 2);
-  const animationRef = React.useRef<number>();
+  const animationRef = React.useRef(0);
 
   React.useEffect(() => {
     const animate = (timeMs: number) => {
@@ -44,7 +44,7 @@ export function Countdown({
       animationRef.current = requestAnimationFrame(() => animate(startTime));
     }
 
-    return () => cancelAnimationFrame(animationRef.current!);
+    return () => cancelAnimationFrame(animationRef.current);
   }, [count, startTime, durationSec, numBars]);
 
   const bars = Array.from({ length: numBars }, (_, i) => (
