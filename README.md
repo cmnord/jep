@@ -8,27 +8,35 @@ Play Jeopardy! online with your friends at [Jep!][jep]. Choose from past games o
 
 ## Development
 
-To run the app locally, make sure the project's local dependencies are
-installed:
+To run the app locally, first install [Docker][docker].
+
+Next, install the project's local dependencies:
 
 ```sh
 npm install
 ```
 
-Set environment variables:
+Start the Supabase project:
+
+```ts
+npx supabase start
+```
+
+> **Warning**
+>
+> Enable Realtime events manually on the `room_events` table for multiplayer
+> games to work:
+>
+> **http://localhost:54323/project/default/database/tables**
+
+Set environment variables. In particular, set `SUPABASE_URL`,
+`SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` from the results of `npx
+supabase status`.
 
 ```sh
 cp .env.example .env
 vim .env # add secrets to .env
 source .env
-```
-
-Link supabase project:
-
-```ts
-npx supabase init
-npx supabase start
-npx supabase link --project-ref $SUPABASE_PROJECT_REF --password $SUPABASE_DB_PASSWORD
 ```
 
 Afterwards, start the Remix development server like so:
@@ -39,11 +47,7 @@ npm run dev
 
 Open up [http://localhost:3000](http://localhost:3000) and you should be ready to go!
 
-## Local Supabase
-
-To use a local version of Supabase instead of the production URL, set
-`SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` from the
-results of `npx supabase status`.
+## Supabase
 
 View the local Supabase dashboard at
 [http://localhost:54323/](http://localhost:54323/).
@@ -51,12 +55,11 @@ View the local Supabase dashboard at
 View mock emails sent for password reset and email verification at
 [http://localhost:54324/](http://localhost:54324/).
 
-> **Warning**
->
-> Enable Realtime events manually on the `room_events` table for multiplayer
-> games to work:
->
-> **http://localhost:54323/project/default/database/tables**
+Link to your own production Supabase project with:
+
+```sh
+npx supabase link --project-ref $SUPABASE_PROJECT_REF --password $SUPBABASE_DB_PASSWORD
+```
 
 ### Make a migration[^1]
 
@@ -104,6 +107,7 @@ npx supabase gen types typescript --linked > app/models/database.types.ts
 
 [jep]: https://whatis.club
 [blog]: https://clairenord.com/jep.html
+[docker]: https://www.docker.com/
 
 [^1]: https://supabase.com/docs/guides/cli/local-development#database-migrations
 [^2]: https://supabase.com/docs/guides/cli/local-development#deploy-database-changes
