@@ -16,6 +16,7 @@ import {
   useLoaderData,
   useRouteError,
 } from "@remix-run/react";
+import { Analytics } from "@vercel/analytics/react";
 import * as React from "react";
 
 import { CodeBlock } from "~/components/code";
@@ -114,6 +115,7 @@ export default function App() {
             />
           </>
         ) : null}
+        <Analytics />
         <SoundContext.Provider
           value={{
             volume,
