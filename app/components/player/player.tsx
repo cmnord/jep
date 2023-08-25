@@ -31,7 +31,15 @@ function PlayerScore({
         {player.name}
         {winning && <div>👑</div>}
       </div>
-      <div className="text-shadow-md w-1/3 grow font-impact text-xl text-white sm:w-auto">
+      <div
+        className={classNames(
+          "text-shadow-md w-1/3 grow font-impact text-xl sm:w-auto",
+          {
+            "text-white": player.score >= 0,
+            "text-red-400": player.score < 0,
+          },
+        )}
+      >
         {formatDollars(player.score)}
       </div>
     </div>
