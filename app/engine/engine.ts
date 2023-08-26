@@ -300,20 +300,16 @@ export function gameEngine(state: State, action: Action): State {
           buzzes.set(userId, deltaMs);
         }
 
-        // Wait for others to buzz in if we haven't yet received a timeout buzz
-        // and not everyone has buzzed in yet.
-        if (deltaMs <= CLUE_TIMEOUT_MS && buzzes.size < state.players.size) {
+        // Wait for every player to either buzz in or time out
+        if (buzzes.size < state.players.size) {
           return State.copy(state, { buzzes });
         }
 
-        // All buzzes are in or we've timed out, so find the winner. If we
-        // missed someone's < 5sec buzz at this point, that's too bad.
-        const winningBuzz = getWinningBuzzer(buzzes);
-
-        // If there's no winning buzzer, reveal the answer to everyone and mark
-        // it as answered. If the clue was wagerable and the player didn't buzz,
-        // deduct their wager from their score.
-        if (!winningBuzz) {
+        const winningBuzzer = getWinningBuzzer(buzzes);
+        if (!winningBuzzer) {
+          // Reveal the answer to everyone and mark it as answered. If the clue
+          // was wagerable and the player didn't buzz, deduct their wager from
+          // their score.
           const board = state.game.boards.at(state.round);
           const clue = board?.categories.at(j)?.clues.at(i);
           const players = new Map(state.players);
