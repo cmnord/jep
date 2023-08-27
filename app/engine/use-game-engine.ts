@@ -65,18 +65,13 @@ function stateToGameEngine(
   };
 }
 
-/** useSoloGameEngine handles solo play by setting the players and board control
- * for one player without any server room events. This means that once the page
- * refreshes the game loses all progress.
+/** useSoloGameEngine sets up solo play without any server room events. This
+ * means that once the page refreshes the game loses all progress.
  */
-export function useSoloGameEngine(game: Game, userId: string, name: string) {
-  const [state, dispatch] = React.useReducer(gameEngine, game, (arg) => {
-    return new State({
-      boardControl: userId,
-      game: arg,
-      players: new Map([[userId, { name, userId, score: 0 }]]),
-    });
-  });
+export function useSoloGameEngine(game: Game) {
+  const [state, dispatch] = React.useReducer(gameEngine, game, (arg) =>
+    State.fromGame(arg),
+  );
 
   return stateToGameEngine(game, state, dispatch);
 }

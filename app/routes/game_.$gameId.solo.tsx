@@ -56,12 +56,13 @@ export default function SoloGame() {
   const matches = useMatches();
   const pathname = matches[matches.length - 1].pathname;
 
-  const gameReducer = useSoloGameEngine(data.game, data.userId, data.name);
+  const gameReducer = useSoloGameEngine(data.game);
 
   return (
     <GameEngineContext.Provider value={gameReducer}>
       <GameComponent
         game={data.game}
+        name={data.name}
         roomId={-1}
         userId={data.userId}
         url={data.BASE_URL + pathname}

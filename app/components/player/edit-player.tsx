@@ -111,23 +111,23 @@ export function EditPlayerForm({ roomId, userId }: RoomProps) {
     players.get(userId),
   );
 
-  const [name, setName] = React.useState(optimisticPlayer?.name ?? "You");
+  const [name, setName] = React.useState(optimisticPlayer?.name);
   const debouncedName = useDebounce(name, 500);
 
   React.useEffect(() => {
     const serverPlayer = players.get(userId);
     setOptimisticPlayer(serverPlayer);
-    setName(serverPlayer?.name ?? "You");
+    setName(serverPlayer?.name);
   }, [players, userId]);
 
   React.useEffect(() => {
     if (
       !editing &&
       debouncedName !== optimisticPlayer?.name &&
-      debouncedName !== "" &&
+      debouncedName &&
       fetcher.state === "idle"
     ) {
-      fetcher.submit(formRef.current);
+      fetcher.submit(formRef.current, { method: "PATCH" });
       setOptimisticPlayer((prev) =>
         prev
           ? { ...prev, name: debouncedName }
@@ -137,7 +137,11 @@ export function EditPlayerForm({ roomId, userId }: RoomProps) {
   }, [editing, debouncedName, optimisticPlayer, userId, fetcher]);
 
   return (
-    <fetcher.Form method="POST" action={`/room/${roomId}/player`} ref={formRef}>
+    <fetcher.Form
+      method="PATCH"
+      action={`/room/${roomId}/player`}
+      ref={formRef}
+    >
       <input
         type="hidden"
         name="userId"
@@ -146,7 +150,7 @@ export function EditPlayerForm({ roomId, userId }: RoomProps) {
       />
       <EditPlayer
         loading={loading}
-        name={optimisticPlayer?.name ?? "You"}
+        name={optimisticPlayer?.name ?? ""}
         editing={editing}
         onBlur={() => setEditing(false)}
         onChangeName={setName}

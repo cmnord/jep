@@ -26,7 +26,7 @@ export default function PlayGame() {
   const matches = useMatches();
   const pathname = matches[matches.length - 1].pathname;
 
-  const gameReducer = useSoloGameEngine(data.game, "mock", "mock");
+  const gameReducer = useSoloGameEngine(data.game);
 
   return (
     <GameEngineContext.Provider value={gameReducer}>
@@ -34,6 +34,7 @@ export default function PlayGame() {
         game={data.game}
         roomId={-1}
         userId="mock"
+        name="mock"
         url={data.BASE_URL + pathname}
       />
     </GameEngineContext.Provider>

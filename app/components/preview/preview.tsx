@@ -1,4 +1,4 @@
-import { useFetcher } from "@remix-run/react";
+import { Form as fetcherForm, useFetcher } from "@remix-run/react";
 
 import Button from "~/components/button";
 import CopyLinkButton from "~/components/copy-link-button";
@@ -8,34 +8,82 @@ import HowToPlay from "~/components/how-to-play";
 import Link from "~/components/link";
 import { EditPlayerForm, PlayerIcon } from "~/components/player";
 import SoundControl from "~/components/sound";
-import type { Action } from "~/engine";
-import { GameState, useEngineContext } from "~/engine";
+import type { Player } from "~/engine";
+import { Action, GameState, useEngineContext } from "~/engine";
+import { Board } from "~/models/convert.server";
 import { stringToHslColor } from "~/utils";
 import useSoloAction from "~/utils/use-solo-action";
 
-export function Preview({
-  numRounds,
+function JoinGameDialog({
+  Form,
+  gameTitle,
+  name,
+  players,
   roomId,
   userId,
-  onDismiss,
-  url,
 }: {
+  Form: typeof fetcherForm;
+  gameTitle: string;
+  name: string;
+  players: Map<string, Player>;
+} & RoomProps) {
+  return (
+    <Dialog
+      isOpen
+      title={`Join game "${gameTitle}"?`}
+      description={`${players.size} player${
+        players.size === 1 ? "" : "s"
+      } so far`}
+    >
+      <ul className="mb-4 list-inside list-disc font-handwriting text-xl font-bold">
+        {Array.from(players.values()).map((p, i) => (
+          <li key={i} style={{ color: stringToHslColor(p.userId) }}>
+            {p.name}
+          </li>
+        ))}
+      </ul>
+      <Dialog.Footer>
+        <Form method="POST" action={`/room/${roomId}/player`}>
+          <input type="hidden" name="userId" value={userId} />
+          <input type="hidden" name="name" value={name} />
+          <Button type="primary" htmlType="submit">
+            Join game
+          </Button>
+        </Form>
+      </Dialog.Footer>
+    </Dialog>
+  );
+}
+
+function PreviewRoundDialog({
+  board,
+  boardControl,
+  Form,
+  numRounds,
+  onDismiss,
+  players,
+  round,
+  type,
+  url,
+  roomId,
+  userId,
+}: {
+  board: Board;
+  boardControl: string | null;
+  Form: typeof fetcherForm;
   numRounds: number;
   onDismiss: () => void;
+  players: Map<string, Player>;
+  round: number;
+  type: GameState;
   url: string;
 } & RoomProps) {
-  const { type, board, boardControl, players, round, soloDispatch } =
-    useEngineContext();
-
   const isOpen = type === GameState.PreviewRound;
 
   const boardController = boardControl ? players.get(boardControl) : undefined;
   const boardControlName = boardController
     ? boardController.name
     : "Unknown player";
-
-  const fetcher = useFetcher<Action>();
-  useSoloAction(fetcher, soloDispatch);
 
   if (!board) return null;
 
@@ -89,13 +137,67 @@ export function Preview({
       ) : null}
       <Dialog.Footer>
         <CopyLinkButton url={url} text="Copy link to room" />
-        <fetcher.Form method="POST" action={`/room/${roomId}/start`}>
+        <Form method="POST" action={`/room/${roomId}/start`}>
           <input type="hidden" name="round" value={round} />
           <Button type="primary" htmlType="submit" onClick={onDismiss}>
             Start round
           </Button>
-        </fetcher.Form>
+        </Form>
       </Dialog.Footer>
     </Dialog>
+  );
+}
+
+export function Preview({
+  gameTitle,
+  name,
+  numRounds,
+  onDismiss,
+  url,
+  roomId,
+  userId,
+}: {
+  gameTitle: string;
+  name: string;
+  numRounds: number;
+  onDismiss: () => void;
+  url: string;
+} & RoomProps) {
+  const { type, board, boardControl, players, round, soloDispatch } =
+    useEngineContext();
+
+  const fetcher = useFetcher<Action>();
+  useSoloAction(fetcher, soloDispatch);
+
+  if (!board) return null;
+
+  const userInGame = players.has(userId);
+
+  if (userInGame) {
+    return (
+      <PreviewRoundDialog
+        board={board}
+        boardControl={boardControl}
+        Form={fetcher.Form}
+        numRounds={numRounds}
+        onDismiss={onDismiss}
+        players={players}
+        round={round}
+        type={type}
+        url={url}
+        roomId={roomId}
+        userId={userId}
+      />
+    );
+  }
+  return (
+    <JoinGameDialog
+      Form={fetcher.Form}
+      gameTitle={gameTitle}
+      name={name}
+      players={players}
+      roomId={roomId}
+      userId={userId}
+    />
   );
 }

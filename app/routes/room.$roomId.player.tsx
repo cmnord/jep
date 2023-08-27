@@ -6,6 +6,9 @@ import { createRoomEvent } from "~/models/room-event.server";
 import { getRoom } from "~/models/room.server";
 
 export async function action({ request, params }: ActionArgs) {
+  if (request.method !== "POST" && request.method !== "PATCH") {
+    throw new Response("method not allowed", { status: 405 });
+  }
   const formData = await request.formData();
 
   const name = formData.get("name");
@@ -22,8 +25,11 @@ export async function action({ request, params }: ActionArgs) {
     throw new Response("room name not found in URL params", { status: 404 });
   }
 
+  const type =
+    request.method === "POST" ? ActionType.Join : ActionType.ChangeName;
+
   if (roomId === -1) {
-    return json({ type: ActionType.ChangeName, payload: { userId, name } });
+    return json({ type, payload: { userId, name } });
   }
 
   const room = await getRoom(roomId);
@@ -31,7 +37,7 @@ export async function action({ request, params }: ActionArgs) {
     throw new Response("room not found", { status: 404 });
   }
 
-  await createRoomEvent(room.id, ActionType.ChangeName, {
+  await createRoomEvent(room.id, type, {
     userId,
     name,
   });

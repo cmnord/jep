@@ -26,7 +26,7 @@ function PlayerScore({
     >
       <div
         className="flex w-2/3 grow flex-wrap gap-2 font-handwriting text-2xl font-bold sm:w-auto"
-        style={{ color: color }}
+        style={{ color }}
       >
         {player.name}
         {winning && <div>👑</div>}
@@ -47,11 +47,11 @@ function PlayerScore({
 }
 
 export function PlayerIcon({ player }: { player: Player }) {
-  const color = stringToHslColor(player.userId);
+  const backgroundColor = stringToHslColor(player.userId);
   return (
     <div
       className="flex h-8 w-8 items-center justify-center rounded-full"
-      style={{ backgroundColor: color }}
+      style={{ backgroundColor }}
       title={player.name}
     >
       <div className="text-md font-mono font-bold text-white">
@@ -61,30 +61,39 @@ export function PlayerIcon({ player }: { player: Player }) {
   );
 }
 
+function getMaxScore(others: Player[], you?: Player) {
+  const bestOther = others.at(0);
+  if (bestOther && you) {
+    return Math.max(bestOther.score, you.score);
+  } else if (bestOther) {
+    return bestOther.score;
+  } else if (you) {
+    return you.score;
+  }
+  return 0;
+}
+
 export function PlayerScores({ userId }: { userId: string }) {
   const { players, boardControl } = useEngineContext();
 
   const yourPlayer = players.get(userId);
-  if (!yourPlayer) {
-    throw new Error(`Player ${userId} not found`);
-  }
 
   // sort all other players from highest to lowest score
   const sortedOtherPlayers = Array.from(players.values())
     .filter((p) => p.userId !== userId)
     .sort((a, b) => b.score - a.score);
 
-  const maxScore = sortedOtherPlayers[0]
-    ? Math.max(sortedOtherPlayers[0].score, yourPlayer.score)
-    : yourPlayer.score;
+  const maxScore = getMaxScore(sortedOtherPlayers, yourPlayer);
 
   return (
     <div className="flex flex-col gap-2 sm:grid sm:grid-cols-3">
-      <PlayerScore
-        player={yourPlayer}
-        hasBoardControl={yourPlayer.userId === boardControl}
-        winning={yourPlayer.score === maxScore}
-      />
+      {yourPlayer ? (
+        <PlayerScore
+          player={yourPlayer}
+          hasBoardControl={yourPlayer.userId === boardControl}
+          winning={yourPlayer.score === maxScore}
+        />
+      ) : null}
       {sortedOtherPlayers.map((p, i) => (
         <PlayerScore
           key={i}

@@ -20,11 +20,13 @@ export interface RoomProps {
 /** GameComponent maintains the game state. */
 export default function GameComponent({
   game,
+  name,
   roomId,
   userId,
   url,
 }: {
   game: Game;
+  name: string;
   url: string;
 } & RoomProps) {
   const { type, round } = useEngineContext();
@@ -52,11 +54,13 @@ export default function GameComponent({
   return (
     <>
       <Preview
+        gameTitle={game.title}
+        name={name}
         numRounds={game.boards.length}
-        roomId={roomId}
-        userId={userId}
         onDismiss={isSingleLongFormClue ? playFinalSfx : playBoardFillSfx}
         url={url}
+        roomId={roomId}
+        userId={userId}
       />
       <div className="flex grow flex-col bg-slate-900">
         <BoardComponent roomId={roomId} userId={userId} />
