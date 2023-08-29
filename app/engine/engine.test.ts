@@ -1,3 +1,5 @@
+import { produce } from "immer";
+
 import { MOCK_GAME } from "~/models/mock.server";
 
 import type { Action } from "./engine";
@@ -9,7 +11,7 @@ import {
   getWinningBuzzer,
 } from "./engine";
 import type { Player } from "./state";
-import { GameState, State } from "./state";
+import { GameState, State, stateFromGame } from "./state";
 
 const PLAYER1: Player = {
   name: "Player 1",
@@ -104,16 +106,16 @@ describe("gameEngine", () => {
     expectedState: State;
   }
 
-  const initialState = State.fromGame(MOCK_GAME);
+  const initialState = stateFromGame(MOCK_GAME);
 
   const testCases: TestCase[] = [
     {
       name: "Player joins",
       state: initialState,
       actions: [PLAYER1_JOIN_ACTION],
-      expectedState: State.copy(initialState, {
-        boardControl: PLAYER1.userId,
-        players: new Map([[PLAYER1.userId, PLAYER1]]),
+      expectedState: produce(initialState, (draft) => {
+        draft.boardControl = PLAYER1.userId;
+        draft.players.set(PLAYER1.userId, PLAYER1);
       }),
     },
     {
@@ -126,23 +128,22 @@ describe("gameEngine", () => {
           payload: { name: "Player New Name", userId: PLAYER1.userId },
         },
       ],
-      expectedState: State.copy(initialState, {
-        boardControl: PLAYER1.userId,
-        players: new Map([
-          [PLAYER1.userId, { ...PLAYER1, name: "Player New Name" }],
-        ]),
+      expectedState: produce(initialState, (draft) => {
+        draft.boardControl = PLAYER1.userId;
+        draft.players.set(PLAYER1.userId, {
+          ...PLAYER1,
+          name: "Player New Name",
+        });
       }),
     },
     {
       name: "Two players join, first gets board control",
       state: initialState,
       actions: [PLAYER1_JOIN_ACTION, PLAYER2_JOIN_ACTION],
-      expectedState: State.copy(initialState, {
-        boardControl: PLAYER1.userId,
-        players: new Map([
-          [PLAYER1.userId, PLAYER1],
-          [PLAYER2.userId, PLAYER2],
-        ]),
+      expectedState: produce(initialState, (draft) => {
+        draft.boardControl = PLAYER1.userId;
+        draft.players.set(PLAYER1.userId, PLAYER1);
+        draft.players.set(PLAYER2.userId, PLAYER2);
       }),
     },
     {
@@ -155,10 +156,10 @@ describe("gameEngine", () => {
           payload: { round: 0 },
         },
       ],
-      expectedState: State.copy(initialState, {
-        type: GameState.ShowBoard,
-        boardControl: PLAYER1.userId,
-        players: new Map([[PLAYER1.userId, PLAYER1]]),
+      expectedState: produce(initialState, (draft) => {
+        draft.type = GameState.ShowBoard;
+        draft.boardControl = PLAYER1.userId;
+        draft.players.set(PLAYER1.userId, PLAYER1);
       }),
     },
     {
@@ -175,11 +176,11 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER1.userId, i: 0, j: 0 },
         },
       ],
-      expectedState: State.copy(initialState, {
-        type: GameState.ReadClue,
-        activeClue: [0, 0],
-        boardControl: PLAYER1.userId,
-        players: new Map([[PLAYER1.userId, PLAYER1]]),
+      expectedState: produce(initialState, (draft) => {
+        draft.type = GameState.ReadClue;
+        draft.activeClue = [0, 0];
+        draft.boardControl = PLAYER1.userId;
+        draft.players.set(PLAYER1.userId, PLAYER1);
       }),
     },
     {
@@ -200,12 +201,12 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER1.userId, i: 0, j: 0, deltaMs: 123 },
         },
       ],
-      expectedState: State.copy(initialState, {
-        type: GameState.RevealAnswerToBuzzer,
-        activeClue: [0, 0],
-        boardControl: PLAYER1.userId,
-        buzzes: new Map([[PLAYER1.userId, 123]]),
-        players: new Map([[PLAYER1.userId, PLAYER1]]),
+      expectedState: produce(initialState, (draft) => {
+        draft.type = GameState.RevealAnswerToBuzzer;
+        draft.activeClue = [0, 0];
+        draft.boardControl = PLAYER1.userId;
+        draft.buzzes.set(PLAYER1.userId, 123);
+        draft.players.set(PLAYER1.userId, PLAYER1);
       }),
     },
     {
@@ -222,15 +223,13 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER1.userId, i: 0, j: 0, deltaMs: 123 },
         },
       ],
-      expectedState: State.copy(initialState, {
-        type: GameState.ReadClue,
-        activeClue: [0, 0],
-        boardControl: PLAYER1.userId,
-        buzzes: new Map([[PLAYER1.userId, 123]]),
-        players: new Map([
-          [PLAYER1.userId, PLAYER1],
-          [PLAYER2.userId, PLAYER2],
-        ]),
+      expectedState: produce(initialState, (draft) => {
+        draft.type = GameState.ReadClue;
+        draft.activeClue = [0, 0];
+        draft.boardControl = PLAYER1.userId;
+        draft.buzzes.set(PLAYER1.userId, 123);
+        draft.players.set(PLAYER1.userId, PLAYER1);
+        draft.players.set(PLAYER2.userId, PLAYER2);
       }),
     },
     {
@@ -251,18 +250,14 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER2.userId, i: 0, j: 0, deltaMs: 456 },
         },
       ],
-      expectedState: State.copy(initialState, {
-        type: GameState.RevealAnswerToBuzzer,
-        activeClue: [0, 0],
-        boardControl: PLAYER1.userId,
-        buzzes: new Map([
-          [PLAYER1.userId, 123],
-          [PLAYER2.userId, 456],
-        ]),
-        players: new Map([
-          [PLAYER1.userId, PLAYER1],
-          [PLAYER2.userId, PLAYER2],
-        ]),
+      expectedState: produce(initialState, (draft) => {
+        draft.type = GameState.RevealAnswerToBuzzer;
+        draft.activeClue = [0, 0];
+        draft.boardControl = PLAYER1.userId;
+        draft.buzzes.set(PLAYER1.userId, 123);
+        draft.buzzes.set(PLAYER2.userId, 456);
+        draft.players.set(PLAYER1.userId, PLAYER1);
+        draft.players.set(PLAYER2.userId, PLAYER2);
       }),
     },
     {
@@ -288,18 +283,14 @@ describe("gameEngine", () => {
           },
         },
       ],
-      expectedState: State.copy(initialState, {
-        type: GameState.RevealAnswerToBuzzer,
-        activeClue: [0, 0],
-        boardControl: PLAYER1.userId,
-        buzzes: new Map([
-          [PLAYER1.userId, 123],
-          [PLAYER2.userId, CLUE_TIMEOUT_MS + 1],
-        ]),
-        players: new Map([
-          [PLAYER1.userId, PLAYER1],
-          [PLAYER2.userId, PLAYER2],
-        ]),
+      expectedState: produce(initialState, (draft) => {
+        draft.type = GameState.RevealAnswerToBuzzer;
+        draft.activeClue = [0, 0];
+        draft.boardControl = PLAYER1.userId;
+        draft.buzzes.set(PLAYER1.userId, 123);
+        draft.buzzes.set(PLAYER2.userId, CLUE_TIMEOUT_MS + 1);
+        draft.players.set(PLAYER1.userId, PLAYER1);
+        draft.players.set(PLAYER2.userId, PLAYER2);
       }),
     },
     {
@@ -325,15 +316,13 @@ describe("gameEngine", () => {
           },
         },
       ],
-      expectedState: State.copy(initialState, {
-        type: GameState.ReadClue,
-        activeClue: [0, 0],
-        boardControl: PLAYER1.userId,
-        buzzes: new Map([[PLAYER1.userId, 123]]),
-        players: new Map([
-          [PLAYER1.userId, PLAYER1],
-          [PLAYER2.userId, PLAYER2],
-        ]),
+      expectedState: produce(initialState, (draft) => {
+        draft.type = GameState.ReadClue;
+        draft.activeClue = [0, 0];
+        draft.boardControl = PLAYER1.userId;
+        draft.buzzes.set(PLAYER1.userId, 123);
+        draft.players.set(PLAYER1.userId, PLAYER1);
+        draft.players.set(PLAYER2.userId, PLAYER2);
       }),
     },
     {
@@ -364,18 +353,14 @@ describe("gameEngine", () => {
           },
         },
       ],
-      expectedState: State.copy(initialState, {
-        type: GameState.RevealAnswerToBuzzer,
-        activeClue: [0, 0],
-        boardControl: PLAYER1.userId,
-        buzzes: new Map([
-          [PLAYER1.userId, CLUE_TIMEOUT_MS + 1],
-          [PLAYER2.userId, 123],
-        ]),
-        players: new Map([
-          [PLAYER1.userId, PLAYER1],
-          [PLAYER2.userId, PLAYER2],
-        ]),
+      expectedState: produce(initialState, (draft) => {
+        draft.type = GameState.RevealAnswerToBuzzer;
+        draft.activeClue = [0, 0];
+        draft.boardControl = PLAYER1.userId;
+        draft.buzzes.set(PLAYER1.userId, CLUE_TIMEOUT_MS + 1);
+        draft.buzzes.set(PLAYER2.userId, 123);
+        draft.players.set(PLAYER1.userId, PLAYER1);
+        draft.players.set(PLAYER2.userId, PLAYER2);
       }),
     },
     {
@@ -400,22 +385,18 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER1.userId, i: 0, j: 0, correct: false },
         },
       ],
-      expectedState: State.copy(initialState, {
-        type: GameState.RevealAnswerToAll,
-        activeClue: [0, 0],
-        boardControl: PLAYER1.userId,
-        buzzes: new Map([[PLAYER1.userId, 123]]),
-        isAnswered: [
-          [
-            {
-              isAnswered: true,
-              answeredBy: new Map([[PLAYER1.userId, false]]),
-            },
-            { isAnswered: false, answeredBy: new Map() },
-          ],
-        ],
-        numAnswered: 1,
-        players: new Map([[PLAYER1.userId, { ...PLAYER1, score: -200 }]]),
+      expectedState: produce(initialState, (draft) => {
+        draft.type = GameState.RevealAnswerToAll;
+        draft.activeClue = [0, 0];
+        draft.boardControl = PLAYER1.userId;
+        draft.buzzes.set(PLAYER1.userId, 123);
+
+        const clueState = draft.isAnswered[0][0][0];
+        clueState.isAnswered = true;
+        clueState.answeredBy.set(PLAYER1.userId, false);
+
+        draft.numAnswered = 1;
+        draft.players.set(PLAYER1.userId, { ...PLAYER1, score: -200 });
       }),
     },
     {
@@ -445,24 +426,16 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER1.userId, i: 0, j: 0, correct: false },
         },
       ],
-      expectedState: State.copy(initialState, {
-        type: GameState.ReadClue,
-        activeClue: [0, 0],
-        boardControl: PLAYER1.userId,
-        buzzes: new Map([[PLAYER1.userId, CANT_BUZZ_FLAG]]),
-        isAnswered: [
-          [
-            {
-              isAnswered: false,
-              answeredBy: new Map([[PLAYER1.userId, false]]),
-            },
-            { isAnswered: false, answeredBy: new Map() },
-          ],
-        ],
-        players: new Map([
-          [PLAYER1.userId, { ...PLAYER1, score: -200 }],
-          [PLAYER2.userId, PLAYER2],
-        ]),
+      expectedState: produce(initialState, (draft) => {
+        draft.type = GameState.ReadClue;
+        draft.activeClue = [0, 0];
+        draft.boardControl = PLAYER1.userId;
+        draft.buzzes.set(PLAYER1.userId, CANT_BUZZ_FLAG);
+
+        draft.isAnswered[0][0][0].answeredBy.set(PLAYER1.userId, false);
+
+        draft.players.set(PLAYER1.userId, { ...PLAYER1, score: -200 });
+        draft.players.set(PLAYER2.userId, PLAYER2);
       }),
     },
     {
@@ -496,27 +469,18 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER2.userId, i: 0, j: 0, deltaMs: 123 },
         },
       ],
-      expectedState: State.copy(initialState, {
-        type: GameState.RevealAnswerToBuzzer,
-        activeClue: [0, 0],
-        boardControl: PLAYER1.userId,
-        buzzes: new Map([
-          [PLAYER1.userId, CANT_BUZZ_FLAG],
-          [PLAYER2.userId, 123],
-        ]),
-        isAnswered: [
-          [
-            {
-              isAnswered: false,
-              answeredBy: new Map([[PLAYER1.userId, false]]),
-            },
-            { isAnswered: false, answeredBy: new Map() },
-          ],
-        ],
-        players: new Map([
-          [PLAYER1.userId, { ...PLAYER1, score: -200 }],
-          [PLAYER2.userId, PLAYER2],
-        ]),
+      expectedState: produce(initialState, (draft) => {
+        draft.type = GameState.RevealAnswerToBuzzer;
+        draft.activeClue = [0, 0];
+        draft.boardControl = PLAYER1.userId;
+
+        draft.buzzes.set(PLAYER1.userId, CANT_BUZZ_FLAG);
+        draft.buzzes.set(PLAYER2.userId, 123);
+
+        draft.isAnswered[0][0][0].answeredBy.set(PLAYER1.userId, false);
+
+        draft.players.set(PLAYER1.userId, { ...PLAYER1, score: -200 });
+        draft.players.set(PLAYER2.userId, PLAYER2);
       }),
     },
     {
@@ -554,31 +518,22 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER2.userId, i: 0, j: 0, correct: true },
         },
       ],
-      expectedState: State.copy(initialState, {
-        type: GameState.RevealAnswerToAll,
-        activeClue: [0, 0],
-        isAnswered: [
-          [
-            {
-              isAnswered: true,
-              answeredBy: new Map([
-                [PLAYER1.userId, false],
-                [PLAYER2.userId, true],
-              ]),
-            },
-            { isAnswered: false, answeredBy: new Map() },
-          ],
-        ],
-        boardControl: PLAYER2.userId,
-        buzzes: new Map([
-          [PLAYER1.userId, CANT_BUZZ_FLAG],
-          [PLAYER2.userId, 123],
-        ]),
-        numAnswered: 1,
-        players: new Map([
-          [PLAYER1.userId, { ...PLAYER1, score: -200 }],
-          [PLAYER2.userId, { ...PLAYER2, score: 200 }],
-        ]),
+      expectedState: produce(initialState, (draft) => {
+        draft.type = GameState.RevealAnswerToAll;
+        draft.activeClue = [0, 0];
+
+        const clueAnswer = draft.isAnswered[0][0][0];
+        clueAnswer.isAnswered = true;
+        clueAnswer.answeredBy.set(PLAYER1.userId, false);
+        clueAnswer.answeredBy.set(PLAYER2.userId, true);
+
+        draft.boardControl = PLAYER2.userId;
+        draft.buzzes.set(PLAYER1.userId, CANT_BUZZ_FLAG);
+        draft.buzzes.set(PLAYER2.userId, 123);
+        draft.numAnswered = 1;
+
+        draft.players.set(PLAYER1.userId, { ...PLAYER1, score: -200 });
+        draft.players.set(PLAYER2.userId, { ...PLAYER2, score: 200 });
       }),
     },
     {
@@ -612,20 +567,18 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER1.userId, i: 0, j: 0 },
         },
       ],
-      expectedState: State.copy(initialState, {
-        type: GameState.ShowBoard,
-        boardControl: PLAYER1.userId,
-        isAnswered: [
-          [
-            { isAnswered: true, answeredBy: new Map([[PLAYER1.userId, true]]) },
-            { isAnswered: false, answeredBy: new Map() },
-          ],
-        ],
-        numAnswered: 1,
-        players: new Map([
-          [PLAYER1.userId, { ...PLAYER1, score: 200 }],
-          [PLAYER2.userId, PLAYER2],
-        ]),
+      expectedState: produce(initialState, (draft) => {
+        draft.type = GameState.ShowBoard;
+        draft.boardControl = PLAYER1.userId;
+
+        const clueAnswer = draft.isAnswered[0][0][0];
+        clueAnswer.isAnswered = true;
+        clueAnswer.answeredBy.set(PLAYER1.userId, true);
+
+        draft.numAnswered = 1;
+
+        draft.players.set(PLAYER1.userId, { ...PLAYER1, score: 200 });
+        draft.players.set(PLAYER2.userId, PLAYER2);
       }),
     },
     {
@@ -684,44 +637,46 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER1.userId, i: 0, j: 1 },
         },
       ],
-      expectedState: State.copy(initialState, {
-        type: GameState.PreviewRound,
-        boardControl: PLAYER2.userId,
-        isAnswered: [
-          [
-            { isAnswered: false, answeredBy: new Map() },
-            { isAnswered: false, answeredBy: new Map() },
-          ],
-        ],
-        numAnswered: 0,
-        numCluesInBoard: 2,
-        players: new Map([
-          [PLAYER1.userId, { ...PLAYER1, score: 200 }],
-          [PLAYER2.userId, { ...PLAYER2, score: 200 }],
-        ]),
-        round: 1,
+      expectedState: produce(initialState, (draft) => {
+        draft.type = GameState.PreviewRound;
+        draft.boardControl = PLAYER2.userId;
+
+        const firstClueAnswer = draft.isAnswered[0][0][0];
+        firstClueAnswer.isAnswered = true;
+        firstClueAnswer.answeredBy.set(PLAYER1.userId, true);
+        const secondClueAnswer = draft.isAnswered[0][0][1];
+        secondClueAnswer.isAnswered = true;
+        secondClueAnswer.answeredBy.set(PLAYER2.userId, true);
+
+        draft.numAnswered = 0;
+        draft.numCluesInBoard = 2;
+
+        draft.players.set(PLAYER1.userId, { ...PLAYER1, score: 200 });
+        draft.players.set(PLAYER2.userId, { ...PLAYER2, score: 200 });
+
+        draft.round = 1;
       }),
     },
     {
       name: "Dismiss clue to go back to the board (round over), player with lowest score gets board control",
       state: initialState,
       actions: TWO_PLAYERS_ROUND_1,
-      expectedState: State.copy(initialState, {
-        type: GameState.PreviewRound,
-        boardControl: PLAYER2.userId,
-        isAnswered: [
-          [
-            { isAnswered: false, answeredBy: new Map() },
-            { isAnswered: false, answeredBy: new Map() },
-          ],
-        ],
-        numAnswered: 0,
-        numCluesInBoard: 2,
-        players: new Map([
-          [PLAYER1.userId, { ...PLAYER1, score: 400 }],
-          [PLAYER2.userId, { ...PLAYER2, score: 0 }],
-        ]),
-        round: 1,
+      expectedState: produce(initialState, (draft) => {
+        draft.type = GameState.PreviewRound;
+        draft.boardControl = PLAYER2.userId;
+
+        const firstClueAnswer = draft.isAnswered[0][0][0];
+        firstClueAnswer.isAnswered = true;
+        firstClueAnswer.answeredBy.set(PLAYER1.userId, true);
+        const secondClueAnswer = draft.isAnswered[0][0][1];
+        secondClueAnswer.isAnswered = true;
+        secondClueAnswer.answeredBy.set(PLAYER1.userId, true);
+
+        draft.numAnswered = 0;
+        draft.numCluesInBoard = 2;
+        draft.players.set(PLAYER1.userId, { ...PLAYER1, score: 400 });
+        draft.players.set(PLAYER2.userId, PLAYER2);
+        draft.round = 1;
       }),
     },
     {
@@ -738,25 +693,25 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER2.userId, i: 0, j: 0 },
         },
       ],
-      expectedState: State.copy(initialState, {
-        type: GameState.WagerClue,
-        activeClue: [0, 0],
-        buzzes: new Map([[PLAYER1.userId, CANT_BUZZ_FLAG]]),
-        boardControl: PLAYER2.userId,
-        isAnswered: [
-          [
-            { isAnswered: false, answeredBy: new Map() },
-            { isAnswered: false, answeredBy: new Map() },
-          ],
-        ],
-        numAnswered: 0,
-        numCluesInBoard: 2,
-        numExpectedWagers: 1,
-        players: new Map([
-          [PLAYER1.userId, { ...PLAYER1, score: 400 }],
-          [PLAYER2.userId, { ...PLAYER2, score: 0 }],
-        ]),
-        round: 1,
+      expectedState: produce(initialState, (draft) => {
+        draft.type = GameState.WagerClue;
+        draft.activeClue = [0, 0];
+        draft.buzzes.set(PLAYER1.userId, CANT_BUZZ_FLAG);
+        draft.boardControl = PLAYER2.userId;
+
+        const firstClueAnswer = draft.isAnswered[0][0][0];
+        firstClueAnswer.isAnswered = true;
+        firstClueAnswer.answeredBy.set(PLAYER1.userId, true);
+        const secondClueAnswer = draft.isAnswered[0][0][1];
+        secondClueAnswer.isAnswered = true;
+        secondClueAnswer.answeredBy.set(PLAYER1.userId, true);
+
+        draft.numAnswered = 0;
+        draft.numCluesInBoard = 2;
+        draft.numExpectedWagers = 1;
+        draft.players.set(PLAYER1.userId, { ...PLAYER1, score: 400 });
+        draft.players.set(PLAYER2.userId, PLAYER2);
+        draft.round = 1;
       }),
     },
     {
@@ -777,26 +732,26 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER2.userId, i: 0, j: 0, wager: 345 },
         },
       ],
-      expectedState: State.copy(initialState, {
-        type: GameState.ReadWagerableClue,
-        activeClue: [0, 0],
-        boardControl: PLAYER2.userId,
-        buzzes: new Map([[PLAYER1.userId, CANT_BUZZ_FLAG]]),
-        isAnswered: [
-          [
-            { isAnswered: false, answeredBy: new Map() },
-            { isAnswered: false, answeredBy: new Map() },
-          ],
-        ],
-        numAnswered: 0,
-        numCluesInBoard: 2,
-        numExpectedWagers: 1,
-        players: new Map([
-          [PLAYER1.userId, { ...PLAYER1, score: 400 }],
-          [PLAYER2.userId, { ...PLAYER2, score: 0 }],
-        ]),
-        round: 1,
-        wagers: new Map([[PLAYER2.userId, 345]]),
+      expectedState: produce(initialState, (draft) => {
+        draft.type = GameState.ReadWagerableClue;
+        draft.activeClue = [0, 0];
+        draft.boardControl = PLAYER2.userId;
+        draft.buzzes.set(PLAYER1.userId, CANT_BUZZ_FLAG);
+
+        const firstClueAnswer = draft.isAnswered[0][0][0];
+        firstClueAnswer.isAnswered = true;
+        firstClueAnswer.answeredBy.set(PLAYER1.userId, true);
+        const secondClueAnswer = draft.isAnswered[0][0][1];
+        secondClueAnswer.isAnswered = true;
+        secondClueAnswer.answeredBy.set(PLAYER1.userId, true);
+
+        draft.numAnswered = 0;
+        draft.numCluesInBoard = 2;
+        draft.numExpectedWagers = 1;
+        draft.players.set(PLAYER1.userId, { ...PLAYER1, score: 400 });
+        draft.players.set(PLAYER2.userId, PLAYER2);
+        draft.round = 1;
+        draft.wagers.set("1,0,0", new Map([[PLAYER2.userId, 345]]));
       }),
     },
     {
@@ -825,29 +780,33 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER2.userId, i: 0, j: 0, correct: true },
         },
       ],
-      expectedState: State.copy(initialState, {
-        type: GameState.RevealAnswerToAll,
-        activeClue: [0, 0],
-        boardControl: PLAYER2.userId,
-        buzzes: new Map([
-          [PLAYER1.userId, CANT_BUZZ_FLAG],
-          [PLAYER2.userId, 123],
-        ]),
-        isAnswered: [
-          [
-            { isAnswered: true, answeredBy: new Map([[PLAYER2.userId, true]]) },
-            { isAnswered: false, answeredBy: new Map() },
-          ],
-        ],
-        numAnswered: 1,
-        numCluesInBoard: 2,
-        numExpectedWagers: 1,
-        players: new Map([
-          [PLAYER1.userId, { ...PLAYER1, score: 400 }],
-          [PLAYER2.userId, { ...PLAYER2, score: 345 }],
-        ]),
-        round: 1,
-        wagers: new Map([[PLAYER2.userId, 345]]),
+      expectedState: produce(initialState, (draft) => {
+        draft.type = GameState.RevealAnswerToAll;
+        draft.activeClue = [0, 0];
+        draft.boardControl = PLAYER2.userId;
+
+        draft.buzzes.set(PLAYER1.userId, CANT_BUZZ_FLAG);
+        draft.buzzes.set(PLAYER2.userId, 123);
+
+        const firstClueAnswer = draft.isAnswered[0][0][0];
+        firstClueAnswer.isAnswered = true;
+        firstClueAnswer.answeredBy.set(PLAYER1.userId, true);
+        const secondClueAnswer = draft.isAnswered[0][0][1];
+        secondClueAnswer.isAnswered = true;
+        secondClueAnswer.answeredBy.set(PLAYER1.userId, true);
+        const thirdClueAnswer = draft.isAnswered[1][0][0];
+        thirdClueAnswer.isAnswered = true;
+        thirdClueAnswer.answeredBy.set(PLAYER2.userId, true);
+
+        draft.numAnswered = 1;
+        draft.numCluesInBoard = 2;
+        draft.numExpectedWagers = 1;
+
+        draft.players.set(PLAYER1.userId, { ...PLAYER1, score: 400 });
+        draft.players.set(PLAYER2.userId, { ...PLAYER2, score: 345 });
+
+        draft.round = 1;
+        draft.wagers.set("1,0,0", new Map([[PLAYER2.userId, 345]]));
       }),
     },
     {
@@ -877,32 +836,31 @@ describe("gameEngine", () => {
           },
         },
       ],
-      expectedState: State.copy(initialState, {
-        type: GameState.RevealAnswerToAll,
-        activeClue: [0, 0],
-        boardControl: PLAYER2.userId,
-        buzzes: new Map([
-          [PLAYER1.userId, CANT_BUZZ_FLAG],
-          [PLAYER2.userId, CLUE_TIMEOUT_MS + 1],
-        ]),
-        isAnswered: [
-          [
-            {
-              isAnswered: true,
-              answeredBy: new Map([[PLAYER2.userId, false]]),
-            },
-            { isAnswered: false, answeredBy: new Map() },
-          ],
-        ],
-        numAnswered: 1,
-        numCluesInBoard: 2,
-        numExpectedWagers: 1,
-        players: new Map([
-          [PLAYER1.userId, { ...PLAYER1, score: 400 }],
-          [PLAYER2.userId, { ...PLAYER2, score: -345 }],
-        ]),
-        round: 1,
-        wagers: new Map([[PLAYER2.userId, 345]]),
+      expectedState: produce(initialState, (draft) => {
+        draft.type = GameState.RevealAnswerToAll;
+        draft.activeClue = [0, 0];
+        draft.boardControl = PLAYER2.userId;
+
+        draft.buzzes.set(PLAYER1.userId, CANT_BUZZ_FLAG);
+        draft.buzzes.set(PLAYER2.userId, CLUE_TIMEOUT_MS + 1);
+
+        const firstClueAnswer = draft.isAnswered[0][0][0];
+        firstClueAnswer.isAnswered = true;
+        firstClueAnswer.answeredBy.set(PLAYER1.userId, true);
+        const secondClueAnswer = draft.isAnswered[0][0][1];
+        secondClueAnswer.isAnswered = true;
+        secondClueAnswer.answeredBy.set(PLAYER1.userId, true);
+        const thirdClueAnswer = draft.isAnswered[1][0][0];
+        thirdClueAnswer.isAnswered = true;
+        thirdClueAnswer.answeredBy.set(PLAYER2.userId, false);
+
+        draft.numAnswered = 1;
+        draft.numCluesInBoard = 2;
+        draft.numExpectedWagers = 1;
+        draft.players.set(PLAYER1.userId, { ...PLAYER1, score: 400 });
+        draft.players.set(PLAYER2.userId, { ...PLAYER2, score: -345 });
+        draft.round = 1;
+        draft.wagers.set("1,0,0", new Map([[PLAYER2.userId, 345]]));
       }),
     },
     {
@@ -919,25 +877,25 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER2.userId, i: 0, j: 1 },
         },
       ],
-      expectedState: State.copy(initialState, {
-        type: GameState.WagerClue,
-        activeClue: [0, 1],
-        boardControl: PLAYER2.userId,
-        buzzes: new Map([[PLAYER2.userId, CANT_BUZZ_FLAG]]),
-        isAnswered: [
-          [
-            { isAnswered: false, answeredBy: new Map() },
-            { isAnswered: false, answeredBy: new Map() },
-          ],
-        ],
-        numAnswered: 0,
-        numCluesInBoard: 2,
-        numExpectedWagers: 1,
-        players: new Map([
-          [PLAYER1.userId, { ...PLAYER1, score: 400 }],
-          [PLAYER2.userId, { ...PLAYER2, score: 0 }],
-        ]),
-        round: 1,
+      expectedState: produce(initialState, (draft) => {
+        draft.type = GameState.WagerClue;
+        draft.activeClue = [0, 1];
+        draft.boardControl = PLAYER2.userId;
+        draft.buzzes.set(PLAYER2.userId, CANT_BUZZ_FLAG);
+
+        const firstClueAnswer = draft.isAnswered[0][0][0];
+        firstClueAnswer.isAnswered = true;
+        firstClueAnswer.answeredBy.set(PLAYER1.userId, true);
+        const secondClueAnswer = draft.isAnswered[0][0][1];
+        secondClueAnswer.isAnswered = true;
+        secondClueAnswer.answeredBy.set(PLAYER1.userId, true);
+
+        draft.numAnswered = 0;
+        draft.numCluesInBoard = 2;
+        draft.numExpectedWagers = 1;
+        draft.players.set(PLAYER1.userId, { ...PLAYER1, score: 400 });
+        draft.players.set(PLAYER2.userId, PLAYER2);
+        draft.round = 1;
       }),
     },
     {
@@ -1032,23 +990,47 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER2.userId, i: 0, j: 1 },
         },
       ],
-      expectedState: State.copy(initialState, {
-        type: GameState.RevealAnswerToAll,
-        activeClue: [0, 1],
-        boardControl: PLAYER2.userId,
-        isAnswered: [
+      expectedState: produce(initialState, (draft) => {
+        draft.type = GameState.RevealAnswerToAll;
+        draft.activeClue = [0, 1];
+        draft.boardControl = PLAYER2.userId;
+
+        draft.isAnswered = [
           [
-            { isAnswered: true, answeredBy: new Map([[PLAYER2.userId, true]]) },
-            { isAnswered: true, answeredBy: new Map() },
+            [
+              {
+                isAnswered: true,
+                answeredBy: new Map([[PLAYER1.userId, true]]),
+              },
+              {
+                isAnswered: true,
+                answeredBy: new Map([
+                  [PLAYER1.userId, false],
+                  [PLAYER2.userId, false],
+                ]),
+              },
+            ],
           ],
-        ],
-        numAnswered: 2,
-        numCluesInBoard: 2,
-        players: new Map([
-          [PLAYER1.userId, { ...PLAYER1, score: 0 }],
-          [PLAYER2.userId, { ...PLAYER2, score: -195 }],
-        ]),
-        round: 1,
+          [
+            [
+              {
+                isAnswered: true,
+                answeredBy: new Map([[PLAYER2.userId, true]]),
+              },
+              {
+                isAnswered: true,
+                answeredBy: new Map(),
+              },
+            ],
+          ],
+        ];
+
+        draft.numAnswered = 2;
+        draft.numCluesInBoard = 2;
+        draft.players.set(PLAYER1.userId, PLAYER1);
+        draft.players.set(PLAYER2.userId, { ...PLAYER2, score: -195 });
+        draft.wagers.set("1,0,0", new Map([[PLAYER2.userId, 5]]));
+        draft.round = 1;
       }),
     },
     {
@@ -1085,25 +1067,28 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER2.userId, i: 0, j: 1 },
         },
       ],
-      expectedState: State.copy(initialState, {
-        type: GameState.WagerClue,
-        activeClue: [0, 1],
-        boardControl: PLAYER2.userId,
-        buzzes: new Map(),
-        isAnswered: [
-          [
-            { isAnswered: true, answeredBy: new Map([[PLAYER2.userId, true]]) },
-            { isAnswered: false, answeredBy: new Map() },
-          ],
-        ],
-        numAnswered: 1,
-        numCluesInBoard: 2,
-        numExpectedWagers: 2,
-        players: new Map([
-          [PLAYER1.userId, { ...PLAYER1, score: 400 }],
-          [PLAYER2.userId, { ...PLAYER2, score: 400 }],
-        ]),
-        round: 1,
+      expectedState: produce(initialState, (draft) => {
+        draft.type = GameState.WagerClue;
+        draft.activeClue = [0, 1];
+        draft.boardControl = PLAYER2.userId;
+
+        const firstClueAnswer = draft.isAnswered[0][0][0];
+        firstClueAnswer.isAnswered = true;
+        firstClueAnswer.answeredBy.set(PLAYER1.userId, true);
+        const secondClueAnswer = draft.isAnswered[0][0][1];
+        secondClueAnswer.isAnswered = true;
+        secondClueAnswer.answeredBy.set(PLAYER1.userId, true);
+        const thirdClueAnswer = draft.isAnswered[1][0][0];
+        thirdClueAnswer.isAnswered = true;
+        thirdClueAnswer.answeredBy.set(PLAYER2.userId, true);
+
+        draft.numAnswered = 1;
+        draft.numCluesInBoard = 2;
+        draft.numExpectedWagers = 2;
+        draft.players.set(PLAYER1.userId, { ...PLAYER1, score: 400 });
+        draft.players.set(PLAYER2.userId, { ...PLAYER2, score: 400 });
+        draft.wagers.set("1,0,0", new Map([[PLAYER2.userId, 400]]));
+        draft.round = 1;
       }),
     },
     {
@@ -1144,26 +1129,44 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER1.userId, i: 0, j: 1, wager: 400 },
         },
       ],
-      expectedState: State.copy(initialState, {
-        type: GameState.WagerClue,
-        activeClue: [0, 1],
-        boardControl: PLAYER2.userId,
-        buzzes: new Map(),
-        isAnswered: [
+      expectedState: produce(initialState, (draft) => {
+        draft.type = GameState.WagerClue;
+        draft.activeClue = [0, 1];
+        draft.boardControl = PLAYER2.userId;
+        draft.isAnswered = [
           [
-            { isAnswered: true, answeredBy: new Map([[PLAYER2.userId, true]]) },
-            { isAnswered: false, answeredBy: new Map() },
+            [
+              {
+                isAnswered: true,
+                answeredBy: new Map([[PLAYER1.userId, true]]),
+              },
+              {
+                isAnswered: true,
+                answeredBy: new Map([[PLAYER1.userId, true]]),
+              },
+            ],
           ],
-        ],
-        numAnswered: 1,
-        numCluesInBoard: 2,
-        numExpectedWagers: 2,
-        players: new Map([
-          [PLAYER1.userId, { ...PLAYER1, score: 400 }],
-          [PLAYER2.userId, { ...PLAYER2, score: 400 }],
-        ]),
-        round: 1,
-        wagers: new Map([[PLAYER1.userId, 400]]),
+          [
+            [
+              {
+                isAnswered: true,
+                answeredBy: new Map([[PLAYER2.userId, true]]),
+              },
+              {
+                isAnswered: false,
+                answeredBy: new Map(),
+              },
+            ],
+          ],
+        ];
+        draft.numAnswered = 1;
+        draft.numCluesInBoard = 2;
+        draft.numExpectedWagers = 2;
+        draft.players.set(PLAYER1.userId, { ...PLAYER1, score: 400 });
+        draft.players.set(PLAYER2.userId, { ...PLAYER2, score: 400 });
+        draft.round = 1;
+        draft.wagers.set("1,0,0", new Map([[PLAYER2.userId, 400]]));
+        draft.wagers.set("1,0,1", new Map([[PLAYER1.userId, 400]]));
       }),
     },
     {
@@ -1208,29 +1211,50 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER2.userId, i: 0, j: 1, wager: 400 },
         },
       ],
-      expectedState: State.copy(initialState, {
-        type: GameState.ReadLongFormClue,
-        activeClue: [0, 1],
-        boardControl: PLAYER2.userId,
-        buzzes: new Map(),
-        isAnswered: [
+      expectedState: produce(initialState, (draft) => {
+        draft.type = GameState.ReadLongFormClue;
+        draft.activeClue = [0, 1];
+        draft.boardControl = PLAYER2.userId;
+        draft.isAnswered = [
           [
-            { isAnswered: true, answeredBy: new Map([[PLAYER2.userId, true]]) },
-            { isAnswered: false, answeredBy: new Map() },
+            [
+              {
+                isAnswered: true,
+                answeredBy: new Map([[PLAYER1.userId, true]]),
+              },
+              {
+                isAnswered: true,
+                answeredBy: new Map([[PLAYER1.userId, true]]),
+              },
+            ],
           ],
-        ],
-        numAnswered: 1,
-        numCluesInBoard: 2,
-        numExpectedWagers: 2,
-        players: new Map([
-          [PLAYER1.userId, { ...PLAYER1, score: 400 }],
-          [PLAYER2.userId, { ...PLAYER2, score: 400 }],
-        ]),
-        round: 1,
-        wagers: new Map([
-          [PLAYER1.userId, 400],
-          [PLAYER2.userId, 400],
-        ]),
+          [
+            [
+              {
+                isAnswered: true,
+                answeredBy: new Map([[PLAYER2.userId, true]]),
+              },
+              {
+                isAnswered: false,
+                answeredBy: new Map(),
+              },
+            ],
+          ],
+        ];
+        draft.numAnswered = 1;
+        draft.numCluesInBoard = 2;
+        draft.numExpectedWagers = 2;
+        draft.players.set(PLAYER1.userId, { ...PLAYER1, score: 400 });
+        draft.players.set(PLAYER2.userId, { ...PLAYER2, score: 400 });
+        draft.round = 1;
+        draft.wagers.set("1,0,0", new Map([[PLAYER2.userId, 400]]));
+        draft.wagers.set(
+          "1,0,1",
+          new Map([
+            [PLAYER1.userId, 400],
+            [PLAYER2.userId, 400],
+          ]),
+        );
       }),
     },
     {
@@ -1284,30 +1308,52 @@ describe("gameEngine", () => {
           },
         },
       ],
-      expectedState: State.copy(initialState, {
-        type: GameState.ReadLongFormClue,
-        activeClue: [0, 1],
-        answers: new Map([[PLAYER1.userId, "right answer"]]),
-        boardControl: PLAYER2.userId,
-        buzzes: new Map([[PLAYER1.userId, 0]]),
-        isAnswered: [
+      expectedState: produce(initialState, (draft) => {
+        draft.type = GameState.ReadLongFormClue;
+        draft.activeClue = [0, 1];
+        draft.answers.set("1,0,1", new Map([[PLAYER1.userId, "right answer"]]));
+        draft.boardControl = PLAYER2.userId;
+        draft.buzzes.set(PLAYER1.userId, 0);
+        draft.isAnswered = [
           [
-            { isAnswered: true, answeredBy: new Map([[PLAYER2.userId, true]]) },
-            { isAnswered: false, answeredBy: new Map() },
+            [
+              {
+                isAnswered: true,
+                answeredBy: new Map([[PLAYER1.userId, true]]),
+              },
+              {
+                isAnswered: true,
+                answeredBy: new Map([[PLAYER1.userId, true]]),
+              },
+            ],
           ],
-        ],
-        numAnswered: 1,
-        numCluesInBoard: 2,
-        numExpectedWagers: 2,
-        players: new Map([
-          [PLAYER1.userId, { ...PLAYER1, score: 400 }],
-          [PLAYER2.userId, { ...PLAYER2, score: 400 }],
-        ]),
-        round: 1,
-        wagers: new Map([
-          [PLAYER1.userId, 400],
-          [PLAYER2.userId, 400],
-        ]),
+          [
+            [
+              {
+                isAnswered: true,
+                answeredBy: new Map([[PLAYER2.userId, true]]),
+              },
+              {
+                isAnswered: false,
+                answeredBy: new Map(),
+              },
+            ],
+          ],
+        ];
+        draft.numAnswered = 1;
+        draft.numCluesInBoard = 2;
+        draft.numExpectedWagers = 2;
+        draft.players.set(PLAYER1.userId, { ...PLAYER1, score: 400 });
+        draft.players.set(PLAYER2.userId, { ...PLAYER2, score: 400 });
+        draft.round = 1;
+        draft.wagers.set("1,0,0", new Map([[PLAYER2.userId, 400]]));
+        draft.wagers.set(
+          "1,0,1",
+          new Map([
+            [PLAYER1.userId, 400],
+            [PLAYER2.userId, 400],
+          ]),
+        );
       }),
     },
     {
@@ -1370,36 +1416,59 @@ describe("gameEngine", () => {
           },
         },
       ],
-      expectedState: State.copy(initialState, {
-        type: GameState.RevealAnswerLongForm,
-        activeClue: [0, 1],
-        answers: new Map([
-          [PLAYER1.userId, "right answer"],
-          [PLAYER2.userId, "wrong answer"],
-        ]),
-        boardControl: PLAYER2.userId,
-        buzzes: new Map([
-          [PLAYER1.userId, 0],
-          [PLAYER2.userId, 0],
-        ]),
-        isAnswered: [
+      expectedState: produce(initialState, (draft) => {
+        draft.type = GameState.RevealAnswerLongForm;
+        draft.activeClue = [0, 1];
+        draft.answers.set(
+          "1,0,1",
+          new Map([
+            [PLAYER1.userId, "right answer"],
+            [PLAYER2.userId, "wrong answer"],
+          ]),
+        );
+        draft.boardControl = PLAYER2.userId;
+        draft.buzzes.set(PLAYER1.userId, 0);
+        draft.buzzes.set(PLAYER2.userId, 0);
+        draft.isAnswered = [
           [
-            { isAnswered: true, answeredBy: new Map([[PLAYER2.userId, true]]) },
-            { isAnswered: false, answeredBy: new Map() },
+            [
+              {
+                isAnswered: true,
+                answeredBy: new Map([[PLAYER1.userId, true]]),
+              },
+              {
+                isAnswered: true,
+                answeredBy: new Map([[PLAYER1.userId, true]]),
+              },
+            ],
           ],
-        ],
-        numAnswered: 1,
-        numCluesInBoard: 2,
-        numExpectedWagers: 2,
-        players: new Map([
-          [PLAYER1.userId, { ...PLAYER1, score: 400 }],
-          [PLAYER2.userId, { ...PLAYER2, score: 400 }],
-        ]),
-        round: 1,
-        wagers: new Map([
-          [PLAYER1.userId, 400],
-          [PLAYER2.userId, 400],
-        ]),
+          [
+            [
+              {
+                isAnswered: true,
+                answeredBy: new Map([[PLAYER2.userId, true]]),
+              },
+              {
+                isAnswered: false,
+                answeredBy: new Map(),
+              },
+            ],
+          ],
+        ];
+        draft.numAnswered = 1;
+        draft.numCluesInBoard = 2;
+        draft.numExpectedWagers = 2;
+        draft.players.set(PLAYER1.userId, { ...PLAYER1, score: 400 });
+        draft.players.set(PLAYER2.userId, { ...PLAYER2, score: 400 });
+        draft.round = 1;
+        draft.wagers.set("1,0,0", new Map([[PLAYER2.userId, 400]]));
+        draft.wagers.set(
+          "1,0,1",
+          new Map([
+            [PLAYER1.userId, 400],
+            [PLAYER2.userId, 400],
+          ]),
+        );
       }),
     },
     {
@@ -1466,39 +1535,59 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER1.userId, i: 0, j: 1, correct: false },
         },
       ],
-      expectedState: State.copy(initialState, {
-        type: GameState.RevealAnswerLongForm,
-        activeClue: [0, 1],
-        answers: new Map([
-          [PLAYER1.userId, "right answer"],
-          [PLAYER2.userId, "wrong answer"],
-        ]),
-        boardControl: PLAYER2.userId,
-        buzzes: new Map([
-          [PLAYER1.userId, 0],
-          [PLAYER2.userId, 0],
-        ]),
-        isAnswered: [
+      expectedState: produce(initialState, (draft) => {
+        draft.type = GameState.RevealAnswerLongForm;
+        draft.activeClue = [0, 1];
+        draft.answers.set(
+          "1,0,1",
+          new Map([
+            [PLAYER1.userId, "right answer"],
+            [PLAYER2.userId, "wrong answer"],
+          ]),
+        );
+        draft.boardControl = PLAYER2.userId;
+        draft.buzzes.set(PLAYER1.userId, 0);
+        draft.buzzes.set(PLAYER2.userId, 0);
+        draft.isAnswered = [
           [
-            { isAnswered: true, answeredBy: new Map([[PLAYER2.userId, true]]) },
-            {
-              isAnswered: false,
-              answeredBy: new Map([[PLAYER1.userId, false]]),
-            },
+            [
+              {
+                isAnswered: true,
+                answeredBy: new Map([[PLAYER1.userId, true]]),
+              },
+              {
+                isAnswered: true,
+                answeredBy: new Map([[PLAYER1.userId, true]]),
+              },
+            ],
           ],
-        ],
-        numAnswered: 1,
-        numCluesInBoard: 2,
-        numExpectedWagers: 2,
-        players: new Map([
-          [PLAYER1.userId, { ...PLAYER1, score: 0 }],
-          [PLAYER2.userId, { ...PLAYER2, score: 400 }],
-        ]),
-        round: 1,
-        wagers: new Map([
-          [PLAYER1.userId, 400],
-          [PLAYER2.userId, 400],
-        ]),
+          [
+            [
+              {
+                isAnswered: true,
+                answeredBy: new Map([[PLAYER2.userId, true]]),
+              },
+              {
+                isAnswered: false,
+                answeredBy: new Map([[PLAYER1.userId, false]]),
+              },
+            ],
+          ],
+        ];
+        draft.numAnswered = 1;
+        draft.numCluesInBoard = 2;
+        draft.numExpectedWagers = 2;
+        draft.players.set(PLAYER1.userId, PLAYER1);
+        draft.players.set(PLAYER2.userId, { ...PLAYER2, score: 400 });
+        draft.round = 1;
+        draft.wagers.set("1,0,0", new Map([[PLAYER2.userId, 400]]));
+        draft.wagers.set(
+          "1,0,1",
+          new Map([
+            [PLAYER1.userId, 400],
+            [PLAYER2.userId, 400],
+          ]),
+        );
       }),
     },
     {
@@ -1569,42 +1658,62 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER2.userId, i: 0, j: 1, correct: true },
         },
       ],
-      expectedState: State.copy(initialState, {
-        type: GameState.RevealAnswerToAll,
-        activeClue: [0, 1],
-        answers: new Map([
-          [PLAYER1.userId, "right answer"],
-          [PLAYER2.userId, "wrong answer"],
-        ]),
-        boardControl: PLAYER2.userId,
-        buzzes: new Map([
-          [PLAYER1.userId, 0],
-          [PLAYER2.userId, 0],
-        ]),
-        isAnswered: [
+      expectedState: produce(initialState, (draft) => {
+        draft.type = GameState.RevealAnswerToAll;
+        draft.activeClue = [0, 1];
+        draft.answers.set(
+          "1,0,1",
+          new Map([
+            [PLAYER1.userId, "right answer"],
+            [PLAYER2.userId, "wrong answer"],
+          ]),
+        );
+        draft.boardControl = PLAYER2.userId;
+        draft.buzzes.set(PLAYER1.userId, 0);
+        draft.buzzes.set(PLAYER2.userId, 0);
+        draft.isAnswered = [
           [
-            { isAnswered: true, answeredBy: new Map([[PLAYER2.userId, true]]) },
-            {
-              isAnswered: true,
-              answeredBy: new Map([
-                [PLAYER1.userId, false],
-                [PLAYER2.userId, true],
-              ]),
-            },
+            [
+              {
+                isAnswered: true,
+                answeredBy: new Map([[PLAYER1.userId, true]]),
+              },
+              {
+                isAnswered: true,
+                answeredBy: new Map([[PLAYER1.userId, true]]),
+              },
+            ],
           ],
-        ],
-        numAnswered: 2,
-        numCluesInBoard: 2,
-        numExpectedWagers: 2,
-        players: new Map([
-          [PLAYER1.userId, { ...PLAYER1, score: 0 }],
-          [PLAYER2.userId, { ...PLAYER2, score: 800 }],
-        ]),
-        round: 1,
-        wagers: new Map([
-          [PLAYER1.userId, 400],
-          [PLAYER2.userId, 400],
-        ]),
+          [
+            [
+              {
+                isAnswered: true,
+                answeredBy: new Map([[PLAYER2.userId, true]]),
+              },
+              {
+                isAnswered: true,
+                answeredBy: new Map([
+                  [PLAYER1.userId, false],
+                  [PLAYER2.userId, true],
+                ]),
+              },
+            ],
+          ],
+        ];
+        draft.numAnswered = 2;
+        draft.numCluesInBoard = 2;
+        draft.numExpectedWagers = 2;
+        draft.players.set(PLAYER1.userId, PLAYER1);
+        draft.players.set(PLAYER2.userId, { ...PLAYER2, score: 800 });
+        draft.round = 1;
+        draft.wagers.set("1,0,0", new Map([[PLAYER2.userId, 400]]));
+        draft.wagers.set(
+          "1,0,1",
+          new Map([
+            [PLAYER1.userId, 400],
+            [PLAYER2.userId, 400],
+          ]),
+        );
       }),
     },
     {
@@ -1675,42 +1784,62 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER1.userId, i: 0, j: 1, correct: false },
         },
       ],
-      expectedState: State.copy(initialState, {
-        type: GameState.RevealAnswerToAll,
-        activeClue: [0, 1],
-        answers: new Map([
-          [PLAYER1.userId, "right answer"],
-          [PLAYER2.userId, "wrong answer"],
-        ]),
-        boardControl: PLAYER2.userId,
-        buzzes: new Map([
-          [PLAYER1.userId, 0],
-          [PLAYER2.userId, 0],
-        ]),
-        isAnswered: [
+      expectedState: produce(initialState, (draft) => {
+        draft.type = GameState.RevealAnswerToAll;
+        draft.activeClue = [0, 1];
+        draft.answers.set(
+          "1,0,1",
+          new Map([
+            [PLAYER1.userId, "right answer"],
+            [PLAYER2.userId, "wrong answer"],
+          ]),
+        );
+        draft.boardControl = PLAYER2.userId;
+        draft.buzzes.set(PLAYER1.userId, 0);
+        draft.buzzes.set(PLAYER2.userId, 0);
+        draft.isAnswered = [
           [
-            { isAnswered: true, answeredBy: new Map([[PLAYER2.userId, true]]) },
-            {
-              isAnswered: true,
-              answeredBy: new Map([
-                [PLAYER2.userId, true],
-                [PLAYER1.userId, false],
-              ]),
-            },
+            [
+              {
+                isAnswered: true,
+                answeredBy: new Map([[PLAYER1.userId, true]]),
+              },
+              {
+                isAnswered: true,
+                answeredBy: new Map([[PLAYER1.userId, true]]),
+              },
+            ],
           ],
-        ],
-        numAnswered: 2,
-        numCluesInBoard: 2,
-        numExpectedWagers: 2,
-        players: new Map([
-          [PLAYER1.userId, { ...PLAYER1, score: 0 }],
-          [PLAYER2.userId, { ...PLAYER2, score: 800 }],
-        ]),
-        round: 1,
-        wagers: new Map([
-          [PLAYER1.userId, 400],
-          [PLAYER2.userId, 400],
-        ]),
+          [
+            [
+              {
+                isAnswered: true,
+                answeredBy: new Map([[PLAYER2.userId, true]]),
+              },
+              {
+                isAnswered: true,
+                answeredBy: new Map([
+                  [PLAYER1.userId, false],
+                  [PLAYER2.userId, true],
+                ]),
+              },
+            ],
+          ],
+        ];
+        draft.numAnswered = 2;
+        draft.numCluesInBoard = 2;
+        draft.numExpectedWagers = 2;
+        draft.players.set(PLAYER1.userId, PLAYER1);
+        draft.players.set(PLAYER2.userId, { ...PLAYER2, score: 800 });
+        draft.round = 1;
+        draft.wagers.set("1,0,0", new Map([[PLAYER2.userId, 400]]));
+        draft.wagers.set(
+          "1,0,1",
+          new Map([
+            [PLAYER1.userId, 400],
+            [PLAYER2.userId, 400],
+          ]),
+        );
       }),
     },
     {
@@ -1791,36 +1920,59 @@ describe("gameEngine", () => {
           },
         },
       ],
-      expectedState: State.copy(initialState, {
-        type: GameState.RevealAnswerLongForm,
-        activeClue: [0, 1],
-        answers: new Map([
-          [PLAYER1.userId, "revised answer 1"],
-          [PLAYER2.userId, "draft answer 2"],
-        ]),
-        boardControl: PLAYER2.userId,
-        buzzes: new Map([
-          [PLAYER1.userId, 0],
-          [PLAYER2.userId, 0],
-        ]),
-        isAnswered: [
+      expectedState: produce(initialState, (draft) => {
+        draft.type = GameState.RevealAnswerLongForm;
+        draft.activeClue = [0, 1];
+        draft.answers.set(
+          "1,0,1",
+          new Map([
+            [PLAYER1.userId, "revised answer 1"],
+            [PLAYER2.userId, "draft answer 2"],
+          ]),
+        );
+        draft.boardControl = PLAYER2.userId;
+        draft.buzzes.set(PLAYER1.userId, 0);
+        draft.buzzes.set(PLAYER2.userId, 0);
+        draft.isAnswered = [
           [
-            { isAnswered: true, answeredBy: new Map([[PLAYER2.userId, true]]) },
-            { isAnswered: false, answeredBy: new Map() },
+            [
+              {
+                isAnswered: true,
+                answeredBy: new Map([[PLAYER1.userId, true]]),
+              },
+              {
+                isAnswered: true,
+                answeredBy: new Map([[PLAYER1.userId, true]]),
+              },
+            ],
           ],
-        ],
-        numAnswered: 1,
-        numCluesInBoard: 2,
-        numExpectedWagers: 2,
-        players: new Map([
-          [PLAYER1.userId, { ...PLAYER1, score: 400 }],
-          [PLAYER2.userId, { ...PLAYER2, score: 400 }],
-        ]),
-        round: 1,
-        wagers: new Map([
-          [PLAYER1.userId, 400],
-          [PLAYER2.userId, 400],
-        ]),
+          [
+            [
+              {
+                isAnswered: true,
+                answeredBy: new Map([[PLAYER2.userId, true]]),
+              },
+              {
+                isAnswered: false,
+                answeredBy: new Map(),
+              },
+            ],
+          ],
+        ];
+        draft.numAnswered = 1;
+        draft.numCluesInBoard = 2;
+        draft.numExpectedWagers = 2;
+        draft.players.set(PLAYER1.userId, { ...PLAYER1, score: 400 });
+        draft.players.set(PLAYER2.userId, { ...PLAYER2, score: 400 });
+        draft.round = 1;
+        draft.wagers.set("1,0,0", new Map([[PLAYER2.userId, 400]]));
+        draft.wagers.set(
+          "1,0,1",
+          new Map([
+            [PLAYER1.userId, 400],
+            [PLAYER2.userId, 400],
+          ]),
+        );
       }),
     },
     {
@@ -1895,27 +2047,57 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER2.userId, i: 0, j: 1 },
         },
       ],
-      expectedState: State.copy(initialState, {
-        type: GameState.GameOver,
-        isAnswered: [
+      expectedState: produce(initialState, (draft) => {
+        draft.type = GameState.GameOver;
+        draft.answers.set(
+          "1,0,1",
+          new Map([
+            [PLAYER1.userId, "right answer"],
+            [PLAYER2.userId, "right answer"],
+          ]),
+        );
+        draft.isAnswered = [
           [
-            { isAnswered: true, answeredBy: new Map([[PLAYER2.userId, true]]) },
-            {
-              isAnswered: true,
-              answeredBy: new Map([
-                [PLAYER1.userId, true],
-                [PLAYER2.userId, true],
-              ]),
-            },
+            [
+              {
+                isAnswered: true,
+                answeredBy: new Map([[PLAYER1.userId, true]]),
+              },
+              {
+                isAnswered: true,
+                answeredBy: new Map([[PLAYER1.userId, true]]),
+              },
+            ],
           ],
-        ],
-        numAnswered: 2,
-        numCluesInBoard: 2,
-        players: new Map([
-          [PLAYER1.userId, { ...PLAYER1, score: 800 }],
-          [PLAYER2.userId, { ...PLAYER2, score: 800 }],
-        ]),
-        round: 1,
+          [
+            [
+              {
+                isAnswered: true,
+                answeredBy: new Map([[PLAYER2.userId, true]]),
+              },
+              {
+                isAnswered: true,
+                answeredBy: new Map([
+                  [PLAYER1.userId, true],
+                  [PLAYER2.userId, true],
+                ]),
+              },
+            ],
+          ],
+        ];
+        draft.numAnswered = 2;
+        draft.numCluesInBoard = 2;
+        draft.players.set(PLAYER1.userId, { ...PLAYER1, score: 800 });
+        draft.players.set(PLAYER2.userId, { ...PLAYER2, score: 800 });
+        draft.round = 1;
+        draft.wagers.set("1,0,0", new Map([[PLAYER2.userId, 400]]));
+        draft.wagers.set(
+          "1,0,1",
+          new Map([
+            [PLAYER1.userId, 400],
+            [PLAYER2.userId, 400],
+          ]),
+        );
       }),
     },
   ];
@@ -1928,7 +2110,21 @@ describe("gameEngine", () => {
       }
       // Previous state is not mutated
       expect(tc.state).toStrictEqual(initialState);
-      expect(state).toStrictEqual(tc.expectedState);
+
+      // Break out state into its own variables for easier debugging
+      expect(state.activeClue).toStrictEqual(tc.expectedState.activeClue);
+      expect(state.answers).toStrictEqual(tc.expectedState.answers);
+      expect(state.boardControl).toBe(tc.expectedState.boardControl);
+      expect(state.buzzes).toStrictEqual(tc.expectedState.buzzes);
+      expect(state.game).toStrictEqual(tc.expectedState.game);
+      expect(state.isAnswered).toStrictEqual(tc.expectedState.isAnswered);
+      expect(state.numAnswered).toBe(tc.expectedState.numAnswered);
+      expect(state.numCluesInBoard).toBe(tc.expectedState.numCluesInBoard);
+      expect(state.numExpectedWagers).toBe(tc.expectedState.numExpectedWagers);
+      expect(state.players).toStrictEqual(tc.expectedState.players);
+      expect(state.round).toBe(tc.expectedState.round);
+      expect(state.type).toBe(tc.expectedState.type);
+      expect(state.wagers).toStrictEqual(tc.expectedState.wagers);
     });
   }
 });

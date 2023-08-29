@@ -8,7 +8,7 @@ import { getSupabase } from "~/supabase";
 import type { Action } from "./engine";
 import { gameEngine, getWinningBuzzer } from "./engine";
 import { applyRoomEventsToState, isTypedRoomEvent } from "./room-event";
-import { State } from "./state";
+import { getClueValue, State, stateFromGame } from "./state";
 
 function stateToGameEngine(
   game: Game,
@@ -27,19 +27,27 @@ function stateToGameEngine(
   }
 
   const isAnswered = (i: number, j: number) => {
-    return state.isAnswered.at(i)?.at(j)?.isAnswered ?? false;
+    return state.isAnswered.at(state.round)?.at(i)?.at(j)?.isAnswered ?? false;
   };
 
   const answeredBy = (i: number, j: number, userId: string) => {
-    return state.isAnswered.at(i)?.at(j)?.answeredBy.get(userId);
+    return state.isAnswered
+      .at(state.round)
+      ?.at(i)
+      ?.at(j)
+      ?.answeredBy.get(userId);
   };
 
   const winningBuzz = getWinningBuzzer(state.buzzes);
   const winningBuzzer = winningBuzz?.userId ?? undefined;
 
   function getClueValueFn(idx: [number, number], userId: string) {
-    return state.getClueValue(idx, userId);
+    return getClueValue(state, idx, userId);
   }
+
+  const clueKey = `${state.round},${
+    state.activeClue ? state.activeClue[0] : -1
+  },${state.activeClue ? state.activeClue[1] : -1}`;
 
   return {
     type: state.type,
@@ -48,7 +56,7 @@ function stateToGameEngine(
      * they were correct.
      */
     answeredBy,
-    answers: state.answers,
+    answers: state.answers.get(clueKey) ?? new Map<string, string>(),
     board,
     buzzes: state.buzzes,
     category,
@@ -60,7 +68,7 @@ function stateToGameEngine(
     numCluesLeftInRound: state.numCluesInBoard - state.numAnswered,
     round: state.round,
     boardControl: state.boardControl,
-    wagers: state.wagers,
+    wagers: state.wagers.get(clueKey) ?? new Map<string, number>(),
     winningBuzzer,
   };
 }
@@ -70,7 +78,7 @@ function stateToGameEngine(
  */
 export function useSoloGameEngine(game: Game) {
   const [state, dispatch] = React.useReducer(gameEngine, game, (arg) =>
-    State.fromGame(arg),
+    stateFromGame(arg),
   );
 
   return stateToGameEngine(game, state, dispatch);
@@ -100,7 +108,7 @@ export function useGameEngine(
     gameEngine,
     { game, serverRoomEvents },
     (arg) =>
-      applyRoomEventsToState(State.fromGame(arg.game), arg.serverRoomEvents),
+      applyRoomEventsToState(stateFromGame(arg.game), arg.serverRoomEvents),
   );
 
   const client = React.useMemo(() => getSupabase(accessToken), [accessToken]);

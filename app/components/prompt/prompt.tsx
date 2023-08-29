@@ -1,5 +1,6 @@
 import { useFetcher } from "@remix-run/react";
 import classNames from "classnames";
+import { produce } from "immer";
 import * as React from "react";
 import useFitText from "use-fit-text";
 
@@ -377,12 +378,15 @@ function ReadCluePrompt({ roomId, userId }: RoomProps) {
     () => {
       if (!buzzerOpenAt) return;
       const deltaMs = Date.now() - buzzerOpenAt;
-      setOptimisticBuzzes((old) => {
-        if (old.has(userId)) {
-          return old;
-        }
-        return new Map([...old, [userId, deltaMs]]);
-      });
+      setOptimisticBuzzes(
+        produce((draft) => {
+          const prev = draft.get(userId);
+          if (prev) {
+            return;
+          }
+          draft.set(userId, deltaMs);
+        }),
+      );
       submitBuzz(deltaMs);
     },
     buzzerOpenAt === undefined ? null : CLUE_TIMEOUT_MS,
@@ -420,7 +424,7 @@ function ReadCluePrompt({ roomId, userId }: RoomProps) {
     // Contestant buzzed, so submit their buzz time
     const deltaMs = clickedAtMs - buzzerOpenAt;
 
-    setOptimisticBuzzes((old) => old.set(userId, deltaMs));
+    setOptimisticBuzzes(produce((draft) => draft.set(userId, deltaMs)));
 
     return submitBuzz(deltaMs);
   };

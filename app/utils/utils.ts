@@ -26,6 +26,7 @@ export function getRandomWord() {
   return gameWords[Math.floor(Math.random() * gameWords.length)];
 }
 
+/** generateGrid creates a 2D grid of size n x m filled with defaultFill. */
 export function generateGrid<T>(n: number, m: number, defaultFill: T) {
   return Array.from({ length: n }, () =>
     Array.from({ length: m }, () => defaultFill),
