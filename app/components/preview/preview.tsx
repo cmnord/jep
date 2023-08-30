@@ -20,16 +20,18 @@ function JoinGameDialog({
   name,
   players,
   roomId,
+  type,
   userId,
 }: {
   Form: typeof fetcherForm;
   gameTitle: string;
   name: string;
   players: Map<string, Player>;
+  type: GameState;
 } & RoomProps) {
   return (
     <Dialog
-      isOpen
+      isOpen={type !== GameState.GameOver}
       title={`Join game "${gameTitle}"?`}
       description={`${players.size} player${
         players.size === 1 ? "" : "s"
@@ -192,6 +194,7 @@ export function Preview({
   }
   return (
     <JoinGameDialog
+      type={type}
       Form={fetcher.Form}
       gameTitle={gameTitle}
       name={name}
