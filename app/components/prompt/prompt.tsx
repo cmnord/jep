@@ -118,7 +118,12 @@ function WagerCluePrompt({ roomId, userId }: RoomProps) {
         shouldAnimate={false}
         wonBuzz={canWager}
       />
-      {longForm ? null : <p className="p-4 font-bold text-white">{category}</p>}
+      {longForm ? null : (
+        <div className="p-4 text-white">
+          <span className="font-bold">{category}</span> for{" "}
+          <span className="font-bold">${clue?.value}</span>
+        </div>
+      )}
       <div
         className="flex w-screen grow items-center justify-center"
         ref={ref}
@@ -261,7 +266,8 @@ function ReadWagerableCluePrompt({ roomId, userId }: RoomProps) {
       <div className="flex justify-between p-4">
         <div className="text-white">
           <span className="font-bold">{category}</span> for{" "}
-          <span className="font-bold">${clueValue}</span>
+          <span className="font-bold">${clue.value}</span> (wagered{" "}
+          <span className="font-bold">${clueValue}</span>)
         </div>
         <span className="text-sm text-slate-300">
           Click or press <Kbd>Enter</Kbd> to buzz in
