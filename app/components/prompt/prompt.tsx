@@ -224,10 +224,10 @@ function ReadWagerableCluePrompt({ roomId, userId }: RoomProps) {
   useTimeout(
     () => {
       if (!buzzerOpenAt) return;
-      submitBuzz(Date.now() - buzzerOpenAt);
+      submitBuzz(CLUE_TIMEOUT_MS + 1);
     },
     buzzerOpenAt !== undefined && boardControl === userId
-      ? CLUE_TIMEOUT_MS
+      ? CLUE_TIMEOUT_MS + 1
       : null,
   );
 
@@ -260,7 +260,7 @@ function ReadWagerableCluePrompt({ roomId, userId }: RoomProps) {
         wonBuzz={
           buzzDurationMs !== undefined &&
           buzzDurationMs !== CANT_BUZZ_FLAG &&
-          buzzDurationMs < CLUE_TIMEOUT_MS
+          buzzDurationMs <= CLUE_TIMEOUT_MS
         }
       />
       <div className="flex justify-between p-4">
@@ -383,19 +383,18 @@ function ReadCluePrompt({ roomId, userId }: RoomProps) {
   useTimeout(
     () => {
       if (!buzzerOpenAt) return;
-      const deltaMs = Date.now() - buzzerOpenAt;
       setOptimisticBuzzes(
         produce((draft) => {
           const prev = draft.get(userId);
           if (prev) {
             return;
           }
-          draft.set(userId, deltaMs);
+          draft.set(userId, CLUE_TIMEOUT_MS + 1);
         }),
       );
-      submitBuzz(deltaMs);
+      submitBuzz(CLUE_TIMEOUT_MS + 1);
     },
-    buzzerOpenAt === undefined ? null : CLUE_TIMEOUT_MS,
+    buzzerOpenAt === undefined ? null : CLUE_TIMEOUT_MS + 1,
   );
 
   // Play the "time's up" sound after 5 seconds if no one buzzed in after the

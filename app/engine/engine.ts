@@ -36,7 +36,7 @@ export interface Action {
 }
 
 /** CLUE_TIMEOUT_MS is the total amount of time a contestant has to buzz in after
- * the clue is read. */
+ * the clue is read, inclusive. */
 export const CLUE_TIMEOUT_MS = 5000;
 
 /** CANT_BUZZ_FLAG means that the player buzzed in wrong, so they can't try again

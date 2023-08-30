@@ -55,7 +55,7 @@ export default function HowTo() {
       setBuzzedAt(Date.now());
     },
     buzzerOpenAt !== undefined && buzzedAt === undefined
-      ? CLUE_TIMEOUT_MS
+      ? CLUE_TIMEOUT_MS + 1
       : null,
   );
 
