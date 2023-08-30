@@ -33,6 +33,7 @@ export default function PlayGame() {
       <GameComponent
         game={data.game}
         roomId={-1}
+        roomName="-1-mock"
         userId="mock"
         name="mock"
         url={data.BASE_URL + pathname}

@@ -64,6 +64,7 @@ export default function SoloGame() {
         game={data.game}
         name={data.name}
         roomId={-1}
+        roomName="-1-solo"
         userId={data.userId}
         url={data.BASE_URL + pathname}
       />

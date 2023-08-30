@@ -53,6 +53,7 @@ export async function loader({ request, params }: LoaderArgs) {
       name,
       roomEvents,
       roomId,
+      roomName,
       userId,
       BASE_URL,
       accessToken,
@@ -67,6 +68,7 @@ export async function loader({ request, params }: LoaderArgs) {
       name,
       roomEvents,
       roomId,
+      roomName,
       accessToken,
       userId,
       BASE_URL,
@@ -93,6 +95,7 @@ export default function PlayGame() {
         game={data.game}
         name={data.name}
         roomId={data.roomId}
+        roomName={data.roomName}
         userId={data.userId}
         url={data.BASE_URL + pathname}
       />

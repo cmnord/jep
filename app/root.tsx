@@ -73,12 +73,21 @@ export const links: LinksFunction = () => [
 
 export async function loader({ request }: LoaderArgs) {
   const authSession = await getValidAuthSession(request);
+  const env = getBrowserEnv();
 
-  const user = authSession
-    ? await getUserByEmail(authSession.email, authSession.accessToken)
-    : undefined;
-
-  return json({ user, env: getBrowserEnv(), BASE_URL, NODE_ENV });
+  try {
+    const user = authSession
+      ? await getUserByEmail(authSession.email, authSession.accessToken)
+      : undefined;
+    return json({ user, env, BASE_URL, NODE_ENV });
+  } catch (error: unknown) {
+    return json({
+      user: undefined,
+      env,
+      BASE_URL,
+      NODE_ENV,
+    });
+  }
 }
 
 export default function App() {

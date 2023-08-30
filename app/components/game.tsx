@@ -1,7 +1,7 @@
 import BoardComponent from "~/components/board";
 import { WarningMessage } from "~/components/error";
+import Link from "~/components/link";
 import PlayerScores, { EditPlayerForm } from "~/components/player";
-import PostGameSummary from "~/components/post-game-summary";
 import Preview from "~/components/preview";
 import Prompt from "~/components/prompt";
 import { GameState, useEngineContext } from "~/engine";
@@ -22,11 +22,13 @@ export default function GameComponent({
   game,
   name,
   roomId,
+  roomName,
   userId,
   url,
 }: {
   game: Game;
   name: string;
+  roomName: string;
   url: string;
 } & RoomProps) {
   const { type, round } = useEngineContext();
@@ -68,24 +70,28 @@ export default function GameComponent({
           className={`mx-auto flex w-full max-w-screen-lg flex-col gap-4 p-3
           text-slate-100 sm:p-6 md:p-12`}
         >
-          {type === GameState.GameOver ? <PostGameSummary /> : null}
-          {type !== GameState.GameOver ? (
-            isSingleLongFormClue ? (
-              <WarningMessage theme="dark">
-                Let's go to the final clue!
-              </WarningMessage>
-            ) : (
-              <WarningMessage theme="dark">
-                <span
-                  className="mr-2 border-b-4 font-handwriting text-xl font-bold"
-                  style={{ borderColor: boardControlColor }}
-                >
-                  {boardControlName}
-                </span>
-                has control of the board.
-              </WarningMessage>
-            )
-          ) : null}
+          {type === GameState.GameOver ? (
+            <>
+              <h2 className="text-xl font-semibold">Game over!</h2>
+              <Link to={`/room/${roomName}/summary`}>
+                Review your game &rarr;
+              </Link>
+            </>
+          ) : isSingleLongFormClue ? (
+            <WarningMessage theme="dark">
+              Let's go to the final clue!
+            </WarningMessage>
+          ) : (
+            <WarningMessage theme="dark">
+              <span
+                className="mr-2 border-b-4 font-handwriting text-xl font-bold"
+                style={{ borderColor: boardControlColor }}
+              >
+                {boardControlName}
+              </span>
+              has control of the board.
+            </WarningMessage>
+          )}
           {type !== GameState.GameOver &&
           (type !== GameState.PreviewRound || round !== 0) ? (
             <EditPlayerForm roomId={roomId} userId={userId} />
