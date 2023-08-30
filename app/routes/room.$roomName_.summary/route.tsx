@@ -3,7 +3,7 @@ import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { PlayerScore } from "~/components/player";
 
-import { applyRoomEventsToState } from "~/engine/room-event";
+import { applyRoomEventsToState, isTypedRoomEvent } from "~/engine/room-event";
 import { stateFromGame } from "~/engine/state";
 import { getValidAuthSession } from "~/models/auth";
 import { getGame } from "~/models/game.server";
@@ -11,6 +11,7 @@ import { getRoomEvents } from "~/models/room-event.server";
 import { getRoom } from "~/models/room.server";
 import { BASE_URL } from "~/utils";
 
+import ScoreChart from "./chart";
 import GameSummary from "./summary";
 
 export const meta: V2_MetaFunction<typeof loader> = ({ data }) => {
@@ -82,6 +83,11 @@ export default function PlayGame() {
             />
           ))}
         </div>
+        <ScoreChart
+          game={data.game}
+          state={state}
+          roomEvents={data.roomEvents.filter(isTypedRoomEvent)}
+        />
       </div>
       <GameSummary game={data.game} state={state} />
     </div>

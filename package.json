@@ -35,6 +35,7 @@
     "nanoid": "^4.0.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "recharts": "^2.8.0",
     "use-fit-text": "^2.4.0",
     "use-sound": "^4.0.1"
   },
