@@ -26,7 +26,6 @@ type ClueTable = Database["public"]["Tables"]["clues"];
 type DbClue = ClueTable["Row"];
 
 type CategoryAndClues = DbCategory & { clues: DbClue[] | null };
-type GameAndClues = DbGame & { categories: CategoryAndClues[] | null };
 
 /** SEARCHABLE_GAME_COLUMNS are the columns of {@link DbGame} that are searched
  * on in {@link getGames}.
@@ -36,7 +35,7 @@ const RESULTS_PER_PAGE = 10;
 
 /* Helpers */
 
-function dbGameToGame(dbGame: GameAndClues): Game {
+function dbGameToGame(dbGame: DbGame, categories: CategoryAndClues[]): Game {
   const game: Game = {
     id: dbGame.id,
     author: dbGame.author,
@@ -49,11 +48,11 @@ function dbGameToGame(dbGame: GameAndClues): Game {
 
   const boardsMap = new Map<number, Board>();
 
-  if (!dbGame.categories) {
+  if (!categories.length) {
     throw new Error("game must have at least one category");
   }
 
-  for (const category of dbGame.categories) {
+  for (const category of categories) {
     if (!category.clues) {
       throw new Error("category must have at least one clue");
     }
@@ -192,39 +191,43 @@ function getPagination(page: number, pageSize: number = RESULTS_PER_PAGE) {
 
 /* Reads */
 
-/** getGame bypasses RLS and enforces permissions on the server side to get
+/** nsgetGame bypasses RLS and enforces permissions on the server side to get
  * unlisted games.
  */
 export async function getGame(
   gameId: string,
   userId?: string,
 ): Promise<Game | null> {
-  const { data, error } = await getSupabaseAdmin()
-    .from<"games", GameTable>("games")
-    .select<"*, categories ( *, clues ( * ) )", GameAndClues>(
-      "*, categories ( *, clues ( * ) )",
-    )
-    .eq("id", gameId)
-    .order("created_at", { foreignTable: "categories" })
-    .order("value", { foreignTable: "categories.clues" });
+  const { data: gameData, error: gameErr } = await getSupabaseAdmin()
+    .from("games")
+    .select()
+    .eq("id", gameId);
 
-  if (error !== null) {
-    throw new Error(error.message);
+  if (gameErr !== null) {
+    throw new Error(gameErr.message);
   }
 
-  const gameAndClues = data.at(0);
-  if (!gameAndClues) {
+  const game = gameData.at(0);
+  if (!game) {
     return null;
   }
 
-  if (
-    gameAndClues.visibility === "PRIVATE" &&
-    gameAndClues.uploaded_by !== userId
-  ) {
+  if (game.visibility === "PRIVATE" && game.uploaded_by !== userId) {
     return null;
   }
 
-  return dbGameToGame(gameAndClues);
+  const { data: categoryData, error: categoryErr } = await getSupabaseAdmin()
+    .from("categories")
+    .select<"*, clues ( * )", CategoryAndClues>("*, clues ( * )")
+    .eq("game_id", gameId)
+    .order("created_at")
+    .order("value", { foreignTable: "clues" });
+
+  if (categoryErr !== null) {
+    throw new Error(categoryErr.message);
+  }
+
+  return dbGameToGame(game, categoryData);
 }
 
 export async function getGamesForUser(
