@@ -252,7 +252,8 @@ export function gameEngine(state: State, action: Action): State {
           }
 
           // Read the clue once all wagers are in
-          if (clueWagers?.size ?? 1 === draft.numExpectedWagers) {
+          const numWagersIn = clueWagers?.size ?? 1;
+          if (numWagersIn === draft.numExpectedWagers) {
             if (clue.longForm) {
               draft.type = GameState.ReadLongFormClue;
             } else {
