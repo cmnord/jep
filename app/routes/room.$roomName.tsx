@@ -26,9 +26,11 @@ export async function loader({ request, params }: LoaderArgs) {
     throw new Response("room name not found in URL params", { status: 404 });
   }
 
-  const roomId = parseInt(roomName.split("-")[0]);
+  const roomParts = roomName.split("-");
+  const roomId = parseInt(roomParts[0]);
+  const roomWord = roomParts[1];
   const room = await getRoom(roomId);
-  if (!room) {
+  if (!room || room.name !== roomWord) {
     throw new Response("room not found", { status: 404 });
   }
 
