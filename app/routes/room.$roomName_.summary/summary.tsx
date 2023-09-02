@@ -217,7 +217,7 @@ function RoundButtons({
   return (
     <div className="flex items-center justify-center gap-2">
       <Button
-        onClick={() => setRound((round - 1) % numRounds)}
+        onClick={() => setRound((numRounds + round - 1) % numRounds)}
         type="transparent"
       >
         &larr;
