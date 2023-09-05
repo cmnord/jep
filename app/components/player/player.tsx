@@ -4,6 +4,10 @@ import type { Player } from "~/engine";
 import { useEngineContext } from "~/engine";
 import { formatDollars, stringToHslColor } from "~/utils";
 
+// https://stackoverflow.com/questions/70524820/is-there-still-no-easy-way-to-split-strings-with-compound-emojis-into-an-array
+const COMPOUND_EMOJI_REGEX =
+  /\p{RI}\p{RI}|\p{Emoji}(\p{EMod}|\u{FE0F}\u{20E3}?|[\u{E0020}-\u{E007E}]+\u{E007F})?(\u{200D}\p{Emoji}(\p{EMod}|\u{FE0F}\u{20E3}?|[\u{E0020}-\u{E007E}]+\u{E007F})?)*|./gsu;
+
 export function PlayerScore({
   player,
   hasBoardControl,
@@ -48,15 +52,15 @@ export function PlayerScore({
 
 export function PlayerIcon({ player }: { player: Player }) {
   const backgroundColor = stringToHslColor(player.userId);
+  const matches = player.name.match(COMPOUND_EMOJI_REGEX);
+  const firstChar = matches ? matches[0] : player.name[0];
   return (
     <div
       className="flex h-8 w-8 items-center justify-center rounded-full"
       style={{ backgroundColor }}
       title={player.name}
     >
-      <div className="text-md font-mono font-bold text-white">
-        {player.name[0]}
-      </div>
+      <div className="text-md font-mono font-bold text-white">{firstChar}</div>
     </div>
   );
 }
