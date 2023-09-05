@@ -57,7 +57,7 @@ export const meta: V2_MetaFunction = () => [
 ];
 
 export const links: LinksFunction = () => [
-  { rel: "icon", href: "/favicon.png", type: "image/png", sizes: "16x16" },
+  { rel: "icon", href: "/favicon.ico", type: "image/x-icon", sizes: "16x16" },
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
     rel: "preconnect",
