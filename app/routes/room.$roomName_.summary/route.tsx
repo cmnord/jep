@@ -63,7 +63,7 @@ export default function PlayGame() {
   const sortedPlayers = Array.from(state.players.values()).sort(
     (a, b) => b.score - a.score,
   );
-  const maxScore = sortedPlayers[0].score;
+  const maxScore = sortedPlayers.at(0)?.score;
   const winningPlayers = sortedPlayers
     .filter((p) => p.score === maxScore)
     .map((p) => p.name);
