@@ -237,13 +237,14 @@ export function gameEngine(state: State, action: Action): State {
         }
 
         // Validate wager amount
+        const minWager = clue.longForm ? 0 : 5;
         const highestClueValue = getHighestClueValue(board);
         const maxWager = clue.longForm
           ? player.score
           : Math.max(player.score, highestClueValue);
 
-        if (maxWager >= 5 && wager < 5) {
-          throw new Error("Wager must be at least $5");
+        if (wager < minWager) {
+          throw new Error(`Wager must be at least $${minWager}`);
         } else if (wager > maxWager) {
           throw new Error(`Wager must be at most $${maxWager}`);
         }

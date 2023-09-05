@@ -1357,6 +1357,84 @@ describe("gameEngine", () => {
       }),
     },
     {
+      name: "Can wager $0 on long-form clue",
+      state: initialState,
+      actions: [
+        ...TWO_PLAYERS_ROUND_1,
+        {
+          type: ActionType.StartRound,
+          payload: { round: 1 },
+        },
+        {
+          type: ActionType.ChooseClue,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0 },
+        },
+        {
+          type: ActionType.SetClueWager,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0, wager: 400 },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0, deltaMs: 123 },
+        },
+        {
+          type: ActionType.Check,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0, correct: true },
+        },
+        {
+          type: ActionType.NextClue,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0 },
+        },
+        {
+          type: ActionType.ChooseClue,
+          payload: { userId: PLAYER2.userId, i: 0, j: 1 },
+        },
+        {
+          type: ActionType.SetClueWager,
+          payload: { userId: PLAYER1.userId, i: 0, j: 1, wager: 0 },
+        },
+      ],
+      expectedState: produce(initialState, (draft) => {
+        draft.type = GameState.WagerClue;
+        draft.activeClue = [0, 1];
+        draft.boardControl = PLAYER2.userId;
+        draft.isAnswered = [
+          [
+            [
+              {
+                isAnswered: true,
+                answeredBy: new Map([[PLAYER1.userId, true]]),
+              },
+              {
+                isAnswered: true,
+                answeredBy: new Map([[PLAYER1.userId, true]]),
+              },
+            ],
+          ],
+          [
+            [
+              {
+                isAnswered: true,
+                answeredBy: new Map([[PLAYER2.userId, true]]),
+              },
+              {
+                isAnswered: false,
+                answeredBy: new Map(),
+              },
+            ],
+          ],
+        ];
+        draft.numAnswered = 1;
+        draft.numCluesInBoard = 2;
+        draft.numExpectedWagers = 2;
+        draft.players.set(PLAYER1.userId, { ...PLAYER1, score: 400 });
+        draft.players.set(PLAYER2.userId, { ...PLAYER2, score: 400 });
+        draft.round = 1;
+        draft.wagers.set("1,0,0", new Map([[PLAYER2.userId, 400]]));
+        draft.wagers.set("1,0,1", new Map([[PLAYER1.userId, 0]]));
+      }),
+    },
+    {
       name: "Reveal answer to evaluate long-form clue after all answers in",
       state: initialState,
       actions: [
