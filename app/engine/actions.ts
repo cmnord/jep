@@ -47,14 +47,16 @@ export function isPlayerAction(action: Action): action is {
 
 export function isRoundAction(action: Action): action is {
   type: ActionType.StartRound;
-  payload: { round: number };
+  payload: { round: number; userId: string };
 } {
   return (
     action.type === ActionType.StartRound &&
     action.payload !== null &&
     typeof action.payload === "object" &&
     "round" in action.payload &&
-    typeof action.payload.round === "number"
+    typeof action.payload.round === "number" &&
+    "userId" in action.payload &&
+    typeof action.payload.userId === "string"
   );
 }
 

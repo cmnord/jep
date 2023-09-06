@@ -139,12 +139,15 @@ function PreviewRoundDialog({
       ) : null}
       <Dialog.Footer>
         <CopyLinkButton url={url} text="Copy link to room" />
-        <Form method="POST" action={`/room/${roomId}/start`}>
-          <input type="hidden" name="round" value={round} />
-          <Button type="primary" htmlType="submit" onClick={onDismiss}>
-            Start round
-          </Button>
-        </Form>
+        {boardControl === userId ? (
+          <Form method="POST" action={`/room/${roomId}/start`}>
+            <input type="hidden" name="round" value={round} />
+            <input type="hidden" name="userId" value={userId} />
+            <Button type="primary" htmlType="submit" onClick={onDismiss}>
+              Start round
+            </Button>
+          </Form>
+        ) : null}
       </Dialog.Footer>
     </Dialog>
   );

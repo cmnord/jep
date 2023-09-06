@@ -128,7 +128,7 @@ export function gameEngine(state: State, action: Action): State {
     case ActionType.StartRound:
       if (!isRoundAction(action)) {
         throw new Error(
-          "StartRound action must have an associated round number",
+          "StartRound action must have an associated round number and user ID",
         );
       }
       return produce(state, (draft) => {
@@ -136,8 +136,8 @@ export function gameEngine(state: State, action: Action): State {
         if (draft.type !== GameState.PreviewRound || draft.players.size === 0) {
           return;
         }
-        const actionRound = action.payload.round;
-        if (actionRound !== draft.round) {
+        const { round, userId } = action.payload;
+        if (draft.boardControl !== userId || round !== draft.round) {
           return;
         }
 

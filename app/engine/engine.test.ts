@@ -40,7 +40,7 @@ const TWO_PLAYERS_ROUND_0: Action[] = [
   PLAYER2_JOIN_ACTION,
   {
     type: ActionType.StartRound,
-    payload: { round: 0 },
+    payload: { round: 0, userId: PLAYER1.userId },
   },
 ];
 
@@ -153,7 +153,7 @@ describe("gameEngine", () => {
         PLAYER1_JOIN_ACTION,
         {
           type: ActionType.StartRound,
-          payload: { round: 0 },
+          payload: { round: 0, userId: PLAYER1.userId },
         },
       ],
       expectedState: produce(initialState, (draft) => {
@@ -169,7 +169,7 @@ describe("gameEngine", () => {
         PLAYER1_JOIN_ACTION,
         {
           type: ActionType.StartRound,
-          payload: { round: 0 },
+          payload: { round: 0, userId: PLAYER1.userId },
         },
         {
           type: ActionType.ChooseClue,
@@ -190,7 +190,7 @@ describe("gameEngine", () => {
         PLAYER1_JOIN_ACTION,
         {
           type: ActionType.StartRound,
-          payload: { round: 0 },
+          payload: { round: 0, userId: PLAYER1.userId },
         },
         {
           type: ActionType.ChooseClue,
@@ -370,7 +370,7 @@ describe("gameEngine", () => {
         PLAYER1_JOIN_ACTION,
         {
           type: ActionType.StartRound,
-          payload: { round: 0 },
+          payload: { round: 0, userId: PLAYER1.userId },
         },
         {
           type: ActionType.ChooseClue,
@@ -686,7 +686,7 @@ describe("gameEngine", () => {
         ...TWO_PLAYERS_ROUND_1,
         {
           type: ActionType.StartRound,
-          payload: { round: 1 },
+          payload: { round: 1, userId: PLAYER2.userId },
         },
         {
           type: ActionType.ChooseClue,
@@ -721,7 +721,7 @@ describe("gameEngine", () => {
         ...TWO_PLAYERS_ROUND_1,
         {
           type: ActionType.StartRound,
-          payload: { round: 1 },
+          payload: { round: 1, userId: PLAYER2.userId },
         },
         {
           type: ActionType.ChooseClue,
@@ -761,7 +761,7 @@ describe("gameEngine", () => {
         ...TWO_PLAYERS_ROUND_1,
         {
           type: ActionType.StartRound,
-          payload: { round: 1 },
+          payload: { round: 1, userId: PLAYER2.userId },
         },
         {
           type: ActionType.ChooseClue,
@@ -816,7 +816,7 @@ describe("gameEngine", () => {
         ...TWO_PLAYERS_ROUND_1,
         {
           type: ActionType.StartRound,
-          payload: { round: 1 },
+          payload: { round: 1, userId: PLAYER2.userId },
         },
         {
           type: ActionType.ChooseClue,
@@ -870,7 +870,7 @@ describe("gameEngine", () => {
         ...TWO_PLAYERS_ROUND_1,
         {
           type: ActionType.StartRound,
-          payload: { round: 1 },
+          payload: { round: 1, userId: PLAYER2.userId },
         },
         {
           type: ActionType.ChooseClue,
@@ -963,7 +963,7 @@ describe("gameEngine", () => {
         },
         {
           type: ActionType.StartRound,
-          payload: { round: 1 },
+          payload: { round: 1, userId: PLAYER2.userId },
         },
         {
           type: ActionType.ChooseClue,
@@ -1040,7 +1040,7 @@ describe("gameEngine", () => {
         ...TWO_PLAYERS_ROUND_1,
         {
           type: ActionType.StartRound,
-          payload: { round: 1 },
+          payload: { round: 1, userId: PLAYER2.userId },
         },
         {
           type: ActionType.ChooseClue,
@@ -1098,7 +1098,7 @@ describe("gameEngine", () => {
         ...TWO_PLAYERS_ROUND_1,
         {
           type: ActionType.StartRound,
-          payload: { round: 1 },
+          payload: { round: 1, userId: PLAYER2.userId },
         },
         {
           type: ActionType.ChooseClue,
@@ -1176,7 +1176,7 @@ describe("gameEngine", () => {
         ...TWO_PLAYERS_ROUND_1,
         {
           type: ActionType.StartRound,
-          payload: { round: 1 },
+          payload: { round: 1, userId: PLAYER2.userId },
         },
         {
           type: ActionType.ChooseClue,
@@ -1264,7 +1264,7 @@ describe("gameEngine", () => {
         ...TWO_PLAYERS_ROUND_1,
         {
           type: ActionType.StartRound,
-          payload: { round: 1 },
+          payload: { round: 1, userId: PLAYER2.userId },
         },
         {
           type: ActionType.ChooseClue,
@@ -1363,7 +1363,7 @@ describe("gameEngine", () => {
         ...TWO_PLAYERS_ROUND_1,
         {
           type: ActionType.StartRound,
-          payload: { round: 1 },
+          payload: { round: 1, userId: PLAYER2.userId },
         },
         {
           type: ActionType.ChooseClue,
@@ -1441,7 +1441,7 @@ describe("gameEngine", () => {
         ...TWO_PLAYERS_ROUND_1,
         {
           type: ActionType.StartRound,
-          payload: { round: 1 },
+          payload: { round: 1, userId: PLAYER2.userId },
         },
         {
           type: ActionType.ChooseClue,
@@ -1556,7 +1556,7 @@ describe("gameEngine", () => {
         ...TWO_PLAYERS_ROUND_1,
         {
           type: ActionType.StartRound,
-          payload: { round: 1 },
+          payload: { round: 1, userId: PLAYER2.userId },
         },
         {
           type: ActionType.ChooseClue,
@@ -1675,7 +1675,7 @@ describe("gameEngine", () => {
         ...TWO_PLAYERS_ROUND_1,
         {
           type: ActionType.StartRound,
-          payload: { round: 1 },
+          payload: { round: 1, userId: PLAYER2.userId },
         },
         {
           type: ActionType.ChooseClue,
@@ -1801,7 +1801,7 @@ describe("gameEngine", () => {
         ...TWO_PLAYERS_ROUND_1,
         {
           type: ActionType.StartRound,
-          payload: { round: 1 },
+          payload: { round: 1, userId: PLAYER2.userId },
         },
         {
           type: ActionType.ChooseClue,
@@ -1927,7 +1927,7 @@ describe("gameEngine", () => {
         ...TWO_PLAYERS_ROUND_1,
         {
           type: ActionType.StartRound,
-          payload: { round: 1 },
+          payload: { round: 1, userId: PLAYER2.userId },
         },
         {
           type: ActionType.ChooseClue,
@@ -2060,7 +2060,7 @@ describe("gameEngine", () => {
         ...TWO_PLAYERS_ROUND_1,
         {
           type: ActionType.StartRound,
-          payload: { round: 1 },
+          payload: { round: 1, userId: PLAYER2.userId },
         },
         {
           type: ActionType.ChooseClue,

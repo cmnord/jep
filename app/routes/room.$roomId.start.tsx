@@ -8,6 +8,11 @@ import { getRoom } from "~/models/room.server";
 export async function action({ request, params }: ActionArgs) {
   const formData = await request.formData();
 
+  const userId = formData.get("userId");
+  if (typeof userId !== "string") {
+    throw new Response("Invalid userId", { status: 400 });
+  }
+
   const roundStr = formData.get("round");
   if (typeof roundStr !== "string") {
     throw new Response("Invalid round", { status: 400 });
@@ -20,7 +25,7 @@ export async function action({ request, params }: ActionArgs) {
   }
 
   if (roomId === -1) {
-    return json({ type: ActionType.StartRound, payload: { round } });
+    return json({ type: ActionType.StartRound, payload: { round, userId } });
   }
 
   const room = await getRoom(roomId);
@@ -30,6 +35,7 @@ export async function action({ request, params }: ActionArgs) {
 
   await createRoomEvent(room.id, ActionType.StartRound, {
     round,
+    userId,
   });
 
   return null;
