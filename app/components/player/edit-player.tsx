@@ -3,11 +3,11 @@ import * as React from "react";
 
 import type { RoomProps } from "~/components/game";
 import { LoadingSpinner } from "~/components/icons";
-import Input from "~/components/input";
-import type { Action } from "~/engine";
+import type { Action, Player } from "~/engine";
 import { useEngineContext } from "~/engine";
 import useDebounce, { useDebounceEnd } from "~/utils/use-debounce";
 import useSoloAction from "~/utils/use-solo-action";
+import { PlayerScoreBox } from "./player";
 
 /** Heroicon name: solid/paper-airplane */
 function SendIcon() {
@@ -26,6 +26,7 @@ function SendIcon() {
   );
 }
 
+/* Heroicon name: solid/pencil-square */
 function PencilIcon() {
   return (
     <svg
@@ -44,61 +45,71 @@ function PencilIcon() {
 }
 
 function EditPlayer({
+  hasBoardControl,
   loading,
-  name,
+  player,
   editing,
   onBlur,
   onChangeName,
   onFocus,
+  winning = false,
 }: {
+  hasBoardControl: boolean;
   loading: boolean;
-  name: string;
+  player: Player;
   editing: boolean;
   onBlur: () => void;
   onChangeName: (name: string) => void;
   onFocus: () => void;
+  winning?: boolean;
 }) {
   const inputRef = React.useRef<HTMLInputElement | null>(null);
   const debouncedLoading = useDebounceEnd(loading, 100);
 
+  function handleFocus() {
+    inputRef.current?.focus();
+    onFocus();
+  }
+
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <label htmlFor="name" className="text-sm text-slate-400">
-        You are
-      </label>
-      <div className="relative">
-        <Input
-          fwdRef={inputRef}
+    <PlayerScoreBox player={player} hasBoardControl={hasBoardControl}>
+      <div className="flex items-center gap-2">
+        <input
+          ref={inputRef}
           type="text"
           id="name"
           name="name"
-          className={`font-handwriting text-xl font-bold placeholder:font-sans
+          className={`block w-full bg-transparent font-handwriting text-2xl font-bold text-white placeholder:font-sans
           placeholder:text-sm placeholder:font-normal`}
           placeholder="Enter your name"
-          defaultValue={name}
+          defaultValue={player.name}
           onChange={(e) => onChangeName(e.target.value)}
           onBlur={onBlur}
-          onFocus={() => {
-            inputRef.current?.select();
-            onFocus();
-          }}
+          onFocus={handleFocus}
         />
-        <div className={"absolute right-0 top-1 p-2"}>
-          {debouncedLoading ? (
-            <LoadingSpinner className="text-blue-600" />
-          ) : editing ? (
+        {debouncedLoading ? (
+          <LoadingSpinner className="text-blue-600" />
+        ) : editing ? (
+          <button type="button" onClick={onBlur}>
             <SendIcon />
-          ) : (
+          </button>
+        ) : (
+          <button type="button" onClick={handleFocus}>
             <PencilIcon />
-          )}
-        </div>
+          </button>
+        )}
+        {winning && <div className="ml-auto text-2xl">👑</div>}
       </div>
-    </div>
+    </PlayerScoreBox>
   );
 }
 
-export function EditPlayerForm({ roomId, userId }: RoomProps) {
-  const { players, soloDispatch } = useEngineContext();
+export function EditPlayerForm({
+  roomId,
+  userId,
+  winning = false,
+}: { winning?: boolean } & RoomProps) {
+  const { players, soloDispatch, boardControl } = useEngineContext();
 
   const fetcher = useFetcher<Action>();
   const loading = fetcher.state === "loading";
@@ -136,6 +147,10 @@ export function EditPlayerForm({ roomId, userId }: RoomProps) {
     }
   }, [editing, debouncedName, optimisticPlayer, userId, fetcher]);
 
+  if (!optimisticPlayer) {
+    return null;
+  }
+
   return (
     <fetcher.Form
       method="PATCH"
@@ -149,12 +164,14 @@ export function EditPlayerForm({ roomId, userId }: RoomProps) {
         value={userId}
       />
       <EditPlayer
+        player={optimisticPlayer}
+        hasBoardControl={userId === boardControl}
         loading={loading}
-        name={optimisticPlayer?.name ?? ""}
         editing={editing}
         onBlur={() => setEditing(false)}
         onChangeName={setName}
         onFocus={() => setEditing(true)}
+        winning={winning}
       />
     </fetcher.Form>
   );

@@ -1,7 +1,7 @@
 import BoardComponent from "~/components/board";
 import { WarningMessage } from "~/components/error";
 import Link from "~/components/link";
-import PlayerScores, { EditPlayerForm } from "~/components/player";
+import { PlayerScores } from "~/components/player";
 import Preview from "~/components/preview";
 import Prompt from "~/components/prompt";
 import { GameState, useEngineContext } from "~/engine";
@@ -92,11 +92,7 @@ export default function GameComponent({
               has control of the board.
             </WarningMessage>
           )}
-          {type !== GameState.GameOver &&
-          (type !== GameState.PreviewRound || round !== 0) ? (
-            <EditPlayerForm roomId={roomId} userId={userId} />
-          ) : null}
-          <PlayerScores userId={userId} />
+          <PlayerScores roomId={roomId} userId={userId} />
         </div>
         <Prompt roomId={roomId} userId={userId} />
       </div>
