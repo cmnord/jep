@@ -28,7 +28,7 @@ export async function action({ request, params }: ActionArgs) {
     };
     const headers = await flashFormState(request, formState);
 
-    return redirect("/profile", { headers });
+    throw redirect("/profile", { headers });
   } else if (request.method === "PATCH") {
     const formData = await request.formData();
     const visibility = formData.get("visibility");
@@ -60,7 +60,7 @@ export async function action({ request, params }: ActionArgs) {
     };
     const headers = await flashFormState(request, formState);
 
-    return redirect("/profile", { headers });
+    throw redirect("/profile", { headers });
   } else {
     throw new Response("method not allowed", { status: 405 });
   }

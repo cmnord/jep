@@ -1,4 +1,4 @@
-import type { ActionArgs } from "@remix-run/node";
+import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { redirect, unstable_parseMultipartFormData } from "@remix-run/node";
 
 import { getValidAuthSession } from "~/models/auth";
@@ -7,8 +7,9 @@ import { BASE_URL, getRedirectTo, safeRedirect } from "~/utils";
 
 import { newUploadHandler } from "./file-upload-handler.server";
 
-export function loader() {
-  throw redirect("/");
+export function loader({ request }: LoaderArgs) {
+  const redirectTo = getRedirectTo(request);
+  return redirect(safeRedirect(redirectTo));
 }
 
 /** POST /game parses and uploads a new game to the server. */

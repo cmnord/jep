@@ -63,12 +63,9 @@ export function assertIsDelete(
   }
 }
 
-/**
- * This should be used any time the redirect path is user-provided
- * (Like the query string on our login/signup pages). This avoids
- * open-redirect vulnerabilities.
- * @param {string} to The redirect destination
- * @param {string} defaultRedirect The redirect to use if the to is unsafe.
+/** This should be used any time the redirect path is user-provided (Like the
+ * query string on our login/signup pages). This avoids open-redirect
+ * vulnerabilities.
  */
 export function safeRedirect(
   to: FormDataEntryValue | string | null | undefined,

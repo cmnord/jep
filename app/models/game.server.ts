@@ -33,6 +33,14 @@ type CategoryAndClues = DbCategory & { clues: DbClue[] | null };
 const SEARCHABLE_GAME_COLUMNS = ["title", "author"];
 const RESULTS_PER_PAGE = 10;
 
+/** IMAGE_DOMAIN_ALLOWLIST lists the domains that are allowed for image sources.
+ * Some clues have images, and we want to make sure that the images are hosted
+ * on a trusted domain. This is for security and to prevent abuse.
+ *
+ * Submit a GitHub issue to add a new domain to this list.
+ */
+const IMAGE_DOMAIN_ALLOWLIST = ["www.j-archive.com", "upload.wikimedia.org"];
+
 /* Helpers */
 
 function dbGameToGame(dbGame: DbGame, categories: CategoryAndClues[]): Game {
@@ -67,6 +75,7 @@ function dbGameToGame(dbGame: DbGame, categories: CategoryAndClues[]): Game {
       clues: category.clues.map((clue) => ({
         ...clue,
         longForm: clue.long_form,
+        imageSrc: clue.image_src ?? undefined,
       })),
     });
     board.categoryNames.push(category.name);
@@ -102,6 +111,7 @@ export function gameToJson(game: Game): string {
               value: clue.value,
               wagerable: clue.wagerable,
               longForm: clue.longForm,
+              imageSrc: clue.imageSrc,
             }),
           ),
         }),
@@ -171,6 +181,35 @@ function validateGame(game: ConvertedGame) {
               j +
               " must also be wagerable",
           );
+        }
+        if (clue.imageSrc !== undefined) {
+          if (clue.imageSrc.trim() === "") {
+            throw new Error(
+              `imageSrc for clue ${i} in category ${j} must not be empty. Provide an imageSrc value or remove the name/value pair.`,
+            );
+          }
+          try {
+            const url = new URL(clue.imageSrc);
+            if (url.protocol !== "http:" && url.protocol !== "https:") {
+              throw new Error(
+                `image for clue ${i} in category ${j} has protocol ${url.protocol}, but must be HTTP or HTTPS`,
+              );
+            }
+            if (!IMAGE_DOMAIN_ALLOWLIST.includes(url.hostname)) {
+              throw new Error(
+                `image for clue ${i} in category ${j} has domain "${
+                  url.hostname
+                }", but must be one of [${IMAGE_DOMAIN_ALLOWLIST.join(", ")}]`,
+              );
+            }
+          } catch (error: unknown) {
+            if (error instanceof TypeError) {
+              throw new Error(
+                `image for clue ${i} in category ${j} has invalid URL "${clue.imageSrc}"`,
+              );
+            }
+            throw error;
+          }
         }
       }
     }
@@ -367,6 +406,7 @@ export async function createGame(
           value: clue.value,
           wagerable: clue.wagerable ?? false,
           long_form: clue.longForm ?? false,
+          image_src: clue.imageSrc,
         });
       }
     }

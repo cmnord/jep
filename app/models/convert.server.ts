@@ -33,6 +33,7 @@ export interface Clue {
   clue: string;
   answer: string;
   value: number;
+  imageSrc?: string;
   wagerable?: boolean;
   longForm?: boolean;
 }
@@ -258,6 +259,7 @@ const typeMap: any = {
       { json: "clue", js: "clue", typ: "" },
       { json: "answer", js: "answer", typ: "" },
       { json: "value", js: "value", typ: 0 },
+      { json: "imageSrc", js: "imageSrc", typ: u(undefined, "") },
       { json: "wagerable", js: "wagerable", typ: u(undefined, true) },
       { json: "longForm", js: "longForm", typ: u(undefined, true) },
     ],

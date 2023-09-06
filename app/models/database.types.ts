@@ -3,7 +3,7 @@ export type Json =
   | number
   | boolean
   | null
-  | { [key: string]: Json }
+  | { [key: string]: Json | undefined }
   | Json[];
 
 export interface Database {
@@ -50,6 +50,14 @@ export interface Database {
           email?: string;
           id?: string;
         };
+        Relationships: [
+          {
+            foreignKeyName: "accounts_id_fkey";
+            columns: ["id"];
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       categories: {
         Row: {
@@ -76,6 +84,14 @@ export interface Database {
           note?: string | null;
           round?: number;
         };
+        Relationships: [
+          {
+            foreignKeyName: "categories_game_id_fkey";
+            columns: ["game_id"];
+            referencedRelation: "games";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       clues: {
         Row: {
@@ -83,6 +99,7 @@ export interface Database {
           category_id: number;
           clue: string;
           id: number;
+          image_src: string | null;
           long_form: boolean;
           value: number;
           wagerable: boolean;
@@ -92,6 +109,7 @@ export interface Database {
           category_id: number;
           clue: string;
           id?: number;
+          image_src?: string | null;
           long_form?: boolean;
           value: number;
           wagerable?: boolean;
@@ -101,10 +119,19 @@ export interface Database {
           category_id?: number;
           clue?: string;
           id?: number;
+          image_src?: string | null;
           long_form?: boolean;
           value?: number;
           wagerable?: boolean;
         };
+        Relationships: [
+          {
+            foreignKeyName: "clues_category_id_fkey";
+            columns: ["category_id"];
+            referencedRelation: "categories";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       games: {
         Row: {
@@ -137,6 +164,14 @@ export interface Database {
           uploaded_by?: string | null;
           visibility?: Database["public"]["Enums"]["game_visibility"];
         };
+        Relationships: [
+          {
+            foreignKeyName: "games_uploaded_by_fkey";
+            columns: ["uploaded_by"];
+            referencedRelation: "accounts";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       reports: {
         Row: {
@@ -160,6 +195,20 @@ export interface Database {
           id?: number;
           reason?: string;
         };
+        Relationships: [
+          {
+            foreignKeyName: "reports_created_by_fkey";
+            columns: ["created_by"];
+            referencedRelation: "accounts";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "reports_game_id_fkey";
+            columns: ["game_id"];
+            referencedRelation: "games";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       room_events: {
         Row: {
@@ -183,6 +232,14 @@ export interface Database {
           ts?: string;
           type?: string;
         };
+        Relationships: [
+          {
+            foreignKeyName: "room_events_room_id_fkey";
+            columns: ["room_id"];
+            referencedRelation: "rooms";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       rooms: {
         Row: {
@@ -200,6 +257,14 @@ export interface Database {
           id?: number;
           name?: string;
         };
+        Relationships: [
+          {
+            foreignKeyName: "rooms_game_id_fkey";
+            columns: ["game_id"];
+            referencedRelation: "games";
+            referencedColumns: ["id"];
+          },
+        ];
       };
     };
     Views: {
@@ -251,6 +316,14 @@ export interface Database {
           public?: boolean | null;
           updated_at?: string | null;
         };
+        Relationships: [
+          {
+            foreignKeyName: "buckets_owner_fkey";
+            columns: ["owner"];
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       migrations: {
         Row: {
@@ -271,6 +344,7 @@ export interface Database {
           id?: number;
           name?: string;
         };
+        Relationships: [];
       };
       objects: {
         Row: {
@@ -309,6 +383,14 @@ export interface Database {
           updated_at?: string | null;
           version?: string | null;
         };
+        Relationships: [
+          {
+            foreignKeyName: "objects_bucketId_fkey";
+            columns: ["bucket_id"];
+            referencedRelation: "buckets";
+            referencedColumns: ["id"];
+          },
+        ];
       };
     };
     Views: {
@@ -331,7 +413,7 @@ export interface Database {
         Args: {
           name: string;
         };
-        Returns: string[];
+        Returns: unknown;
       };
       get_size_by_bucket: {
         Args: Record<PropertyKey, never>;

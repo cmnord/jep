@@ -63,6 +63,9 @@ const SCHEMA = {
                       longForm: {
                         type: "boolean",
                       },
+                      imageSrc: {
+                        type: "string",
+                      },
                     },
                     required: ["clue", "answer", "value"],
                   },

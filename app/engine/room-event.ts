@@ -5,6 +5,7 @@ import type { State } from "./state";
 
 interface RoomEvent extends DbRoomEvent {
   type: ActionType;
+  payload: { [key: string]: string | number | boolean };
 }
 
 export function isTypedRoomEvent(re: DbRoomEvent): re is RoomEvent {

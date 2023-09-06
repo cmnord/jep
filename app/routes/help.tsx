@@ -7,7 +7,9 @@ import Main from "~/components/main";
 export const meta: V2_MetaFunction = () => [{ title: "Help" }];
 
 const JSON_EDIT_URL =
-  "https://json-editor.github.io/json-editor/?data=N4Ig9gDgLglmB2BnEAuUMDGCA2MBGqIAZglAIYDuApomALZUCsIANOHgFZUZQD62ZAJ5gArlELwwAJzplsrEIgwALKrNSgAJEtXqUIZVCgQUAelMda8ALQ61ZAHTSA5qYAmUskSjWADAHZTO1kAYgVNGDdCQ2MzU2wwDDllMEQoFABmX2zTZzIGB2DHSwQFMjc3GFgEOQAFKUgqKVgaVCI5RCo2CDIjJvhCAD0HACoAHTGHLggJqatNBVgobCpCACkqCABCAAIAcXyqHYBlFXtFwQhV/TBObnFuhqvmmFa0ECWVjQ/L68UoKQweDOEAAXzYZDEKSk3ygv0IaUBwLBbCwEEEgOchlh8P0iKBIPBIEkUGuoDhVwRAIJKJAeDAZCkbmQ7wpf0ZnkECiqahZ5Nx7C4PAUECeTRafJASVJzmkggAcodJWzCByhNzSXRlQL8cjQUTpVRZYC3vzKfo1Vy2DytTjzYL7iKxS9TcTDna/rrCWwSWSfvavbSMNgRK6VRapJyNbyPYRbkKHiBRY0XZLg6HY3jqXqIUhqDDWTrs96QAA3OQZwv2oEypq0ihkZxNMh3L5Vv70sArMgDIkJYEAMWkdEzdLAXaoPbBRKkVAAjiIYLOoigANpSkOrXOIfMKcubkAAXX1M/ni+XqHX8HdqM3yGP+rYs4XS6oK/XhuNCqVCk/0le94nk+Z6vu+HxVF8EJQtIv6QBiMBYomvoKPSjLMkeRKICkFC8E0DRSCyIA1s2PBwAMbBQLoHbjlAiJkBAAAs05AA===";
+  "https://json-editor.github.io/json-editor/?data=N4Ig9gDgLglmB2BnEAuUMDGCA2MBGqIAZglAIYDuApomALZUCsIANOHgFZUZQD62ZAJ5gArlELwwAJzplsrEIgwALKrNSgAJEtXqUIZVCgQUAelMda8ALQ61ZAHTSA5qYAmUskSjWADAHZTO1kAYgVNGDdCQ2MzU2wwDDllMEQoFABmX2zTZzIGB2DHSwQFMjc3GFgEOQAFKUgqKVgaVCI5RCo2CDIjJvhCAD0HACoAHTGHLggJqatNBVgobCpCACkqCABCAAIAcXyqHYBlFXtFwQhV/TBObnFuhqvmmFa0ECWVjQ/L68UoKQweDOEAAXzYZDEKSk3ygv0IaUBwLBbCwEEEgOchlh8P0iKBIPBIEkUGuoDhVwRAIJKJAeDAZCkbmQ7wpf0ZnkECiqahZ5Nx7C4PAUECeTRafJASVJzmkggAcodJWzCByhNzSXRlQL8cjQUTpVRZYC3vzKfo1Vy2DytTjzYL7iKxS9TcTDna/rrCWwSWSfvavbSMNgRK6VRapJyNbyPYRbkKHiBRY0XZLg6HY3jqXqIUhqDDWTrs96QAA3OQZwv2oEypq0ihkZxNMh3L5Vv70sArMgDIkJYEAMWkdEzdLAXaoPdpMFkTeOUgwo8D+rYUioAEcRDA11EUABtKUh1a5xD5hTlo8gAC6+qJa8326ou4P8HdqKPyBvK5A963O9QB6GsaCpKgoQHSK8n63quG5/k+AEfFUXwQlC0hgZAGIwFiia+go9KMsy15EogKQULwTQNFILIgDWzY8HAAxsFAugduOUCImQEAACxgqCQA=";
+const ALLOWED_DOMAINS_URL =
+  "https://github.com/cmnord/jep/blob/main/app/models/game.server.ts#L36-L42";
 
 export default function Help() {
   return (
@@ -75,6 +77,12 @@ export default function Help() {
           players may write down their answers over a longer time period instead
           of competing to buzz in. Long-form clues must also be wagerable.
         </p>
+        <p className="mb-4">
+          A clue may have an associated image. To add one, set "imageSrc" to a
+          URL pointing to the image. Jep! does not host images. Images must come
+          from one of the{" "}
+          <Anchor href={ALLOWED_DOMAINS_URL}>allowed domains</Anchor>.
+        </p>
         <h1 className="mb-4 text-2xl font-semibold">Type definition</h1>
         <CodeBlock
           text={`interface Game {
@@ -102,6 +110,7 @@ interface Clue {
   value: number;
   wagerable?: boolean; // default false
   longForm?: boolean; // default false
+  imageSrc?: string;
 }`}
         />
         <h1 className="mb-4 text-2xl font-semibold">
