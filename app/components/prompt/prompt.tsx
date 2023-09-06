@@ -53,6 +53,27 @@ const LONG_FORM_CLUE_DURATION_SEC = 30;
 const TIMES_UP_SFX = "/sounds/times-up.mp3";
 const LONG_FORM_SFX = "/sounds/long-form.mp3";
 
+function SadFileIcon({ badSrc }: { badSrc: string }) {
+  return (
+    <div className="flex items-center justify-center border border-white p-4 text-white">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 72 87"
+        shape-rendering="crispEdges"
+        className="h-10 w-10"
+        role="img"
+        aria-labelledby="sad-file-title"
+      >
+        <title id="sad-file-title">{badSrc}</title>
+        <path
+          stroke="currentColor"
+          d="M0 0h51M0 1h51M0 2h51M0 3h51M0 4h51M0 5h51M0 6h51M0 7h7M37 7h7M51 7h7M0 8h7M37 8h7M51 8h7M0 9h7M37 9h7M51 9h7M0 10h7M37 10h7M51 10h7M0 11h7M37 11h7M51 11h7M0 12h7M37 12h7M51 12h7M0 13h7M37 13h7M51 13h7M0 14h7M37 14h7M58 14h7M0 15h7M37 15h7M58 15h7M0 16h7M37 16h7M58 16h7M0 17h7M37 17h7M58 17h7M0 18h7M37 18h7M58 18h7M0 19h7M37 19h7M58 19h7M0 20h7M37 20h7M58 20h7M0 21h7M18 21h7M37 21h7M65 21h7M0 22h7M18 22h7M37 22h7M65 22h7M0 23h7M18 23h7M37 23h7M65 23h7M0 24h7M18 24h7M37 24h7M65 24h7M0 25h7M18 25h7M37 25h7M65 25h7M0 26h7M18 26h7M37 26h7M65 26h7M0 27h7M18 27h7M37 27h7M65 27h7M0 28h7M18 28h7M37 28h35M0 29h7M18 29h7M37 29h35M0 30h7M18 30h7M37 30h35M0 31h7M18 31h7M37 31h35M0 32h7M18 32h7M37 32h35M0 33h7M18 33h7M37 33h35M0 34h7M18 34h7M37 34h35M0 35h7M65 35h7M0 36h7M65 36h7M0 37h7M65 37h7M0 38h7M65 38h7M0 39h7M65 39h7M0 40h7M65 40h7M0 41h7M65 41h7M0 42h7M65 42h7M0 43h7M65 43h7M0 44h7M65 44h7M0 45h7M65 45h7M0 46h7M65 46h7M0 47h7M65 47h7M0 48h7M65 48h7M0 49h7M65 49h7M0 50h7M65 50h7M0 51h7M65 51h7M0 52h7M65 52h7M0 53h7M65 53h7M0 54h7M65 54h7M0 55h7M65 55h7M0 56h7M25 56h22M65 56h7M0 57h7M25 57h22M65 57h7M0 58h7M25 58h22M65 58h7M0 59h7M25 59h22M65 59h7M0 60h7M25 60h22M65 60h7M0 61h7M25 61h22M65 61h7M0 62h7M25 62h22M65 62h7M0 63h7M18 63h7M47 63h7M65 63h7M0 64h7M18 64h7M47 64h7M65 64h7M0 65h7M18 65h7M47 65h7M65 65h7M0 66h7M18 66h7M47 66h7M65 66h7M0 67h7M18 67h7M47 67h7M65 67h7M0 68h7M18 68h7M47 68h7M65 68h7M0 69h7M18 69h7M47 69h7M65 69h7M0 70h7M65 70h7M0 71h7M65 71h7M0 72h7M65 72h7M0 73h7M65 73h7M0 74h7M65 74h7M0 75h7M65 75h7M0 76h7M65 76h7M0 77h7M65 77h7M0 78h7M65 78h7M0 79h7M65 79h7M0 80h72M0 81h72M0 82h72M0 83h72M0 84h72M0 85h72M0 86h72"
+        />
+      </svg>
+    </div>
+  );
+}
+
 function ClueText({
   answer,
   canBuzz,
@@ -60,6 +81,7 @@ function ClueText({
   focusOnBuzz,
   onBuzz,
   showAnswer,
+  imageSrc,
 }: {
   answer: string;
   canBuzz: boolean;
@@ -67,20 +89,23 @@ function ClueText({
   focusOnBuzz: boolean;
   onBuzz: (buzzedAt: number) => void;
   showAnswer: boolean;
+  imageSrc?: string;
 }) {
   const { fontSize, ref } = useFitText({ minFontSize: 20, maxFontSize: 400 });
+  const [imageError, setImageError] = React.useState(false);
 
   return (
     <button
       type="button"
       disabled={!canBuzz}
       onClick={() => onBuzz(Date.now())}
-      className={`text-shadow-lg flex w-screen grow flex-col justify-center p-4
-      font-korinna font-bold uppercase`}
+      className="flex w-screen grow flex-col items-center justify-center p-4"
       autoFocus={focusOnBuzz}
     >
       <p
-        className="word-spacing-1 mx-auto max-h-96 w-full max-w-screen-lg leading-normal text-white"
+        className={`text-shadow-lg word-spacing-1 mx-auto max-h-96 w-full
+        max-w-screen-lg font-korinna font-bold uppercase leading-normal
+        text-white`}
         ref={ref}
         style={{ fontSize }}
       >
@@ -94,6 +119,17 @@ function ClueText({
           {answer}
         </span>
       </p>
+      {imageSrc ? (
+        imageError ? (
+          <SadFileIcon badSrc={imageSrc} />
+        ) : (
+          <img
+            src={imageSrc}
+            alt={`Image for clue: ${clue}`}
+            onError={() => setImageError(true)}
+          />
+        )
+      ) : null}
     </button>
   );
 }
@@ -278,6 +314,7 @@ function ReadWagerableCluePrompt({ roomId, userId }: RoomProps) {
         canBuzz={boardControl === userId}
         onBuzz={() => handleClick(Date.now())}
         focusOnBuzz
+        imageSrc={clue.imageSrc}
         showAnswer={false}
         answer={clue.answer}
       />
@@ -408,7 +445,7 @@ function ReadCluePrompt({ roomId, userId }: RoomProps) {
     buzzerOpenAt === undefined || someoneBuzzed ? null : CLUE_TIMEOUT_MS,
   );
 
-  const handleClick = (clickedAtMs: number) => {
+  function handleClick(clickedAtMs: number) {
     if (
       clueShownAt === undefined ||
       lockout ||
@@ -432,7 +469,7 @@ function ReadCluePrompt({ roomId, userId }: RoomProps) {
     setOptimisticBuzzes(produce((draft) => draft.set(userId, deltaMs)));
 
     return submitBuzz(deltaMs);
-  };
+  }
 
   useKeyPress("Enter", () => handleClick(Date.now()));
 
@@ -463,6 +500,7 @@ function ReadCluePrompt({ roomId, userId }: RoomProps) {
         canBuzz={!lockout && myBuzzDurationMs === undefined}
         onBuzz={() => handleClick(Date.now())}
         focusOnBuzz
+        imageSrc={clue.imageSrc}
         showAnswer={false}
         answer={clue.answer}
       />
@@ -513,6 +551,7 @@ function ReadLongFormCluePrompt({ roomId, userId }: RoomProps) {
         canBuzz={false}
         onBuzz={() => null}
         focusOnBuzz={false}
+        imageSrc={clue.imageSrc}
         showAnswer={false}
         answer={clue.answer}
       />
@@ -587,6 +626,7 @@ function RevealAnswerToBuzzerPrompt({ roomId, userId }: RoomProps) {
         canBuzz={false}
         clue={clue.clue}
         focusOnBuzz={false}
+        imageSrc={clue.imageSrc}
         onBuzz={() => null}
         showAnswer={false}
       />
@@ -649,6 +689,7 @@ function RevealAnswerLongFormPrompt({ roomId, userId }: RoomProps) {
         canBuzz={false}
         clue={clue.clue}
         focusOnBuzz={false}
+        imageSrc={clue.imageSrc}
         onBuzz={() => null}
         showAnswer
       />
@@ -733,6 +774,7 @@ function RevealAnswerToAllPrompt({ roomId, userId }: RoomProps) {
         canBuzz={false}
         onBuzz={() => null}
         focusOnBuzz={false}
+        imageSrc={clue.imageSrc}
         showAnswer
         answer={clue.answer}
       />

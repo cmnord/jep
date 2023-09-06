@@ -21,12 +21,14 @@
             {
               "clue": "The leaf of a fern is often referred to as this",
               "answer": "Frond",
-              "value": 200
+              "value": 200,
+              "imageSrc": "https://upload.wikimedia.org/wikipedia/commons/1/18/Fern_frond_lobed.jpg"
             },
             {
               "clue": "Unlike seed plants, ferns reproduce with these particles",
               "answer": "Spores",
-              "value": 400
+              "value": 400,
+              "imageSrc": "https://www.j-archive.com/badimage.jpg"
             },
             {
               "clue": "Ferns first emerge in the fossil record in this period",
