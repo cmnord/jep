@@ -65,7 +65,6 @@ function stateToGameEngine(
     soloDispatch: dispatch,
     isAnswered,
     players: state.players,
-    numCluesLeftInRound: state.numCluesInBoard - state.numAnswered,
     round: state.round,
     boardControl: state.boardControl,
     wagers: state.wagers.get(clueKey) ?? new Map<string, number>(),

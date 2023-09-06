@@ -66,14 +66,12 @@ function PlayerScores({
 
 function NextClueForm({
   boardControlName,
-  cluesLeftInRound,
   loading,
   answerers,
   wagerable,
   longForm,
 }: {
   boardControlName: string;
-  cluesLeftInRound: number;
   loading: boolean;
   answerers: PlayerScore[];
   wagerable: boolean;
@@ -87,11 +85,6 @@ function NextClueForm({
         wagerable={wagerable}
         longForm={longForm}
       />
-      {cluesLeftInRound ? (
-        <p className="text-sm text-slate-300">
-          {boardControlName} will choose the next clue.
-        </p>
-      ) : null}
       <Button type="primary" htmlType="submit" autoFocus loading={loading}>
         Back to board
       </Button>
@@ -107,7 +100,6 @@ export function ConnectedNextClueForm({ roomId, userId }: RoomProps) {
     getClueValue,
     players,
     boardControl,
-    numCluesLeftInRound,
     soloDispatch,
   } = useEngineContext();
 
@@ -144,7 +136,6 @@ export function ConnectedNextClueForm({ roomId, userId }: RoomProps) {
       <input type="hidden" value={j} name="j" />
       <NextClueForm
         boardControlName={boardControlName}
-        cluesLeftInRound={numCluesLeftInRound}
         loading={loading}
         answerers={answerers}
         wagerable={clue.wagerable ?? false}

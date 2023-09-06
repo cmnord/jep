@@ -18,7 +18,6 @@ export const GameEngineContext = React.createContext<
   getClueValue: () => 0,
   soloDispatch: () => null,
   isAnswered: () => false,
-  numCluesLeftInRound: 0,
   players: new Map(),
   round: 0,
   wagers: new Map(),
