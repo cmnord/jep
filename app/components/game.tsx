@@ -1,3 +1,4 @@
+import classNames from "classnames";
 import BoardComponent from "~/components/board";
 import Link from "~/components/link";
 import { PlayerScores } from "~/components/player";
@@ -29,7 +30,7 @@ export default function GameComponent({
   roomName: string;
   url: string;
 } & RoomProps) {
-  const { type, round } = useEngineContext();
+  const { type, round, connected, lastMessageAt } = useEngineContext();
 
   const [playBoardFillSfx] = useGameSound(BOARD_FILL_SFX);
   const [playFinalSfx] = useGameSound(FINAL_CATEGORY_REVEAL_SFX);
@@ -82,6 +83,24 @@ export default function GameComponent({
             </div>
           )}
           <PlayerScores roomId={roomId} userId={userId} />
+          <div className="flex items-center gap-2 text-sm text-slate-300">
+            <div
+              className={classNames("h-2 w-2 shrink-0 rounded-full", {
+                "bg-green-500": connected,
+                "bg-red-500": !connected,
+              })}
+            />
+            <span>
+              {connected ? "Connected." : "Disconnected..."}
+              {lastMessageAt ? (
+                <span>
+                  {" "}
+                  Last message received{" "}
+                  {new Date(lastMessageAt).toLocaleTimeString()}.
+                </span>
+              ) : null}
+            </span>
+          </div>
         </div>
         <Prompt roomId={roomId} userId={userId} />
       </div>
