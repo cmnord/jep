@@ -478,13 +478,20 @@ export function gameEngine(state: State, action: Action): State {
       }
       return produce(state, (draft) => {
         const { userId, i, j } = action.payload;
-        // Ignore this action if the clue is no longer active.
+        // Ignore this action if the clue is no longer active or the player does
+        // not have board control.
         if (
           draft.type !== GameState.RevealAnswerToAll ||
           draft.activeClue?.[0] !== i ||
-          draft.activeClue?.[1] !== j ||
-          !draft.players.has(userId)
+          draft.activeClue?.[1] !== j
         ) {
+          return;
+        }
+        const clue = draft.game.boards
+          .at(draft.round)
+          ?.categories.at(j)
+          ?.clues.at(i);
+        if (!clue?.longForm && draft.boardControl !== userId) {
           return;
         }
 

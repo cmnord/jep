@@ -1,9 +1,6 @@
-import classNames from "classnames";
-
 import { PlayerIcon } from "~/components/player";
 import type { Player } from "~/engine";
 import { CANT_BUZZ_FLAG, CLUE_TIMEOUT_MS, useEngineContext } from "~/engine";
-import { formatDollarsWithSign } from "~/utils";
 
 function showBuzz(durationMs?: number) {
   switch (true) {
@@ -16,51 +13,12 @@ function showBuzz(durationMs?: number) {
   }
 }
 
-function Buzz({
-  player,
-  answered,
-  clueValue,
-}: {
-  player: Player;
-  answered: boolean;
-  clueValue: number;
-}) {
-  const clueValueStr = formatDollarsWithSign(clueValue);
-
-  return (
-    <div>
-      {answered ? (
-        <span
-          className={classNames(
-            "text-shadow absolute -top-5 animate-bounce font-bold",
-            {
-              "text-green-300": clueValue >= 0,
-              "text-red-300": clueValue < 0,
-            },
-          )}
-        >
-          {clueValueStr}
-        </span>
-      ) : null}
-      <PlayerIcon player={player} />
-    </div>
-  );
-}
-
 export function Buzzes({
   buzzes: optimisticBuzzes,
-  showWinner,
 }: {
   buzzes?: Map<string, number>;
-  showWinner: boolean;
 }) {
-  const {
-    activeClue,
-    answeredBy,
-    buzzes: serverBuzzes,
-    getClueValue,
-    players,
-  } = useEngineContext();
+  const { activeClue, buzzes: serverBuzzes, players } = useEngineContext();
 
   if (!activeClue) {
     throw new Error("No active clue");
@@ -88,23 +46,9 @@ export function Buzzes({
   return (
     <div className="relative">
       <div className="m-2 flex h-8 w-full gap-4 overflow-x-scroll">
-        {sortedPlayers.map((player, i) => {
-          const answer = answeredBy(
-            activeClue[0],
-            activeClue[1],
-            player.userId,
-          );
-          const clueValue = getClueValue(activeClue, player.userId);
-          const correct = answer === true;
-          return (
-            <Buzz
-              key={i}
-              player={player}
-              answered={answer !== undefined && showWinner}
-              clueValue={correct ? clueValue : -1 * clueValue}
-            />
-          );
-        })}
+        {sortedPlayers.map((player, i) => (
+          <PlayerIcon key={i} player={player} />
+        ))}
       </div>
     </div>
   );

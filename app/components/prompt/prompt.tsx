@@ -199,7 +199,7 @@ function WagerCluePrompt({ roomId, userId }: RoomProps) {
         </p>
       )}
       <Countdown startTime={undefined} />
-      <Buzzes showWinner={false} />
+      <Buzzes />
     </>
   );
 }
@@ -319,7 +319,7 @@ function ReadWagerableCluePrompt({ roomId, userId }: RoomProps) {
         answer={clue.answer}
       />
       <Countdown startTime={undefined} />
-      <Buzzes buzzes={buzzes} showWinner={false} />
+      <Buzzes buzzes={buzzes} />
     </>
   );
 }
@@ -514,7 +514,7 @@ function ReadCluePrompt({ roomId, userId }: RoomProps) {
         />
       </div>
       <Countdown startTime={undefined} />
-      <Buzzes buzzes={optimisticBuzzes} showWinner={false} />
+      <Buzzes buzzes={optimisticBuzzes} />
     </>
   );
 }
@@ -576,7 +576,7 @@ function ReadLongFormCluePrompt({ roomId, userId }: RoomProps) {
         startTime={countdownStartedAt}
         durationSec={LONG_FORM_CLUE_DURATION_SEC}
       />
-      <Buzzes showWinner={false} />
+      <Buzzes />
     </>
   );
 }
@@ -653,7 +653,7 @@ function RevealAnswerToBuzzerPrompt({ roomId, userId }: RoomProps) {
         </p>
       )}
       <Countdown startTime={showAnswer ? undefined : countdownStartedAt} />
-      <Buzzes showWinner={false} />
+      <Buzzes />
     </>
   );
 }
@@ -662,8 +662,9 @@ function RevealAnswerLongFormPrompt({ roomId, userId }: RoomProps) {
   const { activeClue, answers, buzzes, category, clue, getClueValue, players } =
     useEngineContext();
   if (!clue) throw new Error("clue is undefined");
+  if (!activeClue) throw new Error("activeClue is undefined");
 
-  const clueValue = activeClue ? getClueValue(activeClue, userId) : 0;
+  const clueValue = getClueValue(activeClue, userId);
   const buzzDurationMs = buzzes.get(userId);
   const canCheckAnswer =
     buzzDurationMs !== undefined && buzzDurationMs !== CANT_BUZZ_FLAG;
@@ -742,7 +743,7 @@ function RevealAnswerLongFormPrompt({ roomId, userId }: RoomProps) {
         startTime={undefined}
         durationSec={LONG_FORM_CLUE_DURATION_SEC}
       />
-      <Buzzes showWinner={false} />
+      <Buzzes />
     </>
   );
 }
@@ -788,7 +789,7 @@ function RevealAnswerToAllPrompt({ roomId, userId }: RoomProps) {
       />
       <NextClueForm roomId={roomId} userId={userId} />
       <Countdown startTime={undefined} />
-      <Buzzes showWinner />
+      <Buzzes />
     </>
   );
 }

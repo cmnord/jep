@@ -634,7 +634,7 @@ describe("gameEngine", () => {
         },
         {
           type: ActionType.NextClue,
-          payload: { userId: PLAYER1.userId, i: 0, j: 1 },
+          payload: { userId: PLAYER2.userId, i: 0, j: 1 },
         },
       ],
       expectedState: produce(initialState, (draft) => {
@@ -959,7 +959,7 @@ describe("gameEngine", () => {
         },
         {
           type: ActionType.NextClue,
-          payload: { userId: PLAYER2.userId, i: 0, j: 1 },
+          payload: { userId: PLAYER1.userId, i: 0, j: 1 },
         },
         {
           type: ActionType.StartRound,

@@ -1,5 +1,6 @@
 import { useFetcher } from "@remix-run/react";
 import classNames from "classnames";
+import * as React from "react";
 
 import Button from "~/components/button";
 import type { RoomProps } from "~/components/game";
@@ -7,6 +8,9 @@ import type { Action } from "~/engine";
 import { useEngineContext } from "~/engine";
 import { formatDollars, formatDollarsWithSign } from "~/utils";
 import useSoloAction from "~/utils/use-solo-action";
+import useTimeout from "~/utils/use-timeout";
+
+const DEFAULT_COUNTDOWN_MS = 3000;
 
 interface PlayerScore {
   name: string;
@@ -45,32 +49,52 @@ function PlayerScores({
   }
   return (
     <div className="flex gap-2">
-      {answerers.map(({ name, correct, value, score }, i) => (
-        <p className="text-shadow text-center font-bold text-white" key={i}>
-          <span className="font-handwriting text-xl">{name} </span>
-          <span
-            className={classNames("font-impact", {
-              "text-green-300": correct,
-              "text-red-300": !correct,
-            })}
-          >
-            {formatDollarsWithSign(correct ? value : -1 * value)}
-          </span>
-          <br />
-          <span className="font-impact text-xl">{formatDollars(score)}</span>
-        </p>
-      ))}
+      {answerers.map(({ name, correct, value, score }, i) => {
+        const clueValueStr = formatDollarsWithSign(
+          correct ? value : -1 * value,
+        );
+        return (
+          <div className="relative" key={i}>
+            <div className="text-shadow flex flex-col items-center" key={i}>
+              <span className="font-handwriting text-xl font-bold text-slate-300">
+                {name}
+              </span>
+              <span
+                className={classNames("font-impact text-xl", {
+                  "text-white": score >= 0,
+                  "text-red-400": score < 0,
+                })}
+              >
+                {formatDollars(score)}
+              </span>
+            </div>
+            <span
+              className={classNames(
+                "text-shadow absolute -right-1/2 -top-1/4 animate-bounce font-impact",
+                {
+                  "text-green-300": correct,
+                  "text-red-300": !correct,
+                },
+              )}
+            >
+              {clueValueStr}
+            </span>
+          </div>
+        );
+      })}
     </div>
   );
 }
 
 function NextClueForm({
+  hasBoardControl,
   boardControlName,
   loading,
   answerers,
   wagerable,
   longForm,
 }: {
+  hasBoardControl: boolean;
   boardControlName: string;
   loading: boolean;
   answerers: PlayerScore[];
@@ -85,9 +109,29 @@ function NextClueForm({
         wagerable={wagerable}
         longForm={longForm}
       />
-      <Button type="primary" htmlType="submit" autoFocus loading={loading}>
-        Back to board
-      </Button>
+      {hasBoardControl ? (
+        <Button
+          type="primary"
+          htmlType="submit"
+          autoFocus
+          loading={loading}
+          className="relative"
+        >
+          <div
+            className="absolute left-0 h-full rounded-md bg-blue-400"
+            style={{
+              animation: `${
+                DEFAULT_COUNTDOWN_MS / 1000
+              }s linear 0s 1 growFromLeft forwards`,
+            }}
+          />
+          <span className="relative">Back to board</span>
+        </Button>
+      ) : (
+        <p className="text-sm text-slate-300">
+          {boardControlName} will choose the next clue.
+        </p>
+      )}
     </div>
   );
 }
@@ -110,6 +154,7 @@ export function ConnectedNextClueForm({ roomId, userId }: RoomProps) {
   const fetcher = useFetcher<Action>();
   useSoloAction(fetcher, soloDispatch);
   const loading = fetcher.state === "loading";
+  const formRef = React.useRef<HTMLFormElement | null>(null);
 
   const boardController = boardControl ? players.get(boardControl) : undefined;
   const boardControlName = boardController
@@ -129,12 +174,27 @@ export function ConnectedNextClueForm({ roomId, userId }: RoomProps) {
     }))
     .filter((p): p is PlayerScore => p.correct !== undefined);
 
+  const hasBoardControl = boardControl === userId;
+
+  // Submit the form by default after a few seconds.
+  useTimeout(
+    () => {
+      fetcher.submit(formRef.current);
+    },
+    hasBoardControl ? DEFAULT_COUNTDOWN_MS : null,
+  );
+
   return (
-    <fetcher.Form method="POST" action={`/room/${roomId}/next-clue`}>
+    <fetcher.Form
+      method="POST"
+      action={`/room/${roomId}/next-clue`}
+      ref={formRef}
+    >
       <input type="hidden" value={userId} name="userId" />
       <input type="hidden" value={i} name="i" />
       <input type="hidden" value={j} name="j" />
       <NextClueForm
+        hasBoardControl={hasBoardControl}
         boardControlName={boardControlName}
         loading={loading}
         answerers={answerers}
