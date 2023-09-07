@@ -13,7 +13,7 @@ import {
 import { formatDollars } from "~/utils";
 import useSoloAction from "~/utils/use-solo-action";
 
-type PlayerAndCanWager = Player & { canWager: boolean };
+type PlayerAndCanWager = Player & { canWager: boolean; hasWager: boolean };
 
 function PlayerScores({
   players,
@@ -29,13 +29,17 @@ function PlayerScores({
     <div className="text-shadow flex w-full gap-2 self-start overflow-x-scroll text-sm text-slate-300">
       {playerScores.map((p, i) => (
         <div
-          className="flex flex-col items-center justify-between"
+          className="relative flex flex-col items-center justify-between"
           key={`player-${i}`}
         >
           <p className="text-center">
             <span className="font-handwriting text-xl font-bold">{p.name}</span>
-            <span>{p.userId === userId ? " (you)" : null}</span>
-            {p.canWager ? null : <span> (can't wager)</span>}
+            {p.userId === userId ? <span> (you)</span> : null}
+            {p.canWager ? (
+              <span className="ml-1"> {p.hasWager ? "☑️" : "💭"}</span>
+            ) : (
+              <span> (can't wager)</span>
+            )}
           </p>
           <p className="text-white">{formatDollars(p.score)}</p>
         </div>
@@ -132,6 +136,7 @@ export function ConnectedWagerForm({ roomId, userId }: RoomProps) {
   const playersList = Array.from(players.values()).map((p) => ({
     ...p,
     canWager: buzzes.get(p.userId) !== CANT_BUZZ_FLAG,
+    hasWager: wagers.has(p.userId),
   }));
 
   if (wager !== undefined) {

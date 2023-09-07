@@ -5,14 +5,13 @@ import * as React from "react";
 import useFitText from "use-fit-text";
 
 import type { RoomProps } from "~/components/game";
-import type { Action } from "~/engine";
+import type { Action, Player } from "~/engine";
 import {
   CANT_BUZZ_FLAG,
   CLUE_TIMEOUT_MS,
   GameState,
   useEngineContext,
 } from "~/engine";
-import { stringToHslColor } from "~/utils";
 import useKeyPress from "~/utils/use-key-press";
 import useSoloAction from "~/utils/use-solo-action";
 import useGameSound from "~/utils/use-sound";
@@ -659,8 +658,16 @@ function RevealAnswerToBuzzerPrompt({ roomId, userId }: RoomProps) {
 }
 
 function RevealAnswerLongFormPrompt({ roomId, userId }: RoomProps) {
-  const { activeClue, answers, buzzes, category, clue, getClueValue, players } =
-    useEngineContext();
+  const {
+    activeClue,
+    answers,
+    answeredBy,
+    buzzes,
+    category,
+    clue,
+    getClueValue,
+    players,
+  } = useEngineContext();
   if (!clue) throw new Error("clue is undefined");
   if (!activeClue) throw new Error("activeClue is undefined");
 
@@ -669,13 +676,18 @@ function RevealAnswerLongFormPrompt({ roomId, userId }: RoomProps) {
   const canCheckAnswer =
     buzzDurationMs !== undefined && buzzDurationMs !== CANT_BUZZ_FLAG;
 
-  const otherPlayersList = Array.from(players.values())
-    .filter((p) => p.userId !== userId)
-    .map((p) => ({
-      name: p.name,
-      userId: p.userId,
-      answer: answers.get(p.userId),
-    }));
+  const playersList = Array.from(players.values()).map((p) => ({
+    name: p.name,
+    userId: p.userId,
+    answer: answers.get(p.userId),
+  }));
+
+  const [i, j] = activeClue;
+
+  const unansweredPlayers = Array.from(answers.keys())
+    .map((uid) => players.get(uid))
+    .filter((p): p is Player => p !== undefined)
+    .filter((p) => answeredBy(i, j, p.userId) === undefined);
 
   return (
     <>
@@ -712,22 +724,18 @@ function RevealAnswerLongFormPrompt({ roomId, userId }: RoomProps) {
         />
       ) : (
         <p className="p-2 text-center text-sm text-slate-300">
-          {/* TODO: which players? */}
-          Waiting for checks from other players...
+          Waiting for checks from{" "}
+          {unansweredPlayers.map((p) => p.name).join(", ")}...
         </p>
       )}
       <div className="flex w-full gap-2 overflow-x-scroll">
-        {otherPlayersList.map(({ name, userId, answer }) => {
-          const color = stringToHslColor(userId);
+        {playersList.map(({ name, userId, answer }) => {
           return (
             <div
               className="flex flex-col items-center justify-between"
               key={userId}
             >
-              <p
-                className="text-center font-handwriting text-xl font-bold"
-                style={{ color }}
-              >
+              <p className="text-center font-handwriting text-xl font-bold text-white">
                 {name}
               </p>
               {answer ? (

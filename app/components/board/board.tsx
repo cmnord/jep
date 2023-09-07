@@ -112,7 +112,12 @@ export function ConnectedBoardComponent({ roomId, userId }: RoomProps) {
 
   if (!board) return null;
 
-  const hasBoardControl = boardControl === userId;
+  const isSingleLongFormClue =
+    board.categories.length === 1 &&
+    board.categories[0].clues.length === 1 &&
+    Boolean(board.categories[0].clues[0].longForm);
+
+  const hasBoardControl = boardControl === userId || isSingleLongFormClue;
 
   function focusCell(i: number, j: number) {
     const row = tbodyRef.current?.children.item(i);
@@ -180,11 +185,6 @@ export function ConnectedBoardComponent({ roomId, userId }: RoomProps) {
     }
     setFocusedClue([i, j]);
   }
-
-  const isSingleLongFormClue =
-    board.categories.length === 1 &&
-    board.categories[0].clues.length === 1 &&
-    board.categories[0].clues[0].longForm;
 
   if (isSingleLongFormClue) {
     return (

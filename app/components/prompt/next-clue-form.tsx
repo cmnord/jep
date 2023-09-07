@@ -40,7 +40,7 @@ function PlayerScores({
     } else if (wagerable) {
       return (
         <p className="font-bold text-white">
-          {boardControlName} do(es) not have enough money to wager on this clue.
+          {boardControlName} does not have enough money to wager on this clue.
         </p>
       );
     } else {
@@ -109,7 +109,7 @@ function NextClueForm({
         wagerable={wagerable}
         longForm={longForm}
       />
-      {hasBoardControl ? (
+      {hasBoardControl || longForm ? (
         <Button
           type="primary"
           htmlType="submit"
@@ -120,18 +120,16 @@ function NextClueForm({
           <div
             className="absolute left-0 h-full rounded-md bg-blue-400"
             style={{
-              animation: `${
-                DEFAULT_COUNTDOWN_MS / 1000
-              }s linear 0s 1 growFromLeft forwards`,
+              animation: longForm
+                ? undefined
+                : `${
+                    DEFAULT_COUNTDOWN_MS / 1000
+                  }s linear 0s 1 growFromLeft forwards`,
             }}
           />
           <span className="relative">Back to board</span>
         </Button>
-      ) : (
-        <p className="text-sm text-slate-300">
-          {boardControlName} will choose the next clue.
-        </p>
-      )}
+      ) : null}
     </div>
   );
 }
@@ -181,7 +179,7 @@ export function ConnectedNextClueForm({ roomId, userId }: RoomProps) {
     () => {
       fetcher.submit(formRef.current);
     },
-    hasBoardControl ? DEFAULT_COUNTDOWN_MS : null,
+    hasBoardControl && !clue.longForm ? DEFAULT_COUNTDOWN_MS : null,
   );
 
   return (

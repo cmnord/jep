@@ -137,7 +137,16 @@ export function gameEngine(state: State, action: Action): State {
           return;
         }
         const { round, userId } = action.payload;
-        if (draft.boardControl !== userId || round !== draft.round) {
+        if (round != draft.round) {
+          return;
+        }
+        // Any player can start the final round.
+        const board = draft.game.boards[draft.round];
+        const isSingleLongFormClue =
+          board.categories.length === 1 &&
+          board.categories[0].clues.length === 1 &&
+          board.categories[0].clues[0].longForm;
+        if (!isSingleLongFormClue && draft.boardControl !== userId) {
           return;
         }
 

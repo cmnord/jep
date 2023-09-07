@@ -4,7 +4,7 @@ import * as React from "react";
 
 import Button from "~/components/button";
 import type { RoomProps } from "~/components/game";
-import type { Action } from "~/engine";
+import type { Action, Player } from "~/engine";
 import { useEngineContext } from "~/engine";
 import { formatDollarsWithSign } from "~/utils";
 import useSoloAction from "~/utils/use-solo-action";
@@ -83,8 +83,15 @@ export function ConnectedCheckForm({
   showAnswer: boolean;
   onClickShowAnswer: () => void;
 } & RoomProps) {
-  const { activeClue, clue, answeredBy, answers, getClueValue, soloDispatch } =
-    useEngineContext();
+  const {
+    activeClue,
+    clue,
+    answeredBy,
+    answers,
+    getClueValue,
+    soloDispatch,
+    players,
+  } = useEngineContext();
   const fetcher = useFetcher<Action>();
   useSoloAction(fetcher, soloDispatch);
   const loading = fetcher.state === "loading";
@@ -140,6 +147,11 @@ export function ConnectedCheckForm({
     const clueValue = getClueValue(activeClue, userId);
     const value = checkResult ? clueValue : -1 * clueValue;
 
+    const uncheckedPlayers = Array.from(answers.keys())
+      .map((uid) => players.get(uid))
+      .filter((p): p is Player => p !== undefined)
+      .filter((p) => answeredBy(i, j, p.userId) === undefined);
+
     return (
       <div className="flex flex-col items-center gap-2 p-2">
         <p className="font-bold text-white">
@@ -154,7 +166,8 @@ export function ConnectedCheckForm({
           </span>
         </p>
         <p className="text-sm text-slate-300">
-          Waiting for other players to check...
+          Waiting for check(s) from{" "}
+          {uncheckedPlayers.map((p) => p.name).join(", ")}...
         </p>
       </div>
     );

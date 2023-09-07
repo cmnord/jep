@@ -8,10 +8,19 @@ import { clueIsPlayable, State } from "~/engine";
 import type { Board, Clue, Game } from "~/models/convert.server";
 import { formatDollarsWithSign, generateGrid, stringToHslColor } from "~/utils";
 
-function PlayerPoints({ name, value }: { name: string; value: number }) {
+function PlayerPoints({
+  name,
+  value,
+  answer,
+}: {
+  name: string;
+  value: number;
+  answer?: string;
+}) {
   return (
     <p className="font-mono text-xs">
       {name} {formatDollarsWithSign(value)}
+      {answer ? `: "${answer}"` : ""}
     </p>
   );
 }
@@ -27,6 +36,7 @@ interface Props {
 function CluePopover({ clue, state, round, i, j }: Props) {
   const key = `${round},${i},${j}`;
   const wagers = state.wagers.get(key);
+  const answers = state.answers.get(key);
 
   const clueAnswer = state.isAnswered[round][i][j];
 
@@ -39,11 +49,13 @@ function CluePopover({ clue, state, round, i, j }: Props) {
           {Array.from(wagers.entries()).map(([userId, wager]) => {
             const player = state.players.get(userId);
             if (!player) return null;
+            const answer = answers?.get(userId);
             const correct = clueAnswer.answeredBy.get(userId) ?? false;
             return (
               <PlayerPoints
                 key={userId}
                 name={player.name}
+                answer={answer}
                 value={correct ? wager : -wager}
               />
             );
