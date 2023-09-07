@@ -22,7 +22,7 @@ export function PlayerScoreBox({
   return (
     <div
       className={classNames(
-        "flex gap-2 border-2 bg-blue-1000 bg-gradient-to-b from-blue-800 p-2 sm:p-3",
+        "flex gap-2 rounded-md border-2 bg-slate-700 p-2 shadow-md sm:p-3",
         {
           "border-transparent": !hasBoardControl,
           "animate-borderPulse": hasBoardControl,
@@ -63,7 +63,9 @@ export function PlayerScore({
   return (
     <PlayerScoreBox hasBoardControl={hasBoardControl} player={player}>
       <div className="flex w-full gap-2 text-2xl">
-        <p className="font-handwriting font-bold">{player.name}</p>
+        <p className="font-handwriting font-bold text-slate-300">
+          {player.name}
+        </p>
         {winning && <div className="ml-auto">👑</div>}
       </div>
     </PlayerScoreBox>

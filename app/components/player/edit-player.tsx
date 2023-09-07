@@ -16,7 +16,7 @@ function SendIcon() {
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
       fill="currentColor"
-      className="h-5 w-5 text-slate-300"
+      className="h-5 w-5"
       role="img"
       aria-labelledby="send-title"
     >
@@ -33,7 +33,7 @@ function PencilIcon() {
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
       fill="currentColor"
-      className="h-5 w-5 text-slate-300"
+      className="h-5 w-5"
       role="img"
       aria-labelledby="pencil-title"
     >
@@ -73,14 +73,20 @@ function EditPlayer({
 
   return (
     <PlayerScoreBox player={player} hasBoardControl={hasBoardControl}>
-      <div className="flex items-center gap-2">
+      <div
+        className={`flex items-center gap-2 rounded-md text-slate-300
+        transition-colors
+        hover:bg-slate-800 hover:text-white
+        focus:bg-slate-800 focus:text-white`}
+      >
         <input
           ref={inputRef}
           type="text"
           id="name"
           name="name"
-          className={`block w-full bg-transparent font-handwriting text-2xl font-bold text-white placeholder:font-sans
-          placeholder:text-sm placeholder:font-normal`}
+          className={`block w-full bg-transparent font-handwriting text-2xl
+          font-bold
+          placeholder:font-sans placeholder:text-sm placeholder:font-normal`}
           placeholder="Enter your name"
           defaultValue={player.name}
           onChange={(e) => onChangeName(e.target.value)}
