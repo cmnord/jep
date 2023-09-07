@@ -505,6 +505,14 @@ function ReadCluePrompt({ roomId, userId }: RoomProps) {
         answer={clue.answer}
       />
       <Lockout active={lockout} />
+      <div className="invisible">
+        <CheckForm
+          roomId={roomId}
+          userId={userId}
+          showAnswer={false}
+          onClickShowAnswer={() => null}
+        />
+      </div>
       <Countdown startTime={undefined} />
       <Buzzes buzzes={optimisticBuzzes} showWinner={false} />
     </>
