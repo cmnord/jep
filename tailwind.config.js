@@ -6,6 +6,7 @@ module.exports = {
   theme: {
     extend: {
       animation: {
+        borderPulse: "borderPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
         contentShow: "contentShow 150ms cubic-bezier(0.16, 1, 0.3, 1)",
         hide: "hide 100ms ease-in",
         overlayShow: "overlayShow 150ms cubic-bezier(0.16, 1, 0.3, 1)",
@@ -42,6 +43,11 @@ module.exports = {
         handwriting: ["Caveat", "cursive"],
       },
       keyframes: {
+        // borderPulse must include the color of the border
+        borderPulse: {
+          "0%, 100%": { borderColor: "rgba(252, 211, 77, 1)" },
+          "50%": { borderColor: "rgba(252, 211, 77, 0.5)" },
+        },
         contentShow: {
           from: { opacity: 0, transform: "translate(-50%, -48%) scale(0.96)" },
           to: { opacity: 1, transform: "translate(-50%, -50%) scale(1)" },

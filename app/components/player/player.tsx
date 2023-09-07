@@ -24,8 +24,8 @@ export function PlayerScoreBox({
       className={classNames(
         "flex gap-2 border-2 bg-blue-1000 bg-gradient-to-b from-blue-800 p-2 sm:p-3",
         {
-          "border-slate-200": !hasBoardControl,
-          "border-yellow-400": hasBoardControl,
+          "border-transparent": !hasBoardControl,
+          "animate-borderPulse": hasBoardControl,
         },
       )}
     >

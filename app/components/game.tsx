@@ -1,12 +1,10 @@
 import BoardComponent from "~/components/board";
-import { WarningMessage } from "~/components/error";
 import Link from "~/components/link";
 import { PlayerScores } from "~/components/player";
 import Preview from "~/components/preview";
 import Prompt from "~/components/prompt";
 import { GameState, useEngineContext } from "~/engine";
 import type { Game } from "~/models/convert.server";
-import { stringToHslColor } from "~/utils";
 import useGameSound from "~/utils/use-sound";
 
 const BOARD_FILL_SFX = "/sounds/board-fill.mp3";
@@ -43,10 +41,6 @@ export default function GameComponent({
     ? boardController.name
     : "Unknown player";
 
-  const boardControlColor = boardController
-    ? stringToHslColor(boardController.userId)
-    : "gray";
-
   const board = game.boards[round];
   const isSingleLongFormClue =
     board.categories.length === 1 &&
@@ -78,19 +72,14 @@ export default function GameComponent({
               </Link>
             </>
           ) : isSingleLongFormClue ? (
-            <WarningMessage theme="dark">
+            <div className="italic text-slate-300">
               Let's go to the final clue!
-            </WarningMessage>
+            </div>
           ) : (
-            <WarningMessage theme="dark">
-              <span
-                className="mr-2 border-b-4 font-handwriting text-xl font-bold"
-                style={{ borderColor: boardControlColor }}
-              >
-                {boardControlName}
-              </span>
-              has control of the board.
-            </WarningMessage>
+            <div className="italic text-slate-300">
+              <span className="font-bold">{boardControlName} </span>
+              is choosing the next clue.
+            </div>
           )}
           <PlayerScores roomId={roomId} userId={userId} />
         </div>
