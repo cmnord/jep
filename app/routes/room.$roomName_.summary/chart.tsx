@@ -1,4 +1,6 @@
 import {
+  Dot,
+  DotProps,
   Label,
   Legend,
   Line,
@@ -16,6 +18,7 @@ import { stringToHslColor } from "~/utils";
 
 interface DataPoint {
   x: number;
+  wagerable: number;
   // Per-player score for each clue.
   [key: string]: number;
 }
@@ -53,6 +56,25 @@ function AngledAxisTick({
   );
 }
 
+/** CustomDot shows a larger dot for wagerable clues. */
+const CustomDot = (props: DotProps & { payload?: DataPoint }) => {
+  const { cx, cy, fill, payload, stroke } = props;
+  if (payload?.wagerable && cx && cy) {
+    return (
+      <circle
+        cx={cx}
+        cy={cy}
+        fill={fill}
+        r={6}
+        stroke={stroke}
+        strokeWidth={2}
+      />
+    );
+  }
+
+  return <Dot {...props} />;
+};
+
 /** Chart is a line chart of each player's score over time. */
 export default function Chart({
   game,
@@ -68,6 +90,7 @@ export default function Chart({
     ...Object.fromEntries(
       Array.from(state.players.values()).map((player) => [player.userId, 0]),
     ),
+    wagerable: 0,
   };
   const data = [initialPoint];
 
@@ -91,9 +114,11 @@ export default function Chart({
       counter += 1;
       const [i, j] = activeClue;
       const clueAnswer = wipState.isAnswered[wipState.round][i][j];
+      const clue = game.boards[wipState.round].categories[j].clues[i];
 
       const point: DataPoint = {
         x: counter,
+        wagerable: clue.wagerable ? 1 : 0,
       };
       for (const [userId] of clueAnswer.answeredBy) {
         const player = wipState.players.get(userId);
@@ -130,6 +155,7 @@ export default function Chart({
               type="stepAfter"
               dataKey={player.userId}
               stroke={stringToHslColor(player.userId)}
+              dot={(props) => <CustomDot {...props} />}
             />
           ))}
         </LineChart>
