@@ -122,9 +122,9 @@ export default function App() {
               `,
               }}
             />
+            <Analytics />
           </>
         ) : null}
-        <Analytics />
         <SoundContext.Provider
           value={{
             volume,
