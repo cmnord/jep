@@ -32,7 +32,7 @@ import { ConnectedWagerForm as WagerForm } from "./wager-form";
 /** READ_PER_CHAR_MS is the number of milliseconds to "read" each character of
  * the clue before the buzzer opens. Longer clues should take longer to read.
  */
-const READ_PER_CHAR_MS = 70;
+const READ_PER_CHAR_MS = 60;
 
 /** READ_BASE_MS is the base amount of time it takes to read a clue.
  */
