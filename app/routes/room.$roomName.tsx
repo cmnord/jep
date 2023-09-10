@@ -10,7 +10,7 @@ import { getRoomEvents } from "~/models/room-event.server";
 import { getRoom } from "~/models/room.server";
 import { getUserByEmail } from "~/models/user";
 import { getOrCreateUserSession } from "~/session.server";
-import { BASE_URL, getRandomName } from "~/utils";
+import { BASE_URL, getRandomEmoji } from "~/utils";
 
 export const meta: V2_MetaFunction<typeof loader> = ({ data }) => {
   try {
@@ -46,7 +46,7 @@ export async function loader({ request, params }: LoaderArgs) {
   const accessToken = authSession?.accessToken;
 
   const roomEvents = await getRoomEvents(room.id);
-  const name = getRandomName();
+  const name = getRandomEmoji();
 
   if (user) {
     const userId = user.id;

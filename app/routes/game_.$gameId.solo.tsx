@@ -8,7 +8,7 @@ import { getValidAuthSession } from "~/models/auth";
 import { getGame } from "~/models/game.server";
 import { getUserByEmail } from "~/models/user";
 import { getOrCreateUserSession } from "~/session.server";
-import { BASE_URL, getRandomName } from "~/utils";
+import { BASE_URL, getRandomEmoji } from "~/utils";
 
 export const meta: V2_MetaFunction<typeof loader> = ({ data }) => {
   try {
@@ -35,7 +35,7 @@ export async function loader({ request, params }: LoaderArgs) {
     ? await getUserByEmail(authSession.email, authSession.accessToken)
     : null;
 
-  const name = getRandomName();
+  const name = getRandomEmoji();
 
   // Add the user to the room. If they are logged in, their ID is their user ID.
   // If they are a guest, their ID is their guest session ID.
