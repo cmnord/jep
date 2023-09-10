@@ -81,7 +81,7 @@ function WagerForm({
       <div className="flex gap-2">
         <Input
           type="number"
-          min={5}
+          min={longForm ? 0 : 5}
           max={maxWager}
           id="wager"
           name="wager"
