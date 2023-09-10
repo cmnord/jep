@@ -28,7 +28,7 @@ function getSupabaseClient(supabaseKey: string, accessToken?: string) {
     },
     realtime: {
       params: {
-        eventsPerSecond: 1,
+        eventsPerSecond: 5,
       },
     },
     ...global,
