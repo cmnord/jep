@@ -38,9 +38,6 @@ export default function GameComponent({
   const { players, boardControl } = useEngineContext();
 
   const boardController = boardControl ? players.get(boardControl) : undefined;
-  const boardControlName = boardController
-    ? boardController.name
-    : "Unknown player";
 
   const board = game.boards[round];
   const isSingleLongFormClue =
@@ -76,12 +73,12 @@ export default function GameComponent({
             <div className="italic text-slate-300">
               Let's go to the final clue!
             </div>
-          ) : (
+          ) : boardController ? (
             <div className="italic text-slate-300">
-              <span className="font-bold">{boardControlName} </span>
+              <span className="font-bold">{boardController.name} </span>
               is choosing the next clue.
             </div>
-          )}
+          ) : null}
           <PlayerScores roomId={roomId} userId={userId} />
           <div className="flex items-center gap-2 text-sm text-slate-300">
             <div
