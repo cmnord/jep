@@ -1,9 +1,12 @@
+import { EMOJIS } from "./emoji-list";
 import { POKE_NAMES, POSITIVE_ADJECTIVES } from "./name-lists";
 
 export const positiveAdjectivesList =
   POSITIVE_ADJECTIVES.toLowerCase().split("\n");
 
 export const pokeNamesList = POKE_NAMES.toLowerCase().split("\n");
+
+const emojiList = EMOJIS.split("\n");
 
 function makePdf(array: string[]) {
   const weights = new Map<string, number>();
@@ -145,6 +148,12 @@ function capitalize(s: string) {
 export function getRandomName() {
   const sample = Math.random(); // sample is in the range [0, 1).
   return getRandomNameWithSample(sample);
+}
+
+export function getRandomEmoji() {
+  const sample = Math.random(); // sample is in the range [0, 1).
+  const idx = Math.floor(sample * emojiList.length);
+  return emojiList[idx];
 }
 
 export function getRandomNameWithSample(sample: number) {

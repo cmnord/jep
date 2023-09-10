@@ -1,7 +1,7 @@
 export * from "./env";
 export * from "./http.server";
 export * from "./is-browser";
-export { getRandomName } from "./name";
+export { getRandomEmoji, getRandomName } from "./name";
 export {
   formatDollars,
   formatDollarsWithSign,
