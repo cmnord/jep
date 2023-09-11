@@ -25,9 +25,10 @@ export function Countdown({
   const center = (numBars - 1) / 2;
 
   const [count, setCount] = React.useState(numBars / 2);
-  const animationRef = React.useRef(0);
 
   React.useEffect(() => {
+    let requestId: number;
+
     const animate = (timeMs: number) => {
       const elapsedMs = Date.now() - timeMs;
       const elapsedSec = Math.floor(elapsedMs / 1000);
@@ -36,15 +37,15 @@ export function Countdown({
       setCount(newCount);
 
       if (count <= numBars / 2) {
-        animationRef.current = requestAnimationFrame(() => animate(timeMs));
+        requestId = requestAnimationFrame(() => animate(timeMs));
       }
     };
 
     if (startTime) {
-      animationRef.current = requestAnimationFrame(() => animate(startTime));
+      requestId = requestAnimationFrame(() => animate(startTime));
     }
 
-    return () => cancelAnimationFrame(animationRef.current);
+    return () => cancelAnimationFrame(requestId);
   }, [count, startTime, durationSec, numBars]);
 
   const bars = Array.from({ length: numBars }, (_, i) => (
