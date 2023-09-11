@@ -40,7 +40,7 @@ export default function Profile() {
 
   const patchGame = useFetcher<never>();
   const uploadGame = useFetcher<never>();
-  const uploadFormRef = React.useRef<HTMLFormElement | null>(null);
+  const formRef = React.useRef<HTMLFormElement | null>(null);
 
   const [formState, setFormState] = React.useState(data.formState);
 
@@ -79,7 +79,7 @@ export default function Profile() {
         <h1 className="mb-4 text-2xl font-semibold">My Games</h1>
         <Upload
           fetcher={uploadGame}
-          formRef={uploadFormRef}
+          formRef={formRef}
           loggedIn={data.authSession !== null}
           redirectTo="/profile"
         />

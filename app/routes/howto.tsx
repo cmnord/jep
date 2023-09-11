@@ -32,7 +32,6 @@ export default function HowTo() {
   const [lockout, setLockout] = React.useState(false);
   const [hadLockout, setHadLockout] = React.useState(false);
   const [msLeft, setMsLeft] = React.useState<number | undefined>();
-  const animationRef = React.useRef(0);
 
   const buzzDurationMs =
     buzzedAt !== undefined && buzzerOpenAt !== undefined
@@ -85,21 +84,23 @@ export default function HowTo() {
   }
 
   React.useEffect(() => {
+    let requestId: number;
+
     const animate = (timeMs: number) => {
       const elapsedMs = Date.now() - timeMs;
       const newMsLeft = Math.max(CLUE_DURATION_MS - elapsedMs, 0);
       setMsLeft(newMsLeft);
 
       if (newMsLeft > 0) {
-        animationRef.current = requestAnimationFrame(() => animate(timeMs));
+        requestId = requestAnimationFrame(() => animate(timeMs));
       }
     };
 
     if (buzzerOpenAt !== undefined && buzzedAt === undefined) {
-      animationRef.current = requestAnimationFrame(() => animate(buzzerOpenAt));
+      requestId = requestAnimationFrame(() => animate(buzzerOpenAt));
     }
 
-    return () => cancelAnimationFrame(animationRef.current);
+    return () => cancelAnimationFrame(requestId);
   }, [buzzerOpenAt, buzzedAt]);
 
   return (
