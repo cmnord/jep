@@ -10,11 +10,27 @@ import { gameEngine, getWinningBuzzer } from "./engine";
 import { applyRoomEventsToState, isTypedRoomEvent } from "./room-event";
 import { getClueValue, State, stateFromGame } from "./state";
 
+export enum ConnectionState {
+  ERROR,
+  CONNECTING,
+  CONNECTED,
+  DISCONNECTING,
+  DISCONNECTED,
+}
+
+/** RESUBSCRIBE_DELAY_MS is the amount of time we wait before attemping to
+ * re-subscribe to the realtime channel.
+ */
+const RESUBSCRIBE_DELAY_MS = 1000;
+
 function stateToGameEngine(
   game: Game,
   state: State,
   dispatch: React.Dispatch<Action>,
-  { connected, lastMessageAt }: { connected: boolean; lastMessageAt?: number },
+  {
+    connectionState,
+    lastMessageAt,
+  }: { connectionState: ConnectionState; lastMessageAt?: number },
 ) {
   // Board may be undefined
   const board = game.boards.at(state.round);
@@ -62,7 +78,7 @@ function stateToGameEngine(
     buzzes: state.buzzes,
     category,
     clue,
-    connected,
+    connectionState,
     getClueValue: getClueValueFn,
     soloDispatch: dispatch,
     isAnswered,
@@ -84,7 +100,7 @@ export function useSoloGameEngine(game: Game) {
   );
 
   return stateToGameEngine(game, state, dispatch, {
-    connected: true,
+    connectionState: ConnectionState.CONNECTED,
     lastMessageAt: undefined,
   });
 }
@@ -98,7 +114,8 @@ export function useSoloGameEngine(game: Game) {
  *
  * To modify the state, submit a POST request to the proper endpoint to insert a
  * room event. The event will then be propagated to all clients via websockets
- * and the engine will apply it to the state. */
+ * and the engine will apply it to the state.
+ */
 export function useGameEngine(
   game: Game,
   serverRoomEvents: DbRoomEvent[],
@@ -107,7 +124,9 @@ export function useGameEngine(
 ) {
   const [, setRoomEvents] = React.useState(serverRoomEvents);
 
-  const [connected, setConnected] = React.useState(false);
+  const [connectionState, setConnectionState] = React.useState<ConnectionState>(
+    ConnectionState.DISCONNECTED,
+  );
   const [lastMessageAt, setLastMessageAt] = React.useState<
     number | undefined
   >();
@@ -122,55 +141,75 @@ export function useGameEngine(
   const client = React.useMemo(() => getSupabase(accessToken), [accessToken]);
 
   React.useEffect(() => {
-    const channel = client.channel(`realtime:roomId:${roomId}`);
-    if (channel.state !== "closed") {
-      return;
+    let channel = client.channel(`realtime:roomId:${roomId}`);
+    let numRetries = 0;
+
+    function subscribeToChannel() {
+      if (numRetries > 5) {
+        return;
+      }
+      setConnectionState(ConnectionState.CONNECTING);
+      numRetries += 1;
+
+      channel
+        .on<DbRoomEvent>(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "room_events",
+            filter: "room_id=eq." + roomId,
+          },
+          (payload) => {
+            const newEvent = payload.new;
+            if (!isTypedRoomEvent(newEvent)) {
+              throw new Error(
+                "unhandled room event type from DB: " + newEvent.type,
+              );
+            }
+            setRoomEvents((re) => {
+              if (!re.find((re) => re.id === newEvent.id)) {
+                setRoomEvents((prev) => [...prev, newEvent]);
+                dispatch(newEvent);
+              }
+              return re;
+            });
+          },
+        )
+        .subscribe((status, err) => {
+          if (err) {
+            console.error("Realtime subscription error:", err.message);
+            setConnectionState(ConnectionState.ERROR);
+            // Handle the error here by attempting to re-subscribe
+            if (channel) {
+              setConnectionState(ConnectionState.DISCONNECTING);
+              channel.unsubscribe();
+            }
+            channel = client.channel(`realtime:roomId:${roomId}`);
+            setTimeout(subscribeToChannel, RESUBSCRIBE_DELAY_MS);
+          } else {
+            console.info(status, numRetries);
+            switch (status) {
+              case "SUBSCRIBED":
+                return setConnectionState(ConnectionState.CONNECTED);
+              case "CLOSED":
+                return setConnectionState(ConnectionState.DISCONNECTED);
+              case "CHANNEL_ERROR":
+                channel = client.channel(`realtime:roomId:${roomId}`);
+                setTimeout(subscribeToChannel, RESUBSCRIBE_DELAY_MS);
+                return setConnectionState(ConnectionState.ERROR);
+              case "TIMED_OUT":
+                channel = client.channel(`realtime:roomId:${roomId}`);
+                setTimeout(subscribeToChannel, RESUBSCRIBE_DELAY_MS);
+                return setConnectionState(ConnectionState.ERROR);
+              default:
+                throw new Error("unhandled channel status: " + status);
+            }
+          }
+        });
     }
 
-    channel
-      .on<DbRoomEvent>(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "room_events",
-          filter: "room_id=eq." + roomId,
-        },
-        (payload) => {
-          const newEvent = payload.new;
-          if (!isTypedRoomEvent(newEvent)) {
-            throw new Error(
-              "unhandled room event type from DB: " + newEvent.type,
-            );
-          }
-          // Use setRoomEvents instead of roomEvents directly so roomEvents
-          // is not a dependency of the useEffect hook
-          setRoomEvents((re) => {
-            // Only process events we haven't seen yet
-            if (!re.find((re) => re.id === newEvent.id)) {
-              setRoomEvents((prev) => [...prev, newEvent]);
-              dispatch(newEvent);
-            }
-            return re;
-          });
-        },
-      )
-      .subscribe((status, err) => {
-        console.info(status);
-        if (err) {
-          throw new Error("Realtime subscription error:" + err.message);
-        }
-        switch (status) {
-          case "SUBSCRIBED":
-            return setConnected(true);
-          case "CHANNEL_ERROR":
-          case "CLOSED":
-          case "TIMED_OUT":
-            return setConnected(false);
-          default:
-            throw new Error("unhandled channel status: " + status);
-        }
-      });
+    subscribeToChannel();
 
     channel.socket.conn?.addEventListener("message", () => {
       setLastMessageAt(Date.now());
@@ -180,11 +219,15 @@ export function useGameEngine(
     return () => {
       if (channel.state === "joined") {
         console.info("unsubscribing from channel", channel.state);
+        setConnectionState(ConnectionState.DISCONNECTING);
         channel.unsubscribe();
         client.removeChannel(channel);
       }
     };
   }, [client, roomId]);
 
-  return stateToGameEngine(game, state, dispatch, { connected, lastMessageAt });
+  return stateToGameEngine(game, state, dispatch, {
+    connectionState,
+    lastMessageAt,
+  });
 }

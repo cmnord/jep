@@ -1,5 +1,5 @@
-import classNames from "classnames";
 import BoardComponent from "~/components/board";
+import Connection from "~/components/connection";
 import Link from "~/components/link";
 import { PlayerScores } from "~/components/player";
 import Preview from "~/components/preview";
@@ -30,7 +30,7 @@ export default function GameComponent({
   roomName: string;
   url: string;
 } & RoomProps) {
-  const { type, round, connected, lastMessageAt } = useEngineContext();
+  const { type, round, connectionState, lastMessageAt } = useEngineContext();
 
   const [playBoardFillSfx] = useGameSound(BOARD_FILL_SFX);
   const [playFinalSfx] = useGameSound(FINAL_CATEGORY_REVEAL_SFX);
@@ -74,30 +74,13 @@ export default function GameComponent({
               Let's go to the final clue!
             </div>
           ) : boardController ? (
-            <div className="italic text-slate-300">
+            <div className="text-slate-300">
               <span className="font-bold">{boardController.name} </span>
-              is choosing the next clue.
+              <span className="italic">is choosing the next clue.</span>
             </div>
           ) : null}
           <PlayerScores roomId={roomId} userId={userId} />
-          <div className="flex items-center gap-2 text-sm text-slate-300">
-            <div
-              className={classNames("h-2 w-2 shrink-0 rounded-full", {
-                "bg-green-500": connected,
-                "bg-red-500": !connected,
-              })}
-            />
-            <span>
-              {connected ? "Connected." : "Disconnected..."}
-              {lastMessageAt ? (
-                <span>
-                  {" "}
-                  Last message received{" "}
-                  {new Date(lastMessageAt).toLocaleTimeString()}.
-                </span>
-              ) : null}
-            </span>
-          </div>
+          <Connection state={connectionState} lastMessageAt={lastMessageAt} />
         </div>
         <Prompt roomId={roomId} userId={userId} />
       </div>
