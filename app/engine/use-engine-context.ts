@@ -1,7 +1,7 @@
 import * as React from "react";
 
 import { GameState } from "./state";
-import type { useGameEngine } from "./use-game-engine";
+import { ConnectionState, type useGameEngine } from "./use-game-engine";
 
 export const GameEngineContext = React.createContext<
   ReturnType<typeof useGameEngine>
@@ -15,7 +15,7 @@ export const GameEngineContext = React.createContext<
   buzzes: new Map(),
   category: undefined,
   clue: undefined,
-  connected: false,
+  connectionState: ConnectionState.DISCONNECTED,
   getClueValue: () => 0,
   soloDispatch: () => null,
   isAnswered: () => false,
