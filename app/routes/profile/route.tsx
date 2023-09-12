@@ -8,11 +8,13 @@ import Main from "~/components/main";
 import Upload from "~/components/upload";
 import { requireAuthSession } from "~/models/auth";
 import { getGamesForUser } from "~/models/game.server";
+import { getSolvesForUser } from "~/models/solves.server";
 import { getUserByEmail } from "~/models/user/service.server";
 import { getSessionFormState } from "~/session.server";
 import { BASE_URL } from "~/utils";
 
 import { GameInfo } from "./game-info";
+import SolveInfo from "./solve-info";
 
 export async function loader({ request }: LoaderArgs) {
   const authSession = await requireAuthSession(request);
@@ -26,11 +28,16 @@ export async function loader({ request }: LoaderArgs) {
     authSession.accessToken,
   );
 
+  const solves = await getSolvesForUser(
+    authSession.userId,
+    authSession.accessToken,
+  );
+
   const [formState, headers] = await getSessionFormState(request);
 
   const user = await getUserByEmail(authSession.email, authSession.accessToken);
   return json(
-    { user, formState, games, env: { BASE_URL }, authSession },
+    { user, formState, games, solves, env: { BASE_URL }, authSession },
     { headers },
   );
 }
@@ -86,7 +93,7 @@ export default function Profile() {
         {data.games.length === 0 ? (
           <p className="text-sm text-slate-500">No games found.</p>
         ) : null}
-        <ul className="list-inside list-disc text-slate-700">
+        <ul className="mb-4 list-inside list-disc text-slate-700">
           {data.games.map((game) => (
             <GameInfo
               key={game.id}
@@ -103,6 +110,12 @@ export default function Profile() {
             <ErrorMessage>{formState.message}</ErrorMessage>
           )
         ) : null}
+        <h1 className="mb-4 text-2xl font-semibold">My Attempts / Solves</h1>
+        <div>
+          {data.solves.map((solve) => (
+            <SolveInfo key={solve.id} solve={solve} />
+          ))}
+        </div>
       </Main>
     </div>
   );

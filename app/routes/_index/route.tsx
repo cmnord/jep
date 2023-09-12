@@ -21,6 +21,7 @@ import Search from "~/components/search";
 import Upload from "~/components/upload";
 import { getValidAuthSession } from "~/models/auth";
 import { getGames } from "~/models/game.server";
+import { getSolvesForUser, Solve } from "~/models/solves.server";
 import { getSessionFormState } from "~/session.server";
 import useDebounce from "~/utils/use-debounce";
 import useScrollToBottom from "~/utils/use-scroll";
@@ -39,9 +40,14 @@ export async function loader({ request }: LoaderArgs) {
     authSession?.accessToken,
   );
 
+  const userId = authSession?.userId;
+  const solves = userId
+    ? await getSolvesForUser(userId, authSession?.accessToken)
+    : [];
+
   const [formState, headers] = await getSessionFormState(request);
 
-  return json({ serverGames, formState, authSession }, { headers });
+  return json({ serverGames, formState, authSession, solves }, { headers });
 }
 
 export default function Index() {
@@ -69,6 +75,13 @@ export default function Index() {
   // Start with two because 1 was pre-loaded
   const [page, setPage] = React.useState(2);
   const [shouldLoadMore, setShouldLoadMore] = React.useState(true);
+
+  // solvesMap is a map from game_id to solve. Check against it to see if a game
+  // has been solved.
+  const solvesMap = new Map<string, Solve>();
+  data.solves.forEach((solve) => {
+    solvesMap.set(solve.game_id, solve);
+  });
 
   useScrollToBottom(() => {
     if (!shouldLoadMore) return;
@@ -157,7 +170,11 @@ export default function Index() {
       )}
       <div className="mb-4 flex flex-col gap-4 sm:grid sm:grid-cols-2">
         {games.map((game, i) => (
-          <GameCard key={`game-${i}`} game={game} />
+          <GameCard
+            key={`game-${i}`}
+            game={game}
+            solve={solvesMap.get(game.id)}
+          />
         ))}
       </div>
       {gameFetcher.state === "loading" && (
