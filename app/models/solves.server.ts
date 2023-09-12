@@ -1,6 +1,8 @@
 import { AuthSession } from "~/models/auth";
 import { getSupabase } from "~/supabase";
 
+export type Solve = Awaited<ReturnType<typeof getSolvesForUser>>[number];
+
 /* Reads */
 
 export async function getSolve(
@@ -23,6 +25,23 @@ export async function getSolve(
     return null;
   }
   return solve;
+}
+
+export async function getSolvesForUser(
+  userId: string,
+  accessToken?: AuthSession["accessToken"],
+) {
+  const { data, error } = await getSupabase(accessToken)
+    .from("solves")
+    .select("*, rooms ( id, name ), games ( id, title )")
+    .eq("user_id", userId)
+    .order("started_at", { ascending: false });
+
+  if (error !== null) {
+    throw new Error(error.message);
+  }
+
+  return data;
 }
 
 /* Writes */
