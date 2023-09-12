@@ -2,8 +2,10 @@ import type { ActionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 
 import { ActionType } from "~/engine";
+import { getValidAuthSession } from "~/models/auth";
 import { createRoomEvent } from "~/models/room-event.server";
 import { getRoom } from "~/models/room.server";
+import { getSolve, markAttempted } from "~/models/solves.server";
 
 export async function action({ request, params }: ActionArgs) {
   if (request.method !== "POST" && request.method !== "PATCH") {
@@ -35,6 +37,24 @@ export async function action({ request, params }: ActionArgs) {
   const room = await getRoom(roomId);
   if (!room) {
     throw new Response("room not found", { status: 404 });
+  }
+
+  const authSession = await getValidAuthSession(request);
+  // Mark the game as started if it hasn't been already
+  if (request.method === "POST") {
+    const solve = await getSolve(
+      userId,
+      room.game_id,
+      authSession?.accessToken,
+    );
+    if (!solve) {
+      await markAttempted(
+        userId,
+        room.game_id,
+        room.id,
+        authSession?.accessToken,
+      );
+    }
   }
 
   await createRoomEvent(room.id, type, {
