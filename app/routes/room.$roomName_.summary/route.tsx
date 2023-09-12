@@ -4,13 +4,14 @@ import { useLoaderData } from "@remix-run/react";
 import { PlayerScore } from "~/components/player";
 
 import { applyRoomEventsToState, isTypedRoomEvent } from "~/engine/room-event";
-import { stateFromGame } from "~/engine/state";
+import { GameState, stateFromGame } from "~/engine/state";
 import { getValidAuthSession } from "~/models/auth";
 import { getGame } from "~/models/game.server";
 import { getRoomEvents } from "~/models/room-event.server";
 import { getRoom } from "~/models/room.server";
 import { BASE_URL } from "~/utils";
 
+import { getSolve, markSolved } from "~/models/solves.server";
 import ScoreChart from "./chart";
 import GameSummary from "./summary";
 
@@ -37,12 +38,23 @@ export async function loader({ request, params }: LoaderArgs) {
   }
 
   const authSession = await getValidAuthSession(request);
+  const userId = authSession?.userId;
   const game = await getGame(room.game_id, authSession?.userId);
   if (!game) {
     throw new Response("game not found", { status: 404 });
   }
 
   const roomEvents = await getRoomEvents(room.id);
+
+  if (userId) {
+    const state = applyRoomEventsToState(stateFromGame(game), roomEvents);
+    if (state.type === GameState.GameOver && state.players.has(userId)) {
+      const solve = await getSolve(userId, game.id, authSession?.accessToken);
+      if (solve && solve.solved_at === null) {
+        await markSolved(userId, game.id, room.id, authSession?.accessToken);
+      }
+    }
+  }
 
   return json({
     game,
