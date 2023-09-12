@@ -1,3 +1,6 @@
+import { useNavigate } from "@remix-run/react";
+import * as React from "react";
+
 import BoardComponent from "~/components/board";
 import Connection from "~/components/connection";
 import Link from "~/components/link";
@@ -30,12 +33,18 @@ export default function GameComponent({
   roomName: string;
   url: string;
 } & RoomProps) {
-  const { type, round, connectionState, lastMessageAt } = useEngineContext();
+  const { boardControl, connectionState, lastMessageAt, players, round, type } =
+    useEngineContext();
 
   const [playBoardFillSfx] = useGameSound(BOARD_FILL_SFX);
   const [playFinalSfx] = useGameSound(FINAL_CATEGORY_REVEAL_SFX);
 
-  const { players, boardControl } = useEngineContext();
+  const navigate = useNavigate();
+  React.useEffect(() => {
+    if (type === GameState.GameOver) {
+      navigate(`/room/${roomName}/summary`);
+    }
+  }, [navigate, roomName, type]);
 
   const boardController = boardControl ? players.get(boardControl) : undefined;
 
