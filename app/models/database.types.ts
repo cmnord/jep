@@ -266,6 +266,52 @@ export interface Database {
           },
         ];
       };
+      solves: {
+        Row: {
+          game_id: string;
+          id: number;
+          room_id: number;
+          solved_at: string | null;
+          started_at: string | null;
+          user_id: string;
+        };
+        Insert: {
+          game_id: string;
+          id?: number;
+          room_id: number;
+          solved_at?: string | null;
+          started_at?: string | null;
+          user_id: string;
+        };
+        Update: {
+          game_id?: string;
+          id?: number;
+          room_id?: number;
+          solved_at?: string | null;
+          started_at?: string | null;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "solves_game_id_fkey";
+            columns: ["game_id"];
+            referencedRelation: "games";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "solves_room_id_fkey";
+            columns: ["room_id"];
+            referencedRelation: "rooms";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "solves_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "accounts";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: {
       [_ in never]: never;
