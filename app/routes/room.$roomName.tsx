@@ -1,9 +1,11 @@
 import type { LoaderArgs, V2_MetaFunction } from "@remix-run/node";
-import { json } from "@remix-run/node";
+import { json, redirect } from "@remix-run/node";
 import { useLoaderData, useMatches } from "@remix-run/react";
 
 import GameComponent from "~/components/game";
 import { GameEngineContext, useGameEngine } from "~/engine";
+import { applyRoomEventsToState } from "~/engine/room-event";
+import { GameState, stateFromGame } from "~/engine/state";
 import { getValidAuthSession } from "~/models/auth";
 import { getGame } from "~/models/game.server";
 import { getRoomEvents } from "~/models/room-event.server";
@@ -48,6 +50,12 @@ export async function loader({ request, params }: LoaderArgs) {
   const roomEvents = await getRoomEvents(room.id);
   const name = getRandomEmoji();
 
+  const state = applyRoomEventsToState(stateFromGame(game), roomEvents);
+
+  if (state.type === GameState.GameOver) {
+    return redirect(`/room/${roomName}/summary`);
+  }
+
   if (user) {
     const userId = user.id;
     return json({
@@ -84,7 +92,7 @@ export default function PlayGame() {
   const matches = useMatches();
   const pathname = matches[matches.length - 1].pathname;
 
-  const gameReducer = useGameEngine(
+  const engine = useGameEngine(
     data.game,
     data.roomEvents,
     data.roomId,
@@ -92,7 +100,7 @@ export default function PlayGame() {
   );
 
   return (
-    <GameEngineContext.Provider value={gameReducer}>
+    <GameEngineContext.Provider value={engine}>
       <GameComponent
         game={data.game}
         name={data.name}
