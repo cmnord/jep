@@ -41,18 +41,18 @@ export async function action({ request, params }: ActionArgs) {
 
   const authSession = await getValidAuthSession(request);
   // Mark the game as started if it hasn't been already
-  if (request.method === "POST") {
+  if (authSession && request.method === "POST") {
     const solve = await getSolve(
-      userId,
+      authSession.userId,
       room.game_id,
-      authSession?.accessToken,
+      authSession.accessToken,
     );
     if (!solve) {
       await markAttempted(
-        userId,
+        authSession.userId,
         room.game_id,
         room.id,
-        authSession?.accessToken,
+        authSession.accessToken,
       );
     }
   }
