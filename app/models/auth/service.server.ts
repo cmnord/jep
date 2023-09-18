@@ -79,7 +79,8 @@ export async function refreshAccessToken(
   });
 
   if (error) {
-    throw new Error(error.message);
+    console.error(error);
+    return null;
   }
 
   if (!data.session) {
