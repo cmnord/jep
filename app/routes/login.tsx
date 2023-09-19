@@ -36,17 +36,25 @@ export async function action({ request }: ActionFunctionArgs) {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
 
-  const authSession = await signInWithEmail(email, password);
+  try {
+    const authSession = await signInWithEmail(email, password);
 
-  if (!authSession) {
-    return json({ error: "Invalid email or password" }, { status: 400 });
+    if (!authSession) {
+      return json({ error: "Invalid email or password" }, { status: 400 });
+    }
+
+    return createAuthSession({
+      request,
+      authSession,
+      redirectTo: "/",
+    });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return json({ error: error.message }, { status: 500 });
+    }
+    console.error(error);
+    return json({ error: "Unknown error" }, { status: 500 });
   }
-
-  return createAuthSession({
-    request,
-    authSession,
-    redirectTo: "/",
-  });
 }
 
 export default function Login() {
