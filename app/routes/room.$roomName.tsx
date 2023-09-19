@@ -1,4 +1,4 @@
-import type { LoaderArgs, V2_MetaFunction } from "@remix-run/node";
+import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { useLoaderData, useMatches } from "@remix-run/react";
 
@@ -14,7 +14,7 @@ import { getUserByEmail } from "~/models/user";
 import { getOrCreateUserSession } from "~/session.server";
 import { BASE_URL, getRandomEmoji } from "~/utils";
 
-export const meta: V2_MetaFunction<typeof loader> = ({ data }) => {
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
   try {
     return [{ title: data?.game.title }];
   } catch (error: unknown) {
@@ -22,7 +22,7 @@ export const meta: V2_MetaFunction<typeof loader> = ({ data }) => {
   }
 };
 
-export async function loader({ request, params }: LoaderArgs) {
+export async function loader({ request, params }: LoaderFunctionArgs) {
   const roomName = params.roomName;
   if (!roomName) {
     throw new Response("room name not found in URL params", { status: 404 });

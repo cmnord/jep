@@ -1,10 +1,10 @@
-import type { ActionArgs } from "@remix-run/node";
+import type { ActionFunctionArgs } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
 
 import { destroyAuthSession } from "~/models/auth";
 import { assertIsPost } from "~/utils";
 
-export function action({ request }: ActionArgs) {
+export function action({ request }: ActionFunctionArgs) {
   assertIsPost(request);
 
   return destroyAuthSession(request);

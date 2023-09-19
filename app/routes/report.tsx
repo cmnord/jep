@@ -1,4 +1,8 @@
-import type { ActionArgs, LoaderArgs, V2_MetaFunction } from "@remix-run/node";
+import type {
+  ActionFunctionArgs,
+  LoaderFunctionArgs,
+  MetaFunction,
+} from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Form, useActionData, useLoaderData } from "@remix-run/react";
 
@@ -13,18 +17,18 @@ import { insertReport } from "~/models/report.server";
 import { getRoom } from "~/models/room.server";
 import { BASE_URL, GITHUB_URL } from "~/utils";
 
-export const meta: V2_MetaFunction = () => [{ title: "Report a game" }];
+export const meta: MetaFunction = () => [{ title: "Report a game" }];
 
 const ROOM_NAME_REGEX = /^\d+-\w+$/;
 
-export function loader({ request }: LoaderArgs) {
+export function loader({ request }: LoaderFunctionArgs) {
   const searchParams = new URL(request.url).searchParams;
   const gameId = searchParams.get("gameId");
 
   return json({ BASE_URL, gameId });
 }
 
-export async function action({ request }: ActionArgs) {
+export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
   const url = new URL(formData.get("url") as string);
 

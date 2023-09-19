@@ -1,4 +1,4 @@
-import type { LoaderArgs } from "@remix-run/node";
+import type { LoaderFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import {
   Form,
@@ -28,7 +28,7 @@ import useScrollToBottom from "~/utils/use-scroll";
 
 import GameCard from "./game-card";
 
-export async function loader({ request }: LoaderArgs) {
+export async function loader({ request }: LoaderFunctionArgs) {
   const authSession = await getValidAuthSession(request);
 
   const searchParams = new URL(request.url).searchParams;

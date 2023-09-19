@@ -1,4 +1,4 @@
-import type { LoaderArgs } from "@remix-run/node";
+import type { LoaderFunctionArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { useFetcher, useLoaderData } from "@remix-run/react";
 import * as React from "react";
@@ -16,7 +16,7 @@ import { BASE_URL } from "~/utils";
 import { GameInfo } from "./game-info";
 import SolveInfo from "./solve-info";
 
-export async function loader({ request }: LoaderArgs) {
+export async function loader({ request }: LoaderFunctionArgs) {
   const authSession = await requireAuthSession(request);
 
   if (!authSession) {

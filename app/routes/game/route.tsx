@@ -1,4 +1,4 @@
-import type { ActionArgs, LoaderArgs } from "@remix-run/node";
+import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { redirect, unstable_parseMultipartFormData } from "@remix-run/node";
 
 import { getValidAuthSession } from "~/models/auth";
@@ -7,13 +7,13 @@ import { BASE_URL, getRedirectTo, safeRedirect } from "~/utils";
 
 import { newUploadHandler } from "./file-upload-handler.server";
 
-export function loader({ request }: LoaderArgs) {
+export function loader({ request }: LoaderFunctionArgs) {
   const redirectTo = getRedirectTo(request);
   return redirect(safeRedirect(redirectTo));
 }
 
 /** POST /game parses and uploads a new game to the server. */
-export async function action({ request }: ActionArgs) {
+export async function action({ request }: ActionFunctionArgs) {
   const authSession = await getValidAuthSession(request);
   const visibility = authSession !== null ? "UNLISTED" : "PUBLIC";
   const redirectTo = getRedirectTo(request);

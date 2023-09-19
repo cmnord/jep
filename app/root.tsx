@@ -1,8 +1,8 @@
 import * as ToastPrimitive from "@radix-ui/react-toast";
 import type {
   LinksFunction,
-  LoaderArgs,
-  V2_MetaFunction,
+  LoaderFunctionArgs,
+  MetaFunction,
 } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import {
@@ -36,7 +36,7 @@ const META_DESCRIPTION =
   "A website for sharing J! trivia and playing collaboratively with friends in real time.";
 const META_IMAGE = META_URL + "/images/meta.png";
 
-export const meta: V2_MetaFunction = () => [
+export const meta: MetaFunction = () => [
   { title: META_TITLE },
   { name: "title", content: META_TITLE },
   { name: "description", content: META_DESCRIPTION },
@@ -71,7 +71,7 @@ export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
 ];
 
-export async function loader({ request }: LoaderArgs) {
+export async function loader({ request }: LoaderFunctionArgs) {
   const authSession = await getValidAuthSession(request);
   const env = getBrowserEnv();
 

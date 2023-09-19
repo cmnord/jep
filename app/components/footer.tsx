@@ -63,7 +63,7 @@ export default function Footer() {
   const [showModal, setShowModal] = React.useState(false);
   const matches = useMatches();
   const isInGame = matches.some((match) => {
-    const data: unknown = match.data;
+    const data = match.data;
     return data && typeof data === "object" && "game" in data;
   });
 

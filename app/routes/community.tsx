@@ -1,9 +1,9 @@
-import type { V2_MetaFunction } from "@remix-run/node";
+import type { MetaFunction } from "@remix-run/node";
 
 import Link, { Anchor } from "~/components/link";
 import Main from "~/components/main";
 
-export const meta: V2_MetaFunction = () => [{ title: "Community Guidelines" }];
+export const meta: MetaFunction = () => [{ title: "Community Guidelines" }];
 
 const SPORCLE = "https://www.sporcle.com/community/";
 

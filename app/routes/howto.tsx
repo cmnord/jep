@@ -1,4 +1,4 @@
-import type { V2_MetaFunction } from "@remix-run/node";
+import type { MetaFunction } from "@remix-run/node";
 import * as React from "react";
 
 import Button from "~/components/button";
@@ -13,7 +13,7 @@ import { CLUE_TIMEOUT_MS } from "~/engine";
 import useKeyPress from "~/utils/use-key-press";
 import useTimeout from "~/utils/use-timeout";
 
-export const meta: V2_MetaFunction = () => [{ title: "How to Play" }];
+export const meta: MetaFunction = () => [{ title: "How to Play" }];
 
 const CLUE_DURATION_MS = 5000;
 const LOCKOUT_MS = 250;

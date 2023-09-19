@@ -1,4 +1,8 @@
-import type { ActionArgs, LoaderArgs, V2_MetaFunction } from "@remix-run/node";
+import type {
+  ActionFunctionArgs,
+  LoaderFunctionArgs,
+  MetaFunction,
+} from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { Form, useActionData, useNavigation } from "@remix-run/react";
 import * as React from "react";
@@ -15,9 +19,9 @@ import {
   getUserExistsByEmailWithoutSession,
 } from "~/models/user/service.server";
 
-export const meta: V2_MetaFunction = () => [{ title: "Sign up" }];
+export const meta: MetaFunction = () => [{ title: "Sign up" }];
 
-export async function loader({ request }: LoaderArgs) {
+export async function loader({ request }: LoaderFunctionArgs) {
   const authSession = await getValidAuthSession(request);
 
   if (authSession) throw redirect("/");
@@ -25,7 +29,7 @@ export async function loader({ request }: LoaderArgs) {
   return null;
 }
 
-export async function action({ request }: ActionArgs) {
+export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;

@@ -1,10 +1,10 @@
-import type { V2_MetaFunction } from "@remix-run/node";
+import type { MetaFunction } from "@remix-run/node";
 
 import Code, { CodeBlock } from "~/components/code";
 import Link, { Anchor } from "~/components/link";
 import Main from "~/components/main";
 
-export const meta: V2_MetaFunction = () => [{ title: "Help" }];
+export const meta: MetaFunction = () => [{ title: "Help" }];
 
 const JSON_EDIT_URL =
   "https://json-editor.github.io/json-editor/?data=N4Ig9gDgLglmB2BnEAuUMDGCA2MBGqIAZglAIYDuApomALZUCsIANOHgFZUZQD62ZAJ5gArlELwwAJzplsrEIgwALKrNSgAJEtXqUIZVCgQUAelMda8ALQ61ZAHTSA5qYAmUskSjWADAHZTO1kAYgVNGDdCQ2MzU2wwDDllMEQoFABmX2zTZzIGB2DHSwQFMjc3GFgEOQAFKUgqKVgaVCI5RCo2CDIjJvhCAD0HACoAHTGHLggJqatNBVgobCpCACkqCABCAAIAcXyqHYBlFXtFwQhV/TBObnFuhqvmmFa0ECWVjQ/L68UoKQweDOEAAXzYZDEKSk3ygv0IaUBwLBbCwEEEgOchlh8P0iKBIPBIEkUGuoDhVwRAIJKJAeDAZCkbmQ7wpf0ZnkECiqahZ5Nx7C4PAUECeTRafJASVJzmkggAcodJWzCByhNzSXRlQL8cjQUTpVRZYC3vzKfo1Vy2DytTjzYL7iKxS9TcTDna/rrCWwSWSfvavbSMNgRK6VRapJyNbyPYRbkKHiBRY0XZLg6HY3jqXqIUhqDDWTrs96QAA3OQZwv2oEypq0ihkZxNMh3L5Vv70sArMgDIkJYEAMWkdEzdLAXaoPdpMFkTeOUgwo8D+rYUioAEcRDA11EUABtKUh1a5xD5hTlo8gAC6+qJa8326ou4P8HdqKPyBvK5A963O9QB6GsaCpKgoQHSK8n63quG5/k+AEfFUXwQlC0hgZAGIwFiia+go9KMsy15EogKQULwTQNFILIgDWzY8HAAxsFAugduOUCImQEAACxgqCQA=";

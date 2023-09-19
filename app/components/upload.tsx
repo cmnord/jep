@@ -108,7 +108,6 @@ export default function Upload({
       action={`/game?redirectTo=${redirectTo}`}
       encType="multipart/form-data"
       ref={formRef}
-      replace
     >
       <Dialog
         isOpen={showModal}

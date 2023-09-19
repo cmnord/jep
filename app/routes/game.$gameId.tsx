@@ -1,4 +1,4 @@
-import type { ActionArgs, LoaderArgs } from "@remix-run/node";
+import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
 
 import { getValidAuthSession } from "~/models/auth";
@@ -10,7 +10,7 @@ import {
 } from "~/models/game.server";
 import { flashFormState } from "~/session.server";
 
-export async function action({ request, params }: ActionArgs) {
+export async function action({ request, params }: ActionFunctionArgs) {
   const gameId = params.gameId;
 
   if (!gameId) {
@@ -66,7 +66,7 @@ export async function action({ request, params }: ActionArgs) {
   }
 }
 
-export async function loader({ request, params }: LoaderArgs) {
+export async function loader({ request, params }: LoaderFunctionArgs) {
   const gameId = params.gameId;
 
   if (!gameId) {

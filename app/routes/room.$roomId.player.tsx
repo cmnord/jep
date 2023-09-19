@@ -1,4 +1,4 @@
-import type { ActionArgs } from "@remix-run/node";
+import type { ActionFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 
 import { ActionType } from "~/engine";
@@ -7,7 +7,7 @@ import { createRoomEvent } from "~/models/room-event.server";
 import { getRoom } from "~/models/room.server";
 import { getSolve, markAttempted } from "~/models/solves.server";
 
-export async function action({ request, params }: ActionArgs) {
+export async function action({ request, params }: ActionFunctionArgs) {
   if (request.method !== "POST" && request.method !== "PATCH") {
     throw new Response("method not allowed", { status: 405 });
   }

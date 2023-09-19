@@ -188,10 +188,16 @@ export default function Header({
 }) {
   const matches = useMatches();
   const gameRoute = matches.find((match) => {
-    const data: unknown = match.data;
+    const data = match.data;
     return data && typeof data === "object" && "game" in data;
   });
-  const game = gameRoute ? (gameRoute.data.game as Game) : undefined;
+  const game =
+    gameRoute &&
+    typeof gameRoute.data === "object" &&
+    gameRoute.data !== null &&
+    "game" in gameRoute.data
+      ? (gameRoute.data.game as Game)
+      : undefined;
   const pathname = matches[matches.length - 1].pathname;
 
   return (
