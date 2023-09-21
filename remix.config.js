@@ -6,7 +6,7 @@ module.exports = {
   // serverBuildPath: "api/index.js",
   // publicPath: "/build/",
   tailwind: true,
-  ignoredRouteFiles: ["**/.*", "**/*.test.{js,jsx,ts,tsx}"],
+  ignoredRouteFiles: ["**/.*", "**/*.test.{ts,tsx}"],
   // When running locally in development mode, we use the built in remix
   // server. This does not understand the vercel lambda module format,
   // so we default back to the standard build output.
