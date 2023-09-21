@@ -4,7 +4,7 @@ import { useLoaderData } from "@remix-run/react";
 import { PlayerScore } from "~/components/player";
 
 import { applyRoomEventsToState, isTypedRoomEvent } from "~/engine/room-event";
-import { GameState, Player, State, stateFromGame } from "~/engine/state";
+import { GameState, stateFromGame } from "~/engine/state";
 import { getValidAuthSession } from "~/models/auth";
 import { getGame } from "~/models/game.server";
 import { getRoomEvents } from "~/models/room-event.server";
@@ -13,6 +13,7 @@ import { BASE_URL, formatDollars } from "~/utils";
 
 import { getSolve, markSolved } from "~/models/solves.server";
 import ScoreChart from "./chart";
+import { getCoryat } from "./coryat";
 import GameSummary from "./summary";
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
@@ -64,36 +65,6 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   });
 }
 
-/** getCoryat returns the player's score without any wagerable clues. */
-function getCoryat(player: Player, state: State) {
-  let score = player.score;
-
-  for (const [roundKey, wagers] of state.wagers) {
-    const wager = wagers.get(player.userId);
-    if (!wager) {
-      continue;
-    }
-    const [roundStr, iStr, jStr] = roundKey.split(",");
-    const round = parseInt(roundStr);
-    const i = parseInt(iStr);
-    const j = parseInt(jStr);
-    const clueAnswer = state.isAnswered.at(round)?.at(i)?.at(j);
-    if (!clueAnswer) {
-      continue;
-    }
-    const correct = clueAnswer.answeredBy.get(player.userId);
-    if (correct === undefined) {
-      continue;
-    } else if (correct) {
-      score -= wager;
-    } else {
-      score += wager;
-    }
-  }
-
-  return score;
-}
-
 export default function PlayGame() {
   const data = useLoaderData<typeof loader>();
 
@@ -131,7 +102,7 @@ export default function PlayGame() {
         <div className="flex flex-col gap-2 sm:grid sm:grid-cols-3">
           {sortedPlayers.map((p) => (
             <span>
-              {p.name}: {formatDollars(getCoryat(p, state))}
+              {p.name}: {formatDollars(getCoryat(p.userId, state))}
             </span>
           ))}
         </div>

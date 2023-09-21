@@ -13,8 +13,8 @@ const JSON_DIRECTORY = __dirname + "/../app/static";
 
 const MOCK_FILE_PATH = JSON_DIRECTORY + "/mock.jep.json";
 
-/** MOCK_GAME has two rounds. The first round has 1 category with 2 clues and the
- * second round has 1 category with 1 clue.
+/**
+ * MOCK_GAME has two rounds. Each round has 2 categories with 1 clue each.
  */
 export const MOCK_GAME: Game = {
   id: "mock",
@@ -25,7 +25,7 @@ export const MOCK_GAME: Game = {
   visibility: "PUBLIC",
   boards: [
     {
-      categoryNames: ["Round 1, Category 1"],
+      categoryNames: ["Round 1, Category 1", "Round 1, Category 2"],
       categories: [
         {
           name: "Round 1, Category 1",
@@ -38,7 +38,7 @@ export const MOCK_GAME: Game = {
       ],
     },
     {
-      categoryNames: ["Round 2, Category 1"],
+      categoryNames: ["Round 2, Category 1", "Round 2, Category 2"],
       categories: [
         {
           name: "Round 2, Category 1",
