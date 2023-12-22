@@ -22,13 +22,6 @@ Start the Supabase project:
 npx supabase start
 ```
 
-> **Warning**
->
-> Enable Realtime events manually on the `room_events` table for multiplayer
-> games to work:
->
-> **http://localhost:54323/project/default/database/tables**
-
 Set environment variables. In particular, set `SUPABASE_URL`,
 `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` from the results of `npx
 supabase status`.
