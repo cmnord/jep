@@ -8,7 +8,7 @@ import { getSupabase } from "~/supabase";
 import type { Action } from "./engine";
 import { gameEngine, getWinningBuzzer } from "./engine";
 import { applyRoomEventsToState, isTypedRoomEvent } from "./room-event";
-import { getClueValue, State, stateFromGame } from "./state";
+import { State, getClueValue, stateFromGame } from "./state";
 
 export enum ConnectionState {
   ERROR,
@@ -55,7 +55,7 @@ function stateToGameEngine(
       ?.answeredBy.get(userId);
   };
 
-  const winningBuzz = getWinningBuzzer(state.buzzes);
+  const winningBuzz = getWinningBuzzer(state.buzzes, clue?.clue);
   const winningBuzzer = winningBuzz?.userId ?? undefined;
 
   function getClueValueFn(idx: [number, number], userId: string) {
