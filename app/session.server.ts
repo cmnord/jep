@@ -51,7 +51,7 @@ export async function flashFormState(
   return headers;
 }
 
-async function getUserSession(request: Request) {
+export async function getUserSession(request: Request) {
   const session = await getSession(request.headers.get("Cookie"));
   const userId = session.get(USER_SESSION_KEY);
   if (typeof userId === "string") {

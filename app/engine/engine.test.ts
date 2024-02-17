@@ -35,6 +35,11 @@ const PLAYER1_KICK_ACTION: Action = {
   payload: { name: PLAYER1.name, userId: PLAYER1.userId },
 };
 
+const PLAYER1_LEAVE_ACTION: Action = {
+  type: ActionType.Leave,
+  payload: { name: PLAYER1.name, userId: PLAYER1.userId },
+};
+
 const PLAYER2_JOIN_ACTION: Action = {
   type: ActionType.Join,
   payload: { name: PLAYER2.name, userId: PLAYER2.userId },
@@ -157,6 +162,144 @@ describe("gameEngine", () => {
       actions: [PLAYER1_JOIN_ACTION, PLAYER2_JOIN_ACTION, PLAYER1_KICK_ACTION],
       expectedState: produce(initialState, (draft) => {
         draft.boardControl = PLAYER2.userId;
+        draft.players.set(PLAYER2.userId, PLAYER2);
+      }),
+    },
+    {
+      name: "Player can kick themselves",
+      state: initialState,
+      actions: [PLAYER1_JOIN_ACTION, PLAYER2_JOIN_ACTION, PLAYER1_KICK_ACTION],
+      expectedState: produce(initialState, (draft) => {
+        draft.boardControl = PLAYER2.userId;
+        draft.players.set(PLAYER2.userId, PLAYER2);
+      }),
+    },
+    {
+      name: "Cannot kick the only player in the game",
+      state: initialState,
+      actions: [PLAYER1_JOIN_ACTION, PLAYER1_KICK_ACTION],
+      expectedState: produce(initialState, (draft) => {
+        draft.boardControl = PLAYER1.userId;
+        draft.players.set(PLAYER1.userId, PLAYER1);
+      }),
+    },
+    {
+      name: "Cannot kick players after answers have been given",
+      state: initialState,
+      actions: [
+        ...TWO_PLAYERS_ROUND_0,
+        {
+          type: ActionType.ChooseClue,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0 },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0, deltaMs: 123 },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: {
+            userId: PLAYER2.userId,
+            i: 0,
+            j: 0,
+            deltaMs: CLUE_TIMEOUT_MS + 1,
+          },
+        },
+        {
+          type: ActionType.Check,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0, correct: true },
+        },
+        {
+          type: ActionType.NextClue,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0 },
+        },
+        {
+          type: ActionType.Kick,
+          payload: { name: PLAYER2.name, userId: PLAYER2.userId },
+        },
+      ],
+      expectedState: produce(initialState, (draft) => {
+        draft.type = GameState.ShowBoard;
+        draft.boardControl = PLAYER1.userId;
+        draft.numAnswered = 1;
+        const clueAnswer = draft.isAnswered[0][0][0];
+        clueAnswer.isAnswered = true;
+        clueAnswer.answeredBy.set(PLAYER1.userId, true);
+        draft.players.set(PLAYER1.userId, { ...PLAYER1, score: 200 });
+        draft.players.set(PLAYER2.userId, PLAYER2);
+      }),
+    },
+    {
+      name: "Player can leave the game (moved to leftPlayers)",
+      state: initialState,
+      actions: [PLAYER1_JOIN_ACTION, PLAYER2_JOIN_ACTION, PLAYER1_LEAVE_ACTION],
+      expectedState: produce(initialState, (draft) => {
+        draft.boardControl = PLAYER2.userId;
+        draft.leftPlayers.set(PLAYER1.userId, PLAYER1);
+        draft.players.set(PLAYER2.userId, PLAYER2);
+      }),
+    },
+    {
+      name: "Player can leave after answers have been given",
+      state: initialState,
+      actions: [
+        ...TWO_PLAYERS_ROUND_0,
+        {
+          type: ActionType.ChooseClue,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0 },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0, deltaMs: 123 },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: {
+            userId: PLAYER2.userId,
+            i: 0,
+            j: 0,
+            deltaMs: CLUE_TIMEOUT_MS + 1,
+          },
+        },
+        {
+          type: ActionType.Check,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0, correct: true },
+        },
+        {
+          type: ActionType.NextClue,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0 },
+        },
+        PLAYER1_LEAVE_ACTION,
+      ],
+      expectedState: produce(initialState, (draft) => {
+        draft.type = GameState.ShowBoard;
+        draft.boardControl = PLAYER2.userId;
+        draft.numAnswered = 1;
+        const clueAnswer = draft.isAnswered[0][0][0];
+        clueAnswer.isAnswered = true;
+        clueAnswer.answeredBy.set(PLAYER1.userId, true);
+        draft.leftPlayers.set(PLAYER1.userId, {
+          ...PLAYER1,
+          score: 200,
+        });
+        draft.players.set(PLAYER2.userId, PLAYER2);
+      }),
+    },
+    {
+      name: "Cannot leave if you are the only active player",
+      state: initialState,
+      actions: [
+        PLAYER1_JOIN_ACTION,
+        PLAYER2_JOIN_ACTION,
+        PLAYER1_LEAVE_ACTION,
+        {
+          type: ActionType.Leave,
+          payload: { name: PLAYER2.name, userId: PLAYER2.userId },
+        },
+      ],
+      expectedState: produce(initialState, (draft) => {
+        draft.boardControl = PLAYER2.userId;
+        draft.leftPlayers.set(PLAYER1.userId, PLAYER1);
         draft.players.set(PLAYER2.userId, PLAYER2);
       }),
     },

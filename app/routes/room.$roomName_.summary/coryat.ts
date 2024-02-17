@@ -1,9 +1,10 @@
 import { State } from "~/engine";
+import { getPlayer } from "~/engine/state";
 
 /** getBattingAverage returns the number of correct responses and number of
  * possible correct responses for a player. */
 export function getBattingAverage(userId: string, state: State) {
-  const player = state.players.get(userId);
+  const player = getPlayer(state, userId);
   if (!player) {
     return [0, 0];
   }
@@ -36,7 +37,7 @@ export function getBattingAverage(userId: string, state: State) {
  * add the "natural" value of a clue in this row back in.
  */
 export function getCoryat(userId: string, state: State) {
-  const player = state.players.get(userId);
+  const player = getPlayer(state, userId);
   if (!player) {
     return 0;
   }

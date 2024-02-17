@@ -11,7 +11,12 @@ import {
   YAxis,
 } from "recharts";
 import { Action, gameEngine } from "~/engine";
-import { Player, getNumCluesInBoard, stateFromGame } from "~/engine/state";
+import {
+  Player,
+  getNumCluesInBoard,
+  getPlayer,
+  stateFromGame,
+} from "~/engine/state";
 import { Game } from "~/models/game.server";
 import { stringToHslColor } from "~/utils";
 
@@ -124,7 +129,7 @@ export default function Chart({
         wagerable: clue.wagerable ? 1 : 0,
       };
       for (const [userId] of clueAnswer.answeredBy) {
-        const player = wipState.players.get(userId);
+        const player = getPlayer(wipState, userId);
         point[userId] = player?.score ?? 0;
       }
       data.push(point);

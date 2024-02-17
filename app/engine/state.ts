@@ -48,7 +48,10 @@ export interface State {
   readonly answers: Map<RoundIJKey, Map<string, string>>;
   readonly boardControl: string | null;
   readonly game: Game;
+  /** Active players in the game. */
   readonly players: Map<string, Player>;
+  /** Players who voluntarily left mid-game. Preserved for post-game review. */
+  readonly leftPlayers: Map<string, Player>;
   readonly wagers: Map<RoundIJKey, Map<string, number>>;
   readonly isAnswered: ClueAnswer[][][];
 
@@ -78,6 +81,7 @@ export function stateFromGame(game: Game) {
     numCluesInBoard: getNumCluesInBoard(game, 0),
     numExpectedWagers: 0,
     players: new Map(),
+    leftPlayers: new Map(),
     wagers: new Map(),
   };
 
@@ -92,6 +96,11 @@ export function stateFromGame(game: Game) {
   }
 
   return state;
+}
+
+/** getPlayer looks up a player in both active and left player maps. */
+export function getPlayer(state: State, userId: string): Player | undefined {
+  return state.players.get(userId) ?? state.leftPlayers.get(userId);
 }
 
 /** getClueValue gets the clue's wagered value if it's wagerable and its value

@@ -405,7 +405,7 @@ function ReadCluePrompt({
         if (
           buzzUserId !== userId &&
           buzz !== CANT_BUZZ_FLAG &&
-          buzz <= CLUE_TIMEOUT_MS
+          buzz + QUANTIZATION_FACTOR_MS < deltaMs
         ) {
           // How much of the quantization window is left for us to buzz.
           // If we buzz within this window, our buzz is in the same bucket

@@ -1,3 +1,4 @@
+import type { Draft } from "immer";
 import { enableMapSet, produce } from "immer";
 
 import type { Board } from "~/models/convert.server";
@@ -19,6 +20,7 @@ enableMapSet();
 export enum ActionType {
   Join = "join",
   Kick = "kick",
+  Leave = "leave",
   ChangeName = "change_name",
   StartRound = "start_round",
   ChooseClue = "choose_clue",
@@ -123,6 +125,18 @@ export function getHighestClueValue(board: Board | undefined) {
   return max;
 }
 
+/** Transfer board control away from userId to the next player. */
+function transferBoardControl(draft: Draft<State>, userId: string) {
+  if (draft.boardControl !== userId) return;
+  const otherIds = Array.from(draft.players.keys()).filter(
+    (id) => id !== userId,
+  );
+  otherIds.sort();
+  if (otherIds.length > 0) {
+    draft.boardControl = otherIds[0];
+  }
+}
+
 /** gameEngine is the reducer (aka state machine) which implements the game. */
 export function gameEngine(state: State, action: Action): State {
   switch (action.type) {
@@ -162,15 +176,33 @@ export function gameEngine(state: State, action: Action): State {
         if (draft.players.size === 1) {
           return;
         }
-        // If this player has board control, give it to the next player.
-        if (draft.boardControl === action.payload.userId) {
-          const players = Array.from(draft.players.keys());
-          players.sort();
-          const index = players.indexOf(action.payload.userId);
-          const nextPlayer = players[(index + 1) % players.length];
-          draft.boardControl = nextPlayer;
-        }
+        transferBoardControl(draft, action.payload.userId);
         draft.players.delete(action.payload.userId);
+      });
+    case ActionType.Leave:
+      if (!isPlayerAction(action)) {
+        throw new Error("PlayerLeave action must have an associated player");
+      }
+      return produce(state, (draft) => {
+        // Only allow leaving when viewing the board or round preview.
+        if (
+          draft.type !== GameState.ShowBoard &&
+          draft.type !== GameState.PreviewRound
+        ) {
+          return;
+        }
+        const player = draft.players.get(action.payload.userId);
+        if (!player) {
+          return;
+        }
+        // Don't allow the last player to leave.
+        if (draft.players.size <= 1) {
+          return;
+        }
+        transferBoardControl(draft, action.payload.userId);
+        // Move to leftPlayers so they appear in post-game review.
+        draft.players.delete(action.payload.userId);
+        draft.leftPlayers.set(action.payload.userId, player);
       });
     case ActionType.ChangeName:
       if (!isPlayerAction(action)) {

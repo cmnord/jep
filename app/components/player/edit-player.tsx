@@ -53,6 +53,7 @@ function EditPlayer({
   onChangeName,
   onFocus,
   winning,
+  icon,
 }: {
   hasBoardControl: boolean;
   loading: boolean;
@@ -62,6 +63,7 @@ function EditPlayer({
   onChangeName: (name: string) => void;
   onFocus: () => void;
   winning: boolean;
+  icon?: React.ReactNode;
 }) {
   const inputRef = React.useRef<HTMLInputElement | null>(null);
   const debouncedLoading = useDebounceEnd(loading, 100);
@@ -76,6 +78,7 @@ function EditPlayer({
       player={player}
       hasBoardControl={hasBoardControl}
       winning={winning}
+      icon={icon}
     >
       <div className="flex items-center gap-2 rounded-xl text-white">
         <input
@@ -118,7 +121,8 @@ export function EditPlayerForm({
   roomId,
   userId,
   winning,
-}: { winning: boolean } & RoomProps) {
+  icon,
+}: { winning: boolean; icon?: React.ReactNode } & RoomProps) {
   const { players, soloDispatch, boardControl } = useEngineContext();
 
   const fetcher = useFetcher<Action>();
@@ -182,6 +186,7 @@ export function EditPlayerForm({
         onChangeName={setName}
         onFocus={() => setEditing(true)}
         winning={winning}
+        icon={icon}
       />
     </fetcher.Form>
   );

@@ -7,12 +7,23 @@ import { getValidAuthSession } from "~/models/auth";
 import { createRoomEvent } from "~/models/room-event.server";
 import { getRoom } from "~/models/room.server";
 import { getSolve, markAttempted } from "~/models/solves.server";
+import { getUserSession } from "~/session.server";
 import { parseFormData } from "~/utils/http.server";
 
 const formSchema = z.object({
   name: z.string(),
   userId: z.string(),
 });
+
+async function getDeleteActionType(
+  request: Request,
+  targetUserId: string,
+): Promise<ActionType> {
+  // Check Supabase auth first, then fall back to guest cookie session.
+  const authSession = await getValidAuthSession(request);
+  const currentUserId = authSession?.userId ?? (await getUserSession(request));
+  return currentUserId === targetUserId ? ActionType.Leave : ActionType.Kick;
+}
 
 export async function action({ request, params }: Route.ActionArgs) {
   if (
@@ -30,18 +41,23 @@ export async function action({ request, params }: Route.ActionArgs) {
     throw new Response("room name not found in URL params", { status: 404 });
   }
 
-  const type =
-    request.method === "POST"
-      ? ActionType.Join
-      : request.method === "PATCH"
-      ? ActionType.ChangeName
-      : ActionType.Kick;
-
   if (roomId === -1) {
+    const type =
+      request.method === "POST"
+        ? ActionType.Join
+        : request.method === "PATCH"
+          ? ActionType.ChangeName
+          : ActionType.Kick;
     return { type, payload: { userId, name } };
   }
 
   const authSession = await getValidAuthSession(request);
+  const type =
+    request.method === "POST"
+      ? ActionType.Join
+      : request.method === "PATCH"
+        ? ActionType.ChangeName
+        : await getDeleteActionType(request, userId);
   const room = await getRoom(roomId, authSession?.accessToken);
   if (!room) {
     throw new Response("room not found", { status: 404 });
