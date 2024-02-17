@@ -9,6 +9,7 @@ import type { Action, Player } from "~/engine";
 import {
   CANT_BUZZ_FLAG,
   CLUE_TIMEOUT_MS,
+  QUANTIZATION_FACTOR_MS,
   GameState,
   useEngineContext,
 } from "~/engine";
@@ -402,7 +403,7 @@ function ReadCluePrompt({
         if (
           buzzUserId !== userId &&
           buzz !== CANT_BUZZ_FLAG &&
-          buzz < deltaMs
+          (buzz + QUANTIZATION_FACTOR_MS) < deltaMs
         ) {
           submitBuzz(CLUE_TIMEOUT_MS + 1);
         }
