@@ -5,7 +5,7 @@ import { GameState, useEngineContext } from "~/engine";
 import { formatDollars, stringToHslColor } from "~/utils";
 import { RoomProps } from "../game";
 import { EditPlayerForm } from "./edit-player";
-import { KickPlayerForm } from "./kick-player";
+import { KickablePlayerIcon } from "./kick-player";
 
 // https://stackoverflow.com/questions/70524820/is-there-still-no-easy-way-to-split-strings-with-compound-emojis-into-an-array
 const COMPOUND_EMOJI_REGEX =
@@ -17,11 +17,13 @@ export function PlayerScoreBox({
   hasBoardControl,
   children,
   winning,
+  icon,
 }: {
   player: Player;
   hasBoardControl: boolean;
   children: React.ReactNode;
   winning: boolean;
+  icon?: React.ReactNode;
 }) {
   return (
     <div
@@ -30,7 +32,7 @@ export function PlayerScoreBox({
         "bg-blue-700": hasBoardControl,
       })}
     >
-      <PlayerIcon player={player} />
+      {icon ?? <PlayerIcon player={player} />}
       <div className="w-full">
         {children}
         <div className="flex w-1/3 grow items-center justify-end gap-2 text-xl sm:w-auto">
@@ -56,16 +58,19 @@ export function PlayerScore({
   player,
   hasBoardControl,
   winning,
+  icon,
 }: {
   player: Player;
   hasBoardControl: boolean;
   winning: boolean;
+  icon?: React.ReactNode;
 }) {
   return (
     <PlayerScoreBox
       hasBoardControl={hasBoardControl}
       player={player}
       winning={winning}
+      icon={icon}
     >
       <div className="flex w-full gap-2 text-2xl">
         <p className="font-handwriting font-bold text-slate-300">
@@ -131,10 +136,20 @@ export function PlayerScores({ roomId, userId }: RoomProps) {
     type !== GameState.GameOver &&
     (type !== GameState.PreviewRound || round !== 0);
 
+  const onBoard =
+    type === GameState.ShowBoard || type === GameState.PreviewRound;
+
+  // Kick others: only before game starts
   const canKick =
-    (type === GameState.ShowBoard || type === GameState.PreviewRound) &&
-    numAnswered === 0 &&
-    round === 0;
+    onBoard && numAnswered === 0 && round === 0 && players.size > 1;
+
+  // Leave self: any time the board or round preview is showing
+  const canLeave = onBoard && players.size > 1;
+
+  const kickIcon = (player: Player, isSelf: boolean) =>
+    (isSelf ? canLeave : canKick) ? (
+      <KickablePlayerIcon player={player} roomId={roomId} isSelf={isSelf} />
+    ) : undefined;
 
   return (
     <div className="flex flex-col gap-2 sm:grid sm:grid-cols-3">
@@ -144,32 +159,26 @@ export function PlayerScores({ roomId, userId }: RoomProps) {
             roomId={roomId}
             userId={userId}
             winning={yourPlayer.score === maxScore}
+            icon={kickIcon(yourPlayer, true)}
           />
         ) : (
           <PlayerScore
             player={yourPlayer}
             hasBoardControl={yourPlayer.userId === boardControl}
             winning={yourPlayer.score === maxScore}
+            icon={kickIcon(yourPlayer, true)}
           />
         )
       ) : null}
-      {sortedOtherPlayers.map((p) =>
-        canKick ? (
-          <KickPlayerForm
-            key={p.userId}
-            roomId={roomId}
-            player={p}
-            winning={p.score === maxScore}
-          />
-        ) : (
-          <PlayerScore
-            key={p.userId}
-            player={p}
-            hasBoardControl={p.userId === boardControl}
-            winning={p.score === maxScore}
-          />
-        ),
-      )}
+      {sortedOtherPlayers.map((p) => (
+        <PlayerScore
+          key={p.userId}
+          player={p}
+          hasBoardControl={p.userId === boardControl}
+          winning={p.score === maxScore}
+          icon={kickIcon(p, false)}
+        />
+      ))}
     </div>
   );
 }

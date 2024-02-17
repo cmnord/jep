@@ -56,19 +56,22 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     }
   }
 
-  const sortedPlayers = Array.from(state.players.values()).sort(
+  const sortedPlayers = [...state.players.values()].sort(
     (a, b) => b.score - a.score,
   );
-  const coryats = sortedPlayers.map((player) =>
-    getCoryat(player.userId, state),
+  const sortedLeftPlayers = [...state.leftPlayers.values()].sort(
+    (a, b) => b.score - a.score,
   );
+  const allSorted = [...sortedPlayers, ...sortedLeftPlayers];
+  const coryats = allSorted.map((player) => getCoryat(player.userId, state));
   const combinedCoryat = coryats.reduce((acc, coryat) => acc + coryat, 0);
-  const battingAverages = sortedPlayers.map((player) =>
+  const battingAverages = allSorted.map((player) =>
     getBattingAverage(player.userId, state),
   );
 
   return {
     sortedPlayers,
+    sortedLeftPlayers,
     battingAverages,
     coryats,
     combinedCoryat,
@@ -90,6 +93,12 @@ export default function PlayGame({ loaderData }: Route.ComponentProps) {
     .filter((p) => p.score === maxScore)
     .map((p) => p.name);
 
+  const allSorted = [
+    ...loaderData.sortedPlayers,
+    ...loaderData.sortedLeftPlayers,
+  ];
+  const leftPlayerOffset = loaderData.sortedPlayers.length;
+
   return (
     <div className="flex grow flex-col bg-blue-1000 text-white">
       <div
@@ -106,30 +115,51 @@ export default function PlayGame({ loaderData }: Route.ComponentProps) {
             />
           ))}
         </div>
+        {loaderData.sortedLeftPlayers.length > 0 && (
+          <>
+            <h3 className="text-lg text-slate-400">Left the game</h3>
+            <div className="flex flex-col gap-2 sm:grid sm:grid-cols-3">
+              {loaderData.sortedLeftPlayers.map((p) => (
+                <PlayerScore
+                  key={p.userId}
+                  player={p}
+                  hasBoardControl={false}
+                  winning={false}
+                />
+              ))}
+            </div>
+          </>
+        )}
         <h3 className="text-lg">Coryat Scores</h3>
         <p>
           <strong>Combined: </strong>
           {formatDollars(loaderData.combinedCoryat)}
         </p>
         <div className="flex flex-col gap-2 sm:grid sm:grid-cols-3">
-          {loaderData.sortedPlayers.map((p, i) => (
-            <span>
+          {allSorted.map((p, i) => (
+            <span key={p.userId}>
               {p.name}: {formatDollars(loaderData.coryats[i])}
+              {i >= leftPlayerOffset && (
+                <span className="text-slate-400"> (left)</span>
+              )}
             </span>
           ))}
         </div>
         <h3 className="text-lg">Batting averages</h3>
         <div className="flex flex-col gap-2 sm:grid sm:grid-cols-3">
-          {loaderData.sortedPlayers.map((p, i) => (
-            <span>
+          {allSorted.map((p, i) => (
+            <span key={p.userId}>
               {p.name}: {loaderData.battingAverages[i][0]} /{" "}
               {loaderData.battingAverages[i][1]}
+              {i >= leftPlayerOffset && (
+                <span className="text-slate-400"> (left)</span>
+              )}
             </span>
           ))}
         </div>
         <ScoreChart
           game={loaderData.game}
-          players={loaderData.sortedPlayers}
+          players={allSorted}
           roomEvents={loaderData.roomEvents.filter(isTypedRoomEvent)}
         />
       </div>

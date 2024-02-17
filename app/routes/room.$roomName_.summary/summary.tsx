@@ -5,6 +5,7 @@ import { Category } from "~/components/board/category";
 import Button from "~/components/button";
 import Popover from "~/components/popover";
 import { clueIsPlayable, State } from "~/engine";
+import { getPlayer } from "~/engine/state";
 import type { Board, Clue, Game } from "~/models/convert.server";
 import { formatDollarsWithSign, generateGrid, stringToHslColor } from "~/utils";
 
@@ -47,7 +48,7 @@ function CluePopover({ clue, state, round, i, j }: Props) {
       {clue.wagerable && wagers ? (
         <div className="pt-2">
           {Array.from(wagers.entries()).map(([userId, wager]) => {
-            const player = state.players.get(userId);
+            const player = getPlayer(state, userId);
             if (!player) return null;
             const answer = answers?.get(userId);
             const correct = clueAnswer.answeredBy.get(userId) ?? false;
@@ -65,7 +66,7 @@ function CluePopover({ clue, state, round, i, j }: Props) {
         <div className="pt-2">
           {Array.from(clueAnswer.answeredBy.entries()).map(
             ([userId, correct]) => {
-              const player = state.players.get(userId);
+              const player = getPlayer(state, userId);
               if (!player) return null;
               return (
                 <PlayerPoints

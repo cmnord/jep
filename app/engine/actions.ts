@@ -38,13 +38,18 @@ export function isClueWagerAction(action: Action): action is {
 }
 
 export function isPlayerAction(action: Action): action is {
-  type: ActionType.Join | ActionType.ChangeName | ActionType.Kick;
+  type:
+    | ActionType.Join
+    | ActionType.ChangeName
+    | ActionType.Kick
+    | ActionType.Leave;
   payload: { userId: string; name: string };
 } {
   return (
     (action.type === ActionType.Join ||
       action.type === ActionType.ChangeName ||
-      action.type === ActionType.Kick) &&
+      action.type === ActionType.Kick ||
+      action.type === ActionType.Leave) &&
     PlayerPayload.safeParse(action.payload).success
   );
 }
