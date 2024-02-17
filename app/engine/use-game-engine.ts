@@ -55,16 +55,15 @@ function stateToGameEngine(
       ?.answeredBy.get(userId);
   };
 
-  const winningBuzz = getWinningBuzzer(state.buzzes);
+  const winningBuzz = getWinningBuzzer(state.buzzes, clue?.answer);
   const winningBuzzer = winningBuzz?.userId ?? undefined;
 
   function getClueValueFn(idx: [number, number], userId: string) {
     return getClueValue(state, idx, userId);
   }
 
-  const clueKey = `${state.round},${
-    state.activeClue ? state.activeClue[0] : -1
-  },${state.activeClue ? state.activeClue[1] : -1}`;
+  const clueKey = `${state.round},${state.activeClue ? state.activeClue[0] : -1
+    },${state.activeClue ? state.activeClue[1] : -1}`;
 
   return {
     type: state.type,
