@@ -11,7 +11,7 @@ import {
   isPlayerAction,
   isRoundAction,
 } from "./actions";
-import { GameState, getClueValue, getNumCluesInBoard, State } from "./state";
+import { GameState, State, getClueValue, getNumCluesInBoard } from "./state";
 
 enableMapSet();
 
@@ -452,17 +452,20 @@ export function gameEngine(state: State, action: Action): State {
         }
 
         // New buzzes are those previously locked out plus this one.
-        const buzzes = produce(state.buzzes, (draft) => {
-          for (const [userId, deltaMs] of draft.entries()) {
-            if (deltaMs !== CANT_BUZZ_FLAG) {
-              draft.delete(userId);
-            }
+        const buzzes = new Map(draft.buzzes);
+        for (const [userId, deltaMs] of buzzes.entries()) {
+          if (deltaMs !== CANT_BUZZ_FLAG) {
+            buzzes.delete(userId);
           }
-          draft.set(userId, CANT_BUZZ_FLAG);
-        });
+        }
+        buzzes.set(userId, CANT_BUZZ_FLAG);
+
+        if (i == 0 && j == 0 && draft.round == 1) {
+          console.log("CORRECT");
+        }
 
         // If everyone has been locked out, reveal the answer to everyone.
-        if (buzzes.size === state.players.size) {
+        if (buzzes.size === draft.players.size) {
           draft.type = GameState.RevealAnswerToAll;
           player.score = newScore;
 
