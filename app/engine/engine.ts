@@ -44,7 +44,7 @@ export const CLUE_TIMEOUT_MS = 5000;
  * on this clue. */
 export const CANT_BUZZ_FLAG = -1;
 
-// Buzzes within this many milliseconds of each other are treated as ties.
+/** Buzzes within this many milliseconds of each other are treated as ties. */
 export const QUANTIZATION_FACTOR_MS = 150;
 
 function isValidBuzz(deltaMs: number): boolean {
@@ -69,13 +69,13 @@ export function getWinningBuzzer(
     return undefined;
   }
 
-  // generate 53-bit hash, discard MSBs to get 32-bit unsigned
   if (tiebreakerSeed === undefined) {
     tiebreakerSeed = "t";
-    console.log(
-      "WARN: tiebreakerSeed is undefined, ties will be broken in fixed user order.",
+    console.warn(
+      "TiebreakerSeed is undefined, ties will be broken in a fixed user order.",
     );
   }
+  // generate 53-bit hash, discard MSBs to get 32-bit unsigned
   const tiebreakSeed32 = cyrb53(tiebreakerSeed) >>> 0;
 
   const minDeltaMs = Math.min(...validBuzzes.map(([, deltaMs]) => deltaMs));
@@ -97,11 +97,11 @@ export function getWinningBuzzer(
   });
 
   const sortedBuzzes = quantizedBuzzes.sort(
-    ([aUserId, deltaA, tiebreakA], [bUserId, deltaB, tiebreakB]) => {
-      if (deltaA === deltaB) {
+    ([_a, qDeltaA, tiebreakA], [_b, qDeltaB, tiebreakB]) => {
+      if (qDeltaA === qDeltaB) {
         return tiebreakA - tiebreakB;
       } else {
-        return deltaA - deltaB;
+        return qDeltaA - qDeltaB;
       }
     },
   );
