@@ -97,7 +97,7 @@ export function getWinningBuzzer(
   });
 
   const sortedBuzzes = quantizedBuzzes.sort(
-    ([_a, qDeltaA, tiebreakA], [_b, qDeltaB, tiebreakB]) => {
+    ([, qDeltaA, tiebreakA], [, qDeltaB, tiebreakB]) => {
       if (qDeltaA === qDeltaB) {
         return tiebreakA - tiebreakB;
       } else {
@@ -432,14 +432,7 @@ export function gameEngine(state: State, action: Action): State {
             return;
           }
         } else {
-<<<<<<< HEAD
-          const winningBuzzer = getWinningBuzzer(
-            draft.buzzes,
-            draft.clue?.clue,
-          );
-=======
           const winningBuzzer = getWinningBuzzer(draft.buzzes, clueText);
->>>>>>> 7af7760 (use tiebreak at all getWinningBuzzer callsites)
           if (userId !== winningBuzzer?.userId) {
             return;
           }

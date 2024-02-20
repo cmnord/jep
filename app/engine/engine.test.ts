@@ -2208,11 +2208,12 @@ describe("gameEngine", () => {
 });
 
 describe("getWinningBuzzer", () => {
-  it("returns the buzz of the lower user ID in case of a tie", () => {
+  it("measures the buzzer winrate between two equally fast players over 1000 trials. Expected to be near 50-50", () => {
     let player1Wins = 0;
-    for (let charCode = 16; charCode <= 116; charCode++) {
-      let tiebreakSeed = String.fromCharCode(charCode);
-      let buzzes = new Map();
+    const n_trials = 1000;
+    for (let trial = 0; trial < n_trials; trial++) {
+      const tiebreakSeed = Math.random().toString() + trial.toString();
+      const buzzes = new Map();
       buzzes.set(PLAYER1.userId, 100);
       buzzes.set(PLAYER2.userId, 100);
       const winner = getWinningBuzzer(buzzes, tiebreakSeed)?.userId;
@@ -2220,7 +2221,9 @@ describe("getWinningBuzzer", () => {
         player1Wins++;
       }
     }
-    expect(player1Wins).toBeGreaterThan(30);
-    expect(player1Wins).toBeLessThan(70);
+    // CDF of bin(n=1000, p=0.5) = 0.99999 @ k = 435
+    const k = 435;
+    expect(player1Wins).toBeGreaterThan(k);
+    expect(player1Wins).toBeLessThan(n_trials - k);
   });
 });
