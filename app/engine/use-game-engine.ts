@@ -55,7 +55,7 @@ function stateToGameEngine(
       ?.answeredBy.get(userId);
   };
 
-  const winningBuzz = getWinningBuzzer(state.buzzes, clue?.answer);
+  const winningBuzz = getWinningBuzzer(state.buzzes, clue?.clue);
   const winningBuzzer = winningBuzz?.userId ?? undefined;
 
   function getClueValueFn(idx: [number, number], userId: string) {

@@ -44,6 +44,9 @@ export const CLUE_TIMEOUT_MS = 5000;
  * on this clue. */
 export const CANT_BUZZ_FLAG = -1;
 
+// Buzzes within this many milliseconds of each other are treated as ties.
+export const QUANTIZATION_FACTOR_MS = 150;
+
 function isValidBuzz(deltaMs: number): boolean {
   return deltaMs !== CANT_BUZZ_FLAG && deltaMs <= CLUE_TIMEOUT_MS;
 }
@@ -67,14 +70,22 @@ export function getWinningBuzzer(
   }
 
   // generate 53-bit hash, discard MSBs to get 32-bit unsigned
-  const tiebreakSeed32 = cyrb53(tiebreakerSeed ?? "t") >>> 0;
+  if (tiebreakerSeed === undefined) {
+    tiebreakerSeed = "t";
+    console.log(
+      "WARN: tiebreakerSeed is undefined, ties will be broken in fixed user order.",
+    );
+  }
+  const tiebreakSeed32 = cyrb53(tiebreakerSeed) >>> 0;
 
-  // Quantize valid buzzer times and add random tiebreakers
-  const quantizationFactor = 150;
+  const minDeltaMs = Math.min(...validBuzzes.map(([, deltaMs]) => deltaMs));
+
   const quantizedBuzzes: [string, number, number][] = validBuzzes.map(
     ([userId, deltaMs]) => [
       userId,
-      Math.floor(deltaMs / quantizationFactor),
+      // measure every buzz relative to the fastest one, and round to the quantization interval
+      Math.floor(Math.max(0, deltaMs - minDeltaMs) / QUANTIZATION_FACTOR_MS),
+      // random number derived from user ID and per-contest seed, to break ties
       cyrb53(userId, tiebreakSeed32),
     ],
   );
@@ -326,7 +337,7 @@ export function gameEngine(state: State, action: Action): State {
           return;
         }
 
-        const winningBuzzer = getWinningBuzzer(draft.buzzes);
+        const winningBuzzer = getWinningBuzzer(draft.buzzes, draft.clue?.clue);
         if (!winningBuzzer) {
           // Reveal the answer to everyone and mark it as answered. If the clue
           // was wagerable and the player didn't buzz, deduct their wager from
@@ -416,7 +427,10 @@ export function gameEngine(state: State, action: Action): State {
             return;
           }
         } else {
-          const winningBuzzer = getWinningBuzzer(draft.buzzes);
+          const winningBuzzer = getWinningBuzzer(
+            draft.buzzes,
+            draft.clue?.clue,
+          );
           if (userId !== winningBuzzer?.userId) {
             return;
           }
