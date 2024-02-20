@@ -18,6 +18,7 @@ enableMapSet();
 
 export enum ActionType {
   Join = "join",
+  Kick = "kick",
   ChangeName = "change_name",
   StartRound = "start_round",
   ChooseClue = "choose_clue",
@@ -142,6 +143,34 @@ export function gameEngine(state: State, action: Action): State {
         if (draft.players.size === 1) {
           draft.boardControl = action.payload.userId;
         }
+      });
+    case ActionType.Kick:
+      if (!isPlayerAction(action)) {
+        throw new Error("PlayerKick action must have an associated player");
+      }
+      return produce(state, (draft) => {
+        // Don't kick players after the game has started.
+        if (
+          (draft.type !== GameState.ShowBoard &&
+            draft.type !== GameState.PreviewRound) ||
+          draft.numAnswered > 0 ||
+          draft.round > 0
+        ) {
+          return;
+        }
+        // Don't allow the only player to be kicked.
+        if (draft.players.size === 1) {
+          return;
+        }
+        // If this player has board control, give it to the next player.
+        if (draft.boardControl === action.payload.userId) {
+          const players = Array.from(draft.players.keys());
+          players.sort();
+          const index = players.indexOf(action.payload.userId);
+          const nextPlayer = players[(index + 1) % players.length];
+          draft.boardControl = nextPlayer;
+        }
+        draft.players.delete(action.payload.userId);
       });
     case ActionType.ChangeName:
       if (!isPlayerAction(action)) {
