@@ -1,5 +1,4 @@
 import { useFetcher } from "react-router";
-import * as React from "react";
 
 import type { Action, Player } from "~/engine";
 import { useEngineContext } from "~/engine";
@@ -24,11 +23,10 @@ function KickPlayer({
         <div className="ml-auto flex items-center gap-2">
           <button
             type="submit"
-            className="flex grow items-center rounded-md
-            p-1
-        text-slate-300
-        transition-colors hover:bg-slate-800
-        hover:text-white focus:bg-slate-800 focus:text-white"
+            className={`flex grow items-center rounded-md p-1 text-slate-300
+            transition-colors 
+            hover:bg-slate-800 hover:text-white 
+            focus:bg-slate-800 focus:text-white`}
           >
             {/* Heroicon name: solid/x-mark */}
             <svg
@@ -67,14 +65,8 @@ export function KickPlayerForm({
   const fetcher = useFetcher<Action>();
   useSoloAction(fetcher, soloDispatch);
 
-  const formRef = React.useRef<HTMLFormElement | null>(null);
-
   return (
-    <fetcher.Form
-      method="DELETE"
-      action={`/room/${roomId}/player`}
-      ref={formRef}
-    >
+    <fetcher.Form method="DELETE" action={`/room/${roomId}/player`}>
       <input type="hidden" name="userId" value={player.userId} />
       <input type="hidden" name="name" value={player.name} />
       <KickPlayer
