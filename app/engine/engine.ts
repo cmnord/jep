@@ -337,13 +337,14 @@ export function gameEngine(state: State, action: Action): State {
           return;
         }
 
-        const winningBuzzer = getWinningBuzzer(draft.buzzes, draft.clue?.clue);
+        const board = draft.game.boards.at(draft.round);
+        const clue = board?.categories.at(j)?.clues.at(i);
+
+        const winningBuzzer = getWinningBuzzer(draft.buzzes, clue?.clue);
         if (!winningBuzzer) {
           // Reveal the answer to everyone and mark it as answered. If the clue
           // was wagerable and the player didn't buzz, deduct their wager from
           // their score.
-          const board = draft.game.boards.at(draft.round);
-          const clue = board?.categories.at(j)?.clues.at(i);
           if (clue?.wagerable) {
             const clueValue = getClueValue(draft, [i, j], userId);
             const player = draft.players.get(userId);
@@ -419,6 +420,10 @@ export function gameEngine(state: State, action: Action): State {
         }
         const isLongForm = draft.type === GameState.RevealAnswerLongForm;
 
+        const board = draft.game.boards.at(draft.round);
+        const clue = board?.categories.at(j)?.clues.at(i);
+        const clueText = clue?.clue;
+
         // Ignore the action if it was from a player who didn't answer the clue.
         const key = `${draft.round},${i},${j}`;
         if (isLongForm) {
@@ -427,10 +432,14 @@ export function gameEngine(state: State, action: Action): State {
             return;
           }
         } else {
+<<<<<<< HEAD
           const winningBuzzer = getWinningBuzzer(
             draft.buzzes,
             draft.clue?.clue,
           );
+=======
+          const winningBuzzer = getWinningBuzzer(draft.buzzes, clueText);
+>>>>>>> 7af7760 (use tiebreak at all getWinningBuzzer callsites)
           if (userId !== winningBuzzer?.userId) {
             return;
           }
