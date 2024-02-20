@@ -2209,15 +2209,18 @@ describe("gameEngine", () => {
 
 describe("getWinningBuzzer", () => {
   it("returns the buzz of the lower user ID in case of a tie", () => {
-    // NB: Maps iterate over keys in insertion order
-    let buzzes = new Map();
-    buzzes.set(PLAYER1.userId, 100);
-    buzzes.set(PLAYER2.userId, 100);
-    expect(getWinningBuzzer(buzzes)?.userId).toBe(PLAYER1.userId);
-
-    buzzes = new Map();
-    buzzes.set(PLAYER2.userId, 100);
-    buzzes.set(PLAYER1.userId, 100);
-    expect(getWinningBuzzer(buzzes)?.userId).toBe(PLAYER1.userId);
+    let player1Wins = 0;
+    for (let charCode = 16; charCode <= 116; charCode++) {
+      let tiebreakSeed = String.fromCharCode(charCode);
+      let buzzes = new Map();
+      buzzes.set(PLAYER1.userId, 100);
+      buzzes.set(PLAYER2.userId, 100);
+      const winner = getWinningBuzzer(buzzes, tiebreakSeed)?.userId;
+      if (winner === PLAYER1.userId) {
+        player1Wins++;
+      }
+    }
+    expect(player1Wins).toBeGreaterThan(30);
+    expect(player1Wins).toBeLessThan(70);
   });
 });
