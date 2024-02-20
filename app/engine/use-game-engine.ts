@@ -74,6 +74,7 @@ function stateToGameEngine(
      */
     answeredBy,
     answers: state.answers.get(clueKey) ?? new Map<string, string>(),
+    numAnswered: state.numAnswered,
     board,
     buzzes: state.buzzes,
     category,
