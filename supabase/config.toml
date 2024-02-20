@@ -10,9 +10,9 @@ port = 54321
 schemas = ["public", "storage", "graphql_public"]
 # Extra schemas to add to the search_path of every request. public is always included.
 extra_search_path = ["public", "extensions"]
-# The maximum number of rows returns from a view, table, or stored procedure. Limits payload size
-# for accidental or malicious requests.
-max_rows = 1000
+# The maximum number of rows returns from a view, table, or stored procedure.
+# Limits payload size for accidental or malicious requests.
+max_rows = 10000
 
 [db]
 # Port to use for the local database URL.
