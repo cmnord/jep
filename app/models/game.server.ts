@@ -61,7 +61,7 @@ function dbGameToGame(dbGame: DbGame, categories: CategoryAndClues[]): Game {
   }
 
   for (const category of categories) {
-    if (!category.clues) {
+    if (category.clues == null || category.clues.length === 0) {
       throw new Error("category must have at least one clue");
     }
     const round = category.round;
@@ -392,7 +392,9 @@ export async function createGame(
   for (let round = 0; round < inputGame.boards.length; round++) {
     const board = inputGame.boards[round];
     for (const category of board.categories) {
-      const dbCategory = categoryData.find((c) => c.name === category.name);
+      const dbCategory = categoryData.find(
+        (c) => c.name === category.name && c.round == round,
+      );
       if (!dbCategory) {
         throw new Error(
           "category " + category.name + " not inserted into database",
