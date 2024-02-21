@@ -5,7 +5,7 @@ import { LoadingSpinner } from "~/components/icons";
 type ButtonProps = React.ComponentProps<"button">;
 
 type Props = {
-  type?: "primary" | "default" | "transparent";
+  type?: "primary" | "default" | "transparent" | "danger";
   htmlType?: ButtonProps["type"];
   loading?: boolean;
 } & Omit<ButtonProps, "type">;
@@ -34,6 +34,8 @@ export default function Button({
             type === "default",
           "text-white hover:border-blue-300 hover:text-blue-300":
             type === "transparent",
+          "border-transparent bg-red-600 text-white hover:bg-red-700":
+            type === "danger",
         },
       )}
       type={htmlType}
