@@ -326,7 +326,12 @@ function ReadWagerableCluePrompt({ roomId, userId }: RoomProps) {
 /** ReadCluePrompt handles all frontend behavior while the game state is
  * GameState.ReadClue.
  */
-function ReadCluePrompt({ roomId, userId }: RoomProps) {
+function ReadCluePrompt({
+  roomId,
+  userId,
+  lockout,
+  onLockout,
+}: RoomProps & { lockout: boolean; onLockout: () => void }) {
   const { activeClue, buzzes, category, clue, getClueValue, soloDispatch } =
     useEngineContext();
 
@@ -341,7 +346,6 @@ function ReadCluePrompt({ roomId, userId }: RoomProps) {
   const [buzzerOpenAt, setBuzzerOpenAt] = React.useState<number | undefined>(
     myBuzzDurationMs !== undefined ? 0 : undefined,
   );
-  const [lockout, setLockout] = React.useState(false);
 
   const fetcher = useFetcher<Action>();
   useSoloAction(fetcher, soloDispatch);
@@ -411,9 +415,6 @@ function ReadCluePrompt({ roomId, userId }: RoomProps) {
   const delayMs = myBuzzDurationMs === undefined ? clueDurationMs : null;
   useTimeout(() => setBuzzerOpenAt(Date.now()), delayMs);
 
-  // Remove the lockout after 500ms.
-  useTimeout(() => setLockout(false), lockout ? LOCKOUT_MS : null);
-
   // If nothing happens for 5 seconds after the buzzer opens, close the buzzer
   // and send a 5-second "non-buzz" buzz to the server.
   useTimeout(
@@ -455,7 +456,7 @@ function ReadCluePrompt({ roomId, userId }: RoomProps) {
 
     const lockoutDeltaMs = clickedAtMs - clueShownAt;
     if (lockoutDeltaMs < clueDurationMs) {
-      return setLockout(true);
+      return onLockout();
     }
 
     if (buzzerOpenAt === undefined || !clueIdx) {
@@ -503,7 +504,6 @@ function ReadCluePrompt({ roomId, userId }: RoomProps) {
         showAnswer={false}
         answer={clue.answer}
       />
-      <Lockout active={lockout} />
       <div className="invisible">
         <CheckForm
           roomId={roomId}
@@ -805,12 +805,23 @@ function RevealAnswerToAllPrompt({ roomId, userId }: RoomProps) {
 export function ConnectedPrompt(props: RoomProps) {
   const { type } = useEngineContext();
 
+  const [lockout, setLockout] = React.useState(false);
+
+  // Remove the lockout after 500ms.
+  useTimeout(() => setLockout(false), lockout ? LOCKOUT_MS : null);
+
   function getPromptContent() {
     switch (type) {
       case GameState.WagerClue:
         return <WagerCluePrompt {...props} />;
       case GameState.ReadClue:
-        return <ReadCluePrompt {...props} />;
+        return (
+          <ReadCluePrompt
+            {...props}
+            lockout={lockout}
+            onLockout={() => setLockout(true)}
+          />
+        );
       case GameState.ReadWagerableClue:
         return <ReadWagerableCluePrompt {...props} />;
       case GameState.ReadLongFormClue:
@@ -838,6 +849,7 @@ export function ConnectedPrompt(props: RoomProps) {
           height: "100dvh",
         }}
       >
+        <Lockout active={lockout} />
         {promptContent}
       </div>
     </Fade>
