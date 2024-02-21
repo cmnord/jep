@@ -70,7 +70,7 @@ function PlayerScores({
             </div>
             <span
               className={classNames(
-                "text-shadow absolute -right-1/2 -top-1/4 animate-bounce font-impact",
+                "text-shadow absolute -right-1/2 -top-1/4 animate-bounce whitespace-nowrap font-impact",
                 {
                   "text-green-300": correct,
                   "text-red-300": !correct,
