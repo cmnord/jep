@@ -205,7 +205,7 @@ export default function Header({
       <div className="flex items-center justify-between">
         <Link to="/">
           <h1 className="text-shadow-md font-korinna text-2xl font-bold text-white">
-            Jep!
+            Nep!
           </h1>
         </Link>
         <div className="flex items-center gap-2">
