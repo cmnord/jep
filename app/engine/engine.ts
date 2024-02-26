@@ -45,7 +45,7 @@ export const CLUE_TIMEOUT_MS = 5000;
 export const CANT_BUZZ_FLAG = -1;
 
 /** Buzzes within this many milliseconds of each other are treated as ties. */
-export const QUANTIZATION_FACTOR_MS = 150;
+export const QUANTIZATION_FACTOR_MS = 200;
 
 function isValidBuzz(deltaMs: number): boolean {
   return deltaMs !== CANT_BUZZ_FLAG && deltaMs <= CLUE_TIMEOUT_MS;
