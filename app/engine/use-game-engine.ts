@@ -8,7 +8,7 @@ import { getSupabase } from "~/supabase";
 import type { Action } from "./engine";
 import { gameEngine, getWinningBuzzer } from "./engine";
 import { applyRoomEventsToState, isTypedRoomEvent } from "./room-event";
-import { getClueValue, State, stateFromGame } from "./state";
+import { State, getClueValue, stateFromGame } from "./state";
 
 export enum ConnectionState {
   ERROR,
@@ -74,6 +74,7 @@ function stateToGameEngine(
      */
     answeredBy,
     answers: state.answers.get(clueKey) ?? new Map<string, string>(),
+    numAnswered: state.numAnswered,
     board,
     buzzes: state.buzzes,
     category,

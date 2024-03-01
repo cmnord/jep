@@ -5,6 +5,7 @@ import { GameState, useEngineContext } from "~/engine";
 import { formatDollars, stringToHslColor } from "~/utils";
 import { RoomProps } from "../game";
 import { EditPlayerForm } from "./edit-player";
+import { KickPlayerForm } from "./kick-player";
 
 // https://stackoverflow.com/questions/70524820/is-there-still-no-easy-way-to-split-strings-with-compound-emojis-into-an-array
 const COMPOUND_EMOJI_REGEX =
@@ -111,7 +112,8 @@ function getMaxScore(others: Player[], you?: Player) {
  * - Shows each player's name and score
  */
 export function PlayerScores({ roomId, userId }: RoomProps) {
-  const { players, boardControl, type, round } = useEngineContext();
+  const { players, boardControl, type, round, numAnswered } =
+    useEngineContext();
 
   const yourPlayer = players.get(userId);
 
@@ -125,6 +127,11 @@ export function PlayerScores({ roomId, userId }: RoomProps) {
   const editable =
     type !== GameState.GameOver &&
     (type !== GameState.PreviewRound || round !== 0);
+
+  const canKick =
+    (type === GameState.ShowBoard || type === GameState.PreviewRound) &&
+    numAnswered === 0 &&
+    round === 0;
 
   return (
     <div className="flex flex-col gap-2 sm:grid sm:grid-cols-3">
@@ -143,14 +150,23 @@ export function PlayerScores({ roomId, userId }: RoomProps) {
           />
         )
       ) : null}
-      {sortedOtherPlayers.map((p, i) => (
-        <PlayerScore
-          key={i}
-          player={p}
-          hasBoardControl={p.userId === boardControl}
-          winning={p.score === maxScore}
-        />
-      ))}
+      {sortedOtherPlayers.map((p, i) =>
+        canKick ? (
+          <KickPlayerForm
+            key={i}
+            roomId={roomId}
+            player={p}
+            winning={p.score === maxScore}
+          />
+        ) : (
+          <PlayerScore
+            key={i}
+            player={p}
+            hasBoardControl={p.userId === boardControl}
+            winning={p.score === maxScore}
+          />
+        ),
+      )}
     </div>
   );
 }
