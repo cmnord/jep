@@ -107,20 +107,19 @@ function GameSettings({ game, url }: { game: Game; url: string }) {
           hover:text-slate-300 data-[state=open]:text-slate-300`}
           aria-label="Customise options"
         >
-          {/* Heroicon name: solid/bars-3 */}
+          {/* Heroicon name: outline/information-circle */}
           <svg
             xmlns="http://www.w3.org/2000/svg"
+            fill="none"
             viewBox="0 0 24 24"
-            fill="currentColor"
+            strokeWidth="1.5"
+            stroke="currentColor"
             className="h-6 w-6"
-            role="img"
-            aria-labelledby="menu-title"
           >
-            <title id="menu-title">Menu</title>
             <path
-              fillRule="evenodd"
-              d="M3 6.75A.75.75 0 013.75 6h16.5a.75.75 0 010 1.5H3.75A.75.75 0 013 6.75zM3 12a.75.75 0 01.75-.75h16.5a.75.75 0 010 1.5H3.75A.75.75 0 013 12zm0 5.25a.75.75 0 01.75-.75h16.5a.75.75 0 010 1.5H3.75a.75.75 0 01-.75-.75z"
-              clipRule="evenodd"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"
             />
           </svg>
         </button>
