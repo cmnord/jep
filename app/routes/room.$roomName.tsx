@@ -31,25 +31,31 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const roomParts = roomName.split("-");
   const roomId = parseInt(roomParts[0]);
   const roomWord = roomParts[1];
+  console.log("getting room", roomId);
   const room = await getRoom(roomId);
   if (!room || room.name !== roomWord) {
     throw new Response("room not found", { status: 404 });
   }
 
+  console.log("getting valid auth session");
   const authSession = await getValidAuthSession(request);
+  console.log("getting game", room.game_id);
   const game = await getGame(room.game_id, authSession?.userId);
   if (!game) {
     throw new Response("game not found", { status: 404 });
   }
 
+  console.log("getting user", authSession?.email);
   const user = authSession
     ? await getUserByEmail(authSession.email, authSession.accessToken)
     : null;
   const accessToken = authSession?.accessToken;
 
+  console.log("getting room events for room", room.id);
   const roomEvents = await getRoomEvents(room.id);
   const name = getRandomEmoji();
 
+  console.log("applying", roomEvents.length, "room events to state");
   const state = applyRoomEventsToState(stateFromGame(game), roomEvents);
 
   if (state.type === GameState.GameOver) {
