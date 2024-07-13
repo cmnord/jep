@@ -19,7 +19,7 @@ npm install
 Start the Supabase project:
 
 ```ts
-npx supabase start
+npm run db:start
 ```
 
 Set environment variables. In particular, set `SUPABASE_URL`,
@@ -51,7 +51,7 @@ View mock emails sent for password reset and email verification at
 Link to your own production Supabase project with:
 
 ```sh
-npx supabase link --project-ref $SUPABASE_PROJECT_REF --password $SUPBABASE_DB_PASSWORD
+npx supabase link --project-ref $SUPABASE_PROJECT_REF --password $SUPABASE_DB_PASSWORD
 ```
 
 ### Make a migration[^1]
