@@ -62,7 +62,7 @@ export async function action({ request }: ActionFunctionArgs) {
     const roomId = parseInt(parts[0]);
     const name = parts[1];
 
-    const room = await getRoom(roomId);
+    const room = await getRoom(roomId, authSession?.accessToken);
     if (!room || room.name !== name) {
       return json(
         { success: false, message: `room "${roomNameAndId}" not found` },
@@ -71,7 +71,12 @@ export async function action({ request }: ActionFunctionArgs) {
     }
 
     const reason = formData.get("reason") as string;
-    await insertReport(room.game_id, reason, authSession?.userId);
+    await insertReport(
+      room.game_id,
+      reason,
+      authSession?.userId,
+      authSession?.accessToken,
+    );
 
     return json({
       success: true,
@@ -100,7 +105,12 @@ export async function action({ request }: ActionFunctionArgs) {
     }
 
     const reason = formData.get("reason") as string;
-    await insertReport(gameId, reason, authSession?.userId);
+    await insertReport(
+      gameId,
+      reason,
+      authSession?.userId,
+      authSession?.accessToken,
+    );
 
     return json(
       { success: true, message: `Reported game ${gameId}.` },

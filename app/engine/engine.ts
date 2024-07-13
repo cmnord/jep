@@ -502,10 +502,6 @@ export function gameEngine(state: State, action: Action): State {
         }
         buzzes.set(userId, CANT_BUZZ_FLAG);
 
-        if (i == 0 && j == 0 && draft.round == 1) {
-          console.log("CORRECT");
-        }
-
         // If everyone has been locked out, reveal the answer to everyone.
         if (buzzes.size === draft.players.size) {
           draft.type = GameState.RevealAnswerToAll;

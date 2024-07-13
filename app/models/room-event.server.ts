@@ -1,14 +1,19 @@
-import { db } from "~/db.server";
 import type { ActionType } from "~/engine";
+import { AuthSession } from "~/models/auth";
 import type { Database, Json } from "~/models/database.types";
+import { getSupabase } from "~/supabase";
 
 type RoomEventTable = Database["public"]["Tables"]["room_events"];
 export type DbRoomEvent = RoomEventTable["Row"];
 
 /* Reads */
 
-export async function getRoomEvents(roomId: number): Promise<DbRoomEvent[]> {
-  const { data, error } = await db
+export async function getRoomEvents(
+  roomId: number,
+  accessToken?: AuthSession["accessToken"],
+): Promise<DbRoomEvent[]> {
+  const client = getSupabase(accessToken);
+  const { data, error } = await client
     .from<"room_events", RoomEventTable>("room_events")
     .select("*")
     .order("ts", { ascending: true })
@@ -27,8 +32,10 @@ export async function createRoomEvent(
   roomId: number,
   type: ActionType,
   payload?: Json,
+  accessToken?: AuthSession["accessToken"],
 ) {
-  const { data, error } = await db
+  const client = getSupabase(accessToken);
+  const { data, error } = await client
     .from<"room_events", RoomEventTable>("room_events")
     .insert<RoomEventTable["Insert"]>({
       room_id: roomId,

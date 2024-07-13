@@ -33,26 +33,27 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const roomParts = roomName.split("-");
   const roomId = parseInt(roomParts[0]);
   const roomWord = roomParts[1];
-  const room = await getRoom(roomId);
+  const authSession = await getValidAuthSession(request);
+  const userId = authSession?.userId;
+  const accessToken = authSession?.accessToken;
+  const room = await getRoom(roomId, accessToken);
   if (!room || room.name !== roomWord) {
     throw new Response("room not found", { status: 404 });
   }
 
-  const authSession = await getValidAuthSession(request);
-  const userId = authSession?.userId;
-  const game = await getGame(room.game_id, authSession?.userId);
+  const game = await getGame(room.game_id, userId);
   if (!game) {
     throw new Response("game not found", { status: 404 });
   }
 
-  const roomEvents = await getRoomEvents(room.id);
+  const roomEvents = await getRoomEvents(room.id, accessToken);
 
   if (userId) {
     const state = applyRoomEventsToState(stateFromGame(game), roomEvents);
     if (state.type === GameState.GameOver && state.players.has(userId)) {
-      const solve = await getSolve(userId, game.id, authSession?.accessToken);
+      const solve = await getSolve(userId, game.id, accessToken);
       if (solve && solve.solved_at === null) {
-        await markSolved(userId, game.id, room.id, authSession?.accessToken);
+        await markSolved(userId, game.id, room.id, accessToken);
       }
     }
   }
