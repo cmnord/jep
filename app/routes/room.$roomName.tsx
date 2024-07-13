@@ -31,14 +31,14 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const roomParts = roomName.split("-");
   const roomId = parseInt(roomParts[0]);
   const roomWord = roomParts[1];
+  console.log("getting valid auth session");
+  const authSession = await getValidAuthSession(request);
   console.log("getting room", roomId);
-  const room = await getRoom(roomId);
+  const room = await getRoom(roomId, authSession?.accessToken);
   if (!room || room.name !== roomWord) {
     throw new Response("room not found", { status: 404 });
   }
 
-  console.log("getting valid auth session");
-  const authSession = await getValidAuthSession(request);
   console.log("getting game", room.game_id);
   const game = await getGame(room.game_id, authSession?.userId);
   if (!game) {
@@ -52,7 +52,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const accessToken = authSession?.accessToken;
 
   console.log("getting room events for room", room.id);
-  const roomEvents = await getRoomEvents(room.id);
+  const roomEvents = await getRoomEvents(room.id, accessToken);
   const name = getRandomEmoji();
 
   console.log("applying", roomEvents.length, "room events to state");

@@ -1,5 +1,6 @@
-import { db } from "~/db.server";
+import { AuthSession } from "~/models/auth";
 import type { Database } from "~/models/database.types";
+import { getSupabase } from "~/supabase";
 
 type ReportTable = Database["public"]["Tables"]["reports"];
 
@@ -9,8 +10,10 @@ export async function insertReport(
   gameId: string,
   reason: string,
   userId?: string,
+  accessToken?: AuthSession["accessToken"],
 ) {
-  const { data, error } = await db
+  const client = getSupabase(accessToken);
+  const { data, error } = await client
     .from<"reports", ReportTable>("reports")
     .insert<ReportTable["Insert"]>({
       created_by: userId,

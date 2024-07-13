@@ -2,6 +2,7 @@ import type { ActionFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 
 import { ActionType } from "~/engine";
+import { getValidAuthSession } from "~/models/auth";
 import { createRoomEvent } from "~/models/room-event.server";
 import { getRoom } from "~/models/room.server";
 
@@ -40,17 +41,23 @@ export async function action({ request, params }: ActionFunctionArgs) {
     return json({ type: ActionType.Buzz, payload: { i, j, userId, deltaMs } });
   }
 
-  const room = await getRoom(roomId);
+  const authSession = await getValidAuthSession(request);
+  const room = await getRoom(roomId, authSession?.accessToken);
   if (!room) {
     throw new Response("room not found", { status: 404 });
   }
 
-  await createRoomEvent(room.id, ActionType.Buzz, {
-    i,
-    j,
-    userId,
-    deltaMs,
-  });
+  await createRoomEvent(
+    room.id,
+    ActionType.Buzz,
+    {
+      i,
+      j,
+      userId,
+      deltaMs,
+    },
+    authSession?.accessToken,
+  );
 
   return null;
 }
