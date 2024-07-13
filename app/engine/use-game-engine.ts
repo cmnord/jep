@@ -162,6 +162,7 @@ export function useGameEngine(
           },
           (payload) => {
             const newEvent = payload.new;
+            setLastMessageAt(Date.now());
             if (!isTypedRoomEvent(newEvent)) {
               throw new Error(
                 "unhandled room event type from DB: " + newEvent.type,
@@ -210,10 +211,6 @@ export function useGameEngine(
     }
 
     subscribeToChannel();
-
-    channel.socket.conn?.addEventListener("message", () => {
-      setLastMessageAt(Date.now());
-    });
 
     // cleanup function to unsubscribe from the channel
     return () => {

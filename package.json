@@ -14,7 +14,7 @@
     "pretest:e2e:run": "npm run build",
     "test:e2e:run": "cross-env PORT=8811 start-server-and-test start http://localhost:8811 \"npx cypress run\"",
     "typecheck": "tsc -b && tsc -b cypress",
-    "validate": "run-p \"test -- --run\" lint typecheck test:e2e:run"
+    "validate": "run-p \"test -- --run\" format lint typecheck test:e2e:run"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "1.0.3",
@@ -27,7 +27,7 @@
     "@remix-run/node": "2.0.0",
     "@remix-run/react": "2.0.0",
     "@remix-run/vercel": "1.19.3",
-    "@supabase/supabase-js": "^2.26.0",
+    "@supabase/supabase-js": "^2.44.3",
     "@vercel/analytics": "^1.0.2",
     "@vercel/node": "^2.15.10",
     "classnames": "^2.3.2",
@@ -65,7 +65,7 @@
     "prettier-plugin-organize-imports": "^3.2.2",
     "prettier-plugin-tailwindcss": "^0.4.1",
     "start-server-and-test": "^2.0.3",
-    "supabase": "^1.123.4",
+    "supabase": "^1.183.5",
     "tailwindcss": "^3.3.2",
     "typescript": "^5.2.2",
     "vite": "^4.5.3",
