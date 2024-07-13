@@ -59,7 +59,7 @@ const ClueButton = React.forwardRef<HTMLButtonElement, ButtonProps & Props>(
           onKeyDown(event);
         }}
         className={classNames(
-          "group relative h-full w-full bg-blue-bright px-4 py-3 transition-colors",
+          "group relative h-full w-full bg-blue-bright px-4 py-2 transition-colors",
           {
             "hover:bg-blue-700 focus:bg-blue-700": playable,
             "bg-slate-800": !playable,

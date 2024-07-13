@@ -94,7 +94,7 @@ function PostGameClue({ clue, state, round, i, j }: Props) {
   if (!clueAnswer.isAnswered) {
     return (
       <td className="h-full sm:p-1">
-        <div className="h-full w-full bg-slate-800 px-4 py-3">
+        <div className="h-full w-full bg-slate-800 px-4 py-2">
           <p
             className={`text-shadow-md sm:text-shadow-lg flex items-center justify-center
             font-inter font-bold text-white opacity-75 transition-opacity
@@ -130,7 +130,7 @@ function PostGameClue({ clue, state, round, i, j }: Props) {
         <button
           disabled={!playable}
           className={classNames(
-            `group h-full w-full bg-blue-1000 px-4 py-3 transition-colors
+            `group h-full w-full bg-blue-1000 px-4 py-2 transition-colors
             hover:bg-blue-700`,
             {
               "bg-slate-800": !playable,
