@@ -1,5 +1,6 @@
-import { db } from "~/db.server";
+import { AuthSession } from "~/models/auth";
 import type { Database } from "~/models/database.types";
+import { getSupabase } from "~/supabase";
 import { getRandomWord } from "~/utils";
 
 type RoomTable = Database["public"]["Tables"]["rooms"];
@@ -7,8 +8,12 @@ type Room = RoomTable["Row"];
 
 /* Reads */
 
-export async function getRoom(roomId: number): Promise<Room | null> {
-  const { data, error } = await db
+export async function getRoom(
+  roomId: number,
+  accessToken?: AuthSession["accessToken"],
+): Promise<Room | null> {
+  const client = getSupabase(accessToken);
+  const { data, error } = await client
     .from<"rooms", RoomTable>("rooms")
     .select("*")
     .eq("id", roomId);
@@ -27,10 +32,11 @@ export async function getRoom(roomId: number): Promise<Room | null> {
 
 /* Writes */
 
-export async function createRoom(gameId: string) {
+export async function createRoom(gameId: string, accessToken?: string) {
+  const client = getSupabase(accessToken);
   const word = getRandomWord();
 
-  const { data, error } = await db
+  const { data, error } = await client
     .from<"rooms", RoomTable>("rooms")
     .insert<RoomTable["Insert"]>({ name: word, game_id: gameId })
     .select();

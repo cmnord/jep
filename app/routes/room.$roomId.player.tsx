@@ -34,12 +34,12 @@ export async function action({ request, params }: ActionFunctionArgs) {
     return json({ type, payload: { userId, name } });
   }
 
-  const room = await getRoom(roomId);
+  const authSession = await getValidAuthSession(request);
+  const room = await getRoom(roomId, authSession?.accessToken);
   if (!room) {
     throw new Response("room not found", { status: 404 });
   }
 
-  const authSession = await getValidAuthSession(request);
   // Mark the game as started if it hasn't been already
   if (authSession && request.method === "POST") {
     const solve = await getSolve(
@@ -57,10 +57,15 @@ export async function action({ request, params }: ActionFunctionArgs) {
     }
   }
 
-  await createRoomEvent(room.id, type, {
-    userId,
-    name,
-  });
+  await createRoomEvent(
+    room.id,
+    type,
+    {
+      userId,
+      name,
+    },
+    authSession?.accessToken,
+  );
 
   return null;
 }

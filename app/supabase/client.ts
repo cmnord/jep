@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { AuthSession } from "~/models/auth";
 
 import type { Database } from "~/models/database.types";
 import {
@@ -42,7 +43,7 @@ function getSupabaseClient(supabaseKey: string, accessToken?: string) {
  *
  * Reason : https://github.com/rphlmr/supa-fly-stack/pull/43#issue-1336412790
  */
-function getSupabase(accessToken?: string) {
+function getSupabase(accessToken?: AuthSession["accessToken"]) {
   return getSupabaseClient(SUPABASE_ANON_KEY, accessToken);
 }
 
