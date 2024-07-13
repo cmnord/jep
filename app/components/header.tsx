@@ -5,7 +5,6 @@ import CopyLinkButton from "~/components/copy-link-button";
 import * as DropdownMenu from "~/components/dropdown-menu";
 import SoundControl from "~/components/sound";
 import type { Game } from "~/models/game.server";
-import { stringToHslColor } from "~/utils";
 import { ExclamationTriangle } from "./icons";
 
 function LoginButton() {
@@ -20,21 +19,30 @@ function LoginButton() {
  * and a logout button.
  */
 function AccountButton({ user }: { user: { id: string; email: string } }) {
-  const backgroundColor = stringToHslColor(user.id);
   const email = user.email;
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>
         <button
-          className={`flex items-center justify-center rounded-full p-1
-          transition-colors
-          hover:bg-blue-700 data-[state=open]:bg-blue-700`}
-          style={{ backgroundColor }}
-          aria-label="Account"
+          className={`rounded-full p-1 text-white transition-colors
+          hover:bg-white/10 data-[state=open]:bg-white/10`}
+          title="Account"
         >
-          <div className="flex h-6 w-6 items-center justify-center uppercase text-blue-1000">
-            {email.slice(0, 1)}
-          </div>
+          {/* Heroicon name: user-circle */}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+            className="flex h-6 w-6"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+            />
+          </svg>
         </button>
       </DropdownMenu.Trigger>
 
@@ -103,8 +111,8 @@ function GameSettings({ game, url }: { game: Game; url: string }) {
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>
         <button
-          className={`flex h-6 w-6 items-center justify-center text-white
-          hover:text-slate-300 data-[state=open]:text-slate-300`}
+          className={`rounded-full p-1 text-white transition-colors
+            hover:bg-white/10 data-[state=open]:bg-white/10`}
           aria-label="Customise options"
         >
           {/* Heroicon name: outline/information-circle */}
@@ -207,7 +215,7 @@ export default function Header({
             Jep!
           </h1>
         </Link>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-5">
           {user ? <AccountButton user={user} /> : <LoginButton />}
           {game && <GameSettings game={game} url={BASE_URL + pathname} />}
         </div>
