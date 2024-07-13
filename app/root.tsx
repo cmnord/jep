@@ -66,7 +66,7 @@ export const links: LinksFunction = () => [
   },
   {
     rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&display=swap",
+    href: "https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Inter:wght@100..900&display=swap",
   },
   { rel: "stylesheet", href: stylesheet },
 ];

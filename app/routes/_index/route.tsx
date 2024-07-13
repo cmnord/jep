@@ -21,7 +21,7 @@ import Search from "~/components/search";
 import Upload from "~/components/upload";
 import { getValidAuthSession } from "~/models/auth";
 import { getGames } from "~/models/game.server";
-import { getSolvesForUser, Solve } from "~/models/solves.server";
+import { Solve, getSolvesForUser } from "~/models/solves.server";
 import { getSessionFormState } from "~/session.server";
 import useDebounce from "~/utils/use-debounce";
 import useScrollToBottom from "~/utils/use-scroll";

@@ -59,7 +59,7 @@ const ClueButton = React.forwardRef<HTMLButtonElement, ButtonProps & Props>(
           onKeyDown(event);
         }}
         className={classNames(
-          "group relative h-full w-full bg-blue-1000 px-4 py-3 transition-colors",
+          "group relative h-full w-full bg-blue-bright px-4 py-3 transition-colors",
           {
             "hover:bg-blue-700 focus:bg-blue-700": playable,
             "bg-slate-800": !playable,
@@ -71,7 +71,7 @@ const ClueButton = React.forwardRef<HTMLButtonElement, ButtonProps & Props>(
       >
         <p
           className={classNames(
-            "text-shadow-md sm:text-shadow-lg flex items-center justify-center gap-1 font-impact text-yellow-1000",
+            "text-shadow-md sm:text-shadow-lg flex items-center justify-center gap-1 font-inter font-bold text-yellow-1000",
             {
               "opacity-0 group-hover:opacity-50 group-focus:opacity-50":
                 answered,
@@ -89,7 +89,7 @@ ClueButton.displayName = "ClueButton";
 
 export function ClueComponent(props: Props) {
   return (
-    <td className="h-full sm:p-1">
+    <td className="h-full border-2 border-blue-925">
       {props.answered ? (
         <Popover
           content={

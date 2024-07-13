@@ -4,8 +4,8 @@ function Item(props: DropdownMenu.MenuItemProps) {
   return (
     <DropdownMenu.Item
       className={`group relative flex select-none items-center rounded-md p-1
-      text-slate-500 outline-none
-      data-[highlighted]:bg-slate-200 data-[highlighted]:text-slate-700`}
+      text-slate-200 outline-none
+      data-[highlighted]:bg-white/10`}
       {...props}
     >
       {props.children}
@@ -16,7 +16,7 @@ function Item(props: DropdownMenu.MenuItemProps) {
 function Content(props: DropdownMenu.MenuContentProps) {
   return (
     <DropdownMenu.Content
-      className={`w-56 rounded-md bg-white p-1 text-slate-900 shadow-md
+      className={`w-56 rounded-md bg-blue-1000 p-1 text-white shadow-md
           will-change-[opacity,transform]
           data-[side=bottom]:animate-slideUpAndFade
           data-[side=left]:animate-slideRightAndFade
@@ -26,7 +26,7 @@ function Content(props: DropdownMenu.MenuContentProps) {
       {...props}
     >
       {props.children}
-      <DropdownMenu.Arrow className="fill-white" />
+      <DropdownMenu.Arrow className="fill-blue-1000" />
     </DropdownMenu.Content>
   );
 }
@@ -37,4 +37,4 @@ const Portal = DropdownMenu.Portal;
 const Label = DropdownMenu.Label;
 const Separator = DropdownMenu.Separator;
 
-export { Root, Trigger, Portal, Content, Item, Label, Separator };
+export { Content, Item, Label, Portal, Root, Separator, Trigger };

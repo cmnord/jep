@@ -40,17 +40,17 @@ export default function Dialog({
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay
           className={`fixed bottom-0 left-0 right-0 top-0 grid
-          place-items-center overflow-y-auto bg-slate-500 bg-opacity-75
+          place-items-center overflow-y-auto bg-slate-500/75
           transition-opacity data-[state=open]:animate-overlayShow`}
         >
           <DialogPrimitive.Content
-            className={`rounded-md bg-white p-4 shadow-xl focus:outline-none
+            className={`rounded-md bg-blue-1000 p-4 shadow-xl focus:outline-none
             data-[state=open]:animate-contentShow sm:max-w-lg`}
           >
-            <DialogPrimitive.Title className="mb-4 text-2xl font-medium leading-6 text-blue-1000">
+            <DialogPrimitive.Title className="mb-4 text-2xl font-medium leading-6 text-white">
               {title}
             </DialogPrimitive.Title>
-            <DialogPrimitive.Description className="mb-5 mt-3 text-slate-500">
+            <DialogPrimitive.Description className="mb-5 mt-3 text-slate-300">
               {description}
             </DialogPrimitive.Description>
             {children}

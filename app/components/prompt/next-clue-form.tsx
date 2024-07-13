@@ -60,7 +60,7 @@ function PlayerScores({
                 {name}
               </span>
               <span
-                className={classNames("font-impact text-xl", {
+                className={classNames("font-inter text-xl font-bold", {
                   "text-white": score >= 0,
                   "text-red-400": score < 0,
                 })}
@@ -70,7 +70,7 @@ function PlayerScores({
             </div>
             <span
               className={classNames(
-                "text-shadow absolute -right-1/2 -top-1/4 animate-bounce whitespace-nowrap font-impact",
+                "text-shadow absolute -right-1/2 -top-1/4 animate-bounce whitespace-nowrap font-inter font-bold",
                 {
                   "text-green-300": correct,
                   "text-red-300": !correct,

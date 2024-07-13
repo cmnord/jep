@@ -63,4 +63,4 @@ function getSupabaseAdmin() {
   return getSupabaseClient(SUPABASE_SERVICE_ROLE_KEY);
 }
 
-export { getSupabaseAdmin, getSupabase };
+export { getSupabase, getSupabaseAdmin };

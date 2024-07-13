@@ -130,7 +130,7 @@ function GameSettings({ game, url }: { game: Game; url: string }) {
           <DropdownMenu.Label className="p-1 font-bold">
             {game.title}
           </DropdownMenu.Label>
-          <DropdownMenu.Label className="p-1 text-slate-700">
+          <DropdownMenu.Label className="p-1 text-slate-400">
             {game.author} &middot; {game.copyright}
           </DropdownMenu.Label>
           {game.note && (
@@ -138,7 +138,7 @@ function GameSettings({ game, url }: { game: Game; url: string }) {
               <p className="break-words p-1 text-sm">{game.note}</p>
             </DropdownMenu.Label>
           )}
-          <DropdownMenu.Label className="p-1 text-sm text-slate-700">
+          <DropdownMenu.Label className="p-1 text-sm text-slate-400">
             {game.boards.length} round{game.boards.length === 1 ? "" : "s"}
           </DropdownMenu.Label>
 
@@ -200,7 +200,7 @@ export default function Header({
   const pathname = matches[matches.length - 1].pathname;
 
   return (
-    <nav className="bg-blue-1000 p-4">
+    <nav className="bg-blue-bright p-4">
       <div className="flex items-center justify-between">
         <Link to="/">
           <h1 className="text-shadow-md font-korinna text-2xl font-bold text-white">

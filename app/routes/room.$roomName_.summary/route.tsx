@@ -83,7 +83,7 @@ export default function PlayGame() {
     .map((p) => p.name);
 
   return (
-    <div className="flex grow flex-col bg-slate-900 text-white">
+    <div className="flex grow flex-col bg-blue-1000 text-white">
       <div
         className={`mx-auto flex w-full max-w-screen-lg flex-col gap-4 p-3
           text-slate-100 sm:p-6 md:p-12`}

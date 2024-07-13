@@ -5,7 +5,7 @@
     "build": "remix build",
     "db:start": "npx supabase start -x gotrue,realtime,storage-api,imgproxy,inbucket,pgadmin-schema-diff,migra,postgres-meta,studio,deno-relay",
     "dev": "remix dev",
-    "format": "prettier --write .",
+    "format": "prettier --write . --log-level silent",
     "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint .",
     "start": "node --require dotenv/config node_modules/@remix-run/serve/dist/cli.js build/index.js",
     "test": "vitest --coverage",

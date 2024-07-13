@@ -70,7 +70,7 @@ export default function Footer() {
   return (
     <footer
       className={classNames("flex justify-center py-4", {
-        "bg-slate-900": isInGame,
+        "bg-blue-1000": isInGame,
       })}
     >
       <Dialog
@@ -84,7 +84,7 @@ export default function Footer() {
         description="Jep! is a website for playing trivia puzzles with friends online."
         onClickClose={() => setShowModal(false)}
       >
-        <p className="text-slate-500">
+        <p className="text-slate-300">
           This website is open to contributions from developers of any level or
           experience. For more information or to report any issues, check out
           the project on <Anchor href={GITHUB_URL}>GitHub</Anchor>.

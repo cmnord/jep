@@ -23,8 +23,8 @@ export default function CopyLinkButton({
         type="button"
         className={
           (className ?? "") +
-          ` inline-flex items-center rounded-md p-1 text-slate-700
-          hover:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500
+          ` inline-flex items-center rounded-md p-1 text-slate-200
+          hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500
           focus:ring-offset-2`
         }
         onClick={() => {

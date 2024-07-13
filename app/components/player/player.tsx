@@ -10,38 +10,38 @@ import { EditPlayerForm } from "./edit-player";
 const COMPOUND_EMOJI_REGEX =
   /\p{RI}\p{RI}|\p{Emoji}(\p{EMod}|\u{FE0F}\u{20E3}?|[\u{E0020}-\u{E007E}]+\u{E007F})?(\u{200D}\p{Emoji}(\p{EMod}|\u{FE0F}\u{20E3}?|[\u{E0020}-\u{E007E}]+\u{E007F})?)*|./gsu;
 
+/** PlayerScoreBox contains a player icon and their score. */
 export function PlayerScoreBox({
   player,
   hasBoardControl,
   children,
+  winning,
 }: {
   player: Player;
   hasBoardControl: boolean;
   children: React.ReactNode;
+  winning: boolean;
 }) {
   return (
     <div
-      className={classNames(
-        "flex gap-2 rounded-md border-2 bg-slate-700 p-2 shadow-md sm:p-3",
-        {
-          "border-transparent": !hasBoardControl,
-          "animate-borderPulse": hasBoardControl,
-        },
-      )}
+      className={classNames("flex gap-2 rounded-xl p-2 sm:p-3", {
+        "bg-white/5": !hasBoardControl,
+        "bg-blue-700": hasBoardControl,
+      })}
     >
       <PlayerIcon player={player} />
       <div className="w-full">
         {children}
-        <div
-          className={classNames(
-            "text-shadow-md w-1/3 grow font-impact text-xl sm:w-auto",
-            {
+        <div className="flex w-1/3 grow items-center justify-end gap-2 text-xl sm:w-auto">
+          {winning && <span>👑</span>}
+          <div
+            className={classNames("text-shadow-md font-inter font-bold", {
               "text-white": player.score >= 0,
               "text-red-400": player.score < 0,
-            },
-          )}
-        >
-          {formatDollars(player.score)}
+            })}
+          >
+            {formatDollars(player.score)}
+          </div>
         </div>
       </div>
     </div>
@@ -61,12 +61,15 @@ export function PlayerScore({
   winning: boolean;
 }) {
   return (
-    <PlayerScoreBox hasBoardControl={hasBoardControl} player={player}>
+    <PlayerScoreBox
+      hasBoardControl={hasBoardControl}
+      player={player}
+      winning={winning}
+    >
       <div className="flex w-full gap-2 text-2xl">
         <p className="font-handwriting font-bold text-slate-300">
           {player.name}
         </p>
-        {winning && <div className="ml-auto">👑</div>}
       </div>
     </PlayerScoreBox>
   );

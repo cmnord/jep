@@ -4,13 +4,13 @@ export function Category({ name, note }: { name: string; note?: string }) {
   const { fontSize, ref } = useFitText({ maxFontSize: 300 });
 
   return (
-    <th className="h-full border-2 border-b-4 border-black bg-blue-1000 leading-none sm:border-8 sm:border-b-12 sm:p-4">
+    <th className="h-full border-2 border-blue-925 bg-black/30 leading-none sm:p-4">
       <p
         style={{ fontSize }}
         ref={ref}
         className="flex h-20 w-full flex-col items-center justify-center"
       >
-        <span className="fond-bold text-shadow-md sm:text-shadow-lg font-impact uppercase">
+        <span className="text-shadow-md sm:text-shadow-lg font-inter font-bold uppercase">
           {name}
         </span>
       </p>

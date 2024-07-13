@@ -9,8 +9,8 @@ import type { Action, Player } from "~/engine";
 import {
   CANT_BUZZ_FLAG,
   CLUE_TIMEOUT_MS,
-  QUANTIZATION_FACTOR_MS,
   GameState,
+  QUANTIZATION_FACTOR_MS,
   useEngineContext,
 } from "~/engine";
 import useKeyPress from "~/utils/use-key-press";
@@ -403,7 +403,7 @@ function ReadCluePrompt({
         if (
           buzzUserId !== userId &&
           buzz !== CANT_BUZZ_FLAG &&
-          (buzz + QUANTIZATION_FACTOR_MS) < deltaMs
+          buzz + QUANTIZATION_FACTOR_MS < deltaMs
         ) {
           submitBuzz(CLUE_TIMEOUT_MS + 1);
         }
@@ -845,7 +845,7 @@ export function ConnectedPrompt(props: RoomProps) {
     <Fade show={isOpen}>
       <div
         className={`relative flex w-screen flex-col justify-between
-        overflow-x-hidden overflow-y-scroll bg-blue-1000`}
+        overflow-x-hidden overflow-y-scroll bg-blue-bright`}
         style={{
           height: "100dvh",
         }}

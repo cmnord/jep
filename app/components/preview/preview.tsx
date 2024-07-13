@@ -118,14 +118,14 @@ function PreviewRoundDialog({
             >
               {boardControlName}
             </span>{" "}
-            will start with control of the board.
+            starts with control of the board.
           </>
         )
       }
     >
       {round === 0 ? (
         <div className="flex flex-col gap-2">
-          <EditPlayerForm roomId={roomId} userId={userId} />
+          <EditPlayerForm roomId={roomId} userId={userId} winning={false} />
           <div className="flex flex-wrap gap-2">
             {Array.from(players.values()).map((p, i) => (
               <PlayerIcon key={i} player={p} />
