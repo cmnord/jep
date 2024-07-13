@@ -16,7 +16,7 @@ function SendIcon() {
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
       fill="currentColor"
-      className="h-5 w-5"
+      className="h-5 w-5 opacity-50"
       role="img"
       aria-labelledby="send-title"
     >
@@ -33,7 +33,7 @@ function PencilIcon() {
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
       fill="currentColor"
-      className="h-5 w-5"
+      className="h-5 w-5 opacity-50"
       role="img"
       aria-labelledby="pencil-title"
     >
@@ -52,7 +52,7 @@ function EditPlayer({
   onBlur,
   onChangeName,
   onFocus,
-  winning = false,
+  winning,
 }: {
   hasBoardControl: boolean;
   loading: boolean;
@@ -61,7 +61,7 @@ function EditPlayer({
   onBlur: () => void;
   onChangeName: (name: string) => void;
   onFocus: () => void;
-  winning?: boolean;
+  winning: boolean;
 }) {
   const inputRef = React.useRef<HTMLInputElement | null>(null);
   const debouncedLoading = useDebounceEnd(loading, 100);
@@ -72,13 +72,12 @@ function EditPlayer({
   }
 
   return (
-    <PlayerScoreBox player={player} hasBoardControl={hasBoardControl}>
-      <div
-        className={`flex items-center gap-2 rounded-md text-slate-300
-        transition-colors
-        hover:bg-slate-800 hover:text-white
-        focus:bg-slate-800 focus:text-white`}
-      >
+    <PlayerScoreBox
+      player={player}
+      hasBoardControl={hasBoardControl}
+      winning={winning}
+    >
+      <div className="flex items-center gap-2 rounded-xl text-white">
         <input
           ref={inputRef}
           type="text"
@@ -86,7 +85,7 @@ function EditPlayer({
           name="name"
           className={`block w-full bg-transparent font-handwriting text-2xl
           font-bold
-          placeholder:font-sans placeholder:text-sm placeholder:font-normal`}
+          placeholder:font-sans placeholder:text-sm placeholder:font-normal placeholder:text-white placeholder:text-opacity-40`}
           placeholder="Enter your name"
           defaultValue={player.name}
           onChange={(e) => onChangeName(e.target.value)}
@@ -94,17 +93,24 @@ function EditPlayer({
           onFocus={handleFocus}
         />
         {debouncedLoading ? (
-          <LoadingSpinner className="text-blue-600" />
+          <LoadingSpinner className="px-3 py-2 text-blue-600" />
         ) : editing ? (
-          <button type="button" onClick={onBlur}>
+          <button
+            type="button"
+            onClick={onBlur}
+            className="rounded-xl bg-white/10 px-3 py-2"
+          >
             <SendIcon />
           </button>
         ) : (
-          <button type="button" onClick={handleFocus}>
+          <button
+            type="button"
+            onClick={handleFocus}
+            className="rounded-xl bg-white/10 px-3 py-2"
+          >
             <PencilIcon />
           </button>
         )}
-        {winning && <div className="ml-auto text-2xl">👑</div>}
       </div>
     </PlayerScoreBox>
   );
@@ -113,8 +119,8 @@ function EditPlayer({
 export function EditPlayerForm({
   roomId,
   userId,
-  winning = false,
-}: { winning?: boolean } & RoomProps) {
+  winning,
+}: { winning: boolean } & RoomProps) {
   const { players, soloDispatch, boardControl } = useEngineContext();
 
   const fetcher = useFetcher<Action>();

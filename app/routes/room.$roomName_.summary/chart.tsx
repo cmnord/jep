@@ -12,7 +12,7 @@ import {
   YAxis,
 } from "recharts";
 import { Action, gameEngine } from "~/engine";
-import { getNumCluesInBoard, State, stateFromGame } from "~/engine/state";
+import { State, getNumCluesInBoard, stateFromGame } from "~/engine/state";
 import { Game } from "~/models/game.server";
 import { stringToHslColor } from "~/utils";
 

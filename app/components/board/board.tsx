@@ -54,7 +54,7 @@ function BoardComponent({
         className="mx-auto max-w-screen-lg"
         style={{ minWidth: `${board.categoryNames.length * 50}px` }}
       >
-        <table className="h-1 w-full table-fixed border-spacing-3 bg-black text-white">
+        <table className="h-1 w-full table-fixed bg-blue-bright text-white">
           <thead>
             <tr className="h-1">
               {board.categories.map((category) => (

@@ -96,8 +96,8 @@ function PostGameClue({ clue, state, round, i, j }: Props) {
       <td className="h-full sm:p-1">
         <div className="h-full w-full bg-slate-800 px-4 py-3">
           <p
-            className={`text-shadow-md sm:text-shadow-lg flex items-center
-            justify-center font-impact text-white opacity-75 transition-opacity
+            className={`text-shadow-md sm:text-shadow-lg flex items-center justify-center
+            font-inter font-bold text-white opacity-75 transition-opacity
             group-hover:opacity-100`}
           >
             {clue.wagerable && clueAnswer.isAnswered ? null : (
@@ -140,7 +140,7 @@ function PostGameClue({ clue, state, round, i, j }: Props) {
         >
           <p
             className={`text-shadow-md sm:text-shadow-lg flex items-center
-            justify-center font-impact text-white opacity-75 transition-opacity
+            justify-center font-inter font-bold text-white opacity-75 transition-opacity
             group-hover:opacity-100`}
           >
             {clue.wagerable ? null : (

@@ -31,15 +31,19 @@ module.exports = {
         12: "12px",
       },
       backgroundColor: {
-        "blue-1000": "#120081",
+        "blue-1000": "#0b163f",
+        "blue-bright": "#0c0a79",
+      },
+      borderColor: {
+        "blue-925": "#222167",
       },
       colors: {
-        "blue-1000": "#120081",
+        "blue-1000": "#0b163f",
         "yellow-1000": "#d69f4c",
       },
       fontFamily: {
         korinna: ["Korinna-Agency", "Times New Roman", "Times", "serif"],
-        impact: ["Impact", "Times New Roman", "Times", "serif"],
+        inter: ["Inter", "Times New Roman", "Times", "serif"],
         handwriting: ["Caveat", "cursive"],
       },
       keyframes: {

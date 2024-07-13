@@ -122,7 +122,7 @@ export default function Upload({
           file?.name ?? "unknown"
         }" publicly?`}
       >
-        <div className="mb-4 flex flex-col gap-2 text-sm text-slate-500">
+        <div className="mb-4 flex flex-col gap-2 text-sm text-slate-300">
           <WarningMessage>
             As a guest, you will not be able to edit or delete the game later.
           </WarningMessage>
