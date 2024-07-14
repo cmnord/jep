@@ -30,6 +30,11 @@ const PLAYER1_JOIN_ACTION: Action = {
   payload: { name: PLAYER1.name, userId: PLAYER1.userId },
 };
 
+const PLAYER1_KICK_ACTION: Action = {
+  type: ActionType.Kick,
+  payload: { name: PLAYER1.name, userId: PLAYER1.userId },
+};
+
 const PLAYER2_JOIN_ACTION: Action = {
   type: ActionType.Join,
   payload: { name: PLAYER2.name, userId: PLAYER2.userId },
@@ -143,6 +148,15 @@ describe("gameEngine", () => {
       expectedState: produce(initialState, (draft) => {
         draft.boardControl = PLAYER1.userId;
         draft.players.set(PLAYER1.userId, PLAYER1);
+        draft.players.set(PLAYER2.userId, PLAYER2);
+      }),
+    },
+    {
+      name: "Two players join, first is kicked, second gets board control",
+      state: initialState,
+      actions: [PLAYER1_JOIN_ACTION, PLAYER2_JOIN_ACTION, PLAYER1_KICK_ACTION],
+      expectedState: produce(initialState, (draft) => {
+        draft.boardControl = PLAYER2.userId;
         draft.players.set(PLAYER2.userId, PLAYER2);
       }),
     },

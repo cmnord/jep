@@ -37,7 +37,8 @@ export function isPlayerAction(action: Action): action is {
 } {
   return (
     (action.type === ActionType.Join ||
-      action.type === ActionType.ChangeName) &&
+      action.type === ActionType.ChangeName ||
+      action.type === ActionType.Kick) &&
     action.payload !== null &&
     typeof action.payload === "object" &&
     "userId" in action.payload &&
