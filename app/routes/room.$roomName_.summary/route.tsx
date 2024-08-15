@@ -48,8 +48,8 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 
   const roomEvents = await getRoomEvents(room.id, accessToken);
 
+  const state = applyRoomEventsToState(stateFromGame(game), roomEvents);
   if (userId) {
-    const state = applyRoomEventsToState(stateFromGame(game), roomEvents);
     if (state.type === GameState.GameOver && state.players.has(userId)) {
       const solve = await getSolve(userId, game.id, accessToken);
       if (solve && solve.solved_at === null) {
@@ -58,7 +58,16 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     }
   }
 
+  const sortedPlayers = Array.from(state.players.values()).sort(
+    (a, b) => b.score - a.score,
+  );
+  const coryats = sortedPlayers.map((player) =>
+    getCoryat(player.userId, state),
+  );
+
   return json({
+    sortedPlayers,
+    coryats,
     game,
     roomEvents,
     roomId,
@@ -74,11 +83,8 @@ export default function PlayGame() {
     data.roomEvents,
   );
 
-  const sortedPlayers = Array.from(state.players.values()).sort(
-    (a, b) => b.score - a.score,
-  );
-  const maxScore = sortedPlayers.at(0)?.score;
-  const winningPlayers = sortedPlayers
+  const maxScore = data.sortedPlayers.at(0)?.score;
+  const winningPlayers = data.sortedPlayers
     .filter((p) => p.score === maxScore)
     .map((p) => p.name);
 
@@ -90,7 +96,7 @@ export default function PlayGame() {
       >
         <h2 className="text-2xl">Congrats, {winningPlayers.join(" and ")}!</h2>
         <div className="flex flex-col gap-2 sm:grid sm:grid-cols-3">
-          {sortedPlayers.map((p) => (
+          {data.sortedPlayers.map((p) => (
             <PlayerScore
               key={p.userId}
               player={p}
@@ -101,15 +107,15 @@ export default function PlayGame() {
         </div>
         <h3 className="text-lg">Coryat Scores</h3>
         <div className="flex flex-col gap-2 sm:grid sm:grid-cols-3">
-          {sortedPlayers.map((p) => (
+          {data.sortedPlayers.map((p, i) => (
             <span>
-              {p.name}: {formatDollars(getCoryat(p.userId, state))}
+              {p.name}: {formatDollars(data.coryats[i])}
             </span>
           ))}
         </div>
         <ScoreChart
           game={data.game}
-          state={state}
+          players={data.sortedPlayers}
           roomEvents={data.roomEvents.filter(isTypedRoomEvent)}
         />
       </div>

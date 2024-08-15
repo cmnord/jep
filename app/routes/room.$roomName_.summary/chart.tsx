@@ -12,7 +12,7 @@ import {
   YAxis,
 } from "recharts";
 import { Action, gameEngine } from "~/engine";
-import { State, getNumCluesInBoard, stateFromGame } from "~/engine/state";
+import { Player, getNumCluesInBoard, stateFromGame } from "~/engine/state";
 import { Game } from "~/models/game.server";
 import { stringToHslColor } from "~/utils";
 
@@ -78,18 +78,16 @@ const CustomDot = (props: DotProps & { payload?: DataPoint }) => {
 /** Chart is a line chart of each player's score over time. */
 export default function Chart({
   game,
-  state,
+  players,
   roomEvents,
 }: {
   game: Game;
-  state: State;
+  players: Player[];
   roomEvents: Action[];
 }) {
   const initialPoint: DataPoint = {
     x: 0,
-    ...Object.fromEntries(
-      Array.from(state.players.values()).map((player) => [player.userId, 0]),
-    ),
+    ...Object.fromEntries(players.map((player) => [player.userId, 0])),
     wagerable: 0,
   };
   const data = [initialPoint];
@@ -147,7 +145,7 @@ export default function Chart({
           ))}
           {/* Horizontal reference line at score 0 */}
           <ReferenceLine y={0} strokeDasharray="3 3" />
-          {Array.from(state.players.values()).map((player) => (
+          {players.map((player) => (
             <Line
               name={player.name}
               connectNulls
