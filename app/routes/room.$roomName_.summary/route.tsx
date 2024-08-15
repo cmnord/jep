@@ -64,10 +64,12 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const coryats = sortedPlayers.map((player) =>
     getCoryat(player.userId, state),
   );
+  const combinedCoryat = coryats.reduce((acc, coryat) => acc + coryat, 0);
 
   return json({
     sortedPlayers,
     coryats,
+    combinedCoryat,
     game,
     roomEvents,
     roomId,
@@ -106,6 +108,10 @@ export default function PlayGame() {
           ))}
         </div>
         <h3 className="text-lg">Coryat Scores</h3>
+        <p>
+          <strong>Combined: </strong>
+          {formatDollars(data.combinedCoryat)}
+        </p>
         <div className="flex flex-col gap-2 sm:grid sm:grid-cols-3">
           {data.sortedPlayers.map((p, i) => (
             <span>
