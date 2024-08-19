@@ -13,7 +13,7 @@ import { BASE_URL, formatDollars } from "~/utils";
 
 import { getSolve, markSolved } from "~/models/solves.server";
 import ScoreChart from "./chart";
-import { getCoryat } from "./coryat";
+import { getBattingAverage, getCoryat } from "./coryat";
 import GameSummary from "./summary";
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
@@ -65,9 +65,13 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     getCoryat(player.userId, state),
   );
   const combinedCoryat = coryats.reduce((acc, coryat) => acc + coryat, 0);
+  const battingAverages = sortedPlayers.map((player) =>
+    getBattingAverage(player.userId, state),
+  );
 
   return json({
     sortedPlayers,
+    battingAverages,
     coryats,
     combinedCoryat,
     game,
@@ -116,6 +120,15 @@ export default function PlayGame() {
           {data.sortedPlayers.map((p, i) => (
             <span>
               {p.name}: {formatDollars(data.coryats[i])}
+            </span>
+          ))}
+        </div>
+        <h3 className="text-lg">Batting averages</h3>
+        <div className="flex flex-col gap-2 sm:grid sm:grid-cols-3">
+          {data.sortedPlayers.map((p, i) => (
+            <span>
+              {p.name}: {data.battingAverages[i][0]} /{" "}
+              {data.battingAverages[i][1]}
             </span>
           ))}
         </div>

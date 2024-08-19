@@ -1,5 +1,37 @@
 import { State } from "~/engine";
 
+/** getBattingAverage returns the number of correct responses and number of
+ * possible correct responses for a player. */
+export function getBattingAverage(userId: string, state: State) {
+  const player = state.players.get(userId);
+  if (!player) {
+    return [0, 0];
+  }
+
+  let numResponses = 0;
+  let numCorrectResponses = 0;
+
+  for (const roundIsAnswered of state.isAnswered) {
+    for (const rowIsAnswered of roundIsAnswered) {
+      for (const { isAnswered, answeredBy } of rowIsAnswered) {
+        if (!isAnswered) {
+          continue;
+        }
+        const correct = answeredBy.get(player.userId);
+        if (correct === undefined) {
+          continue;
+        }
+        numResponses += 1;
+        if (correct) {
+          numCorrectResponses += 1;
+        }
+      }
+    }
+  }
+
+  return [numCorrectResponses, numResponses];
+}
+
 /** getCoryat returns the player's score without any wagerable clues. If correct,
  * add the "natural" value of a clue in this row back in.
  */
