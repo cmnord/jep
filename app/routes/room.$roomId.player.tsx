@@ -8,7 +8,11 @@ import { getRoom } from "~/models/room.server";
 import { getSolve, markAttempted } from "~/models/solves.server";
 
 export async function action({ request, params }: ActionFunctionArgs) {
-  if (request.method !== "POST" && request.method !== "PATCH") {
+  if (
+    request.method !== "POST" &&
+    request.method !== "PATCH" &&
+    request.method !== "DELETE"
+  ) {
     throw new Response("method not allowed", { status: 405 });
   }
   const formData = await request.formData();
@@ -28,7 +32,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
   }
 
   const type =
-    request.method === "POST" ? ActionType.Join : ActionType.ChangeName;
+    request.method === "POST"
+      ? ActionType.Join
+      : request.method === "PATCH"
+      ? ActionType.ChangeName
+      : ActionType.Kick;
 
   if (roomId === -1) {
     return json({ type, payload: { userId, name } });

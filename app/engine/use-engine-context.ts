@@ -9,6 +9,7 @@ export const GameEngineContext = React.createContext<
   type: GameState.PreviewRound,
   activeClue: null,
   answers: new Map(),
+  numAnswered: 0,
   answeredBy: () => false,
   board: { categories: [], categoryNames: [] },
   boardControl: null,
