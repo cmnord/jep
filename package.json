@@ -27,7 +27,7 @@
     "@remix-run/node": "2.0.0",
     "@remix-run/react": "2.0.0",
     "@remix-run/vercel": "1.19.3",
-    "@supabase/supabase-js": "^2.44.3",
+    "@supabase/supabase-js": "^2.86.0",
     "@vercel/analytics": "^1.0.2",
     "@vercel/node": "^2.15.10",
     "classnames": "^2.3.2",
