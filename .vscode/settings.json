@@ -1,0 +1,14 @@
+{
+  "json.schemas": [
+    {
+      "fileMatch": [
+        "/*.jep.json"
+      ],
+      "url": "https://whatis.club/game.schema.json"
+    }
+  ],
+  "yaml.schemas": {
+    "https://json.schemastore.org/github-workflow.json": "/.github/workflows/deploy.yml"
+  },
+  "testing.automaticallyOpenPeekView": "never",
+}
