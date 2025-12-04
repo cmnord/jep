@@ -68,7 +68,7 @@
     "supabase": "^1.183.5",
     "tailwindcss": "^3.3.2",
     "typescript": "^5.2.2",
-    "vite": "^4.5.3",
+    "vite": "^7.2.6",
     "vite-tsconfig-paths": "^4.2.0",
     "vitest": "^0.29.8"
   },
