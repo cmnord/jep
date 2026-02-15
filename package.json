@@ -74,7 +74,8 @@
   },
   "overrides": {
     "react": "$react",
-    "react-dom": "$react-dom"
+    "react-dom": "$react-dom",
+    "vite": "$vite"
   },
   "engines": {
     "node": ">=20"
