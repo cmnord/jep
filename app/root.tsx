@@ -19,7 +19,6 @@ import { Analytics } from "@vercel/analytics/react";
 import * as React from "react";
 
 import { CodeBlock } from "~/components/code";
-import { DefaultErrorBoundary } from "~/components/error";
 import Footer from "~/components/footer";
 import Header from "~/components/header";
 import { getValidAuthSession } from "~/models/auth";
@@ -155,34 +154,17 @@ export default function App() {
   );
 }
 
-export function ErrorBoundary() {
-  const error = useRouteError();
-  console.error(error);
+const errorHeader = (
+  <nav className="bg-blue-bright p-4">
+    <a href="/">
+      <h1 className="text-shadow-md font-korinna text-2xl font-bold text-white">
+        Jep!
+      </h1>
+    </a>
+  </nav>
+);
 
-  if (isRouteErrorResponse(error)) {
-    return (
-      <html>
-        <head>
-          <title>Oh no!</title>
-          <meta charSet="utf-8" />
-          <meta name="viewport" content="width=device-width,initial-scale=1" />
-          <Meta />
-          <Links />
-        </head>
-        <body className="flex flex-col">
-          <Header />
-          <div className="flex flex-col gap-4 p-12">
-            <h1 className="text-3xl font-bold">Caught error</h1>
-            <p>Status: {error.status}</p>
-            <CodeBlock text={JSON.stringify(error.data, null, 2)} />
-          </div>
-          <ScrollRestoration />
-          <Scripts />
-        </body>
-      </html>
-    );
-  }
-
+function ErrorDocument({ children }: { children: React.ReactNode }) {
   return (
     <html>
       <head>
@@ -193,11 +175,86 @@ export function ErrorBoundary() {
         <Links />
       </head>
       <body className="flex flex-col">
-        <Header />
-        <DefaultErrorBoundary />
+        {errorHeader}
+        {children}
         <ScrollRestoration />
         <Scripts />
       </body>
     </html>
+  );
+}
+
+/** Renders route error details. Must be rendered within a router context. */
+function RouteError() {
+  const error = useRouteError();
+  console.error(error);
+
+  if (isRouteErrorResponse(error)) {
+    return (
+      <ErrorDocument>
+        <div className="flex flex-col gap-4 p-12">
+          <h1 className="text-3xl font-bold">Caught error</h1>
+          <p>Status: {error.status}</p>
+          <CodeBlock text={JSON.stringify(error.data, null, 2)} />
+        </div>
+      </ErrorDocument>
+    );
+  }
+
+  const message = error instanceof Error ? error.message : "Unknown error";
+  return (
+    <ErrorDocument>
+      <div className="p-12">
+        <h1 className="mb-4 text-xl font-bold">Error</h1>
+        <p className="font-mono text-sm text-red-500">{message}</p>
+      </div>
+    </ErrorDocument>
+  );
+}
+
+class SafeErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <html>
+          <head>
+            <title>Oh no!</title>
+            <meta charSet="utf-8" />
+            <meta
+              name="viewport"
+              content="width=device-width,initial-scale=1"
+            />
+          </head>
+          <body className="flex flex-col p-12">
+            <h1 className="mb-4 text-xl font-bold">Application Error</h1>
+            <p>
+              An unexpected error occurred. Check the browser console for
+              details.
+            </p>
+          </body>
+        </html>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+export function ErrorBoundary() {
+  return (
+    <SafeErrorBoundary>
+      <RouteError />
+    </SafeErrorBoundary>
   );
 }

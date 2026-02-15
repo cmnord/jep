@@ -1,5 +1,5 @@
 import { createCookieSessionStorage } from "@remix-run/node";
-import { nanoid } from "nanoid";
+import { randomUUID } from "node:crypto";
 
 import { NODE_ENV, SESSION_SECRET } from "~/utils";
 
@@ -77,7 +77,7 @@ export async function getOrCreateUserSession(
 ) {
   let userId = await getUserSession(request);
   if (!userId) {
-    userId = nanoid();
+    userId = randomUUID();
     await createUserSession(request, userId, headers);
   }
   return userId;
