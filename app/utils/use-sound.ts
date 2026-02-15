@@ -1,5 +1,4 @@
 import * as React from "react";
-import useSound from "use-sound";
 
 interface SoundSettings {
   /** volume is a number between 0 and 1. */
@@ -24,11 +23,37 @@ export function useSoundContext() {
 }
 
 /** useGameSound uses the sound settings from the context to play a sound. */
-export default function useGameSound(src: string) {
-  const soundContext = useSoundContext();
-  return useSound<unknown>(src, {
-    volume: soundContext.volume,
-    interrupt: true,
-    soundEnabled: !soundContext.mute,
-  });
+export default function useGameSound(
+  src: string,
+): [() => void, { stop: () => void }] {
+  const { volume, mute } = useSoundContext();
+  const audioRef = React.useRef<HTMLAudioElement | null>(null);
+
+  React.useEffect(() => {
+    audioRef.current = new Audio(src);
+    return () => {
+      audioRef.current?.pause();
+      audioRef.current = null;
+    };
+  }, [src]);
+
+  React.useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+    }
+  }, [volume]);
+
+  const play = React.useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio || mute) return;
+    // interrupt: restart if already playing
+    audio.currentTime = 0;
+    audio.play();
+  }, [mute]);
+
+  const stop = React.useCallback(() => {
+    audioRef.current?.pause();
+  }, []);
+
+  return [play, { stop }];
 }
