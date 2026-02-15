@@ -24,7 +24,7 @@
     "@radix-ui/react-switch": "1.0.2",
     "@radix-ui/react-toast": "1.1.3",
     "@radix-ui/react-toggle": "1.0.2",
-    "@remix-run/node": "2.0.0",
+    "@remix-run/node": "2.17.2",
     "@remix-run/react": "2.0.0",
     "@remix-run/vercel": "1.19.3",
     "@supabase/supabase-js": "^2.86.0",
