@@ -116,7 +116,7 @@ function transform(
       const typ = typs[i];
       try {
         return transform(val, typ, getProps);
-      } catch (_) {}
+      } catch {}
     }
     return invalidValue(typs, val, key, parent);
   }

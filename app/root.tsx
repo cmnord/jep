@@ -79,7 +79,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       ? await getUserByEmail(authSession.email, authSession.accessToken)
       : undefined;
     return json({ user, env, BASE_URL, NODE_ENV });
-  } catch (error: unknown) {
+  } catch {
     return json({
       user: undefined,
       env,

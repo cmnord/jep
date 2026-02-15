@@ -19,7 +19,7 @@ import GameSummary from "./summary";
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   try {
     return [{ title: "Summary: " + data?.game.title }];
-  } catch (error: unknown) {
+  } catch {
     return [];
   }
 };

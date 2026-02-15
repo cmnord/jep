@@ -10,7 +10,7 @@ import { BASE_URL } from "~/utils";
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   try {
     return [{ title: data?.game.title }];
-  } catch (error: unknown) {
+  } catch {
     return [];
   }
 };
