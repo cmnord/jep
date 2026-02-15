@@ -46,7 +46,3 @@ as permissive
 for select
 to public
 using (true);
-
-
-
-drop function if exists "storage"."can_insert_object"(bucketid text, name text, owner uuid, metadata jsonb);
