@@ -74,7 +74,7 @@ function UploadBox({
   return (
     <div className="my-2 flex flex-col items-center">
       <button
-        {...getRootProps()}
+        {...getRootProps({ role: "button" })}
         id="upload-button"
         type="button"
         onClick={() => inputRef.current?.click()}
@@ -95,8 +95,18 @@ function UploadBox({
         {loading ? <LoadingSpinner className="mb-2" /> : <UploadIcon />}
         <p className="grid text-center">
           <span className="col-start-1 row-start-1">{label}</span>
-          <span className="col-start-1 row-start-1 invisible" aria-hidden="true">{UPLOAD_TEXT}</span>
-          <span className="col-start-1 row-start-1 invisible" aria-hidden="true">Invalid file type</span>
+          <span
+            className="invisible col-start-1 row-start-1"
+            aria-hidden="true"
+          >
+            {UPLOAD_TEXT}
+          </span>
+          <span
+            className="invisible col-start-1 row-start-1"
+            aria-hidden="true"
+          >
+            Invalid file type
+          </span>
         </p>
         <input
           id="upload"

@@ -20,8 +20,8 @@ export default function SolveInfo({ solve }: { solve: Solve }) {
   const solveDate = solve.solved_at
     ? formatter.format(new Date(solve.solved_at))
     : solve.started_at
-    ? formatter.format(new Date(solve.started_at))
-    : undefined;
+      ? formatter.format(new Date(solve.started_at))
+      : undefined;
 
   return (
     <div className="flex items-center gap-2">

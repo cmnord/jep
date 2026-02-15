@@ -103,4 +103,5 @@ npx supabase gen types typescript --linked > app/models/database.types.ts
 [docker]: https://www.docker.com/
 
 [^1]: https://supabase.com/docs/guides/cli/local-development#database-migrations
+
 [^2]: https://supabase.com/docs/guides/cli/local-development#deploy-database-changes

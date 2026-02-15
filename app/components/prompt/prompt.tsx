@@ -143,7 +143,7 @@ function WagerCluePrompt({ roomId, userId }: RoomProps) {
 
   const canWager = buzzes.get(userId) !== CANT_BUZZ_FLAG;
   const wagererName = boardControl
-    ? players.get(boardControl)?.name ?? "winning buzzer"
+    ? (players.get(boardControl)?.name ?? "winning buzzer")
     : "winning buzzer";
   const longForm = clue?.longForm ?? false;
 
@@ -610,7 +610,7 @@ function RevealAnswerToBuzzerPrompt({ roomId, userId }: RoomProps) {
   );
 
   const winningPlayerName = winningBuzzer
-    ? players.get(winningBuzzer)?.name ?? "winning buzzer"
+    ? (players.get(winningBuzzer)?.name ?? "winning buzzer")
     : "winning buzzer";
 
   return (

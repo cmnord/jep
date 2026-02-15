@@ -107,9 +107,9 @@
   --bw: 4px;
   --c: #d69f4c;
 
-  background-image: linear-gradient(var(--c), var(--c)),
+  background-image:
     linear-gradient(var(--c), var(--c)), linear-gradient(var(--c), var(--c)),
-    linear-gradient(var(--c), var(--c));
+    linear-gradient(var(--c), var(--c)), linear-gradient(var(--c), var(--c));
   background-repeat: no-repeat;
   background-position:
     0 100%,

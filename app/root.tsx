@@ -148,7 +148,6 @@ export default function App() {
               }}
             />
             <Scripts />
-
           </ToastPrimitive.Provider>
         </SoundContext.Provider>
       </body>

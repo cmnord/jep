@@ -90,12 +90,6 @@ export function getWinningBuzzer(
     ],
   );
 
-  quantizedBuzzes.forEach(([userId, qDeltaMs, tiebreak], index) => {
-    console.log(
-      `User: ${userId}, Raw: ${validBuzzes[index][1]}, Quantized: ${qDeltaMs}, Tiebreaker: ${tiebreak}`,
-    );
-  });
-
   const sortedBuzzes = quantizedBuzzes.sort(
     ([, qDeltaA, tiebreakA], [, qDeltaB, tiebreakB]) => {
       if (qDeltaA === qDeltaB) {
@@ -444,7 +438,7 @@ export function gameEngine(state: State, action: Action): State {
           : player.score - clueValue;
 
         const numExpectedChecks = isLongForm
-          ? draft.answers.get(key)?.size ?? 0
+          ? (draft.answers.get(key)?.size ?? 0)
           : 1;
         const numChecks =
           (draft.isAnswered.at(draft.round)?.at(i)?.at(j)?.answeredBy.size ??
