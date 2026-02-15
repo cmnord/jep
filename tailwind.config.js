@@ -1,7 +1,7 @@
 import plugin from "tailwindcss/plugin";
 
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+export default {
   content: ["./app/**/*.{ts,tsx,jsx,js}"],
   theme: {
     extend: {

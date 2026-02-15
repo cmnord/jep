@@ -9,7 +9,7 @@ import type { Game } from "~/models/game.server";
  * path.join(). The workaround is to use __dirname and concatenate the json
  * directory to it.
  */
-const JSON_DIRECTORY = __dirname + "/../app/static";
+const JSON_DIRECTORY = import.meta.dirname + "/../app/static";
 
 const MOCK_FILE_PATH = JSON_DIRECTORY + "/mock.jep.json";
 
