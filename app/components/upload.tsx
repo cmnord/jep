@@ -1,6 +1,8 @@
 import type { FetcherWithComponents } from "@remix-run/react";
 import { useSubmit } from "@remix-run/react";
+import classNames from "classnames";
 import * as React from "react";
+import { useDropzone } from "react-dropzone";
 
 import Button from "~/components/button";
 import Dialog from "~/components/dialog";
@@ -39,24 +41,63 @@ function UploadBox({
   loading: boolean;
   onChange: (file?: File) => void;
 }) {
-  // TODO: drag and drop with react-dropzone
   const inputRef = React.useRef<HTMLInputElement>(null);
+
+  const onDrop = React.useCallback(
+    (acceptedFiles: File[]) => {
+      const file = acceptedFiles[0];
+      if (!file || !inputRef.current) return;
+
+      // Set the file on the native input so form serialization works
+      const dataTransfer = new DataTransfer();
+      dataTransfer.items.add(file);
+      inputRef.current.files = dataTransfer.files;
+
+      onChange(file);
+    },
+    [onChange],
+  );
+
+  const { getRootProps, isDragActive, isDragReject } = useDropzone({
+    onDrop,
+    accept: { "application/json": [".jep.json", ".json"] },
+    multiple: false,
+    disabled: loading,
+    noClick: true,
+  });
+
+  let label = UPLOAD_TEXT;
+  if (isDragActive) {
+    label = isDragReject ? "Invalid file type" : "Drop file here";
+  }
 
   return (
     <div className="my-2 flex flex-col items-center">
       <button
+        {...getRootProps()}
         id="upload-button"
         type="button"
         onClick={() => inputRef.current?.click()}
-        className={`flex flex-col items-center justify-center rounded-lg
-        border-2 border-dashed border-blue-600 p-6 text-sm text-slate-900
-        shadow-sm transition-colors
-        hover:border-blue-700 hover:shadow-md
-        focus:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500
-        focus:ring-offset-2`}
+        className={classNames(
+          `flex flex-col items-center justify-center rounded-lg
+          border-2 border-dashed p-6 text-sm text-slate-900
+          shadow-sm transition-colors
+          focus:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500
+          focus:ring-offset-2`,
+          {
+            "border-green-500 bg-green-50": isDragActive && !isDragReject,
+            "border-red-500 bg-red-50": isDragReject,
+            "border-blue-600 hover:border-blue-700 hover:shadow-md":
+              !isDragActive,
+          },
+        )}
       >
         {loading ? <LoadingSpinner className="mb-2" /> : <UploadIcon />}
-        <p>{UPLOAD_TEXT}</p>
+        <p className="grid text-center">
+          <span className="col-start-1 row-start-1">{label}</span>
+          <span className="col-start-1 row-start-1 invisible" aria-hidden="true">{UPLOAD_TEXT}</span>
+          <span className="col-start-1 row-start-1 invisible" aria-hidden="true">Invalid file type</span>
+        </p>
         <input
           id="upload"
           type="file"
