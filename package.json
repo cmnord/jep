@@ -4,7 +4,7 @@
   "sideEffects": false,
   "scripts": {
     "build": "remix vite:build",
-    "db:start": "npx supabase start -x storage-api,imgproxy,postgres-meta,edge-runtime,logflare,supavisor,vector",
+    "db:start": "npx supabase start -x storage-api,imgproxy,edge-runtime,logflare,supavisor,vector",
     "dev": "remix vite:dev",
     "format": "prettier --write . --log-level silent",
     "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint .",
