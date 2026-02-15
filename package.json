@@ -3,7 +3,7 @@
   "sideEffects": false,
   "scripts": {
     "build": "remix build",
-    "db:start": "npx supabase start -x gotrue,realtime,storage-api,imgproxy,inbucket,pgadmin-schema-diff,migra,postgres-meta,studio,deno-relay",
+    "db:start": "npx supabase start -x realtime,storage-api,imgproxy,postgres-meta,edge-runtime,logflare,supavisor,vector",
     "dev": "remix dev",
     "format": "prettier --write . --log-level silent",
     "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint .",
@@ -65,7 +65,7 @@
     "prettier-plugin-organize-imports": "^3.2.2",
     "prettier-plugin-tailwindcss": "^0.4.1",
     "start-server-and-test": "^2.0.3",
-    "supabase": "^1.183.5",
+    "supabase": "^2.76.8",
     "tailwindcss": "^3.3.2",
     "typescript": "^5.2.2",
     "vite": "^4.5.3",
