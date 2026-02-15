@@ -17,13 +17,6 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- Name: pgsodium; Type: EXTENSION; Schema: -; Owner: -
---
-
-CREATE EXTENSION IF NOT EXISTS "pgsodium" WITH SCHEMA "pgsodium";
-
-
---
 -- Name: pg_graphql; Type: EXTENSION; Schema: -; Owner: -
 --
 
