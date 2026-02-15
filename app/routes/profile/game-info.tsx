@@ -54,7 +54,7 @@ function ChangeVisibilityItem({
     <DropdownMenu.Item
       asChild
       // Prevent the dropdown menu from closing
-      onSelect={(e) => e.preventDefault()}
+      onSelect={(e: Event) => e.preventDefault()}
     >
       <fetcher.Form method="PATCH" action={`/game/${gameId}`}>
         <input type="hidden" readOnly name="visibility" value={visibility} />
@@ -188,7 +188,7 @@ export function GameInfo({
               <DropdownMenu.Item
                 asChild
                 // Prevent the dropdown menu from closing
-                onSelect={(e) => e.preventDefault()}
+                onSelect={(e: Event) => e.preventDefault()}
               >
                 <button onClick={() => setShowModal(true)} className="w-full">
                   {/* Heroicon name: solid/trash */}

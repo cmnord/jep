@@ -1,6 +1,5 @@
 import {
   Dot,
-  DotProps,
   Label,
   Legend,
   Line,
@@ -37,8 +36,8 @@ function AngledAxisTick({
   y,
   payload,
 }: {
-  x: number;
-  y: number;
+  x: string | number;
+  y: string | number;
   payload: { value: number };
 }) {
   return (
@@ -57,7 +56,13 @@ function AngledAxisTick({
 }
 
 /** CustomDot shows a larger dot for wagerable clues. */
-const CustomDot = (props: DotProps & { payload?: DataPoint }) => {
+const CustomDot = (props: {
+  cx?: number;
+  cy?: number;
+  fill?: string;
+  stroke?: string;
+  payload?: DataPoint;
+}) => {
   const { cx, cy, fill, payload, stroke } = props;
   if (payload?.wagerable && cx && cy) {
     return (
@@ -72,7 +77,7 @@ const CustomDot = (props: DotProps & { payload?: DataPoint }) => {
     );
   }
 
-  return <Dot {...props} />;
+  return <Dot cx={cx} cy={cy} fill={fill} stroke={stroke} r={4} />;
 };
 
 /** Chart is a line chart of each player's score over time. */

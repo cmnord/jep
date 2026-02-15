@@ -31,7 +31,7 @@ function BoardComponent({
   onClickClue: (i: number, j: number) => void;
   onFocusClue: (i: number, j: number) => void;
   onKeyDownClue: (event: React.KeyboardEvent, i: number, j: number) => void;
-  tbodyRef: React.RefObject<HTMLTableSectionElement>;
+  tbodyRef: React.RefObject<HTMLTableSectionElement | null>;
 }) {
   // Transpose the clues so we can render them in a table.
   const numRows = Math.max(...board.categories.map((c) => c.clues.length));

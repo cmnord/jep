@@ -68,7 +68,7 @@ function AccountButton({ user }: { user: { id: string; email: string } }) {
           <DropdownMenu.Item
             asChild
             // Prevent the dropdown menu from closing
-            onSelect={(e) => e.preventDefault()}
+            onSelect={(e: Event) => e.preventDefault()}
           >
             <Form method="POST" action="/logout">
               <button type="submit" className="flex grow items-center">
@@ -147,7 +147,7 @@ function GameSettings({ game, url }: { game: Game; url: string }) {
           <DropdownMenu.Item
             className="relative flex items-center rounded-md p-1"
             // Prevent the dropdown menu from closing
-            onSelect={(e) => e.preventDefault()}
+            onSelect={(e: Event) => e.preventDefault()}
           >
             <div className="w-full">
               <SoundControl />
@@ -155,7 +155,7 @@ function GameSettings({ game, url }: { game: Game; url: string }) {
           </DropdownMenu.Item>
           <DropdownMenu.Item
             // Prevent the dropdown menu from closing
-            onSelect={(e) => e.preventDefault()}
+            onSelect={(e: Event) => e.preventDefault()}
           >
             <CopyLinkButton
               className="grow"

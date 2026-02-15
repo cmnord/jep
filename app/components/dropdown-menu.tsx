@@ -1,6 +1,6 @@
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 
-function Item(props: DropdownMenu.MenuItemProps) {
+function Item(props: DropdownMenu.DropdownMenuItemProps) {
   return (
     <DropdownMenu.Item
       className={`group relative flex select-none items-center rounded-md p-1
@@ -13,7 +13,7 @@ function Item(props: DropdownMenu.MenuItemProps) {
   );
 }
 
-function Content(props: DropdownMenu.MenuContentProps) {
+function Content(props: DropdownMenu.DropdownMenuContentProps) {
   return (
     <DropdownMenu.Content
       className={`w-56 rounded-md bg-blue-1000 p-1 text-white shadow-md

@@ -126,7 +126,7 @@ export default function Upload({
   redirectTo,
 }: {
   fetcher: FetcherWithComponents<never>;
-  formRef: React.RefObject<HTMLFormElement>;
+  formRef: React.RefObject<HTMLFormElement | null>;
   loggedIn: boolean;
   redirectTo: string;
 }) {
