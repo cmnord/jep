@@ -8,7 +8,6 @@ import { json } from "@remix-run/node";
 import {
   isRouteErrorResponse,
   Links,
-  LiveReload,
   Meta,
   Outlet,
   Scripts,
@@ -149,7 +148,7 @@ export default function App() {
               }}
             />
             <Scripts />
-            <LiveReload />
+
           </ToastPrimitive.Provider>
         </SoundContext.Provider>
       </body>
@@ -180,7 +179,6 @@ export function ErrorBoundary() {
           </div>
           <ScrollRestoration />
           <Scripts />
-          <LiveReload />
         </body>
       </html>
     );
@@ -200,7 +198,6 @@ export function ErrorBoundary() {
         <DefaultErrorBoundary />
         <ScrollRestoration />
         <Scripts />
-        <LiveReload />
       </body>
     </html>
   );
