@@ -13,4 +13,5 @@ node_modules
 /cypress/videos
 /coverage
 
+*.tsbuildinfo
 .DS_Store
