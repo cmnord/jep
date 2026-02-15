@@ -18,10 +18,10 @@ jobs:
         uses: styfle/cancel-workflow-action@0.11.0
 
       - name: ⬇️ Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: ⎔ Setup node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 20
 
@@ -47,13 +47,13 @@ jobs:
         uses: styfle/cancel-workflow-action@0.11.0
 
       - name: ⬇️ Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: 🏄 Copy test env vars
         run: cp .env.example .env
 
       - name: ⎔ Setup node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 20
 
@@ -70,7 +70,7 @@ jobs:
         run: npm run build
 
       - name: 🌳 Cypress run
-        uses: cypress-io/github-action@v5
+        uses: cypress-io/github-action@v6
         with:
           # TODO: use npm start instead
           start: npm run dev

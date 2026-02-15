@@ -18,7 +18,7 @@ import {
   getValidAuthSession,
   signInWithEmail,
 } from "~/models/auth";
-import { assertIsPost } from "~/utils";
+import { assertIsPost } from "~/utils/http.server";
 
 export const meta: MetaFunction = () => [{ title: "Login" }];
 

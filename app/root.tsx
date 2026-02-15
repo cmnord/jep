@@ -27,7 +27,7 @@ import { getUserByEmail } from "~/models/user";
 import { BASE_URL, getBrowserEnv, NODE_ENV } from "~/utils";
 import { SoundContext } from "~/utils/use-sound";
 
-import stylesheet from "./styles.css";
+import stylesheet from "./styles.css?url";
 
 const META_URL = "https://whatis.club";
 const META_TITLE = "Jep!";

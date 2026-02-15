@@ -7,7 +7,6 @@ node_modules
 
 /api/
 /build/
-/public/build
 
 /cypress/screenshots
 /cypress/videos

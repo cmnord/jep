@@ -3,7 +3,8 @@ import { redirect, unstable_parseMultipartFormData } from "@remix-run/node";
 
 import { getValidAuthSession } from "~/models/auth";
 import { flashFormState } from "~/session.server";
-import { BASE_URL, getRedirectTo, safeRedirect } from "~/utils";
+import { BASE_URL } from "~/utils";
+import { getRedirectTo, safeRedirect } from "~/utils/http.server";
 
 import { newUploadHandler } from "./file-upload-handler.server";
 
