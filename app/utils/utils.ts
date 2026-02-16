@@ -61,6 +61,21 @@ export const cyrb53 = (str: string, seed = 0) => {
   return 4294967296 * (2097151 & h2) + (h1 >>> 0);
 };
 
+/** formatElapsedTime formats milliseconds as M:SS or H:MM:SS. */
+export function formatElapsedTime(totalMs: number): string {
+  const totalSeconds = Math.floor(totalMs / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  const pad = (n: number) => n.toString().padStart(2, "0");
+
+  if (hours > 0) {
+    return `${hours}:${pad(minutes)}:${pad(seconds)}`;
+  }
+  return `${minutes}:${pad(seconds)}`;
+}
+
 /** stringToHslColor generates a deterministic hue from the input str and then
  * adds saturation and lightness to make an HSL color string. */
 export function stringToHslColor(str: string) {

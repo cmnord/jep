@@ -7,7 +7,7 @@ import { getValidAuthSession } from "~/models/auth";
 import { getGame } from "~/models/game.server";
 import { getRoomEvents } from "~/models/room-event.server";
 import { getRoom } from "~/models/room.server";
-import { BASE_URL, formatDollars } from "~/utils";
+import { BASE_URL, formatDollars, formatElapsedTime } from "~/utils";
 
 import { getSolve, markSolved } from "~/models/solves.server";
 import ScoreChart from "./chart";
@@ -105,6 +105,11 @@ export default function PlayGame({ loaderData }: Route.ComponentProps) {
         className={`mx-auto flex w-full max-w-screen-lg flex-col gap-4 p-3 text-slate-100 sm:p-6 md:p-12`}
       >
         <h2 className="text-2xl">Congrats, {winningPlayers.join(" and ")}!</h2>
+        {state.clockAccumulatedMs > 0 && (
+          <p className="text-slate-300">
+            Game duration: {formatElapsedTime(state.clockAccumulatedMs)}
+          </p>
+        )}
         <div className="flex flex-col gap-2 sm:grid sm:grid-cols-3">
           {loaderData.sortedPlayers.map((p) => (
             <PlayerScore

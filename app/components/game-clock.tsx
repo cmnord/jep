@@ -4,23 +4,10 @@ import { useFetcher } from "react-router";
 import type { RoomProps } from "~/components/game";
 import type { Action } from "~/engine";
 import { useEngineContext } from "~/engine";
+import { formatElapsedTime } from "~/utils";
 import useSoloAction from "~/utils/use-solo-action";
 
 const UPDATE_INTERVAL_MS = 200;
-
-function formatElapsedTime(totalMs: number): string {
-  const totalSeconds = Math.floor(totalMs / 1000);
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-
-  const pad = (n: number) => n.toString().padStart(2, "0");
-
-  if (hours > 0) {
-    return `${hours}:${pad(minutes)}:${pad(seconds)}`;
-  }
-  return `${minutes}:${pad(seconds)}`;
-}
 
 export default function GameClock({ roomId }: Pick<RoomProps, "roomId">) {
   const { clockRunning, clockAccumulatedMs, clockLastResumedAt, soloDispatch } =
