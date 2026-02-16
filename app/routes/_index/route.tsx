@@ -23,7 +23,7 @@ import { getGames } from "~/models/game.server";
 import { getSolvesForUser, Solve } from "~/models/solves.server";
 import { getSessionFormState } from "~/session.server";
 import useDebounce from "~/utils/use-debounce";
-import useScrollToBottom from "~/utils/use-scroll";
+import useInfiniteScroll from "~/utils/use-scroll";
 
 import GameCard from "./game-card";
 
@@ -68,11 +68,18 @@ export default function Index({ loaderData }: Route.ComponentProps) {
   const navigation = useNavigation();
 
   // Pagination
-  const gameFetcher = useFetcher<typeof loader>();
-  const [games, setGames] = React.useState(loaderData.serverGames);
-  // Start with two because 1 was pre-loaded
-  const [page, setPage] = React.useState(2);
-  const [shouldLoadMore, setShouldLoadMore] = React.useState(true);
+  const {
+    items: games,
+    sentinelRef,
+    shouldLoadMore,
+    isLoading: isLoadingMore,
+  } = useInfiniteScroll(loaderData.serverGames, {
+    getUrl: (page) => {
+      const qParam = debouncedSearch ? `&q=${debouncedSearch}` : "";
+      return `/?index${qParam}&page=${page}`;
+    },
+    getItems: (data: typeof loaderData) => data.serverGames,
+  });
 
   // solvesMap is a map from game_id to solve. Check against it to see if a game
   // has been solved.
@@ -80,37 +87,6 @@ export default function Index({ loaderData }: Route.ComponentProps) {
   loaderData.solves.forEach((solve) => {
     solvesMap.set(solve.game_id, solve);
   });
-
-  useScrollToBottom(() => {
-    if (!shouldLoadMore) return;
-    const qParam = debouncedSearch ? `&q=${debouncedSearch}` : "";
-    gameFetcher.load(`/?index${qParam}&page=${page}`);
-
-    setShouldLoadMore(false);
-  });
-
-  React.useEffect(() => {
-    if (!gameFetcher.data) {
-      return;
-    }
-    const newGames = gameFetcher.data.serverGames;
-    if (newGames.length === 0) {
-      setShouldLoadMore(false);
-      return;
-    }
-
-    setGames((prevGames) => [...prevGames, ...newGames]);
-    setPage((prevPage) => prevPage + 1);
-    setShouldLoadMore(true);
-  }, [gameFetcher.data]);
-
-  // Reset the games and page when the data from the server changes
-  const serverGames = loaderData.serverGames;
-  React.useEffect(() => {
-    setGames(serverGames);
-    setPage(2);
-    setShouldLoadMore(true);
-  }, [serverGames]);
 
   React.useEffect(() => {
     if (uploadFetcher.state === "submitting") {
@@ -177,7 +153,8 @@ export default function Index({ loaderData }: Route.ComponentProps) {
           />
         ))}
       </div>
-      {gameFetcher.state === "loading" && (
+      {shouldLoadMore && <div ref={sentinelRef} />}
+      {isLoadingMore && (
         <div className="flex h-5 justify-center">
           <LoadingSpinner />
         </div>
