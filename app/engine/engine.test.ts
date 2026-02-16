@@ -1056,7 +1056,7 @@ describe("gameEngine", () => {
       }),
     },
     {
-      name: "If all players have negative scores, advance past long-form clue",
+      name: "If all players have negative scores, show long-form clue before revealing answer",
       state: initialState,
       actions: [
         ...TWO_PLAYERS_ROUND_0,
@@ -1142,15 +1142,166 @@ describe("gameEngine", () => {
           type: ActionType.NextClue,
           payload: { userId: PLAYER2.userId, i: 0, j: 0 },
         },
+        // All players have negative scores: enters ReadLongFormClue
         {
           type: ActionType.ChooseClue,
           payload: { userId: PLAYER2.userId, i: 0, j: 1 },
         },
       ],
       expectedState: produce(initialState, (draft) => {
-        draft.type = GameState.RevealAnswerToAll;
+        draft.type = GameState.ReadLongFormClue;
         draft.activeClue = [0, 1];
         draft.boardControl = PLAYER2.userId;
+        draft.buzzes = new Map([
+          [PLAYER1.userId, CANT_BUZZ_FLAG],
+          [PLAYER2.userId, CANT_BUZZ_FLAG],
+        ]);
+
+        draft.isAnswered = [
+          [
+            [
+              {
+                isAnswered: true,
+                answeredBy: new Map([[PLAYER1.userId, true]]),
+              },
+              {
+                isAnswered: true,
+                answeredBy: new Map([
+                  [PLAYER1.userId, false],
+                  [PLAYER2.userId, false],
+                ]),
+              },
+            ],
+          ],
+          [
+            [
+              {
+                isAnswered: true,
+                answeredBy: new Map([[PLAYER2.userId, true]]),
+              },
+              {
+                isAnswered: false,
+                answeredBy: new Map(),
+              },
+            ],
+          ],
+        ];
+
+        draft.numAnswered = 1;
+        draft.numCluesInBoard = 2;
+        draft.players.set(PLAYER1.userId, PLAYER1);
+        draft.players.set(PLAYER2.userId, { ...PLAYER2, score: -195 });
+        draft.wagers.set("1,0,0", new Map([[PLAYER2.userId, 5]]));
+        draft.round = 1;
+      }),
+    },
+    {
+      name: "If all players have negative scores, NextClue from ReadLongFormClue reveals answer then advances to GameOver",
+      state: initialState,
+      actions: [
+        ...TWO_PLAYERS_ROUND_0,
+        {
+          type: ActionType.ChooseClue,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0 },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0, deltaMs: 123 },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: {
+            userId: PLAYER2.userId,
+            i: 0,
+            j: 0,
+            deltaMs: CLUE_TIMEOUT_MS + 1,
+          },
+        },
+        {
+          type: ActionType.Check,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0, correct: true },
+        },
+        {
+          type: ActionType.NextClue,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0 },
+        },
+        {
+          type: ActionType.ChooseClue,
+          payload: { userId: PLAYER1.userId, i: 0, j: 1 },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: { userId: PLAYER1.userId, i: 0, j: 1, deltaMs: 123 },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: {
+            userId: PLAYER2.userId,
+            i: 0,
+            j: 1,
+            deltaMs: CLUE_TIMEOUT_MS + 1,
+          },
+        },
+        {
+          type: ActionType.Check,
+          payload: { userId: PLAYER1.userId, i: 0, j: 1, correct: false },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: { userId: PLAYER2.userId, i: 0, j: 1, deltaMs: 123 },
+        },
+        {
+          type: ActionType.Check,
+          payload: { userId: PLAYER2.userId, i: 0, j: 1, correct: false },
+        },
+        {
+          type: ActionType.NextClue,
+          payload: { userId: PLAYER1.userId, i: 0, j: 1 },
+        },
+        {
+          type: ActionType.StartRound,
+          payload: { round: 1, userId: PLAYER2.userId },
+        },
+        {
+          type: ActionType.ChooseClue,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0 },
+        },
+        {
+          type: ActionType.SetClueWager,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0, wager: 5 },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0, deltaMs: 123 },
+        },
+        {
+          type: ActionType.Check,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0, correct: true },
+        },
+        {
+          type: ActionType.NextClue,
+          payload: { userId: PLAYER2.userId, i: 0, j: 0 },
+        },
+        // All players have negative scores: enters ReadLongFormClue
+        {
+          type: ActionType.ChooseClue,
+          payload: { userId: PLAYER2.userId, i: 0, j: 1 },
+        },
+        // NextClue from ReadLongFormClue → RevealAnswerToAll
+        {
+          type: ActionType.NextClue,
+          payload: { userId: PLAYER2.userId, i: 0, j: 1 },
+        },
+        // NextClue from RevealAnswerToAll → GameOver
+        {
+          type: ActionType.NextClue,
+          payload: { userId: PLAYER2.userId, i: 0, j: 1 },
+        },
+      ],
+      expectedState: produce(initialState, (draft) => {
+        draft.type = GameState.GameOver;
+        draft.activeClue = null;
+        draft.boardControl = null;
 
         draft.isAnswered = [
           [
