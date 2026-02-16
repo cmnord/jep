@@ -146,9 +146,9 @@ export function PlayerScores({ roomId, userId }: RoomProps) {
           />
         )
       ) : null}
-      {sortedOtherPlayers.map((p, i) => (
+      {sortedOtherPlayers.map((p) => (
         <PlayerScore
-          key={i}
+          key={p.userId}
           player={p}
           hasBoardControl={p.userId === boardControl}
           winning={p.score === maxScore}
