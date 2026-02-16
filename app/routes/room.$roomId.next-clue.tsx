@@ -1,5 +1,3 @@
-import type { ActionFunctionArgs } from "@remix-run/node";
-import { json } from "@remix-run/node";
 import { z } from "zod";
 
 import { ActionType } from "~/engine";
@@ -7,6 +5,7 @@ import { getValidAuthSession } from "~/models/auth";
 import { createRoomEvent } from "~/models/room-event.server";
 import { getRoom } from "~/models/room.server";
 import { parseFormData } from "~/utils/http.server";
+import type { Route } from "./+types/room.$roomId.next-clue";
 
 const formSchema = z.object({
   i: z.coerce.number().int(),
@@ -14,7 +13,7 @@ const formSchema = z.object({
   userId: z.string(),
 });
 
-export async function action({ request, params }: ActionFunctionArgs) {
+export async function action({ request, params }: Route.ActionArgs) {
   const formData = await request.formData();
   const { i, j, userId } = parseFormData(formData, formSchema);
 
@@ -24,7 +23,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   }
 
   if (roomId === -1) {
-    return json({ type: ActionType.NextClue, payload: { i, j, userId } });
+    return { type: ActionType.NextClue, payload: { i, j, userId } };
   }
 
   const authSession = await getValidAuthSession(request);

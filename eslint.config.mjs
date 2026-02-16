@@ -5,7 +5,9 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["node_modules/", "build/", "public/build/", "api/"] },
+  {
+    ignores: ["node_modules/", "build/", "api/", ".react-router/"],
+  },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   { languageOptions: { globals: { ...globals.node } } },

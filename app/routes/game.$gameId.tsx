@@ -1,5 +1,6 @@
-import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
-import { redirect } from "@remix-run/node";
+import { redirect } from "react-router";
+
+import type { Route } from "./+types/game.$gameId";
 
 import { getValidAuthSession } from "~/models/auth";
 import {
@@ -10,7 +11,7 @@ import {
 } from "~/models/game.server";
 import { flashFormState } from "~/session.server";
 
-export async function action({ request, params }: ActionFunctionArgs) {
+export async function action({ request, params }: Route.ActionArgs) {
   const gameId = params.gameId;
 
   if (!gameId) {
@@ -66,7 +67,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   }
 }
 
-export async function loader({ request, params }: LoaderFunctionArgs) {
+export async function loader({ request, params }: Route.LoaderArgs) {
   const gameId = params.gameId;
 
   if (!gameId) {

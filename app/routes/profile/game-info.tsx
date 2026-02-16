@@ -1,6 +1,6 @@
-import type { FetcherWithComponents } from "@remix-run/react";
-import { Link } from "@remix-run/react";
 import * as React from "react";
+import type { FetcherWithComponents } from "react-router";
+import { Link } from "react-router";
 
 import Button from "~/components/button";
 import CopyLinkButton from "~/components/copy-link-button";

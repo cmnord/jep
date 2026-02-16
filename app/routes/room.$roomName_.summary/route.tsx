@@ -1,7 +1,5 @@
-import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
-import { json } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
 import { PlayerScore } from "~/components/player";
+import type { Route } from "./+types/route";
 
 import { applyRoomEventsToState, isTypedRoomEvent } from "~/engine/room-event";
 import { GameState, stateFromGame } from "~/engine/state";
@@ -16,7 +14,7 @@ import ScoreChart from "./chart";
 import { getBattingAverage, getCoryat } from "./coryat";
 import GameSummary from "./summary";
 
-export const meta: MetaFunction<typeof loader> = ({ data }) => {
+export const meta: Route.MetaFunction = ({ data }) => {
   try {
     return [{ title: "Summary: " + data?.game.title }];
   } catch {
@@ -24,7 +22,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
   }
 };
 
-export async function loader({ request, params }: LoaderFunctionArgs) {
+export async function loader({ request, params }: Route.LoaderArgs) {
   const roomName = params.roomName;
   if (!roomName) {
     throw new Response("room name not found in URL params", { status: 404 });
@@ -69,7 +67,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     getBattingAverage(player.userId, state),
   );
 
-  return json({
+  return {
     sortedPlayers,
     battingAverages,
     coryats,
@@ -78,19 +76,17 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     roomEvents,
     roomId,
     BASE_URL,
-  });
+  };
 }
 
-export default function PlayGame() {
-  const data = useLoaderData<typeof loader>();
-
+export default function PlayGame({ loaderData }: Route.ComponentProps) {
   const state = applyRoomEventsToState(
-    stateFromGame(data.game),
-    data.roomEvents,
+    stateFromGame(loaderData.game),
+    loaderData.roomEvents,
   );
 
-  const maxScore = data.sortedPlayers.at(0)?.score;
-  const winningPlayers = data.sortedPlayers
+  const maxScore = loaderData.sortedPlayers.at(0)?.score;
+  const winningPlayers = loaderData.sortedPlayers
     .filter((p) => p.score === maxScore)
     .map((p) => p.name);
 
@@ -101,7 +97,7 @@ export default function PlayGame() {
       >
         <h2 className="text-2xl">Congrats, {winningPlayers.join(" and ")}!</h2>
         <div className="flex flex-col gap-2 sm:grid sm:grid-cols-3">
-          {data.sortedPlayers.map((p) => (
+          {loaderData.sortedPlayers.map((p) => (
             <PlayerScore
               key={p.userId}
               player={p}
@@ -113,31 +109,31 @@ export default function PlayGame() {
         <h3 className="text-lg">Coryat Scores</h3>
         <p>
           <strong>Combined: </strong>
-          {formatDollars(data.combinedCoryat)}
+          {formatDollars(loaderData.combinedCoryat)}
         </p>
         <div className="flex flex-col gap-2 sm:grid sm:grid-cols-3">
-          {data.sortedPlayers.map((p, i) => (
+          {loaderData.sortedPlayers.map((p, i) => (
             <span>
-              {p.name}: {formatDollars(data.coryats[i])}
+              {p.name}: {formatDollars(loaderData.coryats[i])}
             </span>
           ))}
         </div>
         <h3 className="text-lg">Batting averages</h3>
         <div className="flex flex-col gap-2 sm:grid sm:grid-cols-3">
-          {data.sortedPlayers.map((p, i) => (
+          {loaderData.sortedPlayers.map((p, i) => (
             <span>
-              {p.name}: {data.battingAverages[i][0]} /{" "}
-              {data.battingAverages[i][1]}
+              {p.name}: {loaderData.battingAverages[i][0]} /{" "}
+              {loaderData.battingAverages[i][1]}
             </span>
           ))}
         </div>
         <ScoreChart
-          game={data.game}
-          players={data.sortedPlayers}
-          roomEvents={data.roomEvents.filter(isTypedRoomEvent)}
+          game={loaderData.game}
+          players={loaderData.sortedPlayers}
+          roomEvents={loaderData.roomEvents.filter(isTypedRoomEvent)}
         />
       </div>
-      <GameSummary game={data.game} state={state} />
+      <GameSummary game={loaderData.game} state={state} />
     </div>
   );
 }

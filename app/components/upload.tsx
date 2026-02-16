@@ -1,8 +1,8 @@
-import type { FetcherWithComponents } from "@remix-run/react";
-import { useSubmit } from "@remix-run/react";
 import clsx from "clsx";
 import * as React from "react";
 import { useDropzone } from "react-dropzone";
+import type { FetcherWithComponents } from "react-router";
+import { useSubmit } from "react-router";
 
 import Button from "~/components/button";
 import Dialog from "~/components/dialog";

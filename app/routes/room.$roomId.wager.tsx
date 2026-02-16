@@ -1,6 +1,6 @@
-import type { ActionFunctionArgs } from "@remix-run/node";
-import { json } from "@remix-run/node";
 import { z } from "zod";
+
+import type { Route } from "./+types/room.$roomId.wager";
 
 import { ActionType } from "~/engine";
 import { getValidAuthSession } from "~/models/auth";
@@ -20,7 +20,7 @@ const formSchema = z
     message: "wager or full required",
   });
 
-export async function action({ request, params }: ActionFunctionArgs) {
+export async function action({ request, params }: Route.ActionArgs) {
   const formData = await request.formData();
   const {
     i,
@@ -37,10 +37,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   }
 
   if (roomId === -1) {
-    return json({
-      type: ActionType.SetClueWager,
-      payload: { i, j, userId, wager },
-    });
+    return { type: ActionType.SetClueWager, payload: { i, j, userId, wager } };
   }
 
   const authSession = await getValidAuthSession(request);

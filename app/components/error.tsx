@@ -1,4 +1,4 @@
-import { useRouteError } from "@remix-run/react";
+import { useRouteError } from "react-router";
 
 export function DefaultErrorBoundary() {
   const error = useRouteError();

@@ -1,7 +1,6 @@
-import type { LoaderFunctionArgs } from "@remix-run/node";
-import { json, redirect } from "@remix-run/node";
-import { useFetcher, useLoaderData } from "@remix-run/react";
 import * as React from "react";
+import { data, redirect, useFetcher } from "react-router";
+import type { Route } from "./+types/route";
 
 import { ErrorMessage, SuccessMessage } from "~/components/error";
 import Main from "~/components/main";
@@ -16,7 +15,7 @@ import { BASE_URL } from "~/utils";
 import { GameInfo } from "./game-info";
 import SolveInfo from "./solve-info";
 
-export async function loader({ request }: LoaderFunctionArgs) {
+export async function loader({ request }: Route.LoaderArgs) {
   const authSession = await requireAuthSession(request);
 
   if (!authSession) {
@@ -36,20 +35,18 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const [formState, headers] = await getSessionFormState(request);
 
   const user = await getUserByEmail(authSession.email, authSession.accessToken);
-  return json(
+  return data(
     { user, formState, games, solves, env: { BASE_URL }, authSession },
     { headers },
   );
 }
 
-export default function Profile() {
-  const data = useLoaderData<typeof loader>();
-
+export default function Profile({ loaderData }: Route.ComponentProps) {
   const patchGame = useFetcher<never>();
   const uploadGame = useFetcher<never>();
   const formRef = React.useRef<HTMLFormElement | null>(null);
 
-  const [formState, setFormState] = React.useState(data.formState);
+  const [formState, setFormState] = React.useState(loaderData.formState);
 
   React.useEffect(() => {
     if (patchGame.state === "submitting") {
@@ -65,10 +62,11 @@ export default function Profile() {
     }
   }, [uploadGame.state]);
 
+  const loaderFormState = loaderData.formState;
   React.useEffect(() => {
-    setFormState(data.formState);
+    setFormState(loaderFormState);
 
-    if (data.formState?.success) {
+    if (loaderFormState?.success) {
       // Use JavaScript to reset form
       const handler = window.setTimeout(() => {
         // Use JavaScript to hide success message after timeout
@@ -76,28 +74,28 @@ export default function Profile() {
       }, 5000);
       return () => window.clearTimeout(handler);
     }
-  }, [data.formState]);
+  }, [loaderFormState]);
 
   return (
     <div className="max-w-full grow">
       <Main>
         <h1 className="mb-4 text-2xl font-semibold">Profile</h1>
-        <p className="mb-4">{data.user?.email}</p>
+        <p className="mb-4">{loaderData.user?.email}</p>
         <h1 className="mb-4 text-2xl font-semibold">My Games</h1>
         <Upload
           fetcher={uploadGame}
           formRef={formRef}
-          loggedIn={data.authSession !== null}
+          loggedIn={loaderData.authSession !== null}
           redirectTo="/profile"
         />
-        {data.games.length === 0 ? (
+        {loaderData.games.length === 0 ? (
           <p className="text-sm text-slate-500">No games found.</p>
         ) : null}
         <ul className="mb-4 list-inside list-disc text-slate-700">
-          {data.games.map((game) => (
+          {loaderData.games.map((game) => (
             <GameInfo
               key={game.id}
-              BASE_URL={data.env.BASE_URL}
+              BASE_URL={loaderData.env.BASE_URL}
               game={game}
               fetcher={patchGame}
             />
@@ -112,7 +110,7 @@ export default function Profile() {
         ) : null}
         <h1 className="mb-4 text-2xl font-semibold">My Attempts / Solves</h1>
         <div>
-          {data.solves.map((solve) => (
+          {loaderData.solves.map((solve) => (
             <SolveInfo key={solve.id} solve={solve} />
           ))}
         </div>

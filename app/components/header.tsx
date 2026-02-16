@@ -1,4 +1,4 @@
-import { Form, Link, useMatches } from "@remix-run/react";
+import { Form, Link, useMatches } from "react-router";
 
 import Button from "~/components/button";
 import CopyLinkButton from "~/components/copy-link-button";
@@ -184,15 +184,15 @@ export default function Header({
 }) {
   const matches = useMatches();
   const gameRoute = matches.find((match) => {
-    const data = match.data;
-    return data && typeof data === "object" && "game" in data;
+    const loaderData = match.loaderData;
+    return loaderData && typeof loaderData === "object" && "game" in loaderData;
   });
   const game =
     gameRoute &&
-    typeof gameRoute.data === "object" &&
-    gameRoute.data !== null &&
-    "game" in gameRoute.data
-      ? (gameRoute.data.game as Game)
+    typeof gameRoute.loaderData === "object" &&
+    gameRoute.loaderData !== null &&
+    "game" in gameRoute.loaderData
+      ? (gameRoute.loaderData.game as Game)
       : undefined;
   const pathname = matches[matches.length - 1].pathname;
 

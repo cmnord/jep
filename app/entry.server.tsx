@@ -1,16 +1,16 @@
 import { PassThrough } from "node:stream";
 
-declare module "@remix-run/server-runtime" {
+declare module "react-router" {
   interface Future {
     v3_singleFetch: true;
   }
 }
 
-import type { EntryContext } from "@remix-run/node";
-import { createReadableStreamFromReadable } from "@remix-run/node";
-import { RemixServer } from "@remix-run/react";
+import { createReadableStreamFromReadable } from "@react-router/node";
 import { isbot } from "isbot";
 import { renderToPipeableStream } from "react-dom/server";
+import type { EntryContext } from "react-router";
+import { ServerRouter } from "react-router";
 
 export const streamTimeout = 5_000;
 
@@ -18,7 +18,7 @@ export default function handleRequest(
   request: Request,
   responseStatusCode: number,
   responseHeaders: Headers,
-  remixContext: EntryContext,
+  reactRouterContext: EntryContext,
 ) {
   // Prevent browsers from MIME-sniffing a response away from the declared type
   responseHeaders.set("X-Content-Type-Options", "nosniff");
@@ -46,20 +46,21 @@ export default function handleRequest(
   responseHeaders.set("X-DNS-Prefetch-Control", "off");
 
   const prohibitOutOfOrderStreaming =
-    isBotRequest(request.headers.get("user-agent")) || remixContext.isSpaMode;
+    isBotRequest(request.headers.get("user-agent")) ||
+    reactRouterContext.isSpaMode;
 
   return prohibitOutOfOrderStreaming
     ? handleBotRequest(
         request,
         responseStatusCode,
         responseHeaders,
-        remixContext,
+        reactRouterContext,
       )
     : handleBrowserRequest(
         request,
         responseStatusCode,
         responseHeaders,
-        remixContext,
+        reactRouterContext,
       );
 }
 
@@ -74,12 +75,12 @@ function handleBotRequest(
   request: Request,
   responseStatusCode: number,
   responseHeaders: Headers,
-  remixContext: EntryContext,
+  reactRouterContext: EntryContext,
 ) {
   return new Promise((resolve, reject) => {
     let shellRendered = false;
     const { pipe, abort } = renderToPipeableStream(
-      <RemixServer context={remixContext} url={request.url} />,
+      <ServerRouter context={reactRouterContext} url={request.url} />,
       {
         onAllReady() {
           shellRendered = true;
@@ -120,12 +121,12 @@ function handleBrowserRequest(
   request: Request,
   responseStatusCode: number,
   responseHeaders: Headers,
-  remixContext: EntryContext,
+  reactRouterContext: EntryContext,
 ) {
   return new Promise((resolve, reject) => {
     let shellRendered = false;
     const { pipe, abort } = renderToPipeableStream(
-      <RemixServer context={remixContext} url={request.url} />,
+      <ServerRouter context={reactRouterContext} url={request.url} />,
       {
         onShellReady() {
           shellRendered = true;

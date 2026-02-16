@@ -1,7 +1,7 @@
-import { useFetcher } from "@remix-run/react";
 import clsx from "clsx";
 import { produce } from "immer";
 import * as React from "react";
+import { useFetcher } from "react-router";
 import useFitText from "use-fit-text";
 
 import type { RoomProps } from "~/components/game";

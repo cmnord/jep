@@ -1,10 +1,5 @@
-import type {
-  ActionFunctionArgs,
-  LoaderFunctionArgs,
-  MetaFunction,
-} from "@remix-run/node";
-import { json } from "@remix-run/node";
-import { Form, useActionData, useLoaderData } from "@remix-run/react";
+import { data, Form } from "react-router";
+import type { Route } from "./+types/report";
 
 import { z } from "zod";
 
@@ -20,7 +15,7 @@ import { getRoom } from "~/models/room.server";
 import { BASE_URL, GITHUB_URL } from "~/utils";
 import { parseFormData } from "~/utils/http.server";
 
-export const meta: MetaFunction = () => [{ title: "Report a game" }];
+export const meta: Route.MetaFunction = () => [{ title: "Report a game" }];
 
 const formSchema = z.object({
   url: z.string().min(1),
@@ -28,20 +23,20 @@ const formSchema = z.object({
 });
 const ROOM_NAME_REGEX = /^\d+-\w+$/;
 
-export function loader({ request }: LoaderFunctionArgs) {
+export function loader({ request }: Route.LoaderArgs) {
   const searchParams = new URL(request.url).searchParams;
   const gameId = searchParams.get("gameId");
 
-  return json({ BASE_URL, gameId });
+  return { BASE_URL, gameId };
 }
 
-export async function action({ request }: ActionFunctionArgs) {
+export async function action({ request }: Route.ActionArgs) {
   const formData = await request.formData();
   const { url: urlStr, reason } = parseFormData(formData, formSchema);
   const url = new URL(urlStr);
 
   if (url.origin !== BASE_URL) {
-    return json(
+    return data(
       {
         success: false,
         message: `URL must be from ${BASE_URL}`,
@@ -57,7 +52,7 @@ export async function action({ request }: ActionFunctionArgs) {
     const roomNameAndId = pathname.slice("/room/".length);
 
     if (!ROOM_NAME_REGEX.test(roomNameAndId)) {
-      return json(
+      return data(
         {
           success: false,
           message: "room name must be in the format of {roomId}-{roomName}",
@@ -72,7 +67,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
     const room = await getRoom(roomId, authSession?.accessToken);
     if (!room || room.name !== name) {
-      return json(
+      return data(
         { success: false, message: `room "${roomNameAndId}" not found` },
         { status: 404 },
       );
@@ -85,7 +80,7 @@ export async function action({ request }: ActionFunctionArgs) {
       authSession?.accessToken,
     );
 
-    return json({
+    return data({
       success: true,
       message: `Reported game ${room.game_id} in room ${roomNameAndId}.`,
     });
@@ -96,14 +91,14 @@ export async function action({ request }: ActionFunctionArgs) {
     try {
       const game = await getGame(gameId, authSession?.userId);
       if (!game) {
-        return json(
+        return data(
           { success: false, message: `game "${gameId}" not found` },
           { status: 404 },
         );
       }
     } catch (error: unknown) {
       if (error instanceof Error) {
-        return json(
+        return data(
           { success: false, message: `Error fetching game: ${error.message}` },
           { status: 404 },
         );
@@ -118,22 +113,22 @@ export async function action({ request }: ActionFunctionArgs) {
       authSession?.accessToken,
     );
 
-    return json(
+    return data(
       { success: true, message: `Reported game ${gameId}.` },
       { status: 404 },
     );
   }
 
-  return json(
+  return data(
     { success: false, message: "Could not find /game/ or /room/ in URL." },
     { status: 400 },
   );
 }
 
-export default function Report() {
-  const data = useLoaderData<typeof loader>();
-  const actionData = useActionData<typeof action>();
-
+export default function Report({
+  loaderData,
+  actionData,
+}: Route.ComponentProps) {
   return (
     <div className="max-w-full grow">
       <Main>
@@ -156,10 +151,12 @@ export default function Report() {
             type="text"
             id="url"
             name="url"
-            placeholder={`${data.BASE_URL}/room/... or ${data.BASE_URL}/game/...`}
+            placeholder={`${loaderData.BASE_URL}/room/... or ${loaderData.BASE_URL}/game/...`}
             required
             defaultValue={
-              data.gameId ? `${data.BASE_URL}/game/${data.gameId}` : undefined
+              loaderData.gameId
+                ? `${loaderData.BASE_URL}/game/${loaderData.gameId}`
+                : undefined
             }
           />
           <label
@@ -179,10 +176,10 @@ export default function Report() {
             Report
           </Button>
           {actionData ? (
-            actionData.success ? (
-              <SuccessMessage>{actionData.message}</SuccessMessage>
+            actionData?.success ? (
+              <SuccessMessage>{actionData?.message}</SuccessMessage>
             ) : (
-              <ErrorMessage>{actionData.message}</ErrorMessage>
+              <ErrorMessage>{actionData?.message}</ErrorMessage>
             )
           ) : null}
         </Form>

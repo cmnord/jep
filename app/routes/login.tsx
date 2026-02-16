@@ -1,12 +1,7 @@
-import type {
-  ActionFunctionArgs,
-  LoaderFunctionArgs,
-  MetaFunction,
-} from "@remix-run/node";
-import { json, redirect } from "@remix-run/node";
-import { Form, useActionData, useNavigation } from "@remix-run/react";
 import * as React from "react";
+import { data, Form, redirect, useNavigation } from "react-router";
 import { z } from "zod";
+import type { Route } from "./+types/login";
 
 import Button from "~/components/button";
 import { ErrorMessage } from "~/components/error";
@@ -23,9 +18,9 @@ import { assertIsPost, parseFormData } from "~/utils/http.server";
 
 const formSchema = z.object({ email: z.string(), password: z.string() });
 
-export const meta: MetaFunction = () => [{ title: "Login" }];
+export const meta: Route.MetaFunction = () => [{ title: "Login" }];
 
-export async function loader({ request }: LoaderFunctionArgs) {
+export async function loader({ request }: Route.LoaderArgs) {
   const authSession = await getValidAuthSession(request);
 
   if (authSession) throw redirect("/");
@@ -33,7 +28,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   return null;
 }
 
-export async function action({ request }: ActionFunctionArgs) {
+export async function action({ request }: Route.ActionArgs) {
   assertIsPost(request);
   const formData = await request.formData();
   const { email, password } = parseFormData(formData, formSchema);
@@ -42,7 +37,7 @@ export async function action({ request }: ActionFunctionArgs) {
     const authSession = await signInWithEmail(email, password);
 
     if (!authSession) {
-      return json({ error: "Invalid email or password" }, { status: 400 });
+      return data({ error: "Invalid email or password" }, { status: 400 });
     }
 
     return createAuthSession({
@@ -52,15 +47,14 @@ export async function action({ request }: ActionFunctionArgs) {
     });
   } catch (error: unknown) {
     if (error instanceof Error) {
-      return json({ error: error.message }, { status: 500 });
+      return data({ error: error.message }, { status: 500 });
     }
     console.error(error);
-    return json({ error: "Unknown error" }, { status: 500 });
+    return data({ error: "Unknown error" }, { status: 500 });
   }
 }
 
-export default function Login() {
-  const actionData = useActionData<typeof action>();
+export default function Login({ actionData }: Route.ComponentProps) {
   const navigation = useNavigation();
   const disabled = navigation.state !== "idle";
 
@@ -123,7 +117,7 @@ export default function Login() {
             Log in
           </Button>
           {actionData?.error ? (
-            <ErrorMessage>{actionData.error}</ErrorMessage>
+            <ErrorMessage>{actionData?.error}</ErrorMessage>
           ) : null}
           <hr className="my-4" />
           <p>

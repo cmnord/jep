@@ -1,13 +1,12 @@
-import type { MetaFunction } from "@remix-run/node";
-import { json } from "@remix-run/node";
-import { useLoaderData, useMatches } from "@remix-run/react";
+import { useMatches } from "react-router";
+import type { Route } from "./+types/mock";
 
 import GameComponent from "~/components/game";
 import { GameEngineContext, useSoloGameEngine } from "~/engine";
 import { getMockGame } from "~/models/mock.server";
 import { BASE_URL } from "~/utils";
 
-export const meta: MetaFunction<typeof loader> = ({ data }) => {
+export const meta: Route.MetaFunction = ({ data }) => {
   try {
     return [{ title: data?.game.title }];
   } catch {
@@ -18,25 +17,24 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 export async function loader() {
   const game = await getMockGame();
 
-  return json({ game, BASE_URL });
+  return { game, BASE_URL };
 }
 
-export default function PlayGame() {
-  const data = useLoaderData<typeof loader>();
+export default function PlayGame({ loaderData }: Route.ComponentProps) {
   const matches = useMatches();
   const pathname = matches[matches.length - 1].pathname;
 
-  const gameReducer = useSoloGameEngine(data.game);
+  const gameReducer = useSoloGameEngine(loaderData.game);
 
   return (
     <GameEngineContext.Provider value={gameReducer}>
       <GameComponent
-        game={data.game}
+        game={loaderData.game}
         roomId={-1}
         roomName="-1-mock"
         userId="mock"
         name="mock"
-        url={data.BASE_URL + pathname}
+        url={loaderData.BASE_URL + pathname}
       />
     </GameEngineContext.Provider>
   );

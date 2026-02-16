@@ -1,5 +1,5 @@
-import type { MetaFunction } from "@remix-run/node";
 import * as React from "react";
+import type { Route } from "./+types/howto";
 
 import Button from "~/components/button";
 import { ErrorMessage, SuccessMessage } from "~/components/error";
@@ -13,7 +13,7 @@ import { CLUE_TIMEOUT_MS } from "~/engine";
 import useKeyPress from "~/utils/use-key-press";
 import useTimeout from "~/utils/use-timeout";
 
-export const meta: MetaFunction = () => [{ title: "How to Play" }];
+export const meta: Route.MetaFunction = () => [{ title: "How to Play" }];
 
 const CLUE_DURATION_MS = 5000;
 const LOCKOUT_MS = 250;

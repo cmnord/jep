@@ -1,5 +1,5 @@
-import { createCookieSessionStorage } from "@remix-run/node";
 import { randomUUID } from "node:crypto";
+import { createCookieSessionStorage } from "react-router";
 
 import { NODE_ENV, SESSION_SECRET } from "~/utils";
 

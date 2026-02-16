@@ -1,5 +1,7 @@
-import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
-import { redirect, unstable_parseMultipartFormData } from "@remix-run/node";
+import { parseFormData } from "@mjackson/form-data-parser";
+import { redirect } from "react-router";
+
+import type { Route } from "./+types/route";
 
 import { getValidAuthSession } from "~/models/auth";
 import { flashFormState } from "~/session.server";
@@ -8,21 +10,24 @@ import { getRedirectTo, safeRedirect } from "~/utils/http.server";
 
 import { newUploadHandler } from "./file-upload-handler.server";
 
-export function loader({ request }: LoaderFunctionArgs) {
+export function loader({ request }: Route.LoaderArgs) {
   const redirectTo = getRedirectTo(request);
   return redirect(safeRedirect(redirectTo));
 }
 
 /** POST /game parses and uploads a new game to the server. */
-export async function action({ request }: ActionFunctionArgs) {
+export async function action({ request }: Route.ActionArgs) {
   const authSession = await getValidAuthSession(request);
   const visibility = authSession !== null ? "UNLISTED" : "PUBLIC";
   const redirectTo = getRedirectTo(request);
 
   try {
     const uploadHandler = newUploadHandler(authSession, visibility);
-    const formData = await unstable_parseMultipartFormData(
+    const formData = await parseFormData(
       request,
+      {
+        maxFileSize: 1_000_000, // 1MB limit for JSON game uploads
+      },
       uploadHandler,
     );
     // formData.get will return the type our upload handler returns.

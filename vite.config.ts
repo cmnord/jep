@@ -1,4 +1,4 @@
-import { vitePlugin as remix } from "@remix-run/dev";
+import { reactRouter } from "@react-router/dev/vite";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig, loadEnv } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
@@ -14,19 +14,6 @@ export default defineConfig(({ mode }) => {
     optimizeDeps: {
       include: ["@vercel/analytics/react"],
     },
-    plugins: [
-      tailwindcss(),
-      remix({
-        future: {
-          v3_fetcherPersist: true,
-          v3_relativeSplatPath: true,
-          v3_throwAbortReason: true,
-          v3_singleFetch: true,
-          v3_lazyRouteDiscovery: true,
-          v3_routeConfig: true,
-        },
-      }),
-      tsconfigPaths(),
-    ],
+    plugins: [tailwindcss(), reactRouter(), tsconfigPaths()],
   };
 });

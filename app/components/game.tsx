@@ -1,5 +1,5 @@
-import { useNavigate } from "@remix-run/react";
 import * as React from "react";
+import { useNavigate } from "react-router";
 
 import BoardComponent from "~/components/board";
 import Connection from "~/components/connection";

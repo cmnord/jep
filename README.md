@@ -32,7 +32,7 @@ vim .env # add secrets to .env
 source .env
 ```
 
-Afterwards, start the Remix development server like so:
+Afterwards, start the development server like so:
 
 ```sh
 npm run dev
@@ -74,8 +74,7 @@ npx supabase gen types typescript --linked > app/models/database.types.ts
 
 ## Tools used
 
-- Web framework: [Remix](https://remix.run/) bootstrapped by
-  [create-remix](https://www.npmjs.com/package/create-remix)
+- Web framework: [React Router v7](https://reactrouter.com/)
 - CSS framework: [Tailwind CSS](https://tailwindcss.com/)
 - Hosting, deployment: [Vercel](https://vercel.com)
 - Database: [Supabase](https://supabase.com/)

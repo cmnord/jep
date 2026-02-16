@@ -1,10 +1,11 @@
-import type { LoaderFunctionArgs } from "@remix-run/node";
-import { redirect } from "@remix-run/node";
+import { redirect } from "react-router";
+
 import { getValidAuthSession } from "~/models/auth";
+import type { Route } from "./+types/game_.$gameId.play";
 
 import { createRoom } from "~/models/room.server";
 
-export async function loader({ request, params }: LoaderFunctionArgs) {
+export async function loader({ request, params }: Route.LoaderArgs) {
   const gameId = params.gameId;
 
   if (!gameId) {

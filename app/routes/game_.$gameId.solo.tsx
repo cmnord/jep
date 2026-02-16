@@ -1,6 +1,5 @@
-import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
-import { json } from "@remix-run/node";
-import { useLoaderData, useMatches } from "@remix-run/react";
+import { data, useMatches } from "react-router";
+import type { Route } from "./+types/game_.$gameId.solo";
 
 import GameComponent from "~/components/game";
 import { GameEngineContext, useSoloGameEngine } from "~/engine";
@@ -10,7 +9,7 @@ import { getUserByEmail } from "~/models/user";
 import { getOrCreateUserSession } from "~/session.server";
 import { BASE_URL, getRandomEmoji } from "~/utils";
 
-export const meta: MetaFunction<typeof loader> = ({ data }) => {
+export const meta: Route.MetaFunction = ({ data }) => {
   try {
     return [{ title: data?.game.title }];
   } catch {
@@ -18,7 +17,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
   }
 };
 
-export async function loader({ request, params }: LoaderFunctionArgs) {
+export async function loader({ request, params }: Route.LoaderArgs) {
   const gameId = params.gameId;
 
   if (!gameId) {
@@ -40,33 +39,32 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   // Add the user to the room. If they are logged in, their ID is their user ID.
   // If they are a guest, their ID is their guest session ID.
   if (user) {
-    return json({ game, userId: user.id, name, BASE_URL });
+    return { game, userId: user.id, name, BASE_URL };
   } else {
     const headers = new Headers();
     const userId = await getOrCreateUserSession(request, headers);
-    return json({ game, userId, name, BASE_URL }, { headers });
+    return data({ game, userId, name, BASE_URL }, { headers });
   }
 }
 
 /** SoloGame lets a single user play a game without others being able to join. If
  * they refresh the page, the game will reset.
  */
-export default function SoloGame() {
-  const data = useLoaderData<typeof loader>();
+export default function SoloGame({ loaderData }: Route.ComponentProps) {
   const matches = useMatches();
   const pathname = matches[matches.length - 1].pathname;
 
-  const gameReducer = useSoloGameEngine(data.game);
+  const gameReducer = useSoloGameEngine(loaderData.game);
 
   return (
     <GameEngineContext.Provider value={gameReducer}>
       <GameComponent
-        game={data.game}
-        name={data.name}
+        game={loaderData.game}
+        name={loaderData.name}
         roomId={-1}
         roomName="-1-solo"
-        userId={data.userId}
-        url={data.BASE_URL + pathname}
+        userId={loaderData.userId}
+        url={loaderData.BASE_URL + pathname}
       />
     </GameEngineContext.Provider>
   );

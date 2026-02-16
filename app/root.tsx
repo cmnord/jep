@@ -1,10 +1,6 @@
 import * as ToastPrimitive from "@radix-ui/react-toast";
-import type {
-  LinksFunction,
-  LoaderFunctionArgs,
-  MetaFunction,
-} from "@remix-run/node";
-import { json } from "@remix-run/node";
+import { Analytics } from "@vercel/analytics/react";
+import * as React from "react";
 import {
   isRouteErrorResponse,
   Links,
@@ -12,11 +8,10 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
-  useLoaderData,
   useRouteError,
-} from "@remix-run/react";
-import { Analytics } from "@vercel/analytics/react";
-import * as React from "react";
+} from "react-router";
+
+import type { Route } from "./+types/root";
 
 import { CodeBlock } from "~/components/code";
 import Footer from "~/components/footer";
@@ -34,7 +29,7 @@ const META_DESCRIPTION =
   "A website for sharing J! trivia and playing collaboratively with friends in real time.";
 const META_IMAGE = META_URL + "/images/meta.png";
 
-export const meta: MetaFunction = () => [
+export const meta: Route.MetaFunction = () => [
   { title: META_TITLE },
   { name: "title", content: META_TITLE },
   { name: "description", content: META_DESCRIPTION },
@@ -54,7 +49,7 @@ export const meta: MetaFunction = () => [
   { property: "twitter:image", content: META_IMAGE },
 ];
 
-export const links: LinksFunction = () => [
+export const links: Route.LinksFunction = () => [
   { rel: "icon", href: "/favicon.ico", type: "image/x-icon", sizes: "16x16" },
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
@@ -69,7 +64,7 @@ export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
 ];
 
-export async function loader({ request }: LoaderFunctionArgs) {
+export async function loader({ request }: Route.LoaderArgs) {
   const authSession = await getValidAuthSession(request);
   const env = getBrowserEnv();
 
@@ -77,22 +72,20 @@ export async function loader({ request }: LoaderFunctionArgs) {
     const user = authSession
       ? await getUserByEmail(authSession.email, authSession.accessToken)
       : undefined;
-    return json({ user, env, BASE_URL, NODE_ENV });
+    return { user, env, BASE_URL, NODE_ENV };
   } catch {
-    return json({
+    return {
       user: undefined,
       env,
       BASE_URL,
       NODE_ENV,
-    });
+    };
   }
 }
 
-export default function App() {
+export default function App({ loaderData }: Route.ComponentProps) {
   const [volume, setVolume] = React.useState(0.5);
   const [mute, setMute] = React.useState(false);
-
-  const data = useLoaderData<typeof loader>();
 
   return (
     <html lang="en">
@@ -103,11 +96,12 @@ export default function App() {
         <Links />
       </head>
       <body className="relative flex min-h-screen flex-col">
-        {data.NODE_ENV === "production" && data.env.GA_TRACKING_ID ? (
+        {loaderData.NODE_ENV === "production" &&
+        loaderData.env.GA_TRACKING_ID ? (
           <>
             <script
               async
-              src={`https://www.googletagmanager.com/gtag/js?id=${data.env.GA_TRACKING_ID}`}
+              src={`https://www.googletagmanager.com/gtag/js?id=${loaderData.env.GA_TRACKING_ID}`}
             />
             <script
               dangerouslySetInnerHTML={{
@@ -116,7 +110,7 @@ export default function App() {
                 function gtag(){dataLayer.push(arguments);}
                 gtag('js', new Date());
 
-                gtag('config', '${data.env.GA_TRACKING_ID}');
+                gtag('config', '${loaderData.env.GA_TRACKING_ID}');
               `,
               }}
             />
@@ -135,13 +129,13 @@ export default function App() {
             <ToastPrimitive.Viewport
               className={`fixed right-0 bottom-0 z-50 m-0 flex w-96 max-w-full list-none flex-col gap-3 p-[var(--viewport-padding)] outline-none [--viewport-padding:_25px]`}
             />
-            <Header user={data.user} BASE_URL={data.BASE_URL} />
+            <Header user={loaderData.user} BASE_URL={loaderData.BASE_URL} />
             <Outlet />
             <Footer />
             <ScrollRestoration />
             <script
               dangerouslySetInnerHTML={{
-                __html: `window.env = ${JSON.stringify(data.env)}`,
+                __html: `window.env = ${JSON.stringify(loaderData.env)}`,
               }}
             />
             <Scripts />

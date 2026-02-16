@@ -1,5 +1,5 @@
-import type { Fetcher } from "@remix-run/react";
 import * as React from "react";
+import type { Fetcher } from "react-router";
 
 import type { Action } from "~/engine";
 

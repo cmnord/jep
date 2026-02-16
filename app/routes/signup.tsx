@@ -1,12 +1,7 @@
-import type {
-  ActionFunctionArgs,
-  LoaderFunctionArgs,
-  MetaFunction,
-} from "@remix-run/node";
-import { json, redirect } from "@remix-run/node";
-import { Form, useActionData, useNavigation } from "@remix-run/react";
 import * as React from "react";
+import { data, Form, redirect, useNavigation } from "react-router";
 import { z } from "zod";
+import type { Route } from "./+types/signup";
 
 import Button from "~/components/button";
 import { ErrorMessage, SuccessMessage } from "~/components/error";
@@ -23,9 +18,9 @@ import { parseFormData } from "~/utils/http.server";
 
 const formSchema = z.object({ email: z.string(), password: z.string() });
 
-export const meta: MetaFunction = () => [{ title: "Sign up" }];
+export const meta: Route.MetaFunction = () => [{ title: "Sign up" }];
 
-export async function loader({ request }: LoaderFunctionArgs) {
+export async function loader({ request }: Route.LoaderArgs) {
   const authSession = await getValidAuthSession(request);
 
   if (authSession) throw redirect("/");
@@ -33,11 +28,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
   return null;
 }
 
-export async function action({ request }: ActionFunctionArgs) {
+export async function action({ request }: Route.ActionArgs) {
   const formData = await request.formData();
   const { email, password } = parseFormData(formData, formSchema);
   if (password.length < 6) {
-    return json(
+    return data(
       { success: false, message: "Password must be at least 6 characters" },
       { status: 400 },
     );
@@ -45,7 +40,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
   const userExists = await getUserExistsByEmailWithoutSession(email);
   if (userExists) {
-    return json(
+    return data(
       {
         success: false,
         message: "User already exists with this email, sign in instead",
@@ -56,7 +51,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
   try {
     await createUserAccount(email, password);
-    return json({
+    return data({
       success: true,
       message:
         "Created user account! Check your email for a verification link.",
@@ -64,14 +59,13 @@ export async function action({ request }: ActionFunctionArgs) {
   } catch (error: unknown) {
     console.error(error);
     if (error instanceof Error) {
-      return json({ success: false, message: error.message }, { status: 500 });
+      return data({ success: false, message: error.message }, { status: 500 });
     }
     throw error;
   }
 }
 
-export default function Signup() {
-  const actionData = useActionData<typeof action>();
+export default function Signup({ actionData }: Route.ComponentProps) {
   const navigation = useNavigation();
   const loading = navigation.state !== "idle";
 
@@ -139,10 +133,10 @@ export default function Signup() {
             Sign up
           </Button>
           {actionData ? (
-            actionData.success ? (
-              <SuccessMessage>{actionData.message}</SuccessMessage>
+            actionData?.success ? (
+              <SuccessMessage>{actionData?.message}</SuccessMessage>
             ) : (
-              <ErrorMessage>{actionData.message}</ErrorMessage>
+              <ErrorMessage>{actionData?.message}</ErrorMessage>
             )
           ) : null}
           <hr className="my-4" />

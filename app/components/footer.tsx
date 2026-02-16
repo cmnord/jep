@@ -1,6 +1,6 @@
-import { Link, useMatches } from "@remix-run/react";
 import clsx from "clsx";
 import * as React from "react";
+import { Link, useMatches } from "react-router";
 
 import Dialog from "~/components/dialog";
 import { Anchor } from "~/components/link";
@@ -63,8 +63,8 @@ export default function Footer() {
   const [showModal, setShowModal] = React.useState(false);
   const matches = useMatches();
   const isInGame = matches.some((match) => {
-    const data = match.data;
-    return data && typeof data === "object" && "game" in data;
+    const loaderData = match.loaderData;
+    return loaderData && typeof loaderData === "object" && "game" in loaderData;
   });
 
   return (

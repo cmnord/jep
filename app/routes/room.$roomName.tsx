@@ -1,6 +1,5 @@
-import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
-import { json, redirect } from "@remix-run/node";
-import { useLoaderData, useMatches } from "@remix-run/react";
+import { data, redirect, useMatches } from "react-router";
+import type { Route } from "./+types/room.$roomName";
 
 import GameComponent from "~/components/game";
 import { GameEngineContext, useGameEngine } from "~/engine";
@@ -14,7 +13,7 @@ import { getUserByEmail } from "~/models/user";
 import { getOrCreateUserSession } from "~/session.server";
 import { BASE_URL, getRandomEmoji } from "~/utils";
 
-export const meta: MetaFunction<typeof loader> = ({ data }) => {
+export const meta: Route.MetaFunction = ({ data }) => {
   try {
     return [{ title: data?.game.title }];
   } catch {
@@ -22,7 +21,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
   }
 };
 
-export async function loader({ request, params }: LoaderFunctionArgs) {
+export async function loader({ request, params }: Route.LoaderArgs) {
   const roomName = params.roomName;
   if (!roomName) {
     throw new Response("room name not found in URL params", { status: 404 });
@@ -58,7 +57,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 
   if (user) {
     const userId = user.id;
-    return json({
+    return {
       game,
       name,
       roomEvents,
@@ -67,12 +66,12 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
       userId,
       BASE_URL,
       accessToken,
-    });
+    };
   }
 
   const headers = new Headers();
   const userId = await getOrCreateUserSession(request, headers);
-  return json(
+  return data(
     {
       game,
       name,
@@ -87,27 +86,26 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   );
 }
 
-export default function PlayGame() {
-  const data = useLoaderData<typeof loader>();
+export default function PlayGame({ loaderData }: Route.ComponentProps) {
   const matches = useMatches();
   const pathname = matches[matches.length - 1].pathname;
 
   const engine = useGameEngine(
-    data.game,
-    data.roomEvents,
-    data.roomId,
-    data.accessToken,
+    loaderData.game,
+    loaderData.roomEvents,
+    loaderData.roomId,
+    loaderData.accessToken,
   );
 
   return (
     <GameEngineContext.Provider value={engine}>
       <GameComponent
-        game={data.game}
-        name={data.name}
-        roomId={data.roomId}
-        roomName={data.roomName}
-        userId={data.userId}
-        url={data.BASE_URL + pathname}
+        game={loaderData.game}
+        name={loaderData.name}
+        roomId={loaderData.roomId}
+        roomName={loaderData.roomName}
+        userId={loaderData.userId}
+        url={loaderData.BASE_URL + pathname}
       />
     </GameEngineContext.Provider>
   );

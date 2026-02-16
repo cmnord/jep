@@ -1,6 +1,6 @@
-import type { ActionFunctionArgs } from "@remix-run/node";
-import { json } from "@remix-run/node";
 import { z } from "zod";
+
+import type { Route } from "./+types/room.$roomId.player";
 
 import { ActionType } from "~/engine";
 import { getValidAuthSession } from "~/models/auth";
@@ -14,7 +14,7 @@ const formSchema = z.object({
   userId: z.string(),
 });
 
-export async function action({ request, params }: ActionFunctionArgs) {
+export async function action({ request, params }: Route.ActionArgs) {
   if (request.method !== "POST" && request.method !== "PATCH") {
     throw new Response("method not allowed", { status: 405 });
   }
@@ -30,7 +30,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
     request.method === "POST" ? ActionType.Join : ActionType.ChangeName;
 
   if (roomId === -1) {
-    return json({ type, payload: { userId, name } });
+    return { type, payload: { userId, name } };
   }
 
   const authSession = await getValidAuthSession(request);

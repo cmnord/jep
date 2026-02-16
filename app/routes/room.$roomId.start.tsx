@@ -1,5 +1,3 @@
-import type { ActionFunctionArgs } from "@remix-run/node";
-import { json } from "@remix-run/node";
 import { z } from "zod";
 
 import { ActionType } from "~/engine";
@@ -7,13 +5,14 @@ import { getValidAuthSession } from "~/models/auth";
 import { createRoomEvent } from "~/models/room-event.server";
 import { getRoom } from "~/models/room.server";
 import { parseFormData } from "~/utils/http.server";
+import type { Route } from "./+types/room.$roomId.start";
 
 const formSchema = z.object({
   userId: z.string(),
   round: z.coerce.number().int(),
 });
 
-export async function action({ request, params }: ActionFunctionArgs) {
+export async function action({ request, params }: Route.ActionArgs) {
   const formData = await request.formData();
   const { userId, round } = parseFormData(formData, formSchema);
 
@@ -23,7 +22,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   }
 
   if (roomId === -1) {
-    return json({ type: ActionType.StartRound, payload: { round, userId } });
+    return { type: ActionType.StartRound, payload: { round, userId } };
   }
 
   const authSession = await getValidAuthSession(request);
