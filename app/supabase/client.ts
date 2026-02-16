@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { AuthSession } from "~/models/auth";
 
 import type { Database } from "~/models/database.types";
@@ -9,7 +9,15 @@ import {
   SUPABASE_URL,
 } from "~/utils";
 
+// Cache the browser-side client to avoid multiple GoTrueClient instances.
+let browserClient: SupabaseClient<Database> | undefined;
+let browserClientToken: string | undefined;
+
 function getSupabaseClient(supabaseKey: string, accessToken?: string) {
+  if (isBrowser && browserClient && browserClientToken === accessToken) {
+    return browserClient;
+  }
+
   const global = accessToken
     ? {
         global: {
@@ -20,7 +28,7 @@ function getSupabaseClient(supabaseKey: string, accessToken?: string) {
       }
     : {};
 
-  return createClient<Database>(SUPABASE_URL, supabaseKey, {
+  const client = createClient<Database>(SUPABASE_URL, supabaseKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
@@ -32,6 +40,13 @@ function getSupabaseClient(supabaseKey: string, accessToken?: string) {
     },
     ...global,
   });
+
+  if (isBrowser) {
+    browserClient = client;
+    browserClientToken = accessToken;
+  }
+
+  return client;
 }
 
 /**
