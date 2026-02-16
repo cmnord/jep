@@ -1,4 +1,5 @@
 import { redirect } from "react-router";
+import { z } from "zod";
 
 import type { Route } from "./+types/game.$gameId";
 
@@ -10,6 +11,11 @@ import {
   updateGameVisibility,
 } from "~/models/game.server";
 import { flashFormState } from "~/session.server";
+import { parseFormData } from "~/utils/http.server";
+
+const visibilitySchema = z.object({
+  visibility: z.enum(["PUBLIC", "PRIVATE", "UNLISTED"]),
+});
 
 export async function action({ request, params }: Route.ActionArgs) {
   const gameId = params.gameId;
@@ -32,22 +38,7 @@ export async function action({ request, params }: Route.ActionArgs) {
     throw redirect("/profile", { headers });
   } else if (request.method === "PATCH") {
     const formData = await request.formData();
-    const visibility = formData.get("visibility");
-    if (!visibility) {
-      throw new Response("visibility not found", { status: 400 });
-    }
-    if (typeof visibility !== "string") {
-      throw new Response("visibility must be a string", { status: 400 });
-    }
-    if (
-      visibility !== "PUBLIC" &&
-      visibility !== "PRIVATE" &&
-      visibility !== "UNLISTED"
-    ) {
-      throw new Response("visibility must be PUBLIC, PRIVATE, or UNLISTED", {
-        status: 400,
-      });
-    }
+    const { visibility } = parseFormData(formData, visibilitySchema);
 
     const game = await updateGameVisibility(
       gameId,

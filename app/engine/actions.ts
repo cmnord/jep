@@ -1,5 +1,20 @@
+import { z } from "zod";
+
 import type { Action } from "./engine";
 import { ActionType } from "./engine";
+
+const CluePayload = z.object({
+  userId: z.string(),
+  i: z.number(),
+  j: z.number(),
+});
+
+const ClueWagerPayload = CluePayload.extend({ wager: z.number() });
+const PlayerPayload = z.object({ userId: z.string(), name: z.string() });
+const RoundPayload = z.object({ round: z.number(), userId: z.string() });
+const BuzzPayload = CluePayload.extend({ deltaMs: z.number() });
+const AnswerPayload = CluePayload.extend({ answer: z.string() });
+const CheckPayload = CluePayload.extend({ correct: z.boolean() });
 
 export function isClueAction(action: Action): action is {
   type: ActionType.ChooseClue | ActionType.NextClue;
@@ -8,11 +23,7 @@ export function isClueAction(action: Action): action is {
   return (
     (action.type === ActionType.ChooseClue ||
       action.type === ActionType.NextClue) &&
-    action.payload !== null &&
-    typeof action.payload === "object" &&
-    "userId" in action.payload &&
-    "i" in action.payload &&
-    "j" in action.payload
+    CluePayload.safeParse(action.payload).success
   );
 }
 
@@ -22,12 +33,7 @@ export function isClueWagerAction(action: Action): action is {
 } {
   return (
     action.type === ActionType.SetClueWager &&
-    action.payload !== null &&
-    typeof action.payload === "object" &&
-    "userId" in action.payload &&
-    "i" in action.payload &&
-    "j" in action.payload &&
-    "wager" in action.payload
+    ClueWagerPayload.safeParse(action.payload).success
   );
 }
 
@@ -38,10 +44,7 @@ export function isPlayerAction(action: Action): action is {
   return (
     (action.type === ActionType.Join ||
       action.type === ActionType.ChangeName) &&
-    action.payload !== null &&
-    typeof action.payload === "object" &&
-    "userId" in action.payload &&
-    "name" in action.payload
+    PlayerPayload.safeParse(action.payload).success
   );
 }
 
@@ -51,12 +54,7 @@ export function isRoundAction(action: Action): action is {
 } {
   return (
     action.type === ActionType.StartRound &&
-    action.payload !== null &&
-    typeof action.payload === "object" &&
-    "round" in action.payload &&
-    typeof action.payload.round === "number" &&
-    "userId" in action.payload &&
-    typeof action.payload.userId === "string"
+    RoundPayload.safeParse(action.payload).success
   );
 }
 
@@ -66,12 +64,7 @@ export function isBuzzAction(action: Action): action is {
 } {
   return (
     action.type === ActionType.Buzz &&
-    action.payload !== null &&
-    typeof action.payload === "object" &&
-    "userId" in action.payload &&
-    "i" in action.payload &&
-    "j" in action.payload &&
-    "deltaMs" in action.payload
+    BuzzPayload.safeParse(action.payload).success
   );
 }
 
@@ -81,12 +74,7 @@ export function isAnswerAction(action: Action): action is {
 } {
   return (
     action.type === ActionType.Answer &&
-    action.payload !== null &&
-    typeof action.payload === "object" &&
-    "userId" in action.payload &&
-    "i" in action.payload &&
-    "j" in action.payload &&
-    "answer" in action.payload
+    AnswerPayload.safeParse(action.payload).success
   );
 }
 
@@ -96,11 +84,6 @@ export function isCheckAction(action: Action): action is {
 } {
   return (
     action.type === ActionType.Check &&
-    action.payload !== null &&
-    typeof action.payload === "object" &&
-    "userId" in action.payload &&
-    "i" in action.payload &&
-    "j" in action.payload &&
-    "correct" in action.payload
+    CheckPayload.safeParse(action.payload).success
   );
 }

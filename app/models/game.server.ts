@@ -1,11 +1,6 @@
 import type { AuthSession } from "~/models/auth";
-import type {
-  Board,
-  Category,
-  Clue,
-  Game as ConvertedGame,
-} from "~/models/convert.server";
-import { Convert } from "~/models/convert.server";
+import type { Board, Game as ConvertedGame } from "~/models/convert.server";
+import { Convert, GameSchema } from "~/models/convert.server";
 import type { Database } from "~/models/database.types";
 import { getSupabase, getSupabaseAdmin } from "~/supabase";
 
@@ -32,14 +27,6 @@ type CategoryAndClues = DbCategory & { clues: DbClue[] | null };
  */
 const SEARCHABLE_GAME_COLUMNS = ["title", "author"];
 const RESULTS_PER_PAGE = 10;
-
-/** IMAGE_DOMAIN_ALLOWLIST lists the domains that are allowed for image sources.
- * Some clues have images, and we want to make sure that the images are hosted
- * on a trusted domain. This is for security and to prevent abuse.
- *
- * Submit a GitHub issue to add a new domain to this list.
- */
-const IMAGE_DOMAIN_ALLOWLIST = ["www.j-archive.com", "upload.wikimedia.org"];
 
 /* Helpers */
 
@@ -93,127 +80,7 @@ function dbGameToGame(dbGame: DbGame, categories: CategoryAndClues[]): Game {
 }
 
 export function gameToJson(game: Game): string {
-  const gameToConvert: ConvertedGame = {
-    title: game.title,
-    author: game.author,
-    copyright: game.copyright,
-    note: game.note,
-    boards: game.boards.map((board) => ({
-      ...board,
-      categories: board.categories.map(
-        (category): Category => ({
-          name: category.name,
-          note: category.note,
-          clues: category.clues.map(
-            (clue): Clue => ({
-              clue: clue.clue,
-              answer: clue.answer,
-              value: clue.value,
-              wagerable: clue.wagerable,
-              longForm: clue.longForm,
-              imageSrc: clue.imageSrc,
-            }),
-          ),
-        }),
-      ),
-    })),
-  };
-
-  return Convert.gameToJson(gameToConvert);
-}
-
-/** validateGame validates a game before inserting it into the database. */
-function validateGame(game: ConvertedGame) {
-  if (game.title.trim() === "") {
-    throw new Error("title must not be empty");
-  }
-  if (game.author.trim() === "") {
-    throw new Error("author must not be empty");
-  }
-  if (game.boards.length === 0) {
-    throw new Error("game must have at least one board");
-  }
-
-  for (let round = 0; round < game.boards.length; round++) {
-    const board = game.boards[round];
-    if (board.categories.length === 0) {
-      throw new Error("board " + round + " must have at least one category");
-    }
-    if (board.categoryNames.length === 0) {
-      throw new Error(
-        "board " + round + " must have at least one category name",
-      );
-    }
-    if (board.categoryNames.length !== board.categories.length) {
-      throw new Error("categoryNames and categories must have the same length");
-    }
-    if (new Set(board.categoryNames).size !== board.categoryNames.length) {
-      throw new Error("categoryNames must not have duplicates");
-    }
-    for (let j = 0; j < board.categories.length; j++) {
-      const category = board.categories[j];
-      if (category.name !== board.categoryNames[j]) {
-        throw new Error("category name must match categoryNames at index " + j);
-      }
-      if (category.name.trim() === "") {
-        throw new Error("category name " + j + " must not be empty");
-      }
-      if (category.clues.length === 0) {
-        throw new Error("category " + j + " must have at least one clue");
-      }
-      for (let i = 0; i < category.clues.length; i++) {
-        const clue = category.clues[i];
-        if (clue.clue.trim() === "") {
-          throw new Error(
-            "clue " + i + " in category " + j + " must not be empty",
-          );
-        }
-        if (clue.answer.trim() === "") {
-          throw new Error(
-            "answer " + i + " in category " + j + " must not be empty",
-          );
-        }
-        if (clue.longForm && !clue.wagerable) {
-          throw new Error(
-            "long-form clue " +
-              i +
-              " in category " +
-              j +
-              " must also be wagerable",
-          );
-        }
-        if (clue.imageSrc !== undefined) {
-          if (clue.imageSrc.trim() === "") {
-            throw new Error(
-              `imageSrc for clue ${i} in category ${j} must not be empty. Provide an imageSrc value or remove the name/value pair.`,
-            );
-          }
-          try {
-            const url = new URL(clue.imageSrc);
-            if (url.protocol !== "http:" && url.protocol !== "https:") {
-              throw new Error(
-                `image for clue ${i} in category ${j} has protocol ${url.protocol}, but must be HTTP or HTTPS`,
-              );
-            }
-            if (!IMAGE_DOMAIN_ALLOWLIST.includes(url.hostname)) {
-              throw new Error(
-                `image for clue ${i} in category ${j} has domain "${
-                  url.hostname
-                }", but must be one of [${IMAGE_DOMAIN_ALLOWLIST.join(", ")}]`,
-              );
-            }
-          } catch (error: unknown) {
-            if (error instanceof TypeError) {
-              throw new Error(
-                `image for clue ${i} in category ${j} has invalid URL "${clue.imageSrc}"`,
-              );
-            }
-            throw error;
-          }
-        }
-      }
-    }
-  }
+  return Convert.gameToJson(GameSchema.parse(game));
 }
 
 /** getPagination returns the from and to indices for the given page and page
@@ -339,7 +206,7 @@ export async function createGame(
   uploadedByUserId?: string,
   accessToken?: AuthSession["accessToken"],
 ) {
-  validateGame(inputGame);
+  GameSchema.parse(inputGame);
   const client = getSupabase(accessToken);
 
   const { data: gameData, error: gameErr } = await client

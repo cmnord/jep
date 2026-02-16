@@ -1,268 +1,95 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable no-prototype-builtins */
-/* eslint-disable no-empty */
-// To parse this data:
-//
-//   import { Convert, Game } from "./file";
-//
-//   const game = Convert.toGame(json);
-//
-// These functions will throw an error if the JSON doesn't
-// match the expected interface, even if the JSON is valid.
+import { z } from "zod";
 
-export interface Game {
-  title: string;
-  author: string;
-  copyright: string;
-  note: string;
-  boards: Board[];
-}
+/** IMAGE_DOMAIN_ALLOWLIST lists the domains that are allowed for image sources.
+ * Some clues have images, and we want to make sure that the images are hosted
+ * on a trusted domain. This is for security and to prevent abuse.
+ *
+ * Submit a GitHub issue to add a new domain to this list.
+ */
+export const IMAGE_DOMAIN_ALLOWLIST = [
+  "www.j-archive.com",
+  "upload.wikimedia.org",
+];
 
-export interface Board {
-  categoryNames: string[];
-  categories: Category[];
-}
-
-export interface Category {
-  name: string;
-  clues: Clue[];
-  note?: string;
-}
-
-export interface Clue {
-  clue: string;
-  answer: string;
-  value: number;
-  imageSrc?: string;
-  wagerable?: boolean;
-  longForm?: boolean;
-}
-
-// Converts JSON strings to/from your types
-// and asserts the results of JSON.parse at runtime
-export class Convert {
-  public static toGame(json: string): Game {
-    return cast(JSON.parse(json), r("Game"));
-  }
-
-  public static gameToJson(value: Game): string {
-    return JSON.stringify(uncast(value, r("Game")), null, 2);
+function isValidImageSrc(src: string): boolean {
+  try {
+    const url = new URL(src);
+    if (url.protocol !== "http:" && url.protocol !== "https:") return false;
+    if (!IMAGE_DOMAIN_ALLOWLIST.includes(url.hostname)) return false;
+    return true;
+  } catch {
+    return false;
   }
 }
 
-function invalidValue(typ: any, val: any, key: any, parent: any = ""): never {
-  const prettyTyp = prettyTypeName(typ);
-  const parentText = parent ? ` on ${parent}` : "";
-  const keyText = key ? ` for key "${key}"` : "";
-  throw Error(
-    `Invalid value${keyText}${parentText}. Expected ${prettyTyp} but got ${JSON.stringify(
-      val,
-    )}`,
+export const ClueSchema = z
+  .object({
+    clue: z.string().trim().min(1, "clue must not be empty"),
+    answer: z.string().trim().min(1, "answer must not be empty"),
+    value: z.number(),
+    imageSrc: z
+      .string()
+      .trim()
+      .min(1, "imageSrc must not be empty; remove the field instead")
+      .refine(
+        isValidImageSrc,
+        `imageSrc must be a valid HTTP(S) URL from [${IMAGE_DOMAIN_ALLOWLIST.join(", ")}]`,
+      )
+      .optional(),
+    wagerable: z.boolean().optional(),
+    longForm: z.boolean().optional(),
+  })
+  .refine((clue) => !clue.longForm || clue.wagerable, {
+    message: "long-form clues must also be wagerable",
+  });
+
+export const CategorySchema = z.object({
+  name: z.string().trim().min(1, "category name must not be empty"),
+  clues: z.array(ClueSchema).min(1, "category must have at least one clue"),
+  note: z.string().optional(),
+});
+
+export const BoardSchema = z
+  .object({
+    categoryNames: z
+      .array(z.string())
+      .min(1, "board must have at least one category name"),
+    categories: z
+      .array(CategorySchema)
+      .min(1, "board must have at least one category"),
+  })
+  .refine((board) => board.categoryNames.length === board.categories.length, {
+    message: "categoryNames and categories must have the same length",
+  })
+  .refine(
+    (board) => new Set(board.categoryNames).size === board.categoryNames.length,
+    { message: "categoryNames must not have duplicates" },
+  )
+  .refine(
+    (board) =>
+      board.categories.every((cat, j) => cat.name === board.categoryNames[j]),
+    { message: "category names must match categoryNames at each index" },
   );
-}
 
-function prettyTypeName(typ: any): string {
-  if (Array.isArray(typ)) {
-    if (typ.length === 2 && typ[0] === undefined) {
-      return `an optional ${prettyTypeName(typ[1])}`;
-    } else {
-      return `one of [${typ
-        .map((a) => {
-          return prettyTypeName(a);
-        })
-        .join(", ")}]`;
-    }
-  } else if (typeof typ === "object" && typ.literal !== undefined) {
-    return typ.literal;
-  } else {
-    return typeof typ;
-  }
-}
+export const GameSchema = z.object({
+  title: z.string().trim().min(1, "title must not be empty"),
+  author: z.string().trim().min(1, "author must not be empty"),
+  copyright: z.string(),
+  note: z.string(),
+  boards: z.array(BoardSchema).min(1, "game must have at least one board"),
+});
 
-function jsonToJSProps(typ: any): any {
-  if (typ.jsonToJS === undefined) {
-    const map: any = {};
-    typ.props.forEach((p: any) => (map[p.json] = { key: p.js, typ: p.typ }));
-    typ.jsonToJS = map;
-  }
-  return typ.jsonToJS;
-}
+export type Game = z.infer<typeof GameSchema>;
+export type Board = z.infer<typeof BoardSchema>;
+export type Category = z.infer<typeof CategorySchema>;
+export type Clue = z.infer<typeof ClueSchema>;
 
-function jsToJSONProps(typ: any): any {
-  if (typ.jsToJSON === undefined) {
-    const map: any = {};
-    typ.props.forEach((p: any) => (map[p.js] = { key: p.json, typ: p.typ }));
-    typ.jsToJSON = map;
-  }
-  return typ.jsToJSON;
-}
+export const Convert = {
+  toGame(json: string): Game {
+    return GameSchema.parse(JSON.parse(json));
+  },
 
-function transform(
-  val: any,
-  typ: any,
-  getProps: any,
-  key: any = "",
-  parent: any = "",
-): any {
-  function transformPrimitive(typ: string, val: any): any {
-    if (typeof typ === typeof val) return val;
-    return invalidValue(typ, val, key, parent);
-  }
-
-  function transformUnion(typs: any[], val: any): any {
-    // val must validate against one typ in typs
-    const l = typs.length;
-    for (let i = 0; i < l; i++) {
-      const typ = typs[i];
-      try {
-        return transform(val, typ, getProps);
-      } catch {}
-    }
-    return invalidValue(typs, val, key, parent);
-  }
-
-  function transformEnum(cases: string[], val: any): any {
-    if (cases.indexOf(val) !== -1) return val;
-    return invalidValue(
-      cases.map((a) => {
-        return l(a);
-      }),
-      val,
-      key,
-      parent,
-    );
-  }
-
-  function transformArray(typ: any, val: any): any {
-    // val must be an array with no invalid elements
-    if (!Array.isArray(val)) return invalidValue(l("array"), val, key, parent);
-    return val.map((el) => transform(el, typ, getProps));
-  }
-
-  function transformDate(val: any): any {
-    if (val === null) {
-      return null;
-    }
-    const d = new Date(val);
-    if (isNaN(d.valueOf())) {
-      return invalidValue(l("Date"), val, key, parent);
-    }
-    return d;
-  }
-
-  function transformObject(
-    props: { [k: string]: any },
-    additional: any,
-    val: any,
-  ): any {
-    if (val === null || typeof val !== "object" || Array.isArray(val)) {
-      return invalidValue(l(ref || "object"), val, key, parent);
-    }
-    const result: any = {};
-    Object.getOwnPropertyNames(props).forEach((key) => {
-      const prop = props[key];
-      const v = Object.prototype.hasOwnProperty.call(val, key)
-        ? val[key]
-        : undefined;
-      result[prop.key] = transform(v, prop.typ, getProps, key, ref);
-    });
-    Object.getOwnPropertyNames(val).forEach((key) => {
-      if (!Object.prototype.hasOwnProperty.call(props, key)) {
-        result[key] = transform(val[key], additional, getProps, key, ref);
-      }
-    });
-    return result;
-  }
-
-  if (typ === "any") return val;
-  if (typ === null) {
-    if (val === null) return val;
-    return invalidValue(typ, val, key, parent);
-  }
-  if (typ === false) return invalidValue(typ, val, key, parent);
-  let ref: any = undefined;
-  while (typeof typ === "object" && typ.ref !== undefined) {
-    ref = typ.ref;
-    typ = typeMap[typ.ref];
-  }
-  if (Array.isArray(typ)) return transformEnum(typ, val);
-  if (typeof typ === "object") {
-    return typ.hasOwnProperty("unionMembers")
-      ? transformUnion(typ.unionMembers, val)
-      : typ.hasOwnProperty("arrayItems")
-        ? transformArray(typ.arrayItems, val)
-        : typ.hasOwnProperty("props")
-          ? transformObject(getProps(typ), typ.additional, val)
-          : invalidValue(typ, val, key, parent);
-  }
-  // Numbers can be parsed by Date but shouldn't be.
-  if (typ === Date && typeof val !== "number") return transformDate(val);
-  return transformPrimitive(typ, val);
-}
-
-function cast<T>(val: any, typ: any): T {
-  return transform(val, typ, jsonToJSProps);
-}
-
-function uncast<T>(val: T, typ: any): any {
-  return transform(val, typ, jsToJSONProps);
-}
-
-function l(typ: any) {
-  return { literal: typ };
-}
-
-function a(typ: any) {
-  return { arrayItems: typ };
-}
-
-function u(...typs: any[]) {
-  return { unionMembers: typs };
-}
-
-function o(props: any[], additional: any) {
-  return { props, additional };
-}
-
-function r(name: string) {
-  return { ref: name };
-}
-
-const typeMap: any = {
-  Game: o(
-    [
-      { json: "title", js: "title", typ: "" },
-      { json: "author", js: "author", typ: "" },
-      { json: "copyright", js: "copyright", typ: "" },
-      { json: "note", js: "note", typ: "" },
-      { json: "boards", js: "boards", typ: a(r("Board")) },
-    ],
-    false,
-  ),
-  Board: o(
-    [
-      { json: "categoryNames", js: "categoryNames", typ: a("") },
-      { json: "categories", js: "categories", typ: a(r("Category")) },
-    ],
-    false,
-  ),
-  Category: o(
-    [
-      { json: "name", js: "name", typ: "" },
-      { json: "clues", js: "clues", typ: a(r("Clue")) },
-      { json: "note", js: "note", typ: u(undefined, "") },
-    ],
-    false,
-  ),
-  Clue: o(
-    [
-      { json: "clue", js: "clue", typ: "" },
-      { json: "answer", js: "answer", typ: "" },
-      { json: "value", js: "value", typ: 0 },
-      { json: "imageSrc", js: "imageSrc", typ: u(undefined, "") },
-      { json: "wagerable", js: "wagerable", typ: u(undefined, true) },
-      { json: "longForm", js: "longForm", typ: u(undefined, true) },
-    ],
-    false,
-  ),
+  gameToJson(value: Game): string {
+    return JSON.stringify(value, null, 2);
+  },
 };

@@ -1,12 +1,14 @@
 import { randomUUID } from "node:crypto";
 import { createCookieSessionStorage } from "react-router";
+import { z } from "zod";
 
 import { NODE_ENV, SESSION_SECRET } from "~/utils";
 
-interface FormState {
-  success: boolean;
-  message: string;
-}
+const FormStateSchema = z.object({
+  success: z.boolean(),
+  message: z.string(),
+});
+type FormState = z.infer<typeof FormStateSchema>;
 
 const FORM_STATE_KEY = "formState";
 const USER_SESSION_KEY = "userId";
@@ -34,7 +36,7 @@ export async function getSessionFormState(
   if (!data) {
     return [undefined, headers];
   }
-  return [JSON.parse(data) as FormState, headers];
+  return [FormStateSchema.parse(JSON.parse(data)), headers];
 }
 
 /** flashFormState appends to existing headers if provided. */
