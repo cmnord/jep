@@ -9,8 +9,6 @@ import {
   SUPABASE_URL,
 } from "~/utils";
 
-// ⚠️ cloudflare needs you define fetch option : https://github.com/supabase/supabase-js#custom-fetch-implementation
-// Use Remix fetch polyfill for node (See https://remix.run/docs/en/v1/other-api/node)
 function getSupabaseClient(supabaseKey: string, accessToken?: string) {
   const global = accessToken
     ? {

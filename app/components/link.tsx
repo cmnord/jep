@@ -1,4 +1,4 @@
-import { Link as RemixLink } from "react-router";
+import { Link as RouterLink } from "react-router";
 
 export function Anchor({
   href,
@@ -27,7 +27,7 @@ export default function Link({
   className?: string;
 }) {
   return (
-    <RemixLink
+    <RouterLink
       className={
         `text-blue-600 underline decoration-blue-400 transition-colors visited:text-purple-700 visited:decoration-purple-500 hover:text-blue-500 hover:decoration-blue-300 ` +
         (className ?? "")
@@ -35,6 +35,6 @@ export default function Link({
       to={to}
     >
       {children}
-    </RemixLink>
+    </RouterLink>
   );
 }

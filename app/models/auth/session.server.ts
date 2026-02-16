@@ -193,8 +193,6 @@ async function refreshAuthSession(request: Request): Promise<AuthSession> {
   if (!refreshedAuthSession) {
     const redirectUrl = `${LOGIN_URL}?${makeRedirectToFromHere(request)}`;
 
-    // here we throw instead of return because this function promise a AuthSession and not a response object
-    // https://remix.run/docs/en/v1/guides/constraints#higher-order-functions
     throw redirect(redirectUrl, {
       headers: {
         "Set-Cookie": await commitAuthSession(request, {
@@ -207,8 +205,6 @@ async function refreshAuthSession(request: Request): Promise<AuthSession> {
 
   // refresh is ok and we can redirect
   if (isGet(request)) {
-    // here we throw instead of return because this function promise a UserSession and not a response object
-    // https://remix.run/docs/en/v1/guides/constraints#higher-order-functions
     throw redirect(getCurrentPath(request), {
       headers: {
         "Set-Cookie": await commitAuthSession(request, {

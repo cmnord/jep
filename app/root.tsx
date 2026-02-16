@@ -51,16 +51,6 @@ export const meta: Route.MetaFunction = () => [
 
 export const links: Route.LinksFunction = () => [
   { rel: "icon", href: "/favicon.ico", type: "image/x-icon", sizes: "16x16" },
-  { rel: "preconnect", href: "https://fonts.googleapis.com" },
-  {
-    rel: "preconnect",
-    href: "https://fonts.gstatic.com",
-    crossOrigin: "anonymous",
-  },
-  {
-    rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Inter:wght@100..900&display=swap",
-  },
   { rel: "stylesheet", href: stylesheet },
 ];
 
@@ -96,27 +86,7 @@ export default function App({ loaderData }: Route.ComponentProps) {
         <Links />
       </head>
       <body className="relative flex min-h-screen flex-col">
-        {loaderData.NODE_ENV === "production" &&
-        loaderData.env.GA_TRACKING_ID ? (
-          <>
-            <script
-              async
-              src={`https://www.googletagmanager.com/gtag/js?id=${loaderData.env.GA_TRACKING_ID}`}
-            />
-            <script
-              dangerouslySetInnerHTML={{
-                __html: `
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                gtag('js', new Date());
-
-                gtag('config', '${loaderData.env.GA_TRACKING_ID}');
-              `,
-              }}
-            />
-            <Analytics />
-          </>
-        ) : null}
+        {loaderData.NODE_ENV === "production" ? <Analytics /> : null}
         <SoundContext.Provider
           value={{
             volume,

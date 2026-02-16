@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import "@fontsource-variable/inter";
+@import "@fontsource-variable/caveat";
 
 @font-face {
   font-family: "Korinna-Agency";
@@ -36,8 +38,8 @@
   --shadow-glow-red-200: 0 0 20px 5px var(--color-red-200);
 
   --font-korinna: "Korinna-Agency", "Times New Roman", "Times", serif;
-  --font-inter: "Inter", "Times New Roman", "Times", serif;
-  --font-handwriting: "Caveat", cursive;
+  --font-inter: "Inter Variable", "Inter", "Times New Roman", "Times", serif;
+  --font-handwriting: "Caveat Variable", "Caveat", cursive;
 
   --spacing-1\/6: 16.666667%;
 
