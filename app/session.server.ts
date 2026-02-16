@@ -69,8 +69,7 @@ export async function requireSessionUserId(
   claimedUserId: string,
   authSession: { userId: string } | null,
 ): Promise<void> {
-  const sessionUserId =
-    authSession?.userId ?? (await getUserSession(request));
+  const sessionUserId = authSession?.userId ?? (await getUserSession(request));
   if (sessionUserId !== claimedUserId) {
     throw new Response("userId does not match session", { status: 403 });
   }
