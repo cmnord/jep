@@ -140,12 +140,20 @@ function transferBoardControl(draft: Draft<State>, userId: string) {
   }
 }
 
+/** ensureUtc appends a 'Z' suffix to ISO timestamps that lack timezone info.
+ * Postgres `timestamp` (without timezone) omits the suffix, causing JS Date to
+ * interpret the string as local time instead of UTC. */
+function ensureUtc(ts: string): string {
+  if (/Z|[+-]\d{2}(:\d{2})?$/.test(ts)) return ts;
+  return ts + "Z";
+}
+
 /** resumeClock sets the clock to running, recording when it was resumed.
  * No-op if already running. */
 function resumeClock(draft: Draft<State>, ts: string) {
   if (draft.clockRunning) return;
   draft.clockRunning = true;
-  draft.clockLastResumedAt = ts;
+  draft.clockLastResumedAt = ensureUtc(ts);
 }
 
 /** pauseClock accumulates elapsed time and marks the clock as paused.
@@ -153,7 +161,8 @@ function resumeClock(draft: Draft<State>, ts: string) {
 function pauseClock(draft: Draft<State>, ts: string) {
   if (!draft.clockRunning || !draft.clockLastResumedAt) return;
   const elapsed =
-    new Date(ts).getTime() - new Date(draft.clockLastResumedAt).getTime();
+    new Date(ensureUtc(ts)).getTime() -
+    new Date(draft.clockLastResumedAt).getTime();
   draft.clockAccumulatedMs += Math.max(0, elapsed);
   draft.clockRunning = false;
   draft.clockLastResumedAt = null;

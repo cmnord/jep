@@ -2449,6 +2449,27 @@ describe("gameEngine", () => {
         draft.clockLastResumedAt = null;
       }),
     },
+    {
+      name: "Clock normalizes Postgres timestamps without timezone to UTC",
+      state: initialState,
+      actions: [
+        { ...PLAYER1_JOIN_ACTION, ts: "2024-01-01T00:00:00" },
+        {
+          type: ActionType.StartRound,
+          payload: { round: 0, userId: PLAYER1.userId },
+          ts: "2024-01-01T00:00:05",
+        },
+        { type: ActionType.ToggleClock, ts: "2024-01-01T00:00:15" },
+      ],
+      expectedState: produce(initialState, (draft) => {
+        draft.type = GameState.ShowBoard;
+        draft.boardControl = PLAYER1.userId;
+        draft.players.set(PLAYER1.userId, PLAYER1);
+        draft.clockRunning = false;
+        draft.clockAccumulatedMs = 10000;
+        draft.clockLastResumedAt = null;
+      }),
+    },
   ];
 
   for (const tc of testCases) {
