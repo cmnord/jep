@@ -164,7 +164,7 @@ export default function HowTo() {
                 Click or press <Kbd>Enter</Kbd> to buzz in
               </span>
             </div>
-            <p className="text-shadow-md font-korinna text-xl font-bold uppercase text-white">
+            <p className="font-korinna text-xl font-bold text-white uppercase text-shadow-md">
               This apple variety is named after a city in New York State
             </p>
             <Lockout active={lockout} />

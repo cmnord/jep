@@ -26,13 +26,11 @@ function AccountButton({ user }: { user: { id: string; email: string } }) {
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>
         <button
-          className={`flex items-center justify-center rounded-full p-1
-          transition-colors
-          hover:bg-blue-700 data-[state=open]:bg-blue-700`}
+          className={`flex items-center justify-center rounded-full p-1 transition-colors hover:bg-blue-700 data-[state=open]:bg-blue-700`}
           style={{ backgroundColor }}
           aria-label="Account"
         >
-          <div className="flex h-6 w-6 items-center justify-center uppercase text-blue-1000">
+          <div className="flex h-6 w-6 items-center justify-center text-blue-1000 uppercase">
             {email.slice(0, 1)}
           </div>
         </button>
@@ -103,8 +101,7 @@ function GameSettings({ game, url }: { game: Game; url: string }) {
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>
         <button
-          className={`flex h-6 w-6 items-center justify-center text-white
-          hover:text-slate-300 data-[state=open]:text-slate-300`}
+          className={`flex h-6 w-6 items-center justify-center text-white hover:text-slate-300 data-[state=open]:text-slate-300`}
           aria-label="Customise options"
         >
           {/* Heroicon name: outline/information-circle */}
@@ -135,7 +132,7 @@ function GameSettings({ game, url }: { game: Game; url: string }) {
           </DropdownMenu.Label>
           {game.note && (
             <DropdownMenu.Label>
-              <p className="break-words p-1 text-sm">{game.note}</p>
+              <p className="p-1 text-sm break-words">{game.note}</p>
             </DropdownMenu.Label>
           )}
           <DropdownMenu.Label className="p-1 text-sm text-slate-400">
@@ -203,7 +200,7 @@ export default function Header({
     <nav className="bg-blue-bright p-4">
       <div className="flex items-center justify-between">
         <Link to="/">
-          <h1 className="text-shadow-md font-korinna text-2xl font-bold text-white">
+          <h1 className="font-korinna text-2xl font-bold text-white text-shadow-md">
             Jep!
           </h1>
         </Link>

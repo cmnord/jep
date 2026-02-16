@@ -42,7 +42,7 @@ function CallToAction({
   }
   if (isSingleLongFormClue) {
     return (
-      <div className="italic text-slate-300">Let's go to the final clue!</div>
+      <div className="text-slate-300 italic">Let's go to the final clue!</div>
     );
   }
   if (boardController) {
@@ -107,8 +107,7 @@ export default function GameComponent({
       <div className="flex grow flex-col bg-blue-1000">
         <BoardComponent roomId={roomId} userId={userId} />
         <div
-          className={`mx-auto flex w-full max-w-screen-lg flex-col gap-4 p-3
-          text-slate-100 sm:p-6 md:p-12`}
+          className={`mx-auto flex w-full max-w-screen-lg flex-col gap-4 p-3 text-slate-100 sm:p-6 md:p-12`}
         >
           <CallToAction
             boardController={boardController}

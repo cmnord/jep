@@ -26,7 +26,7 @@ function PlayerScores({
   const playerScores = players.sort((a, b) => b.score - a.score);
 
   return (
-    <div className="text-shadow flex w-full gap-2 self-start overflow-x-scroll text-sm text-slate-300">
+    <div className="flex w-full gap-2 self-start overflow-x-scroll text-sm text-slate-300 text-shadow">
       {playerScores.map((p, i) => (
         <div
           className="relative flex flex-col items-center justify-between"
@@ -85,8 +85,7 @@ function WagerForm({
           max={maxWager}
           id="wager"
           name="wager"
-          className={`min-w-48 font-handwriting text-xl font-bold
-          placeholder:font-sans placeholder:font-normal `}
+          className={`min-w-48 font-handwriting text-xl font-bold placeholder:font-sans placeholder:font-normal`}
           placeholder="choose wager amount"
           required={inputRequired}
         />

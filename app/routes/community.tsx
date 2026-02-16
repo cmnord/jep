@@ -12,7 +12,7 @@ export default function Login() {
     <div className="max-w-full grow">
       <Main>
         <h1 className="mb-4 text-2xl font-semibold">Community Guidelines</h1>
-        <h2 className="mb-4 mt-8 text-xl font-semibold">Summary</h2>
+        <h2 className="mt-8 mb-4 text-xl font-semibold">Summary</h2>
         <p className="mb-2">
           Be polite; don't post anything inappropriate.
           <br className="mb-1" />
@@ -21,7 +21,7 @@ export default function Login() {
           </Link>{" "}
           or by clicking the "Report" button in the game.
         </p>
-        <h2 className="mb-4 mt-8 text-xl font-semibold">
+        <h2 className="mt-8 mb-4 text-xl font-semibold">
           Moderation policy for uploaded games
         </h2>
         <p className="mb-2">
@@ -41,7 +41,7 @@ export default function Login() {
             Accounts that violate the policy will be banned from the website.
           </li>
         </ul>
-        <h3 className="mb-4 mt-8 text-lg font-semibold">
+        <h3 className="mt-8 mb-4 text-lg font-semibold">
           Inappropriate content
         </h3>
         <p className="mb-2">

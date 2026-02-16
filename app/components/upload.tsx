@@ -79,11 +79,7 @@ function UploadBox({
         type="button"
         onClick={() => inputRef.current?.click()}
         className={clsx(
-          `flex flex-col items-center justify-center rounded-lg
-          border-2 border-dashed p-6 text-sm text-slate-900
-          shadow-sm transition-colors
-          focus:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500
-          focus:ring-offset-2`,
+          `flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 text-sm text-slate-900 shadow-sm transition-colors focus:shadow-md focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none`,
           {
             "border-green-500 bg-green-50": isDragActive && !isDragReject,
             "border-red-500 bg-red-50": isDragReject,

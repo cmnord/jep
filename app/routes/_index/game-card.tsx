@@ -24,9 +24,7 @@ export default function GameCard({
   return (
     <button
       onClick={() => setLoading(true)}
-      className={`group flex basis-full flex-col rounded-lg border
-      border-slate-300 shadow-sm transition-colors hover:border-blue-500
-      hover:shadow-sm sm:basis-auto`}
+      className={`group flex basis-full flex-col rounded-lg border border-slate-300 shadow-sm transition-colors hover:border-blue-500 hover:shadow-sm sm:basis-auto`}
       disabled={loading}
     >
       <Link to={to} className="w-full grow">
@@ -42,13 +40,13 @@ export default function GameCard({
             ) : null}
           </div>
           <p
-            className="w-full overflow-hidden overflow-ellipsis whitespace-nowrap text-left text-sm"
+            className="w-full overflow-hidden text-left text-sm overflow-ellipsis whitespace-nowrap"
             title={game.author}
           >
             {game.author}
           </p>
           {game.note && (
-            <p className="break-word text-left text-sm text-slate-500">
+            <p className="text-left text-sm break-word text-slate-500">
               {game.note}
             </p>
           )}

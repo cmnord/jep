@@ -55,7 +55,7 @@ function PlayerScores({
         );
         return (
           <div className="relative" key={i}>
-            <div className="text-shadow flex flex-col items-center" key={i}>
+            <div className="flex flex-col items-center text-shadow" key={i}>
               <span className="font-handwriting text-xl font-bold text-slate-300">
                 {name}
               </span>
@@ -70,7 +70,7 @@ function PlayerScores({
             </div>
             <span
               className={clsx(
-                "text-shadow absolute -right-1/2 -top-1/4 animate-bounce whitespace-nowrap font-inter font-bold",
+                "absolute -top-1/4 -right-1/2 animate-bounce font-inter font-bold whitespace-nowrap text-shadow",
                 {
                   "text-green-300": correct,
                   "text-red-300": !correct,

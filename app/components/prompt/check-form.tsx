@@ -27,7 +27,7 @@ function CheckForm({
     <div className="flex flex-col items-center gap-2 p-2">
       {longForm ? null : (
         <>
-          <p className="text-center font-korinna text-2xl font-bold uppercase text-slate-300 shadow-sm">
+          <p className="text-center font-korinna text-2xl font-bold text-slate-300 uppercase shadow-sm">
             {answer}
           </p>
           <p className="text-center text-sm text-slate-300">
@@ -117,7 +117,7 @@ export function ConnectedCheckForm({
         <div className="relative">
           <span
             className={clsx(
-              "absolute left-1/6 top-1/6 inline-flex h-2/3 w-2/3 rounded-md bg-blue-300 opacity-75",
+              "absolute top-1/6 left-1/6 inline-flex h-2/3 w-2/3 rounded-md bg-blue-300 opacity-75",
               {
                 "animate-ping": !disabled,
               },

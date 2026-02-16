@@ -10,12 +10,12 @@ export function Category({ name, note }: { name: string; note?: string }) {
         ref={ref}
         className="flex h-20 w-full flex-col items-center justify-center"
       >
-        <span className="text-shadow-md sm:text-shadow-lg font-inter font-bold uppercase">
+        <span className="font-inter font-bold uppercase text-shadow-md sm:text-shadow-lg">
           {name}
         </span>
       </p>
       {note ? (
-        <span className="text-xs font-normal leading-none text-slate-300 sm:text-sm">
+        <span className="text-xs leading-none font-normal text-slate-300 sm:text-sm">
           Note: {note}
         </span>
       ) : null}

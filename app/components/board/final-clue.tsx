@@ -61,8 +61,7 @@ export function FinalClue({
         <p
           ref={ref}
           className={clsx(
-            `text-shadow-md sm:text-shadow-lg flex items-center justify-center
-            gap-1 font-korinna uppercase text-white`,
+            `flex items-center justify-center gap-1 font-korinna text-white uppercase text-shadow-md sm:text-shadow-lg`,
             {
               "opacity-0 group-hover:opacity-50 group-focus:opacity-50":
                 answered,

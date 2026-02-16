@@ -96,9 +96,7 @@ function PostGameClue({ clue, state, round, i, j }: Props) {
       <td className="h-full sm:p-1">
         <div className="h-full w-full bg-slate-800 px-4 py-3">
           <p
-            className={`text-shadow-md sm:text-shadow-lg flex items-center justify-center
-            font-inter font-bold text-white opacity-75 transition-opacity
-            group-hover:opacity-100`}
+            className={`flex items-center justify-center font-inter font-bold text-white opacity-75 transition-opacity text-shadow-md group-hover:opacity-100 sm:text-shadow-lg`}
           >
             {clue.wagerable && clueAnswer.isAnswered ? null : (
               <span className="text-sm sm:text-3xl lg:text-4xl">$</span>
@@ -130,8 +128,7 @@ function PostGameClue({ clue, state, round, i, j }: Props) {
         <button
           disabled={!playable}
           className={clsx(
-            `group h-full w-full bg-blue-1000 px-4 py-3 transition-colors
-            hover:bg-blue-700`,
+            `group h-full w-full bg-blue-1000 px-4 py-3 transition-colors hover:bg-blue-700`,
             {
               "bg-slate-800": !playable,
             },
@@ -139,9 +136,7 @@ function PostGameClue({ clue, state, round, i, j }: Props) {
           style={{ backgroundColor }}
         >
           <p
-            className={`text-shadow-md sm:text-shadow-lg flex items-center
-            justify-center font-inter font-bold text-white opacity-75 transition-opacity
-            group-hover:opacity-100`}
+            className={`flex items-center justify-center font-inter font-bold text-white opacity-75 transition-opacity text-shadow-md group-hover:opacity-100 sm:text-shadow-lg`}
           >
             {clue.wagerable ? null : (
               <span className="text-sm sm:text-3xl lg:text-4xl">$</span>

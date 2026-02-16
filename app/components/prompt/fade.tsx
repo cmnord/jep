@@ -22,9 +22,9 @@ export function Fade({
 
   return shouldRender ? (
     <div
-      className={clsx("absolute left-0 top-0 w-screen", {
-        "animate-slideInFromTopLeft": show,
-        "animate-slideOut": !show,
+      className={clsx("absolute top-0 left-0 w-screen", {
+        "animate-slide-in-from-top-left": show,
+        "animate-slide-out": !show,
       })}
       onAnimationEnd={onAnimationEnd}
     >

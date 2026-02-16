@@ -71,7 +71,7 @@ const ClueButton = React.forwardRef<HTMLButtonElement, ButtonProps & Props>(
       >
         <p
           className={clsx(
-            "text-shadow-md sm:text-shadow-lg flex items-center justify-center gap-1 font-inter font-bold text-yellow-1000",
+            "flex items-center justify-center gap-1 font-inter font-bold text-yellow-1000 text-shadow-md sm:text-shadow-lg",
             {
               "opacity-0 group-hover:opacity-50 group-focus:opacity-50":
                 answered,

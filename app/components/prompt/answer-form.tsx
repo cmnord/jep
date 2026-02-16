@@ -36,8 +36,7 @@ function AnswerForm({
           name="answer"
           placeholder="What is..."
           required
-          className={`min-w-48 font-handwriting text-xl font-bold
-          placeholder:font-sans placeholder:font-normal`}
+          className={`min-w-48 font-handwriting text-xl font-bold placeholder:font-sans placeholder:font-normal`}
         />
         <Button type="primary" htmlType="submit" loading={loading}>
           submit

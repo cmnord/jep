@@ -133,9 +133,7 @@ export default function App() {
         >
           <ToastPrimitive.Provider swipeDirection="right">
             <ToastPrimitive.Viewport
-              className={`fixed bottom-0 right-0 z-50 m-0 flex w-96 max-w-full
-              list-none flex-col gap-3 p-[var(--viewport-padding)] outline-none
-              [--viewport-padding:_25px]`}
+              className={`fixed right-0 bottom-0 z-50 m-0 flex w-96 max-w-full list-none flex-col gap-3 p-[var(--viewport-padding)] outline-none [--viewport-padding:_25px]`}
             />
             <Header user={data.user} BASE_URL={data.BASE_URL} />
             <Outlet />
@@ -157,7 +155,7 @@ export default function App() {
 const errorHeader = (
   <nav className="bg-blue-bright p-4">
     <a href="/">
-      <h1 className="text-shadow-md font-korinna text-2xl font-bold text-white">
+      <h1 className="font-korinna text-2xl font-bold text-white text-shadow-md">
         Jep!
       </h1>
     </a>

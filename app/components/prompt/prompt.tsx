@@ -103,9 +103,7 @@ function ClueText({
       autoFocus={focusOnBuzz}
     >
       <p
-        className={`text-shadow-lg word-spacing-1 mx-auto max-h-96 w-full
-        max-w-screen-lg font-korinna font-bold uppercase leading-normal
-        text-white`}
+        className={`mx-auto max-h-96 w-full max-w-screen-lg font-korinna leading-normal font-bold text-white uppercase text-shadow-lg word-spacing-1`}
         ref={ref}
         style={{ fontSize }}
       >
@@ -168,7 +166,7 @@ function WagerCluePrompt({ roomId, userId }: RoomProps) {
         {longForm ? (
           <div className="mx-auto flex max-h-96 max-w-screen-lg flex-col p-4">
             <ShinyText text="final clue" />
-            <p className="text-shadow-md break-words text-center font-korinna font-bold uppercase text-white">
+            <p className="text-center font-korinna font-bold break-words text-white uppercase text-shadow-md">
               {category}
             </p>
           </div>
@@ -176,7 +174,7 @@ function WagerCluePrompt({ roomId, userId }: RoomProps) {
           <div className="relative p-4">
             <ShinyText text="double down" />
             {/* Hidden absolute element keeps shiny text from overflowing its grid */}
-            <p className="invisible absolute left-0 top-0 p-4 text-center font-black uppercase text-white">
+            <p className="invisible absolute top-0 left-0 p-4 text-center font-black text-white uppercase">
               double down
             </p>
           </div>
@@ -844,8 +842,7 @@ export function ConnectedPrompt(props: RoomProps) {
   return (
     <Fade show={isOpen}>
       <div
-        className={`relative flex w-screen flex-col justify-between
-        overflow-x-hidden overflow-y-scroll bg-blue-bright`}
+        className={`relative flex w-screen flex-col justify-between overflow-x-hidden overflow-y-scroll bg-blue-bright`}
         style={{
           height: "100dvh",
         }}

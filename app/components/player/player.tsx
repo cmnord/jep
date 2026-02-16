@@ -35,7 +35,7 @@ export function PlayerScoreBox({
         <div className="flex w-1/3 grow items-center justify-end gap-2 text-xl sm:w-auto">
           {winning && <span>👑</span>}
           <div
-            className={clsx("text-shadow-md font-inter font-bold", {
+            className={clsx("font-inter font-bold text-shadow-md", {
               "text-white": player.score >= 0,
               "text-red-400": player.score < 0,
             })}

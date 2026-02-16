@@ -10,7 +10,7 @@ export default function ShowPasswordButton({
   return (
     <button
       type="button"
-      className={"absolute right-0 top-0.5 p-2"}
+      className={"absolute top-0.5 right-0 p-2"}
       onClick={onClick}
     >
       {showPassword ? (

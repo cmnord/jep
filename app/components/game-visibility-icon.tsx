@@ -8,8 +8,7 @@ export function GameVisibilityTag({
 }) {
   return (
     <div
-      className={`flex items-center rounded-md border border-slate-200
-          bg-slate-100 px-1 text-slate-500`}
+      className={`flex items-center rounded-md border border-slate-200 bg-slate-100 px-1 text-slate-500`}
     >
       <span className="text-xs">{visibility}</span>
       <GameVisibilityIcon

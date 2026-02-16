@@ -97,8 +97,7 @@ export default function PlayGame() {
   return (
     <div className="flex grow flex-col bg-blue-1000 text-white">
       <div
-        className={`mx-auto flex w-full max-w-screen-lg flex-col gap-4 p-3
-          text-slate-100 sm:p-6 md:p-12`}
+        className={`mx-auto flex w-full max-w-screen-lg flex-col gap-4 p-3 text-slate-100 sm:p-6 md:p-12`}
       >
         <h2 className="text-2xl">Congrats, {winningPlayers.join(" and ")}!</h2>
         <div className="flex flex-col gap-2 sm:grid sm:grid-cols-3">
