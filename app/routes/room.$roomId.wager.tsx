@@ -13,7 +13,10 @@ const formSchema = z
     i: z.coerce.number().int(),
     j: z.coerce.number().int(),
     userId: z.string(),
-    wager: z.coerce.number().int().optional(),
+    wager: z.preprocess(
+      (val) => (val === "" ? undefined : val),
+      z.coerce.number().int().optional(),
+    ),
     full: z.coerce.number().int().optional(),
   })
   .refine((d) => d.wager !== undefined || d.full !== undefined, {
