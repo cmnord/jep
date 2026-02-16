@@ -59,7 +59,7 @@ function SadFileIcon({ badSrc }: { badSrc: string }) {
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 72 87"
-        shape-rendering="crispEdges"
+        shapeRendering="crispEdges"
         className="h-10 w-10"
         role="img"
         aria-labelledby="sad-file-title"
@@ -93,6 +93,15 @@ function ClueText({
 }) {
   const { fontSize, ref } = useFitText({ minFontSize: 20, maxFontSize: 400 });
   const [imageError, setImageError] = React.useState(false);
+  const imgRef = React.useRef<HTMLImageElement>(null);
+
+  // Detect broken images that fail without firing onError (e.g. CSP blocks in Safari)
+  React.useEffect(() => {
+    const img = imgRef.current;
+    if (img && img.complete && img.naturalWidth === 0) {
+      setImageError(true);
+    }
+  }, [imageSrc]);
 
   return (
     <button
@@ -122,6 +131,7 @@ function ClueText({
           <SadFileIcon badSrc={imageSrc} />
         ) : (
           <img
+            ref={imgRef}
             src={imageSrc}
             alt={`Image for clue: ${clue}`}
             onError={() => setImageError(true)}

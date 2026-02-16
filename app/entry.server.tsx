@@ -11,6 +11,7 @@ import { isbot } from "isbot";
 import { renderToPipeableStream } from "react-dom/server";
 import type { EntryContext } from "react-router";
 import { ServerRouter } from "react-router";
+import { SUPABASE_URL } from "~/utils";
 
 export const streamTimeout = 5_000;
 
@@ -44,6 +45,17 @@ export default function handleRequest(
   responseHeaders.set("X-XSS-Protection", "0");
   // Prevent DNS prefetching to avoid leaking which URLs are linked on the page
   responseHeaders.set("X-DNS-Prefetch-Control", "off");
+  // Restrict resource loading to trusted origins
+  responseHeaders.set(
+    "Content-Security-Policy",
+    [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline'",
+      "style-src 'self' 'unsafe-inline'",
+      `connect-src 'self' ${SUPABASE_URL} ws://${new URL(SUPABASE_URL).host} wss://${new URL(SUPABASE_URL).host}`,
+      "img-src 'self' data: https://www.j-archive.com https://upload.wikimedia.org",
+    ].join("; "),
+  );
 
   const prohibitOutOfOrderStreaming =
     isBotRequest(request.headers.get("user-agent")) ||
