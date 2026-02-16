@@ -14,7 +14,7 @@ export default function useSoloAction(
   React.useEffect(() => {
     const action = fetcher.data;
     if (action) {
-      dispatch(action);
+      dispatch({ ...action, ts: new Date().toISOString() });
     }
   }, [fetcher.data, dispatch]);
 }

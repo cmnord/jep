@@ -25,6 +25,9 @@ export const GameEngineContext = React.createContext<
   round: 0,
   wagers: new Map(),
   winningBuzzer: undefined,
+  clockRunning: false,
+  clockAccumulatedMs: 0,
+  clockLastResumedAt: null,
 });
 
 export function useEngineContext() {

@@ -64,6 +64,11 @@ export interface State {
   // per clue state
   readonly buzzes: Map<string, number>;
   readonly numExpectedWagers: number;
+
+  // clock state
+  readonly clockRunning: boolean;
+  readonly clockAccumulatedMs: number;
+  readonly clockLastResumedAt: string | null;
 }
 
 /** stateFromGame creates a new initial state based on the game. */
@@ -83,6 +88,9 @@ export function stateFromGame(game: Game) {
     players: new Map(),
     leftPlayers: new Map(),
     wagers: new Map(),
+    clockRunning: false,
+    clockAccumulatedMs: 0,
+    clockLastResumedAt: null,
   };
 
   for (let round = 0; round < game.boards.length; round++) {

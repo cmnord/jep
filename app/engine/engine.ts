@@ -32,11 +32,14 @@ export enum ActionType {
    */
   Check = "check",
   NextClue = "next_clue",
+  ToggleClock = "toggle_clock",
 }
 
 export interface Action {
   type: ActionType;
   payload?: unknown;
+  /** ISO timestamp from the room event (Postgres) or injected for solo play. */
+  ts?: string;
 }
 
 /** CLUE_TIMEOUT_MS is the total amount of time a contestant has to buzz in after
@@ -135,6 +138,25 @@ function transferBoardControl(draft: Draft<State>, userId: string) {
   if (otherIds.length > 0) {
     draft.boardControl = otherIds[0];
   }
+}
+
+/** resumeClock sets the clock to running, recording when it was resumed.
+ * No-op if already running. */
+function resumeClock(draft: Draft<State>, ts: string) {
+  if (draft.clockRunning) return;
+  draft.clockRunning = true;
+  draft.clockLastResumedAt = ts;
+}
+
+/** pauseClock accumulates elapsed time and marks the clock as paused.
+ * No-op if already paused. */
+function pauseClock(draft: Draft<State>, ts: string) {
+  if (!draft.clockRunning || !draft.clockLastResumedAt) return;
+  const elapsed =
+    new Date(ts).getTime() - new Date(draft.clockLastResumedAt).getTime();
+  draft.clockAccumulatedMs += Math.max(0, elapsed);
+  draft.clockRunning = false;
+  draft.clockLastResumedAt = null;
 }
 
 /** gameEngine is the reducer (aka state machine) which implements the game. */
@@ -243,6 +265,7 @@ export function gameEngine(state: State, action: Action): State {
         }
 
         draft.type = GameState.ShowBoard;
+        if (action.ts) resumeClock(draft, action.ts);
       });
     case ActionType.ChooseClue:
       if (!isClueAction(action)) {
@@ -272,6 +295,8 @@ export function gameEngine(state: State, action: Action): State {
         if (!clue) {
           return;
         }
+
+        if (action.ts) resumeClock(draft, action.ts);
 
         if (clue.wagerable) {
           // If long-form, anyone with a positive score can buzz. If not, only the
@@ -337,6 +362,8 @@ export function gameEngine(state: State, action: Action): State {
           return;
         }
 
+        if (action.ts) resumeClock(draft, action.ts);
+
         // Validate wager amount
         const minWager = clue.longForm ? 0 : 5;
         const highestClueValue = getHighestClueValue(board);
@@ -381,6 +408,8 @@ export function gameEngine(state: State, action: Action): State {
         ) {
           return;
         }
+
+        if (action.ts) resumeClock(draft, action.ts);
 
         // Accept this buzz if the user has not already buzzed.
         if (!draft.buzzes.has(userId)) {
@@ -439,6 +468,8 @@ export function gameEngine(state: State, action: Action): State {
           return;
         }
 
+        if (action.ts) resumeClock(draft, action.ts);
+
         const key = `${draft.round},${i},${j}`;
         const clueAnswer = draft.answers.get(key) ?? new Map<string, string>();
         clueAnswer.set(userId, answer);
@@ -492,6 +523,8 @@ export function gameEngine(state: State, action: Action): State {
             return;
           }
         }
+
+        if (action.ts) resumeClock(draft, action.ts);
 
         const clueValue = getClueValue(draft, [i, j], userId);
         const newScore = correct
@@ -600,11 +633,14 @@ export function gameEngine(state: State, action: Action): State {
           return;
         }
 
+        if (action.ts) resumeClock(draft, action.ts);
+
         if (draft.numAnswered === draft.numCluesInBoard) {
           const newRound = draft.round + 1;
           const board = draft.game.boards.at(newRound);
 
           if (!board) {
+            if (action.ts) pauseClock(draft, action.ts);
             draft.type = GameState.GameOver;
             draft.activeClue = null;
             draft.boardControl = null;
@@ -642,6 +678,17 @@ export function gameEngine(state: State, action: Action): State {
         draft.activeClue = null;
         draft.buzzes = new Map();
         draft.numExpectedWagers = 0;
+      });
+    case ActionType.ToggleClock:
+      return produce(state, (draft) => {
+        if (draft.type === GameState.GameOver || !action.ts) {
+          return;
+        }
+        if (draft.clockRunning) {
+          pauseClock(draft, action.ts);
+        } else {
+          resumeClock(draft, action.ts);
+        }
       });
   }
 }

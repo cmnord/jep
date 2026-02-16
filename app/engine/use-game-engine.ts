@@ -89,6 +89,9 @@ function stateToGameEngine(
     boardControl: state.boardControl,
     wagers: state.wagers.get(clueKey) ?? new Map<string, number>(),
     winningBuzzer,
+    clockRunning: state.clockRunning,
+    clockAccumulatedMs: state.clockAccumulatedMs,
+    clockLastResumedAt: state.clockLastResumedAt,
   };
 }
 

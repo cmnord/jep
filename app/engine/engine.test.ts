@@ -2335,6 +2335,120 @@ describe("gameEngine", () => {
         );
       }),
     },
+    {
+      name: "Clock starts running on StartRound",
+      state: initialState,
+      actions: [
+        { ...PLAYER1_JOIN_ACTION, ts: "2024-01-01T00:00:00.000Z" },
+        {
+          type: ActionType.StartRound,
+          payload: { round: 0, userId: PLAYER1.userId },
+          ts: "2024-01-01T00:00:05.000Z",
+        },
+      ],
+      expectedState: produce(initialState, (draft) => {
+        draft.type = GameState.ShowBoard;
+        draft.boardControl = PLAYER1.userId;
+        draft.players.set(PLAYER1.userId, PLAYER1);
+        draft.clockRunning = true;
+        draft.clockAccumulatedMs = 0;
+        draft.clockLastResumedAt = "2024-01-01T00:00:05.000Z";
+      }),
+    },
+    {
+      name: "ToggleClock pauses a running clock",
+      state: initialState,
+      actions: [
+        { ...PLAYER1_JOIN_ACTION, ts: "2024-01-01T00:00:00.000Z" },
+        {
+          type: ActionType.StartRound,
+          payload: { round: 0, userId: PLAYER1.userId },
+          ts: "2024-01-01T00:00:05.000Z",
+        },
+        {
+          type: ActionType.ToggleClock,
+          ts: "2024-01-01T00:00:15.000Z",
+        },
+      ],
+      expectedState: produce(initialState, (draft) => {
+        draft.type = GameState.ShowBoard;
+        draft.boardControl = PLAYER1.userId;
+        draft.players.set(PLAYER1.userId, PLAYER1);
+        draft.clockRunning = false;
+        draft.clockAccumulatedMs = 10000;
+        draft.clockLastResumedAt = null;
+      }),
+    },
+    {
+      name: "ToggleClock resumes a paused clock",
+      state: initialState,
+      actions: [
+        { ...PLAYER1_JOIN_ACTION, ts: "2024-01-01T00:00:00.000Z" },
+        {
+          type: ActionType.StartRound,
+          payload: { round: 0, userId: PLAYER1.userId },
+          ts: "2024-01-01T00:00:05.000Z",
+        },
+        { type: ActionType.ToggleClock, ts: "2024-01-01T00:00:15.000Z" },
+        { type: ActionType.ToggleClock, ts: "2024-01-01T00:00:20.000Z" },
+      ],
+      expectedState: produce(initialState, (draft) => {
+        draft.type = GameState.ShowBoard;
+        draft.boardControl = PLAYER1.userId;
+        draft.players.set(PLAYER1.userId, PLAYER1);
+        draft.clockRunning = true;
+        draft.clockAccumulatedMs = 10000;
+        draft.clockLastResumedAt = "2024-01-01T00:00:20.000Z";
+      }),
+    },
+    {
+      name: "ChooseClue auto-resumes a paused clock",
+      state: initialState,
+      actions: [
+        { ...PLAYER1_JOIN_ACTION, ts: "2024-01-01T00:00:00.000Z" },
+        {
+          type: ActionType.StartRound,
+          payload: { round: 0, userId: PLAYER1.userId },
+          ts: "2024-01-01T00:00:05.000Z",
+        },
+        { type: ActionType.ToggleClock, ts: "2024-01-01T00:00:15.000Z" },
+        {
+          type: ActionType.ChooseClue,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0 },
+          ts: "2024-01-01T00:00:25.000Z",
+        },
+      ],
+      expectedState: produce(initialState, (draft) => {
+        draft.type = GameState.ReadClue;
+        draft.activeClue = [0, 0];
+        draft.boardControl = PLAYER1.userId;
+        draft.players.set(PLAYER1.userId, PLAYER1);
+        draft.clockRunning = true;
+        draft.clockAccumulatedMs = 10000;
+        draft.clockLastResumedAt = "2024-01-01T00:00:25.000Z";
+      }),
+    },
+    {
+      name: "ToggleClock ignored after GameOver",
+      state: initialState,
+      actions: [
+        { ...PLAYER1_JOIN_ACTION, ts: "2024-01-01T00:00:00.000Z" },
+        {
+          type: ActionType.StartRound,
+          payload: { round: 0, userId: PLAYER1.userId },
+          ts: "2024-01-01T00:00:05.000Z",
+        },
+        { type: ActionType.ToggleClock, ts: "2024-01-01T00:00:15.000Z" },
+      ],
+      expectedState: produce(initialState, (draft) => {
+        draft.type = GameState.ShowBoard;
+        draft.boardControl = PLAYER1.userId;
+        draft.players.set(PLAYER1.userId, PLAYER1);
+        draft.clockRunning = false;
+        draft.clockAccumulatedMs = 10000;
+        draft.clockLastResumedAt = null;
+      }),
+    },
   ];
 
   for (const tc of testCases) {
@@ -2360,6 +2474,9 @@ describe("gameEngine", () => {
       expect(state.round).toBe(tc.expectedState.round);
       expect(state.type).toBe(tc.expectedState.type);
       expect(state.wagers).toStrictEqual(tc.expectedState.wagers);
+      expect(state.clockRunning).toBe(tc.expectedState.clockRunning);
+      expect(state.clockAccumulatedMs).toBe(tc.expectedState.clockAccumulatedMs);
+      expect(state.clockLastResumedAt).toBe(tc.expectedState.clockLastResumedAt);
     });
   }
 });
