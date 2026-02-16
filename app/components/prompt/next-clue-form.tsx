@@ -5,7 +5,7 @@ import { useFetcher } from "react-router";
 import Button from "~/components/button";
 import type { RoomProps } from "~/components/game";
 import type { Action } from "~/engine";
-import { useEngineContext } from "~/engine";
+import { GameState, useEngineContext } from "~/engine";
 import { formatDollars, formatDollarsWithSign } from "~/utils";
 import useSoloAction from "~/utils/use-solo-action";
 import useTimeout from "~/utils/use-timeout";
@@ -93,6 +93,8 @@ function NextClueForm({
   answerers,
   wagerable,
   longForm,
+  buttonText,
+  hidePlayerScores,
 }: {
   hasBoardControl: boolean;
   boardControlName: string;
@@ -100,15 +102,19 @@ function NextClueForm({
   answerers: PlayerScore[];
   wagerable: boolean;
   longForm: boolean;
+  buttonText?: string;
+  hidePlayerScores?: boolean;
 }) {
   return (
     <div className="flex flex-col items-center gap-2 p-2">
-      <PlayerScores
-        answerers={answerers}
-        boardControlName={boardControlName}
-        wagerable={wagerable}
-        longForm={longForm}
-      />
+      {!hidePlayerScores && (
+        <PlayerScores
+          answerers={answerers}
+          boardControlName={boardControlName}
+          wagerable={wagerable}
+          longForm={longForm}
+        />
+      )}
       {hasBoardControl || longForm ? (
         <Button
           type="primary"
@@ -127,7 +133,7 @@ function NextClueForm({
                   }s linear 0s 1 growFromLeft forwards`,
             }}
           />
-          <span className="relative">Back to board</span>
+          <span className="relative">{buttonText ?? "Back to board"}</span>
         </Button>
       ) : null}
     </div>
@@ -143,6 +149,7 @@ export function ConnectedNextClueForm({ roomId, userId }: RoomProps) {
     players,
     boardControl,
     soloDispatch,
+    type,
   } = useEngineContext();
 
   if (!activeClue || !clue) {
@@ -173,6 +180,7 @@ export function ConnectedNextClueForm({ roomId, userId }: RoomProps) {
     .filter((p): p is PlayerScore => p.correct !== undefined);
 
   const hasBoardControl = boardControl === userId;
+  const isRevealingAnswer = type === GameState.ReadLongFormClue;
 
   // Submit the form by default after a few seconds.
   useTimeout(
@@ -198,6 +206,8 @@ export function ConnectedNextClueForm({ roomId, userId }: RoomProps) {
         answerers={answerers}
         wagerable={clue.wagerable ?? false}
         longForm={clue.longForm ?? false}
+        buttonText={isRevealingAnswer ? "Reveal answer" : undefined}
+        hidePlayerScores={isRevealingAnswer}
       />
     </fetcher.Form>
   );

@@ -548,8 +548,15 @@ function ReadCluePrompt({
  * GameState.ReadLongFormClue.
  */
 function ReadLongFormCluePrompt({ roomId, userId }: RoomProps) {
-  const { activeClue, buzzes, category, clue, getClueValue, soloDispatch } =
-    useEngineContext();
+  const {
+    activeClue,
+    buzzes,
+    category,
+    clue,
+    getClueValue,
+    players,
+    soloDispatch,
+  } = useEngineContext();
   if (!clue) throw new Error("clue is undefined");
 
   const fetcher = useFetcher<Action>();
@@ -557,6 +564,9 @@ function ReadLongFormCluePrompt({ roomId, userId }: RoomProps) {
 
   const myBuzzDurationMs = buzzes.get(userId);
   const canAnswer = myBuzzDurationMs !== CANT_BUZZ_FLAG;
+  const allPlayersCantAnswer =
+    buzzes.size === players.size &&
+    Array.from(buzzes.values()).every((b) => b === CANT_BUZZ_FLAG);
 
   const [countdownStartedAt] = React.useState(
     myBuzzDurationMs === undefined ? Date.now() : undefined,
@@ -590,6 +600,13 @@ function ReadLongFormCluePrompt({ roomId, userId }: RoomProps) {
       />
       {canAnswer ? (
         <AnswerForm roomId={roomId} userId={userId} />
+      ) : allPlayersCantAnswer ? (
+        <div className="flex flex-col items-center gap-2 p-2">
+          <p className="font-bold text-white">
+            No one has enough money to wager, but give the clue a read!
+          </p>
+          <NextClueForm roomId={roomId} userId={userId} />
+        </div>
       ) : (
         <div className="flex flex-col items-center gap-2 p-2">
           <p className="text-sm text-slate-300">
