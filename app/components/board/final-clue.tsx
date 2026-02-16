@@ -1,4 +1,4 @@
-import classNames from "classnames";
+import clsx from "clsx";
 import * as React from "react";
 import useFitText from "use-fit-text";
 
@@ -51,7 +51,7 @@ export function FinalClue({
           }
           onKeyDown(event);
         }}
-        className={classNames(
+        className={clsx(
           "group relative h-full w-full grow border-8 border-black bg-blue-1000 px-6 py-8 transition-colors hover:bg-blue-700 focus:bg-blue-700",
           {
             "border-spin opacity-75": loading,
@@ -60,7 +60,7 @@ export function FinalClue({
       >
         <p
           ref={ref}
-          className={classNames(
+          className={clsx(
             `text-shadow-md sm:text-shadow-lg flex items-center justify-center
             gap-1 font-korinna uppercase text-white`,
             {

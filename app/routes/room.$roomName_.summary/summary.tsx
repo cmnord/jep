@@ -1,4 +1,4 @@
-import classNames from "classnames";
+import clsx from "clsx";
 import * as React from "react";
 
 import { Category } from "~/components/board/category";
@@ -129,7 +129,7 @@ function PostGameClue({ clue, state, round, i, j }: Props) {
       >
         <button
           disabled={!playable}
-          className={classNames(
+          className={clsx(
             `group h-full w-full bg-blue-1000 px-4 py-3 transition-colors
             hover:bg-blue-700`,
             {

@@ -1,5 +1,5 @@
 import { useFetcher } from "@remix-run/react";
-import classNames from "classnames";
+import clsx from "clsx";
 import { produce } from "immer";
 import * as React from "react";
 import useFitText from "use-fit-text";
@@ -112,7 +112,7 @@ function ClueText({
         {clue}
         <br />
         <span
-          className={classNames("text-cyan-300", {
+          className={clsx("text-cyan-300", {
             invisible: !showAnswer,
           })}
         >

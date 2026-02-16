@@ -1,4 +1,4 @@
-import classNames from "classnames";
+import clsx from "clsx";
 
 /** ReadClueTimer is a white bar which scrolls across the screen for
  * clueDurationMs. */
@@ -13,7 +13,7 @@ export function ReadClueTimer({
 }) {
   return (
     <div
-      className={classNames("mt-2 h-8 shrink-0 self-start", {
+      className={clsx("mt-2 h-8 shrink-0 self-start", {
         "w-0 bg-white": shouldAnimate,
         "w-full": !shouldAnimate,
         "bg-red-600 opacity-75": !shouldAnimate && !wonBuzz,

@@ -1,4 +1,4 @@
-import classNames from "classnames";
+import clsx from "clsx";
 import * as React from "react";
 
 /** Fade applies slide in and out animations on the component when it mounts and
@@ -22,7 +22,7 @@ export function Fade({
 
   return shouldRender ? (
     <div
-      className={classNames("absolute left-0 top-0 w-screen", {
+      className={clsx("absolute left-0 top-0 w-screen", {
         "animate-slideInFromTopLeft": show,
         "animate-slideOut": !show,
       })}

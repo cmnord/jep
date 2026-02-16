@@ -1,5 +1,5 @@
 import { useFetcher } from "@remix-run/react";
-import classNames from "classnames";
+import clsx from "clsx";
 import * as React from "react";
 
 import Button from "~/components/button";
@@ -116,7 +116,7 @@ export function ConnectedCheckForm({
         </p>
         <div className="relative">
           <span
-            className={classNames(
+            className={clsx(
               "absolute left-1/6 top-1/6 inline-flex h-2/3 w-2/3 rounded-md bg-blue-300 opacity-75",
               {
                 "animate-ping": !disabled,
@@ -157,7 +157,7 @@ export function ConnectedCheckForm({
         <p className="font-bold text-white">
           You {checkResult ? "won" : "lost"}{" "}
           <span
-            className={classNames("text-shadow", {
+            className={clsx("text-shadow", {
               "text-green-300": checkResult,
               "text-red-300": !checkResult,
             })}

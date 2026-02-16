@@ -1,4 +1,4 @@
-import classNames from "classnames";
+import clsx from "clsx";
 import * as React from "react";
 
 const DEFAULT_COUNTDOWN_SEC = 5;
@@ -51,7 +51,7 @@ export function Countdown({
   const bars = Array.from({ length: numBars }, (_, i) => (
     <div
       key={i}
-      className={classNames("h-5", {
+      className={clsx("h-5", {
         "bg-red-600": startTime && shouldShowTick(count, i, center),
         "bg-slate-500": !startTime || !shouldShowTick(count, i, center),
       })}
@@ -61,7 +61,7 @@ export function Countdown({
 
   return (
     <div
-      className={classNames("mt-2 flex justify-center", {
+      className={clsx("mt-2 flex justify-center", {
         "gap-2": numBars < 10,
         "gap-1": numBars >= 10,
       })}

@@ -31,7 +31,7 @@
     "@remix-run/route-config": "^2.17.4",
     "@supabase/supabase-js": "^2.95.3",
     "@vercel/analytics": "^1.6.1",
-    "classnames": "^2.5.1",
+    "clsx": "^2.1.1",
     "immer": "^11.1.4",
     "isbot": "^4",
     "react": "^19.2.4",

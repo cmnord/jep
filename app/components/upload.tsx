@@ -1,6 +1,6 @@
 import type { FetcherWithComponents } from "@remix-run/react";
 import { useSubmit } from "@remix-run/react";
-import classNames from "classnames";
+import clsx from "clsx";
 import * as React from "react";
 import { useDropzone } from "react-dropzone";
 
@@ -78,7 +78,7 @@ function UploadBox({
         id="upload-button"
         type="button"
         onClick={() => inputRef.current?.click()}
-        className={classNames(
+        className={clsx(
           `flex flex-col items-center justify-center rounded-lg
           border-2 border-dashed p-6 text-sm text-slate-900
           shadow-sm transition-colors

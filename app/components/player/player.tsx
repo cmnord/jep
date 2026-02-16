@@ -1,4 +1,4 @@
-import classNames from "classnames";
+import clsx from "clsx";
 
 import type { Player } from "~/engine";
 import { GameState, useEngineContext } from "~/engine";
@@ -24,7 +24,7 @@ export function PlayerScoreBox({
 }) {
   return (
     <div
-      className={classNames("flex gap-2 rounded-xl p-2 sm:p-3", {
+      className={clsx("flex gap-2 rounded-xl p-2 sm:p-3", {
         "bg-white/5": !hasBoardControl,
         "bg-blue-700": hasBoardControl,
       })}
@@ -35,7 +35,7 @@ export function PlayerScoreBox({
         <div className="flex w-1/3 grow items-center justify-end gap-2 text-xl sm:w-auto">
           {winning && <span>👑</span>}
           <div
-            className={classNames("text-shadow-md font-inter font-bold", {
+            className={clsx("text-shadow-md font-inter font-bold", {
               "text-white": player.score >= 0,
               "text-red-400": player.score < 0,
             })}

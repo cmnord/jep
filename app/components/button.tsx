@@ -1,4 +1,4 @@
-import classNames from "classnames";
+import clsx from "clsx";
 
 import { LoadingSpinner } from "~/components/icons";
 
@@ -21,7 +21,7 @@ export default function Button({
   return (
     <button
       {...rest}
-      className={classNames(
+      className={clsx(
         className ? className : null,
         "inline-flex w-full justify-center rounded-md border px-4 py-2 text-base font-medium shadow-sm transition-colors",
         "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",

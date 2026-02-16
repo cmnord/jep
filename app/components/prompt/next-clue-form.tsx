@@ -1,5 +1,5 @@
 import { useFetcher } from "@remix-run/react";
-import classNames from "classnames";
+import clsx from "clsx";
 import * as React from "react";
 
 import Button from "~/components/button";
@@ -60,7 +60,7 @@ function PlayerScores({
                 {name}
               </span>
               <span
-                className={classNames("font-inter text-xl font-bold", {
+                className={clsx("font-inter text-xl font-bold", {
                   "text-white": score >= 0,
                   "text-red-400": score < 0,
                 })}
@@ -69,7 +69,7 @@ function PlayerScores({
               </span>
             </div>
             <span
-              className={classNames(
+              className={clsx(
                 "text-shadow absolute -right-1/2 -top-1/4 animate-bounce whitespace-nowrap font-inter font-bold",
                 {
                   "text-green-300": correct,

@@ -1,5 +1,5 @@
 import { Link, useMatches } from "@remix-run/react";
-import classNames from "classnames";
+import clsx from "clsx";
 import * as React from "react";
 
 import Dialog from "~/components/dialog";
@@ -36,7 +36,7 @@ function LinkItem({
 }) {
   return (
     <div
-      className={classNames("text-sm decoration-dashed hover:underline", {
+      className={clsx("text-sm decoration-dashed hover:underline", {
         "text-slate-300 decoration-slate-300 hover:text-slate-100": isInGame,
         "text-slate-500 decoration-slate-500 hover:text-slate-700": !isInGame,
       })}
@@ -49,7 +49,7 @@ function LinkItem({
 function Dot({ isInGame }: { isInGame: boolean }) {
   return (
     <div
-      className={classNames({
+      className={clsx({
         "text-slate-300": isInGame,
         "text-slate-500": !isInGame,
       })}
@@ -69,7 +69,7 @@ export default function Footer() {
 
   return (
     <footer
-      className={classNames("flex justify-center py-4", {
+      className={clsx("flex justify-center py-4", {
         "bg-blue-1000": isInGame,
       })}
     >

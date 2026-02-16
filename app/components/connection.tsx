@@ -1,4 +1,4 @@
-import classNames from "classnames";
+import clsx from "clsx";
 import * as React from "react";
 
 import { ConnectionState } from "~/engine/use-game-engine";
@@ -96,7 +96,7 @@ export default function Connection({
   return (
     <div className="flex items-center gap-2 text-sm text-slate-300">
       <div
-        className={classNames("h-2 w-2 shrink-0 rounded-full", {
+        className={clsx("h-2 w-2 shrink-0 rounded-full", {
           "bg-red-500": debouncedState === ConnectionState.ERROR,
           "bg-yellow-500": debouncedState === ConnectionState.CONNECTING,
           "bg-green-500": debouncedState === ConnectionState.CONNECTED,

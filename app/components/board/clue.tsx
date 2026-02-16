@@ -1,4 +1,4 @@
-import classNames from "classnames";
+import clsx from "clsx";
 import * as React from "react";
 
 import Popover from "~/components/popover";
@@ -58,7 +58,7 @@ const ClueButton = React.forwardRef<HTMLButtonElement, ButtonProps & Props>(
           }
           onKeyDown(event);
         }}
-        className={classNames(
+        className={clsx(
           "group relative h-full w-full bg-blue-bright px-4 py-3 transition-colors",
           {
             "hover:bg-blue-700 focus:bg-blue-700": playable,
@@ -70,7 +70,7 @@ const ClueButton = React.forwardRef<HTMLButtonElement, ButtonProps & Props>(
         {...rest}
       >
         <p
-          className={classNames(
+          className={clsx(
             "text-shadow-md sm:text-shadow-lg flex items-center justify-center gap-1 font-inter font-bold text-yellow-1000",
             {
               "opacity-0 group-hover:opacity-50 group-focus:opacity-50":
