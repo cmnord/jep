@@ -344,13 +344,30 @@ function ReadCluePrompt({
   const { activeClue, buzzes, category, clue, getClueValue, soloDispatch } =
     useEngineContext();
 
+  if (!clue) throw new Error("No clue found");
+  const numCharactersInClue = clue.clue.length ?? 0;
+
+  // Compute clueDurationMs once at mount so the ReadClueTimer CSS animation
+  // doesn't restart when server buzz events arrive mid-animation. The
+  // component remounts between ReadClue phases, so this captures the right
+  // value for re-reads (after a wrong answer) too.
+  const [clueDurationMs] = React.useState(() => {
+    const hasLockedOut =
+      !clue.wagerable &&
+      Array.from(buzzes.values()).some((b) => b === CANT_BUZZ_FLAG);
+    return hasLockedOut
+      ? READ_REOPENED_MS
+      : READ_BASE_MS + READ_PER_CHAR_MS * numCharactersInClue;
+  });
+
   const [optimisticBuzzes, setOptimisticBuzzes] = React.useState(buzzes);
   const myBuzzDurationMs = optimisticBuzzes.get(userId);
 
-  const [clueShownAt, setClueShownAt] = React.useState<number | undefined>(
-    myBuzzDurationMs !== undefined ? 0 : undefined,
+  // Initialize timestamps once at mount. The component remounts between
+  // ReadClue phases, so these capture the right values for each phase.
+  const [clueShownAt] = React.useState(() =>
+    myBuzzDurationMs !== undefined ? 0 : Date.now(),
   );
-  const [clueIdx, setClueIdx] = React.useState(activeClue);
 
   const [buzzerOpenAt, setBuzzerOpenAt] = React.useState<number | undefined>(
     myBuzzDurationMs !== undefined ? 0 : undefined,
@@ -360,34 +377,10 @@ function ReadCluePrompt({
   useSoloAction(fetcher, soloDispatch);
   const submit = fetcher.submit;
 
-  if (!clue) throw new Error("No clue found");
-  const numCharactersInClue = clue.clue.length ?? 0;
-
-  // If we are reopening the buzzers after a wrong answer, delay a fixed amount
-  // of time before re-opening the buzzers.
-  const hasLockedOutBuzzers =
-    !clue.wagerable &&
-    Array.from(optimisticBuzzes.values()).some((b) => b === CANT_BUZZ_FLAG);
-  const clueDurationMs = hasLockedOutBuzzers
-    ? READ_REOPENED_MS
-    : READ_BASE_MS + READ_PER_CHAR_MS * numCharactersInClue;
-
-  // Keep activeClue set to the last valid clue index.
-  React.useEffect(() => {
-    if (activeClue) {
-      setClueShownAt(Date.now());
-      setClueIdx(activeClue);
-      setBuzzerOpenAt(myBuzzDurationMs !== undefined ? 0 : undefined);
-    } else {
-      setClueShownAt(undefined);
-      setBuzzerOpenAt(undefined);
-    }
-  }, [activeClue, myBuzzDurationMs]);
-
   /** submitBuzz submits a buzz of deltaMs to the server. */
   const submitBuzz = React.useCallback(
     (deltaMs: number) => {
-      const [i, j] = clueIdx ?? [-1, -1];
+      const [i, j] = activeClue ?? [-1, -1];
       return submit(
         {
           i: i.toString(),
@@ -398,7 +391,7 @@ function ReadCluePrompt({
         { method: "post", action: `/room/${roomId}/buzz` },
       );
     },
-    [submit, roomId, userId, clueIdx],
+    [submit, roomId, userId, activeClue],
   );
 
   // Update optimisticBuzzes once buzzes come in from the server.
@@ -429,7 +422,20 @@ function ReadCluePrompt({
         }
       }
     }
-    setOptimisticBuzzes(buzzes);
+    // Merge server buzzes with our optimistic buzz. If we submitted a buzz
+    // locally but the server hasn't echoed it back yet, preserve our local
+    // value so shouldAnimate doesn't flicker (which would restart the
+    // ReadClueTimer CSS animation from scratch).
+    setOptimisticBuzzes((prev) => {
+      const myPrevBuzz = prev.get(userId);
+      const myServerBuzz = buzzes.get(userId);
+      if (myPrevBuzz !== undefined && myServerBuzz === undefined) {
+        const merged = new Map(buzzes);
+        merged.set(userId, myPrevBuzz);
+        return merged;
+      }
+      return buzzes;
+    });
     return () => {
       if (timeout) clearTimeout(timeout);
     };
@@ -470,11 +476,7 @@ function ReadCluePrompt({
   );
 
   function handleClick(clickedAtMs: number) {
-    if (
-      clueShownAt === undefined ||
-      lockout ||
-      myBuzzDurationMs !== undefined
-    ) {
+    if (lockout || myBuzzDurationMs !== undefined) {
       return;
     }
 
@@ -483,7 +485,7 @@ function ReadCluePrompt({
       return onLockout();
     }
 
-    if (buzzerOpenAt === undefined || !clueIdx) {
+    if (buzzerOpenAt === undefined || !activeClue) {
       return;
     }
 
@@ -497,7 +499,7 @@ function ReadCluePrompt({
 
   useKeyPress("Enter", () => handleClick(Date.now()));
 
-  const clueValue = clueIdx ? getClueValue(clueIdx, userId) : 0;
+  const clueValue = activeClue ? getClueValue(activeClue, userId) : 0;
 
   return (
     <>
