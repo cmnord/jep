@@ -1,36 +1,23 @@
 import type { ActionFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
+import { z } from "zod";
 
 import { ActionType } from "~/engine";
 import { getValidAuthSession } from "~/models/auth";
 import { createRoomEvent } from "~/models/room-event.server";
 import { getRoom } from "~/models/room.server";
+import { parseFormData } from "~/utils/http.server";
+
+const formSchema = z.object({
+  i: z.coerce.number().int(),
+  j: z.coerce.number().int(),
+  userId: z.string(),
+  deltaMs: z.coerce.number().int(),
+});
 
 export async function action({ request, params }: ActionFunctionArgs) {
   const formData = await request.formData();
-
-  const iStr = formData.get("i");
-  if (typeof iStr !== "string") {
-    throw new Response("Invalid i", { status: 400 });
-  }
-  const i = parseInt(iStr);
-
-  const jStr = formData.get("j");
-  if (typeof jStr !== "string") {
-    throw new Response("Invalid j", { status: 400 });
-  }
-  const j = parseInt(jStr);
-
-  const userId = formData.get("userId");
-  if (typeof userId !== "string") {
-    throw new Response("Invalid userId", { status: 400 });
-  }
-
-  const deltaStr = formData.get("deltaMs");
-  if (typeof deltaStr !== "string") {
-    throw new Response("Invalid delta " + deltaStr, { status: 400 });
-  }
-  const deltaMs = parseInt(deltaStr);
+  const { i, j, userId, deltaMs } = parseFormData(formData, formSchema);
 
   const roomId = params.roomId ? parseInt(params.roomId) : undefined;
   if (!roomId) {

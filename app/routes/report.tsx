@@ -6,6 +6,8 @@ import type {
 import { json } from "@remix-run/node";
 import { Form, useActionData, useLoaderData } from "@remix-run/react";
 
+import { z } from "zod";
+
 import Button from "~/components/button";
 import { ErrorMessage, SuccessMessage } from "~/components/error";
 import Input from "~/components/input";
@@ -16,9 +18,14 @@ import { getGame } from "~/models/game.server";
 import { insertReport } from "~/models/report.server";
 import { getRoom } from "~/models/room.server";
 import { BASE_URL, GITHUB_URL } from "~/utils";
+import { parseFormData } from "~/utils/http.server";
 
 export const meta: MetaFunction = () => [{ title: "Report a game" }];
 
+const formSchema = z.object({
+  url: z.string().min(1),
+  reason: z.string().min(1),
+});
 const ROOM_NAME_REGEX = /^\d+-\w+$/;
 
 export function loader({ request }: LoaderFunctionArgs) {
@@ -30,7 +37,8 @@ export function loader({ request }: LoaderFunctionArgs) {
 
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
-  const url = new URL(formData.get("url") as string);
+  const { url: urlStr, reason } = parseFormData(formData, formSchema);
+  const url = new URL(urlStr);
 
   if (url.origin !== BASE_URL) {
     return json(
@@ -70,7 +78,6 @@ export async function action({ request }: ActionFunctionArgs) {
       );
     }
 
-    const reason = formData.get("reason") as string;
     await insertReport(
       room.game_id,
       reason,
@@ -104,7 +111,6 @@ export async function action({ request }: ActionFunctionArgs) {
       throw error;
     }
 
-    const reason = formData.get("reason") as string;
     await insertReport(
       gameId,
       reason,

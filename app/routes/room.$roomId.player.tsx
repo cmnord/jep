@@ -1,26 +1,25 @@
 import type { ActionFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
+import { z } from "zod";
 
 import { ActionType } from "~/engine";
 import { getValidAuthSession } from "~/models/auth";
 import { createRoomEvent } from "~/models/room-event.server";
 import { getRoom } from "~/models/room.server";
 import { getSolve, markAttempted } from "~/models/solves.server";
+import { parseFormData } from "~/utils/http.server";
+
+const formSchema = z.object({
+  name: z.string(),
+  userId: z.string(),
+});
 
 export async function action({ request, params }: ActionFunctionArgs) {
   if (request.method !== "POST" && request.method !== "PATCH") {
     throw new Response("method not allowed", { status: 405 });
   }
   const formData = await request.formData();
-
-  const name = formData.get("name");
-  if (typeof name !== "string") {
-    throw new Response("Invalid name", { status: 400 });
-  }
-  const userId = formData.get("userId");
-  if (typeof userId !== "string") {
-    throw new Response("Invalid userId", { status: 400 });
-  }
+  const { name, userId } = parseFormData(formData, formSchema);
 
   const roomId = params.roomId ? parseInt(params.roomId) : undefined;
   if (!roomId) {

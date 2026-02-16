@@ -6,6 +6,7 @@ import type {
 import { json, redirect } from "@remix-run/node";
 import { Form, useActionData, useNavigation } from "@remix-run/react";
 import * as React from "react";
+import { z } from "zod";
 
 import Button from "~/components/button";
 import { ErrorMessage, SuccessMessage } from "~/components/error";
@@ -18,6 +19,9 @@ import {
   createUserAccount,
   getUserExistsByEmailWithoutSession,
 } from "~/models/user/service.server";
+import { parseFormData } from "~/utils/http.server";
+
+const formSchema = z.object({ email: z.string(), password: z.string() });
 
 export const meta: MetaFunction = () => [{ title: "Sign up" }];
 
@@ -31,8 +35,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
+  const { email, password } = parseFormData(formData, formSchema);
   if (password.length < 6) {
     return json(
       { success: false, message: "Password must be at least 6 characters" },

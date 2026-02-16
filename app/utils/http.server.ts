@@ -1,3 +1,18 @@
+import type { z } from "zod";
+
+export function parseFormData<T extends z.ZodTypeAny>(
+  formData: FormData,
+  schema: T,
+): z.output<T> {
+  const result = schema.safeParse(Object.fromEntries(formData));
+  if (!result.success) {
+    throw new Response(result.error.issues.map((i) => i.message).join(", "), {
+      status: 400,
+    });
+  }
+  return result.data;
+}
+
 export function getCurrentPath(request: Request) {
   return new URL(request.url).pathname;
 }

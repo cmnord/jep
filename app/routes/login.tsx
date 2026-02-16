@@ -6,6 +6,7 @@ import type {
 import { json, redirect } from "@remix-run/node";
 import { Form, useActionData, useNavigation } from "@remix-run/react";
 import * as React from "react";
+import { z } from "zod";
 
 import Button from "~/components/button";
 import { ErrorMessage } from "~/components/error";
@@ -18,7 +19,9 @@ import {
   getValidAuthSession,
   signInWithEmail,
 } from "~/models/auth";
-import { assertIsPost } from "~/utils/http.server";
+import { assertIsPost, parseFormData } from "~/utils/http.server";
+
+const formSchema = z.object({ email: z.string(), password: z.string() });
 
 export const meta: MetaFunction = () => [{ title: "Login" }];
 
@@ -33,8 +36,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 export async function action({ request }: ActionFunctionArgs) {
   assertIsPost(request);
   const formData = await request.formData();
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
+  const { email, password } = parseFormData(formData, formSchema);
 
   try {
     const authSession = await signInWithEmail(email, password);

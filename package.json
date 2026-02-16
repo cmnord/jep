@@ -38,7 +38,8 @@
     "react-dom": "^19.2.4",
     "react-dropzone": "^15.0.0",
     "recharts": "^3.7.0",
-    "use-fit-text": "^2.4.0"
+    "use-fit-text": "^2.4.0",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
