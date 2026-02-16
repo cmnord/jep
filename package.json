@@ -13,7 +13,8 @@
     "test:coverage": "open coverage/index.html; vitest --coverage",
     "test:e2e:dev": "cross-env ELECTRON_RUN_AS_NODE= start-server-and-test dev http://localhost:3000 \"npx cypress open\"",
     "pretest:e2e:run": "npm run build",
-    "test:e2e:run": "cross-env PORT=8811 ELECTRON_RUN_AS_NODE= start-server-and-test start http://localhost:8811 \"npx cypress run\"",
+    "start:e2e": "node -r dotenv/config node_modules/.bin/react-router-serve ./build/server/index.js",
+    "test:e2e:run": "cross-env PORT=8811 ELECTRON_RUN_AS_NODE= start-server-and-test start:e2e http://localhost:8811 \"npx cypress run\"",
     "typecheck": "react-router typegen && tsc -b && tsc -b cypress",
     "validate": "run-p \"test -- --run\" format lint typecheck test:e2e:run"
   },
