@@ -402,23 +402,38 @@ function ReadCluePrompt({
   );
 
   // Update optimisticBuzzes once buzzes come in from the server.
+  // If another player buzzed in, give us the remaining quantization window to
+  // buzz (so near-simultaneous buzzes can still tie), then submit a timeout.
   React.useEffect(() => {
-    // If a new buzz comes in that's less than the current deltaMs, submit a
-    // timeout buzz.
-    if (buzzerOpenAt) {
+    let timeout: ReturnType<typeof setTimeout> | undefined;
+    if (buzzerOpenAt && myBuzzDurationMs === undefined) {
       const deltaMs = Date.now() - buzzerOpenAt;
       for (const [buzzUserId, buzz] of buzzes) {
         if (
           buzzUserId !== userId &&
           buzz !== CANT_BUZZ_FLAG &&
-          buzz + QUANTIZATION_FACTOR_MS < deltaMs
+          buzz <= CLUE_TIMEOUT_MS
         ) {
-          submitBuzz(CLUE_TIMEOUT_MS + 1);
+          // How much of the quantization window is left for us to buzz.
+          // If we buzz within this window, our buzz is in the same bucket
+          // and clients will resolve the tie.
+          const remainingMs = Math.max(
+            0,
+            buzz + QUANTIZATION_FACTOR_MS - deltaMs,
+          );
+          timeout = setTimeout(
+            () => submitBuzz(CLUE_TIMEOUT_MS + 1),
+            remainingMs,
+          );
+          break;
         }
       }
     }
     setOptimisticBuzzes(buzzes);
-  }, [buzzes, buzzerOpenAt, userId, submitBuzz]);
+    return () => {
+      if (timeout) clearTimeout(timeout);
+    };
+  }, [buzzes, buzzerOpenAt, myBuzzDurationMs, userId, submitBuzz]);
 
   // Open the buzzer after the clue is done being "read".
   const delayMs = myBuzzDurationMs === undefined ? clueDurationMs : null;
