@@ -20,6 +20,31 @@ export default function handleRequest(
   responseHeaders: Headers,
   remixContext: EntryContext,
 ) {
+  // Prevent browsers from MIME-sniffing a response away from the declared type
+  responseHeaders.set("X-Content-Type-Options", "nosniff");
+  // Prevent clickjacking by blocking iframe embedding
+  responseHeaders.set("X-Frame-Options", "DENY");
+  // Limit referrer info sent cross-origin to prevent leaking URL paths/params
+  responseHeaders.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  // Disable unused browser APIs to reduce XSS attack surface
+  responseHeaders.set(
+    "Permissions-Policy",
+    "camera=(), microphone=(), geolocation=()",
+  );
+  // Force HTTPS for 2 years to prevent protocol downgrade attacks
+  responseHeaders.set(
+    "Strict-Transport-Security",
+    "max-age=63072000; includeSubDomains",
+  );
+  // Process-isolate this tab to block cross-window and Spectre attacks
+  responseHeaders.set("Cross-Origin-Opener-Policy", "same-origin");
+  // Prevent other sites from loading our resources (blocks cross-origin reads)
+  responseHeaders.set("Cross-Origin-Resource-Policy", "same-origin");
+  // Disable legacy XSS auditor — it's itself exploitable
+  responseHeaders.set("X-XSS-Protection", "0");
+  // Prevent DNS prefetching to avoid leaking which URLs are linked on the page
+  responseHeaders.set("X-DNS-Prefetch-Control", "off");
+
   const prohibitOutOfOrderStreaming =
     isBotRequest(request.headers.get("user-agent")) || remixContext.isSpaMode;
 
