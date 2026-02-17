@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import * as React from "react";
-import useFitText from "use-fit-text";
+
+import useFitText from "~/utils/use-fit-text";
 
 type ButtonProps = React.ComponentProps<"button">;
 
@@ -25,7 +26,9 @@ export function FinalClue({
     }
   }, [answered]);
 
-  const { fontSize, ref } = useFitText({ minFontSize: 20, maxFontSize: 400 });
+  const { fontSize, ref } = useFitText<HTMLParagraphElement>({
+    maxFontSize: 200,
+  });
 
   return (
     <div className="mx-auto flex w-full max-w-screen-lg grow flex-col justify-center">
@@ -61,13 +64,13 @@ export function FinalClue({
         <p
           ref={ref}
           className={clsx(
-            `flex items-center justify-center gap-1 font-korinna text-white uppercase text-shadow-md sm:text-shadow-lg`,
+            `flex items-center justify-center gap-1 font-korinna text-white uppercase transition-opacity duration-150 text-shadow-md sm:text-shadow-lg`,
             {
               "opacity-0 group-hover:opacity-50 group-focus:opacity-50":
                 answered,
             },
           )}
-          style={{ fontSize }}
+          style={{ fontSize, opacity: fontSize ? undefined : 0 }}
         >
           {category}
         </p>

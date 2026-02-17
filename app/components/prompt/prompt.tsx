@@ -2,7 +2,6 @@ import clsx from "clsx";
 import { produce } from "immer";
 import * as React from "react";
 import { useFetcher } from "react-router";
-import useFitText from "use-fit-text";
 
 import type { RoomProps } from "~/components/game";
 import type { Action, Player } from "~/engine";
@@ -13,6 +12,7 @@ import {
   QUANTIZATION_FACTOR_MS,
   useEngineContext,
 } from "~/engine";
+import useFitText from "~/utils/use-fit-text";
 import useKeyPress from "~/utils/use-key-press";
 import useSoloAction from "~/utils/use-solo-action";
 import useGameSound from "~/utils/use-sound";
@@ -91,7 +91,9 @@ function ClueText({
   showAnswer: boolean;
   imageSrc?: string;
 }) {
-  const { fontSize, ref } = useFitText({ minFontSize: 20, maxFontSize: 400 });
+  const { fontSize, ref } = useFitText<HTMLParagraphElement>({
+    maxFontSize: 200,
+  });
   const [imageError, setImageError] = React.useState(false);
   const imgRef = React.useRef<HTMLImageElement>(null);
 
@@ -112,9 +114,9 @@ function ClueText({
       autoFocus={focusOnBuzz}
     >
       <p
-        className={`mx-auto max-h-96 w-full max-w-screen-lg font-korinna leading-normal font-bold text-white uppercase text-shadow-lg word-spacing-1`}
+        className={`mx-auto max-h-96 w-full max-w-screen-lg font-korinna leading-normal font-bold text-white uppercase transition-opacity duration-150 text-shadow-lg word-spacing-1`}
         ref={ref}
-        style={{ fontSize }}
+        style={{ fontSize, opacity: fontSize ? 1 : 0 }}
       >
         {clue}
         <br />
@@ -147,7 +149,7 @@ function ClueText({
  */
 function WagerCluePrompt({ roomId, userId }: RoomProps) {
   const { clue, boardControl, buzzes, category, players } = useEngineContext();
-  const { ref, fontSize } = useFitText({ minFontSize: 20, maxFontSize: 600 });
+  const { ref, fontSize } = useFitText<HTMLDivElement>({ maxFontSize: 300 });
 
   const canWager = buzzes.get(userId) !== CANT_BUZZ_FLAG;
   const wagererName = boardControl
@@ -169,9 +171,9 @@ function WagerCluePrompt({ roomId, userId }: RoomProps) {
         </div>
       )}
       <div
-        className="flex w-screen grow items-center justify-center"
+        className="flex w-screen grow items-center justify-center transition-opacity duration-150"
         ref={ref}
-        style={{ fontSize }}
+        style={{ fontSize, opacity: fontSize ? 1 : 0 }}
       >
         {longForm ? (
           <div className="mx-auto flex max-h-96 max-w-screen-lg flex-col p-4">

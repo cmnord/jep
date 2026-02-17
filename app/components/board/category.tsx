@@ -1,4 +1,4 @@
-import useFitText from "use-fit-text";
+import useFitText from "~/utils/use-fit-text";
 
 export function Category({
   name,
@@ -9,14 +9,20 @@ export function Category({
   note?: string;
   hidden?: boolean;
 }) {
-  const { fontSize, ref } = useFitText({ maxFontSize: 300 });
+  const { fontSize, ref } = useFitText<HTMLParagraphElement>({
+    maxFontSize: 80,
+  });
 
   return (
     <th className="h-full border-2 border-blue-925 bg-black/30 leading-none sm:p-4">
       <p
-        style={{ fontSize, visibility: hidden ? "hidden" : "visible" }}
+        style={{
+          fontSize,
+          visibility: hidden ? "hidden" : "visible",
+          opacity: fontSize ? 1 : 0,
+        }}
         ref={ref}
-        className="flex h-20 w-full flex-col items-center justify-center"
+        className="flex h-20 w-full flex-col items-center justify-center transition-opacity duration-150"
       >
         <span className="font-inter font-bold uppercase text-shadow-md sm:text-shadow-lg">
           {name}
