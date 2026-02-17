@@ -1,0 +1,40 @@
+{
+  "title": "Test: Negative Scores Final Clue",
+  "author": "Claude",
+  "copyright": "",
+  "note": "Tiny game to test showing the final clue when all players have negative scores. Round 1: answer the clue wrong to go negative. Round 2: the long-form clue should be shown before the answer is revealed.",
+  "boards": [
+    {
+      "categoryNames": ["Easy Math"],
+      "categories": [
+        {
+          "name": "Easy Math",
+          "clues": [
+            {
+              "clue": "2 + 2",
+              "answer": "4",
+              "value": 200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "categoryNames": ["World Capitals"],
+      "categories": [
+        {
+          "name": "World Capitals",
+          "clues": [
+            {
+              "clue": "This European capital, situated on the Danube, was formed in 1873 by the merger of Buda, Obuda, and Pest",
+              "answer": "Budapest",
+              "value": 0,
+              "wagerable": true,
+              "longForm": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

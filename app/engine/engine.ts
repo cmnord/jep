@@ -324,13 +324,13 @@ export function gameEngine(state: State, action: Action): State {
               );
 
           const numExpectedWagers = draft.players.size - buzzes.size;
-          // If no player has enough points to wager, just show the clue.
+          // If no player has enough points to wager, show the clue first
+          // before revealing the answer.
           if (numExpectedWagers === 0) {
-            draft.type = GameState.RevealAnswerToAll;
+            draft.type = GameState.ReadLongFormClue;
             draft.activeClue = [i, j];
-            const clueAnswer = draft.isAnswered[draft.round][i][j];
-            clueAnswer.isAnswered = true;
-            draft.numAnswered += 1;
+            draft.buzzes = buzzes;
+            draft.numExpectedWagers = 0;
             return;
           }
 
@@ -622,6 +622,34 @@ export function gameEngine(state: State, action: Action): State {
       }
       return produce(state, (draft) => {
         const { userId, i, j } = action.payload;
+
+        // Handle NextClue from ReadLongFormClue when no one could wager:
+        // transition to RevealAnswerToAll to show the answer.
+        if (
+          draft.type === GameState.ReadLongFormClue &&
+          draft.activeClue?.[0] === i &&
+          draft.activeClue?.[1] === j
+        ) {
+          const clue = draft.game.boards
+            .at(draft.round)
+            ?.categories.at(j)
+            ?.clues.at(i);
+          if (!clue?.longForm) return;
+
+          const allCantBuzz =
+            draft.buzzes.size === draft.players.size &&
+            Array.from(draft.buzzes.values()).every(
+              (b) => b === CANT_BUZZ_FLAG,
+            );
+          if (!allCantBuzz) return;
+
+          draft.type = GameState.RevealAnswerToAll;
+          const clueAnswer = draft.isAnswered[draft.round][i][j];
+          clueAnswer.isAnswered = true;
+          draft.numAnswered += 1;
+          return;
+        }
+
         // Ignore this action if the clue is no longer active or the player does
         // not have board control.
         if (

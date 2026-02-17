@@ -7,7 +7,7 @@ import { getValidAuthSession } from "~/models/auth";
 import { createRoomEvent } from "~/models/room-event.server";
 import { getRoom } from "~/models/room.server";
 import { getSolve, markAttempted } from "~/models/solves.server";
-import { getUserSession } from "~/session.server";
+import { getUserSession, requireSessionUserId } from "~/session.server";
 import { parseFormData } from "~/utils/http.server";
 
 const formSchema = z.object({
@@ -52,6 +52,12 @@ export async function action({ request, params }: Route.ActionArgs) {
   }
 
   const authSession = await getValidAuthSession(request);
+  // Validate userId for self-actions (Join, ChangeName). DELETE is excluded
+  // because it's either Leave (self) or Kick (cross-user), handled by
+  // getDeleteActionType.
+  if (request.method === "POST" || request.method === "PATCH") {
+    await requireSessionUserId(request, userId, authSession);
+  }
   const type =
     request.method === "POST"
       ? ActionType.Join

@@ -67,29 +67,19 @@ export default function Connection({
       ? getHumanReadableDuration(Date.now() - lastMessageAt)
       : undefined,
   );
-  const [lastUpdatedAt, setLastUpdatedAt] = React.useState(Date.now());
 
   React.useEffect(() => {
-    let requestId: number;
-
-    const animate = () => {
-      const now = Date.now();
-      // Only update every so often.
-      if (now - lastUpdatedAt >= DURATION_UPDATE_INTERVAL_MS) {
-        setDurationMsg(
-          lastMessageAt
-            ? getHumanReadableDuration(now - lastMessageAt)
-            : undefined,
-        );
-        setLastUpdatedAt(now);
-      }
-      requestId = requestAnimationFrame(animate);
-    };
-
-    requestId = requestAnimationFrame(animate);
-
-    return () => cancelAnimationFrame(requestId);
-  }, [lastMessageAt, lastUpdatedAt]);
+    function update() {
+      setDurationMsg(
+        lastMessageAt
+          ? getHumanReadableDuration(Date.now() - lastMessageAt)
+          : undefined,
+      );
+    }
+    update();
+    const id = setInterval(update, DURATION_UPDATE_INTERVAL_MS);
+    return () => clearInterval(id);
+  }, [lastMessageAt]);
 
   const message = formatConnectionState(debouncedState);
 

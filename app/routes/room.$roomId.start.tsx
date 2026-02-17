@@ -4,6 +4,7 @@ import { ActionType } from "~/engine";
 import { getValidAuthSession } from "~/models/auth";
 import { createRoomEvent } from "~/models/room-event.server";
 import { getRoom } from "~/models/room.server";
+import { requireSessionUserId } from "~/session.server";
 import { parseFormData } from "~/utils/http.server";
 import type { Route } from "./+types/room.$roomId.start";
 
@@ -30,6 +31,7 @@ export async function action({ request, params }: Route.ActionArgs) {
   }
 
   const authSession = await getValidAuthSession(request);
+  await requireSessionUserId(request, userId, authSession);
   const room = await getRoom(roomId, authSession?.accessToken);
   if (!room) {
     throw new Response("room not found", { status: 404 });
