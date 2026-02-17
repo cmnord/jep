@@ -92,32 +92,27 @@ function SuggestedDrawer({
           ›
         </span>
       </Collapsible.Trigger>
-      <Collapsible.Content className="flex flex-col gap-2 pt-2">
+      <Collapsible.Content className="flex flex-wrap items-center gap-2 pt-2">
         {allInReason ? (
-          <p className="text-sm text-slate-300">
-            <span className="font-medium text-blue-300">All-in:</span>{" "}
-            {allInReason}
-          </p>
-        ) : null}
-        {recommendations.length > 0 ? (
-          <div className="flex flex-wrap gap-2">
-            {recommendations.map((rec, i) => (
-              <div key={i} className="flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={() => onSelectAmount(rec.amount)}
-                  className="rounded-full border border-blue-400/60 px-3 py-1 text-sm text-blue-200 transition-colors hover:border-blue-300 hover:bg-blue-600/40 hover:text-white"
-                >
-                  {rec.label}:{" "}
-                  <span className="font-handwriting font-bold">
-                    {formatDollars(rec.amount)}
-                  </span>
-                </button>
-                <WhyButton reason={rec.reason} />
-              </div>
-            ))}
+          <div className="flex items-center gap-1">
+            <span className="text-sm text-slate-300">All-in</span>
+            <WhyButton reason={allInReason} />
           </div>
         ) : null}
+        {recommendations.map((rec, i) => (
+          <div key={i} className="flex items-center gap-1">
+            <Button
+              type="primary"
+              onClick={() => onSelectAmount(rec.amount)}
+            >
+              {rec.label}:{" "}
+              <span className="font-handwriting font-bold">
+                {formatDollars(rec.amount)}
+              </span>
+            </Button>
+            <WhyButton reason={rec.reason} />
+          </div>
+        ))}
       </Collapsible.Content>
     </Collapsible.Root>
   );
