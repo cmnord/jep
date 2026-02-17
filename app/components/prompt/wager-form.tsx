@@ -3,7 +3,6 @@ import * as React from "react";
 import { useFetcher } from "react-router";
 
 import Button from "~/components/button";
-import * as DropdownMenu from "~/components/dropdown-menu";
 import type { RoomProps } from "~/components/game";
 import Input from "~/components/input";
 import Popover from "~/components/popover";
@@ -15,7 +14,6 @@ import {
 } from "~/engine";
 import { formatDollars } from "~/utils";
 import useSoloAction from "~/utils/use-solo-action";
-import type { WagerHintsMode } from "~/utils/use-wager-hints";
 import { useWagerHintsContext } from "~/utils/use-wager-hints";
 import type { WagerRecommendation } from "~/utils/wager-strategy";
 import { getFinalClueStrategy } from "~/utils/wager-strategy";
@@ -55,51 +53,6 @@ function PlayerScores({
   );
 }
 
-const PREFERENCE_OPTIONS: { value: WagerHintsMode; label: string }[] = [
-  { value: "show", label: "Always" },
-  { value: "tap_to_reveal", label: "On tap" },
-  { value: "never", label: "Never" },
-];
-
-function PreferenceMenu({
-  wagerHints,
-  setWagerHints,
-}: {
-  wagerHints: WagerHintsMode;
-  setWagerHints: (mode: WagerHintsMode) => void;
-}) {
-  return (
-    <DropdownMenu.Root>
-      <DropdownMenu.Trigger asChild>
-        <button
-          type="button"
-          className="flex h-5 w-5 items-center justify-center rounded text-slate-400 transition-colors hover:text-white"
-        >
-          ⋯
-        </button>
-      </DropdownMenu.Trigger>
-      <DropdownMenu.Portal>
-        <DropdownMenu.Content align="start">
-          <DropdownMenu.Label className="p-1 text-xs text-slate-400">
-            Show suggested wagers
-          </DropdownMenu.Label>
-          {PREFERENCE_OPTIONS.map((opt) => (
-            <DropdownMenu.Item
-              key={opt.value}
-              onSelect={() => setWagerHints(opt.value)}
-            >
-              <span className="mr-2 inline-block w-4 text-center text-xs">
-                {wagerHints === opt.value ? "✓" : ""}
-              </span>
-              {opt.label}
-            </DropdownMenu.Item>
-          ))}
-        </DropdownMenu.Content>
-      </DropdownMenu.Portal>
-    </DropdownMenu.Root>
-  );
-}
-
 function WhyButton({ reason }: { reason: string }) {
   return (
     <Popover content={<p>{reason}</p>}>
@@ -117,31 +70,24 @@ function SuggestedDrawer({
   recommendations,
   onSelectAmount,
   defaultOpen,
-  wagerHints,
-  setWagerHints,
 }: {
   recommendations: WagerRecommendation[];
   onSelectAmount: (amount: number) => void;
   defaultOpen: boolean;
-  wagerHints: WagerHintsMode;
-  setWagerHints: (mode: WagerHintsMode) => void;
 }) {
   if (recommendations.length === 0) return null;
 
   return (
     <Collapsible.Root defaultOpen={defaultOpen} className="w-full">
-      <div className="flex items-center gap-1">
-        <Collapsible.Trigger className="group flex items-center gap-1.5 text-sm text-slate-300 transition-colors hover:text-white">
-          <span>Suggested</span>
-          <span className="rounded-full bg-slate-700 px-1.5 text-xs text-slate-400">
-            {recommendations.length}
-          </span>
-          <span className="text-xs transition-transform group-data-[state=open]:rotate-90">
-            ›
-          </span>
-        </Collapsible.Trigger>
-        <PreferenceMenu wagerHints={wagerHints} setWagerHints={setWagerHints} />
-      </div>
+      <Collapsible.Trigger className="group flex items-center gap-1.5 text-sm text-slate-300 transition-colors hover:text-white">
+        <span>Suggested</span>
+        <span className="rounded-full bg-slate-700 px-1.5 text-xs text-slate-400">
+          {recommendations.length}
+        </span>
+        <span className="text-xs transition-transform group-data-[state=open]:rotate-90">
+          ›
+        </span>
+      </Collapsible.Trigger>
       <Collapsible.Content className="pt-2">
         <div className="flex flex-wrap gap-2">
           {recommendations.map((rec, i) => (
@@ -174,7 +120,6 @@ function WagerForm({
   userId,
   strategy,
   wagerHints,
-  setWagerHints,
 }: {
   highestClueValue: number;
   score: number;
@@ -183,8 +128,7 @@ function WagerForm({
   players: PlayerAndCanWager[];
   userId: string;
   strategy?: { recommendations: WagerRecommendation[] };
-  wagerHints: WagerHintsMode;
-  setWagerHints: (mode: WagerHintsMode) => void;
+  wagerHints: string;
 }) {
   const maxWager = longForm ? score : Math.max(score, highestClueValue);
   const [wagerValue, setWagerValue] = React.useState("");
@@ -228,12 +172,12 @@ function WagerForm({
         />
         <div className="flex shrink-0 items-center gap-1">
           <Button
-            type="default"
+            type={allInRec ? "primary" : "default"}
             onClick={() => setWagerValue(maxWager.toString())}
           >
             All-in
             {allInRec ? (
-              <span className="ml-1 rounded-full bg-blue-500/30 px-1.5 py-0.5 text-xs text-blue-200">
+              <span className="ml-1 rounded-full bg-white/20 px-1.5 py-0.5 text-xs">
                 Suggested
               </span>
             ) : null}
@@ -248,8 +192,6 @@ function WagerForm({
           recommendations={drawerRecs}
           onSelectAmount={(amount) => setWagerValue(amount.toString())}
           defaultOpen={wagerHints === "show"}
-          wagerHints={wagerHints}
-          setWagerHints={setWagerHints}
         />
       ) : null}
 
@@ -264,7 +206,7 @@ function WagerForm({
 export function ConnectedWagerForm({ roomId, userId }: RoomProps) {
   const { activeClue, buzzes, board, clue, players, soloDispatch, wagers } =
     useEngineContext();
-  const { wagerHints, setWagerHints } = useWagerHintsContext();
+  const { wagerHints } = useWagerHintsContext();
   const fetcher = useFetcher<Action>();
   useSoloAction(fetcher, soloDispatch);
   const loading = fetcher.state === "loading";
@@ -332,7 +274,6 @@ export function ConnectedWagerForm({ roomId, userId }: RoomProps) {
         longForm={longForm}
         strategy={strategy}
         wagerHints={wagerHints}
-        setWagerHints={setWagerHints}
       />
     </fetcher.Form>
   );
