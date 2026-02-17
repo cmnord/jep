@@ -101,8 +101,15 @@ function BoardComponent({
 }
 
 export function ConnectedBoardComponent({ roomId, userId }: RoomProps) {
-  const { board, boardControl, isAnswered, numAnswered, soloDispatch, type } =
-    useEngineContext();
+  const {
+    board,
+    boardControl,
+    isAnswered,
+    numAnswered,
+    soloDispatch,
+    type,
+    round,
+  } = useEngineContext();
   const fetcher = useFetcher<Action>();
   useSoloAction(fetcher, soloDispatch);
 
@@ -116,6 +123,7 @@ export function ConnectedBoardComponent({ roomId, userId }: RoomProps) {
   const shouldShowBoard = type !== GameState.PreviewRound;
   const shouldAnimate = numAnswered === 0;
   const { animating, isCategoryRevealed, isClueRevealed } = useBoardFill(
+    round,
     numCategories,
     numRows,
     shouldShowBoard,
