@@ -95,6 +95,28 @@ function computeLeaderStrategy(
   const secondScore = opponentScores[0];
   const recommendations: WagerRecommendation[] = [];
 
+  // Tied for the lead: no bet guarantees a win.
+  // Source: Keith Williams / The Final Wager — "When tied, wager everything."
+  // Rationale: if your opponent bets big and is correct, you need to match.
+  // The trade-off is that betting $0 wins if both miss and opponent bet big.
+  const isTied = myScore === secondScore;
+
+  if (isTied) {
+    recommendations.push({
+      label: "Go all in",
+      amount: myScore,
+      reason:
+        "You're tied. Bet everything — if your opponent bets big and is correct, you need to match.",
+    });
+    recommendations.push({
+      label: "Bet nothing",
+      amount: 0,
+      reason:
+        "If both miss and your opponent bet big, you win. But you lose if they're right and bet anything.",
+    });
+    return { position: "leader", recommendations: dedup(recommendations) };
+  }
+
   // Cover bet: ensures you beat second place if both answer correctly and
   // second bets everything.
   const coverBet = clamp(2 * secondScore + 1 - myScore);

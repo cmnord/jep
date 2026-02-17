@@ -68,13 +68,17 @@ describe("getFinalClueStrategy", () => {
       expect(coverBet!.amount).toBe(18001);
     });
 
-    it("tied with second: cover bet clamps to full score", () => {
-      // Tied at $15,000: cover bet = 2×15000 + 1 - 15000 = $15,001 → clamped to $15,000
+    it("tied with second: recommends all in and bet nothing", () => {
       const result = getFinalClueStrategy(15000, [15000]);
       expect(result.position).toBe("leader");
-      const coverBet = findRec(result, "cover");
-      expect(coverBet).toBeDefined();
-      expect(coverBet!.amount).toBe(15000);
+      // Should offer all-in (not cover bet with wrong reasoning)
+      const allIn = findRec(result, "all in");
+      expect(allIn).toBeDefined();
+      expect(allIn!.amount).toBe(15000);
+      // Should also offer $0
+      const zero = findRec(result, "nothing");
+      expect(zero).toBeDefined();
+      expect(zero!.amount).toBe(0);
     });
 
     it("Emma Boettcher example: cover bet = $20,201", () => {
@@ -214,6 +218,49 @@ describe("getFinalClueStrategy", () => {
     });
   });
 
+  describe("tie scenarios", () => {
+    it("two players tied: offers all-in and bet nothing", () => {
+      const result = getFinalClueStrategy(1200, [1200]);
+      expect(result.position).toBe("leader");
+      expect(amounts(result)).toContain(1200);
+      expect(amounts(result)).toContain(0);
+      // Should NOT claim "win by $1"
+      const allIn = findRec(result, "all in");
+      expect(allIn!.reason).toContain("tied");
+    });
+
+    it("tied at small amount", () => {
+      const result = getFinalClueStrategy(200, [200]);
+      expect(result.position).toBe("leader");
+      expect(findRec(result, "all in")!.amount).toBe(200);
+      expect(findRec(result, "nothing")!.amount).toBe(0);
+    });
+
+    it("tied for first with a third player behind", () => {
+      // $10,000 tied with $10,000, third player at $5,000
+      const result = getFinalClueStrategy(10000, [10000, 5000]);
+      expect(result.position).toBe("leader");
+      const allIn = findRec(result, "all in");
+      expect(allIn).toBeDefined();
+      expect(allIn!.amount).toBe(10000);
+      expect(allIn!.reason).toContain("tied");
+    });
+
+    it("three-way tie: offers all-in and bet nothing", () => {
+      const result = getFinalClueStrategy(8000, [8000, 8000]);
+      expect(result.position).toBe("leader");
+      expect(amounts(result)).toContain(8000);
+      expect(amounts(result)).toContain(0);
+    });
+
+    it("tied but not in first: uses second-place strategy", () => {
+      // I have $5,000, leader has $10,000, another player also has $5,000
+      // I should be treated as second (not leader), since leader > me
+      const result = getFinalClueStrategy(5000, [10000, 5000]);
+      expect(result.position).toBe("second");
+    });
+  });
+
   describe("edge cases", () => {
     it("two-player game: no third-place considerations", () => {
       const result = getFinalClueStrategy(15000, [20000]);
@@ -228,13 +275,15 @@ describe("getFinalClueStrategy", () => {
       expect(result.position).toBe("third_or_lower");
     });
 
-    it("all scores equal: leader with cover bet of $1", () => {
+    it("all scores equal: treated as tie", () => {
       const result = getFinalClueStrategy(10000, [10000, 10000]);
       expect(result.position).toBe("leader");
-      // Cover bet = 2×10000 + 1 - 10000 = $10,001 → clamped to $10,000
-      const coverBet = findRec(result, "cover");
-      expect(coverBet).toBeDefined();
-      expect(coverBet!.amount).toBe(10000);
+      const allIn = findRec(result, "all in");
+      expect(allIn).toBeDefined();
+      expect(allIn!.amount).toBe(10000);
+      const zero = findRec(result, "nothing");
+      expect(zero).toBeDefined();
+      expect(zero!.amount).toBe(0);
     });
 
     it("amounts never exceed player score", () => {
