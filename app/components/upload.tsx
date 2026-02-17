@@ -2,7 +2,7 @@ import clsx from "clsx";
 import * as React from "react";
 import { useDropzone } from "react-dropzone";
 import type { FetcherWithComponents } from "react-router";
-import { useSubmit } from "react-router";
+import { useLocation, useSubmit } from "react-router";
 
 import Button from "~/components/button";
 import Dialog from "~/components/dialog";
@@ -139,6 +139,7 @@ export default function Upload({
   const [showModal, setShowModal] = React.useState(false);
   const [file, setFile] = React.useState<File | undefined>();
   const submit = useSubmit();
+  const location = useLocation();
 
   function handleChangeUpload(newFile?: File) {
     if (loggedIn) {
@@ -188,7 +189,13 @@ export default function Upload({
           >
             Upload publicly
           </Button>
-          <Link to="/login">
+          <Link
+            to={
+              location.pathname === "/"
+                ? "/login"
+                : `/login?redirectTo=${encodeURIComponent(location.pathname)}`
+            }
+          >
             <Button type="primary" htmlType="button" autoFocus>
               Log in
             </Button>

@@ -1,5 +1,11 @@
 import * as React from "react";
-import { data, Form, redirect, useNavigation } from "react-router";
+import {
+  data,
+  Form,
+  redirect,
+  useNavigation,
+  useSearchParams,
+} from "react-router";
 import { z } from "zod";
 import type { Route } from "./+types/signup";
 
@@ -14,7 +20,7 @@ import {
   createUserAccount,
   getUserExistsByEmailWithoutSession,
 } from "~/models/user/service.server";
-import { parseFormData } from "~/utils/http.server";
+import { getRedirectTo, parseFormData } from "~/utils/http.server";
 
 const formSchema = z.object({ email: z.string(), password: z.string() });
 
@@ -23,7 +29,7 @@ export const meta: Route.MetaFunction = () => [{ title: "Sign up" }];
 export async function loader({ request }: Route.LoaderArgs) {
   const authSession = await getValidAuthSession(request);
 
-  if (authSession) throw redirect("/");
+  if (authSession) throw redirect(getRedirectTo(request));
 
   return null;
 }
@@ -69,6 +75,8 @@ export default function Signup({ actionData }: Route.ComponentProps) {
   const navigation = useNavigation();
   const loading = navigation.state !== "idle";
 
+  const [searchParams] = useSearchParams();
+  const redirectTo = searchParams.get("redirectTo") ?? "";
   const [showPassword, setShowPassword] = React.useState(false);
 
   return (
@@ -141,7 +149,12 @@ export default function Signup({ actionData }: Route.ComponentProps) {
           ) : null}
           <hr className="my-4" />
           <p>
-            Have an account? <Link to="/login">Log in</Link>
+            Have an account?{" "}
+            <Link
+              to={`/login${redirectTo ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ""}`}
+            >
+              Log in
+            </Link>
           </p>
         </Form>
       </Main>

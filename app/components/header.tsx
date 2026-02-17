@@ -8,9 +8,13 @@ import type { Game } from "~/models/game.server";
 import { stringToHslColor } from "~/utils";
 import { ExclamationTriangle } from "./icons";
 
-function LoginButton() {
+function LoginButton({ pathname }: { pathname: string }) {
+  const to =
+    pathname === "/"
+      ? "/login"
+      : `/login?redirectTo=${encodeURIComponent(pathname)}`;
   return (
-    <Link to="/login">
+    <Link to={to}>
       <Button type="transparent">Log in</Button>
     </Link>
   );
@@ -205,7 +209,11 @@ export default function Header({
           </h1>
         </Link>
         <div className="flex items-center gap-2">
-          {user ? <AccountButton user={user} /> : <LoginButton />}
+          {user ? (
+            <AccountButton user={user} />
+          ) : (
+            <LoginButton pathname={pathname} />
+          )}
           {game && <GameSettings game={game} url={BASE_URL + pathname} />}
         </div>
       </div>

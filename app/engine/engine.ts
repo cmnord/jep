@@ -12,6 +12,7 @@ import {
   isClueWagerAction,
   isPlayerAction,
   isRoundAction,
+  isTransferPlayerAction,
 } from "./actions";
 import { GameState, State, getClueValue, getNumCluesInBoard } from "./state";
 
@@ -33,6 +34,7 @@ export enum ActionType {
   Check = "check",
   NextClue = "next_clue",
   ToggleClock = "toggle_clock",
+  TransferPlayer = "transfer_player",
 }
 
 export interface Action {
@@ -722,6 +724,85 @@ export function gameEngine(state: State, action: Action): State {
           pauseClock(draft, action.ts);
         } else {
           resumeClock(draft, action.ts);
+        }
+      });
+    case ActionType.TransferPlayer:
+      if (!isTransferPlayerAction(action)) {
+        throw new Error(
+          "TransferPlayer action must have oldUserId and newUserId",
+        );
+      }
+      return produce(state, (draft) => {
+        const { oldUserId, newUserId } = action.payload;
+
+        // Don't transfer after game over.
+        if (draft.type === GameState.GameOver) {
+          return;
+        }
+
+        // If old user is not a current player, nothing to transfer (idempotent).
+        const oldPlayer = draft.players.get(oldUserId);
+        if (!oldPlayer) {
+          return;
+        }
+
+        // If new user already exists in players, retire the orphaned anonymous
+        // player so it doesn't block the game.
+        if (draft.players.has(newUserId)) {
+          transferBoardControl(draft, oldUserId);
+          draft.players.delete(oldUserId);
+          draft.leftPlayers.set(oldUserId, oldPlayer);
+          return;
+        }
+
+        // Transfer the player entry.
+        draft.players.delete(oldUserId);
+        draft.players.set(newUserId, {
+          ...oldPlayer,
+          userId: newUserId,
+        });
+
+        // Transfer board control if applicable.
+        if (draft.boardControl === oldUserId) {
+          draft.boardControl = newUserId;
+        }
+
+        // Transfer any buzz entries for the current active clue.
+        if (draft.buzzes.has(oldUserId)) {
+          const buzzValue = draft.buzzes.get(oldUserId)!;
+          draft.buzzes.delete(oldUserId);
+          draft.buzzes.set(newUserId, buzzValue);
+        }
+
+        // Transfer wager entries.
+        for (const [, wagerMap] of draft.wagers.entries()) {
+          if (wagerMap.has(oldUserId)) {
+            const wagerValue = wagerMap.get(oldUserId)!;
+            wagerMap.delete(oldUserId);
+            wagerMap.set(newUserId, wagerValue);
+          }
+        }
+
+        // Transfer answer entries.
+        for (const [, answerMap] of draft.answers.entries()) {
+          if (answerMap.has(oldUserId)) {
+            const answerValue = answerMap.get(oldUserId)!;
+            answerMap.delete(oldUserId);
+            answerMap.set(newUserId, answerValue);
+          }
+        }
+
+        // Transfer answeredBy entries in isAnswered.
+        for (const round of draft.isAnswered) {
+          for (const row of round) {
+            for (const clueAnswer of row) {
+              if (clueAnswer.answeredBy.has(oldUserId)) {
+                const value = clueAnswer.answeredBy.get(oldUserId)!;
+                clueAnswer.answeredBy.delete(oldUserId);
+                clueAnswer.answeredBy.set(newUserId, value);
+              }
+            }
+          }
         }
       });
   }

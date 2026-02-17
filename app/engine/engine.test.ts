@@ -2615,6 +2615,117 @@ describe("gameEngine", () => {
         },
       ];
     })(),
+
+    // TransferPlayer tests
+    {
+      name: "TransferPlayer transfers player to new userId with score preserved",
+      state: initialState,
+      actions: [
+        PLAYER1_JOIN_ACTION,
+        PLAYER2_JOIN_ACTION,
+        {
+          type: ActionType.TransferPlayer,
+          payload: { oldUserId: PLAYER1.userId, newUserId: "new-auth-id" },
+        },
+      ],
+      expectedState: produce(initialState, (draft) => {
+        draft.boardControl = "new-auth-id";
+        draft.players.set("new-auth-id", {
+          name: PLAYER1.name,
+          userId: "new-auth-id",
+          score: 0,
+        });
+        draft.players.set(PLAYER2.userId, PLAYER2);
+      }),
+    },
+    {
+      name: "TransferPlayer transfers board control",
+      state: initialState,
+      actions: [
+        PLAYER1_JOIN_ACTION,
+        PLAYER2_JOIN_ACTION,
+        {
+          type: ActionType.TransferPlayer,
+          payload: { oldUserId: PLAYER1.userId, newUserId: "new-auth-id" },
+        },
+      ],
+      expectedState: produce(initialState, (draft) => {
+        draft.boardControl = "new-auth-id";
+        draft.players.set("new-auth-id", {
+          name: PLAYER1.name,
+          userId: "new-auth-id",
+          score: 0,
+        });
+        draft.players.set(PLAYER2.userId, PLAYER2);
+      }),
+    },
+    {
+      name: "TransferPlayer is no-op when oldUserId not in players",
+      state: initialState,
+      actions: [
+        PLAYER1_JOIN_ACTION,
+        {
+          type: ActionType.TransferPlayer,
+          payload: { oldUserId: "nonexistent", newUserId: "new-auth-id" },
+        },
+      ],
+      expectedState: produce(initialState, (draft) => {
+        draft.boardControl = PLAYER1.userId;
+        draft.players.set(PLAYER1.userId, PLAYER1);
+      }),
+    },
+    {
+      name: "TransferPlayer retires anonymous player to leftPlayers when authenticated user already in game",
+      state: initialState,
+      actions: [
+        PLAYER1_JOIN_ACTION,
+        PLAYER2_JOIN_ACTION,
+        {
+          type: ActionType.TransferPlayer,
+          payload: {
+            oldUserId: PLAYER1.userId,
+            newUserId: PLAYER2.userId,
+          },
+        },
+      ],
+      expectedState: produce(initialState, (draft) => {
+        draft.boardControl = PLAYER2.userId;
+        draft.players.set(PLAYER2.userId, PLAYER2);
+        draft.leftPlayers.set(PLAYER1.userId, PLAYER1);
+      }),
+    },
+    // TransferPlayer GameOver guard tested separately below.
+    {
+      name: "TransferPlayer transfers buzzes during active clue",
+      state: initialState,
+      actions: [
+        ...TWO_PLAYERS_ROUND_0,
+        {
+          type: ActionType.ChooseClue,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0 },
+        },
+        {
+          type: ActionType.Buzz,
+          payload: { userId: PLAYER1.userId, i: 0, j: 0, deltaMs: 123 },
+        },
+        {
+          type: ActionType.TransferPlayer,
+          payload: { oldUserId: PLAYER1.userId, newUserId: "new-auth-id" },
+        },
+      ],
+      expectedState: produce(clockStartedState, (draft) => {
+        draft.type = GameState.ReadClue;
+        draft.activeClue = [0, 0];
+        draft.boardControl = "new-auth-id";
+        draft.players.set("new-auth-id", {
+          name: PLAYER1.name,
+          userId: "new-auth-id",
+          score: 0,
+        });
+        draft.players.set(PLAYER2.userId, PLAYER2);
+        draft.buzzes.set("new-auth-id", 123);
+      }),
+    },
   ];
 
   for (const tc of testCases) {
@@ -2649,6 +2760,27 @@ describe("gameEngine", () => {
       );
     });
   }
+
+  it("TransferPlayer is no-op after GameOver", () => {
+    // Build a GameOver state directly rather than replaying the full game.
+    const gameOverState = produce(stateFromGame(MOCK_GAME), (draft) => {
+      draft.type = GameState.GameOver;
+      draft.boardControl = null;
+      draft.players.set(PLAYER1.userId, { ...PLAYER1, score: 400 });
+      draft.players.set(PLAYER2.userId, PLAYER2);
+    });
+
+    const result = gameEngine(gameOverState, {
+      type: ActionType.TransferPlayer,
+      payload: { oldUserId: PLAYER1.userId, newUserId: "new-auth-id" },
+      ts: 0,
+    });
+
+    // Player should NOT have been transferred.
+    expect(result.players.has(PLAYER1.userId)).toBe(true);
+    expect(result.players.has("new-auth-id")).toBe(false);
+    expect(result.type).toBe(GameState.GameOver);
+  });
 });
 
 describe("getWinningBuzzer", () => {

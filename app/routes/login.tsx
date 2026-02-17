@@ -1,5 +1,11 @@
 import * as React from "react";
-import { data, Form, redirect, useNavigation } from "react-router";
+import {
+  data,
+  Form,
+  redirect,
+  useNavigation,
+  useSearchParams,
+} from "react-router";
 import { z } from "zod";
 import type { Route } from "./+types/login";
 
@@ -14,7 +20,11 @@ import {
   getValidAuthSession,
   signInWithEmail,
 } from "~/models/auth";
-import { assertIsPost, parseFormData } from "~/utils/http.server";
+import {
+  assertIsPost,
+  getRedirectTo,
+  parseFormData,
+} from "~/utils/http.server";
 
 const formSchema = z.object({ email: z.string(), password: z.string() });
 
@@ -23,7 +33,7 @@ export const meta: Route.MetaFunction = () => [{ title: "Login" }];
 export async function loader({ request }: Route.LoaderArgs) {
   const authSession = await getValidAuthSession(request);
 
-  if (authSession) throw redirect("/");
+  if (authSession) throw redirect(getRedirectTo(request));
 
   return null;
 }
@@ -43,7 +53,7 @@ export async function action({ request }: Route.ActionArgs) {
     return createAuthSession({
       request,
       authSession,
-      redirectTo: "/",
+      redirectTo: getRedirectTo(request),
     });
   } catch (error: unknown) {
     if (error instanceof Error) {
@@ -58,6 +68,8 @@ export default function Login({ actionData }: Route.ComponentProps) {
   const navigation = useNavigation();
   const disabled = navigation.state !== "idle";
 
+  const [searchParams] = useSearchParams();
+  const redirectTo = searchParams.get("redirectTo") ?? "";
   const [showPassword, setShowPassword] = React.useState(false);
 
   return (
@@ -121,7 +133,12 @@ export default function Login({ actionData }: Route.ComponentProps) {
           ) : null}
           <hr className="my-4" />
           <p>
-            Don't have an account? <Link to="/signup">Sign up</Link>
+            Don't have an account?{" "}
+            <Link
+              to={`/signup${redirectTo ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ""}`}
+            >
+              Sign up
+            </Link>
           </p>
         </Form>
       </Main>

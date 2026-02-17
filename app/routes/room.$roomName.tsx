@@ -2,15 +2,15 @@ import { data, redirect, useMatches } from "react-router";
 import type { Route } from "./+types/room.$roomName";
 
 import GameComponent from "~/components/game";
-import { GameEngineContext, useGameEngine } from "~/engine";
+import { ActionType, GameEngineContext, useGameEngine } from "~/engine";
 import { applyRoomEventsToState } from "~/engine/room-event";
 import { GameState, stateFromGame } from "~/engine/state";
 import { getValidAuthSession } from "~/models/auth";
 import { getGame } from "~/models/game.server";
-import { getRoomEvents } from "~/models/room-event.server";
+import { createRoomEvent, getRoomEvents } from "~/models/room-event.server";
 import { getRoom } from "~/models/room.server";
 import { getUserByEmail } from "~/models/user";
-import { getOrCreateUserSession } from "~/session.server";
+import { getOrCreateUserSession, getUserSession } from "~/session.server";
 import { BASE_URL, getRandomEmoji } from "~/utils";
 
 export const meta: Route.MetaFunction = ({ data }) => {
@@ -57,6 +57,38 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 
   if (user) {
     const userId = user.id;
+
+    // Check if this authenticated user was previously playing as an anonymous
+    // guest. If so, transfer the anonymous player to their authenticated
+    // identity so they keep their score and participation. If the
+    // authenticated user is already in the game too, the anonymous player is
+    // retired to leftPlayers so it doesn't block the game.
+    const anonymousUserId = await getUserSession(request);
+    if (
+      anonymousUserId &&
+      anonymousUserId !== userId &&
+      state.players.has(anonymousUserId)
+    ) {
+      await createRoomEvent(
+        room.id,
+        ActionType.TransferPlayer,
+        { oldUserId: anonymousUserId, newUserId: userId },
+        accessToken,
+      );
+      // Re-fetch room events to include the transfer.
+      const updatedRoomEvents = await getRoomEvents(room.id, accessToken);
+      return {
+        game,
+        name,
+        roomEvents: updatedRoomEvents,
+        roomId,
+        roomName,
+        userId,
+        BASE_URL,
+        accessToken,
+      };
+    }
+
     return {
       game,
       name,

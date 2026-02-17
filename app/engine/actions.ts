@@ -15,6 +15,10 @@ const RoundPayload = z.object({ round: z.number(), userId: z.string() });
 const BuzzPayload = CluePayload.extend({ deltaMs: z.number() });
 const AnswerPayload = CluePayload.extend({ answer: z.string() });
 const CheckPayload = CluePayload.extend({ correct: z.boolean() });
+const TransferPlayerPayload = z.object({
+  oldUserId: z.string(),
+  newUserId: z.string(),
+});
 
 export function isClueAction(action: Action): action is {
   type: ActionType.ChooseClue | ActionType.NextClue;
@@ -98,5 +102,16 @@ export function isCheckAction(action: Action): action is {
   return (
     action.type === ActionType.Check &&
     CheckPayload.safeParse(action.payload).success
+  );
+}
+
+export function isTransferPlayerAction(action: Action): action is {
+  type: ActionType.TransferPlayer;
+  payload: { oldUserId: string; newUserId: string };
+  ts: number;
+} {
+  return (
+    action.type === ActionType.TransferPlayer &&
+    TransferPlayerPayload.safeParse(action.payload).success
   );
 }
