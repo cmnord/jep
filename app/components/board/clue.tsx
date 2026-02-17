@@ -11,6 +11,7 @@ interface Props {
   answered: boolean;
   clue: Clue;
   hasBoardControl: boolean;
+  hidden?: boolean;
   onFocus: NonNullable<ButtonProps["onFocus"]>;
   onClick: NonNullable<ButtonProps["onClick"]>;
   onKeyDown: NonNullable<ButtonProps["onKeyDown"]>;
@@ -18,7 +19,16 @@ interface Props {
 
 const ClueButton = React.forwardRef<HTMLButtonElement, ButtonProps & Props>(
   (
-    { answered, clue, hasBoardControl, onFocus, onClick, onKeyDown, ...rest },
+    {
+      answered,
+      clue,
+      hasBoardControl,
+      hidden,
+      onFocus,
+      onClick,
+      onKeyDown,
+      ...rest
+    },
     ref,
   ) => {
     const [loading, setLoading] = React.useState(false);
@@ -70,6 +80,7 @@ const ClueButton = React.forwardRef<HTMLButtonElement, ButtonProps & Props>(
         {...rest}
       >
         <p
+          style={hidden ? { visibility: "hidden" } : undefined}
           className={clsx(
             "flex items-center justify-center gap-1 font-inter font-bold text-yellow-1000 text-shadow-md sm:text-shadow-lg",
             {

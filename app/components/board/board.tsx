@@ -3,7 +3,7 @@ import { useFetcher } from "react-router";
 
 import type { RoomProps } from "~/components/game";
 import type { Action } from "~/engine";
-import { useEngineContext } from "~/engine";
+import { GameState, useEngineContext } from "~/engine";
 import type { Board, Clue } from "~/models/convert.server";
 import { generateGrid } from "~/utils";
 import useSoloAction from "~/utils/use-solo-action";
@@ -12,6 +12,7 @@ import useGameSound from "~/utils/use-sound";
 import { Category } from "./category";
 import { ClueComponent } from "./clue";
 import { FinalClue } from "./final-clue";
+import { useBoardFill } from "./use-board-fill";
 
 const WAGER_SFX = "/sounds/wager.mp3";
 
@@ -20,6 +21,8 @@ function BoardComponent({
   board,
   hasBoardControl,
   isAnswered,
+  isCategoryRevealed,
+  isClueRevealed,
   onClickClue,
   onFocusClue,
   onKeyDownClue,
@@ -28,6 +31,8 @@ function BoardComponent({
   board: Board;
   hasBoardControl: boolean;
   isAnswered: (i: number, j: number) => boolean;
+  isCategoryRevealed: (j: number) => boolean;
+  isClueRevealed: (i: number, j: number) => boolean;
   onClickClue: (i: number, j: number) => void;
   onFocusClue: (i: number, j: number) => void;
   onKeyDownClue: (event: React.KeyboardEvent, i: number, j: number) => void;
@@ -57,11 +62,12 @@ function BoardComponent({
         <table className="h-1 w-full table-fixed bg-blue-bright text-white">
           <thead>
             <tr className="h-1">
-              {board.categories.map((category) => (
+              {board.categories.map((category, j) => (
                 <Category
                   key={category.name}
                   name={category.name}
                   note={category.note}
+                  hidden={!isCategoryRevealed(j)}
                 />
               ))}
             </tr>
@@ -76,6 +82,7 @@ function BoardComponent({
                       clue={clue}
                       answered={isAnswered(i, j)}
                       hasBoardControl={hasBoardControl}
+                      hidden={!isClueRevealed(i, j)}
                       onFocus={() => onFocusClue(i, j)}
                       onClick={() => onClickClue(i, j)}
                       onKeyDown={(e) => onKeyDownClue(e, i, j)}
@@ -94,12 +101,26 @@ function BoardComponent({
 }
 
 export function ConnectedBoardComponent({ roomId, userId }: RoomProps) {
-  const { board, boardControl, isAnswered, soloDispatch } = useEngineContext();
+  const { board, boardControl, isAnswered, numAnswered, soloDispatch, type } =
+    useEngineContext();
   const fetcher = useFetcher<Action>();
   useSoloAction(fetcher, soloDispatch);
 
   const tbodyRef = React.useRef<HTMLTableSectionElement | null>(null);
   const [focusedClueIdx, setFocusedClue] = React.useState<[number, number]>();
+
+  const numCategories = board?.categories.length ?? 0;
+  const numRows = board
+    ? Math.max(...board.categories.map((c) => c.clues.length))
+    : 0;
+  const shouldShowBoard = type !== GameState.PreviewRound;
+  const shouldAnimate = numAnswered === 0;
+  const { animating, isCategoryRevealed, isClueRevealed } = useBoardFill(
+    numCategories,
+    numRows,
+    shouldShowBoard,
+    shouldAnimate,
+  );
 
   React.useEffect(() => {
     if (focusedClueIdx) {
@@ -133,7 +154,7 @@ export function ConnectedBoardComponent({ roomId, userId }: RoomProps) {
 
   function handleClickClue(i: number, j: number) {
     const clue = board?.categories.at(j)?.clues.at(i);
-    if (isAnswered(i, j) || !clue || !hasBoardControl) {
+    if (animating || isAnswered(i, j) || !clue || !hasBoardControl) {
       return;
     }
     if (clue.wagerable && !clue.longForm) {
@@ -202,8 +223,10 @@ export function ConnectedBoardComponent({ roomId, userId }: RoomProps) {
     <BoardComponent
       board={board}
       tbodyRef={tbodyRef}
-      hasBoardControl={hasBoardControl}
+      hasBoardControl={!animating && hasBoardControl}
       isAnswered={isAnswered}
+      isCategoryRevealed={isCategoryRevealed}
+      isClueRevealed={isClueRevealed}
       onClickClue={handleClickClue}
       onFocusClue={handleFocusClue}
       onKeyDownClue={handleKeyDown}
