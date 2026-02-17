@@ -348,9 +348,11 @@ export function ReplayBoard({
 export function ReplayScoreBar({
   allPlayers,
   currentState,
+  playing,
 }: {
   allPlayers: Player[];
   currentState: ReplayFrame["state"] | undefined;
+  playing: boolean;
 }) {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const positionsRef = React.useRef<Map<string, DOMRect>>(new Map());
@@ -375,7 +377,7 @@ export function ReplayScoreBar({
     [sortedPlayers],
   );
 
-  // FLIP animation: after DOM update, animate from old positions to new
+  // FLIP animation: only when playing, skip during scrubbing to avoid flyaway
   React.useLayoutEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -390,27 +392,35 @@ export function ReplayScoreBar({
       newPositions.set(userId, child.getBoundingClientRect());
     }
 
-    // Apply inverse transforms for any items that moved
-    for (const child of children) {
-      const userId = child.dataset.userId!;
-      const oldRect = positionsRef.current.get(userId);
-      const newRect = newPositions.get(userId);
-      if (!oldRect || !newRect) continue;
+    if (playing) {
+      // Apply inverse transforms for any items that moved
+      for (const child of children) {
+        const userId = child.dataset.userId!;
+        const oldRect = positionsRef.current.get(userId);
+        const newRect = newPositions.get(userId);
+        if (!oldRect || !newRect) continue;
 
-      const deltaX = oldRect.left - newRect.left;
-      const deltaY = oldRect.top - newRect.top;
-      if (deltaX === 0 && deltaY === 0) continue;
+        const deltaX = oldRect.left - newRect.left;
+        const deltaY = oldRect.top - newRect.top;
+        if (deltaX === 0 && deltaY === 0) continue;
 
-      // Apply inverse transform (no transition)
-      child.style.transition = "none";
-      child.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+        // Apply inverse transform (no transition)
+        child.style.transition = "none";
+        child.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
 
-      // Force reflow
-      child.getBoundingClientRect();
+        // Force reflow
+        child.getBoundingClientRect();
 
-      // Animate to final position
-      child.style.transition = "transform 300ms ease";
-      child.style.transform = "";
+        // Animate to final position
+        child.style.transition = "transform 300ms ease";
+        child.style.transform = "";
+      }
+    } else {
+      // Scrubbing: clear any in-flight transforms so items snap into place
+      for (const child of children) {
+        child.style.transition = "none";
+        child.style.transform = "";
+      }
     }
 
     positionsRef.current = newPositions;

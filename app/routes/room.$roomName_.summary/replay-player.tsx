@@ -175,7 +175,7 @@ export default function ReplayPlayer({
         onSpeedChange={setSpeed}
       />
 
-      <ReplayScoreBar allPlayers={allPlayers} currentState={displayState} />
+      <ReplayScoreBar allPlayers={allPlayers} currentState={displayState} playing={playing} />
     </div>
   );
 }
