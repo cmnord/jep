@@ -15,17 +15,29 @@ import {
 import { State, getClueValue, stateFromGame } from "./state";
 
 export enum ConnectionState {
-  ERROR,
+  /** Initial connection attempt (first load). */
   CONNECTING,
+  /** Subscribed and receiving events. */
   CONNECTED,
-  DISCONNECTING,
+  /** Lost connection, actively retrying. */
+  RECONNECTING,
+  /** Gave up after max retries or intentionally closed. Needs user action. */
   DISCONNECTED,
 }
 
-/** RESUBSCRIBE_DELAY_MS is the amount of time we wait before attemping to
- * re-subscribe to the realtime channel.
- */
-const RESUBSCRIBE_DELAY_MS = 1000;
+/** Exponential backoff constants for reconnection. */
+const BASE_DELAY_MS = 1000;
+const MAX_DELAY_MS = 30_000;
+const JITTER_MS = 1000;
+export const MAX_RETRIES = 10;
+
+/** How often to check if the channel silently disconnected. */
+const STALENESS_CHECK_MS = 30_000;
+
+function getBackoffDelay(attempt: number): number {
+  const delay = Math.min(BASE_DELAY_MS * 2 ** attempt, MAX_DELAY_MS);
+  return delay + Math.random() * JITTER_MS;
+}
 
 function stateToGameEngine(
   game: Game,
@@ -34,7 +46,14 @@ function stateToGameEngine(
   {
     connectionState,
     lastMessageAt,
-  }: { connectionState: ConnectionState; lastMessageAt?: number },
+    reconnect,
+    numRetries,
+  }: {
+    connectionState: ConnectionState;
+    lastMessageAt?: number;
+    reconnect: () => void;
+    numRetries: number;
+  },
 ) {
   // Board may be undefined
   const board = game.boards.at(state.round);
@@ -88,7 +107,9 @@ function stateToGameEngine(
     soloDispatch: dispatch,
     isAnswered,
     lastMessageAt,
+    numRetries,
     players: state.players,
+    reconnect,
     round: state.round,
     boardControl: state.boardControl,
     wagers: state.wagers.get(clueKey) ?? new Map<string, number>(),
@@ -110,6 +131,8 @@ export function useSoloGameEngine(game: Game) {
   return stateToGameEngine(game, state, dispatch, {
     connectionState: ConnectionState.CONNECTED,
     lastMessageAt: undefined,
+    reconnect: () => {},
+    numRetries: 0,
   });
 }
 
@@ -132,12 +155,21 @@ export function useGameEngine(
 ) {
   const seenEventIds = React.useRef(new Set(serverRoomEvents.map((e) => e.id)));
 
+  const hasConnectedOnce = React.useRef(false);
   const [connectionState, setConnectionState] = React.useState<ConnectionState>(
-    ConnectionState.DISCONNECTED,
+    ConnectionState.CONNECTING,
   );
   const [lastMessageAt, setLastMessageAt] = React.useState<
     number | undefined
   >();
+  const [numRetries, setNumRetries] = React.useState(0);
+
+  // Incrementing this triggers the useEffect to tear down and reconnect.
+  const [reconnectTrigger, setReconnectTrigger] = React.useState(0);
+  const reconnect = React.useCallback(() => {
+    setNumRetries(0);
+    setReconnectTrigger((t) => t + 1);
+  }, []);
 
   const [state, dispatch] = React.useReducer(
     gameEngine,
@@ -150,14 +182,79 @@ export function useGameEngine(
 
   React.useEffect(() => {
     let channel = client.channel(`realtime:roomId:${roomId}`);
-    let numRetries = 0;
+    let retryCount = 0;
+    let retryTimeout: ReturnType<typeof setTimeout> | undefined;
+    let disposed = false;
+
+    /** Unsubscribe without removing—safe to call during retries. */
+    function unsubscribeChannel() {
+      try {
+        channel.unsubscribe();
+      } catch {
+        // ignore cleanup errors
+      }
+    }
+
+    /** Full teardown: unsubscribe AND remove from client. Only for final cleanup. */
+    function removeChannel() {
+      try {
+        channel.unsubscribe();
+        client.removeChannel(channel);
+      } catch {
+        // ignore cleanup errors
+      }
+    }
+
+    /** Fetch events from the DB that we haven't seen yet. */
+    async function fetchMissedEvents() {
+      const maxSeenId =
+        seenEventIds.current.size > 0 ? Math.max(...seenEventIds.current) : 0;
+
+      try {
+        const { data, error } = await client
+          .from("room_events")
+          .select("*")
+          .eq("room_id", roomId)
+          .gt("id", maxSeenId)
+          .order("ts", { ascending: true });
+
+        if (error || !data || disposed) return;
+
+        for (const event of data) {
+          if (!seenEventIds.current.has(event.id) && isTypedRoomEvent(event)) {
+            seenEventIds.current.add(event.id);
+            dispatch(event);
+          }
+        }
+        if (data.length > 0) {
+          setLastMessageAt(Date.now());
+        }
+      } catch (err) {
+        console.error("Failed to fetch missed events:", err);
+      }
+    }
+
+    function scheduleRetry() {
+      retryCount++;
+      const delay = getBackoffDelay(retryCount);
+      console.info(
+        `Scheduling reconnect attempt ${retryCount}/${MAX_RETRIES} in ${Math.round(delay)}ms`,
+      );
+      setNumRetries(retryCount);
+      retryTimeout = setTimeout(subscribeToChannel, delay);
+    }
 
     function subscribeToChannel() {
-      if (numRetries > 5) {
+      if (disposed) return;
+      if (retryCount >= MAX_RETRIES) {
+        setConnectionState(ConnectionState.DISCONNECTED);
         return;
       }
-      setConnectionState(ConnectionState.CONNECTING);
-      numRetries += 1;
+      setConnectionState(
+        hasConnectedOnce.current
+          ? ConnectionState.RECONNECTING
+          : ConnectionState.CONNECTING,
+      );
 
       channel
         .on<DbRoomEvent>(
@@ -183,33 +280,32 @@ export function useGameEngine(
           },
         )
         .subscribe((status, err) => {
+          if (disposed) return;
           if (err) {
             console.error("Realtime subscription error:", err.message);
-            setConnectionState(ConnectionState.ERROR);
-            // Handle the error here by attempting to re-subscribe
-            if (channel) {
-              setConnectionState(ConnectionState.DISCONNECTING);
-              channel.unsubscribe();
-            }
+            setConnectionState(ConnectionState.RECONNECTING);
+            unsubscribeChannel();
             channel = client.channel(`realtime:roomId:${roomId}`);
-            setTimeout(subscribeToChannel, RESUBSCRIBE_DELAY_MS);
+            scheduleRetry();
           } else {
-            console.info(status, numRetries);
             switch (status) {
               case "SUBSCRIBED":
-                return setConnectionState(ConnectionState.CONNECTED);
+                hasConnectedOnce.current = true;
+                retryCount = 0;
+                setNumRetries(0);
+                setConnectionState(ConnectionState.CONNECTED);
+                // Backfill any events missed during reconnection
+                fetchMissedEvents();
+                return;
               case "CLOSED":
                 return setConnectionState(ConnectionState.DISCONNECTED);
               case "CHANNEL_ERROR":
-                channel = client.channel(`realtime:roomId:${roomId}`);
-                setTimeout(subscribeToChannel, RESUBSCRIBE_DELAY_MS);
-                return setConnectionState(ConnectionState.ERROR);
               case "TIMED_OUT":
+                setConnectionState(ConnectionState.RECONNECTING);
+                unsubscribeChannel();
                 channel = client.channel(`realtime:roomId:${roomId}`);
-                setTimeout(subscribeToChannel, RESUBSCRIBE_DELAY_MS);
-                return setConnectionState(ConnectionState.ERROR);
-              default:
-                throw new Error("unhandled channel status: " + status);
+                scheduleRetry();
+                return;
             }
           }
         });
@@ -217,19 +313,49 @@ export function useGameEngine(
 
     subscribeToChannel();
 
-    // cleanup function to unsubscribe from the channel
+    // Re-sync when the tab returns to the foreground.
+    function handleVisibilityChange() {
+      if (document.visibilityState !== "visible" || disposed) return;
+      // Always fetch missed events — cheap and catches any gaps
+      fetchMissedEvents();
+      // If the channel silently disconnected, reconnect
+      if (channel.state !== "joined") {
+        retryCount = 0;
+        setNumRetries(0);
+        unsubscribeChannel();
+        channel = client.channel(`realtime:roomId:${roomId}`);
+        subscribeToChannel();
+      }
+    }
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    // Periodic check for silent disconnects.
+    const stalenessInterval = setInterval(() => {
+      if (disposed) return;
+      if (channel.state !== "joined" && retryCount === 0) {
+        console.info("Staleness check: channel not joined, reconnecting");
+        unsubscribeChannel();
+        channel = client.channel(`realtime:roomId:${roomId}`);
+        subscribeToChannel();
+      }
+    }, STALENESS_CHECK_MS);
+
     return () => {
+      disposed = true;
+      clearTimeout(retryTimeout);
+      clearInterval(stalenessInterval);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       if (channel.state === "joined") {
         console.info("unsubscribing from channel", channel.state);
-        setConnectionState(ConnectionState.DISCONNECTING);
-        channel.unsubscribe();
-        client.removeChannel(channel);
       }
+      removeChannel();
     };
-  }, [client, roomId]);
+  }, [client, roomId, reconnectTrigger]);
 
   return stateToGameEngine(game, state, dispatch, {
     connectionState,
     lastMessageAt,
+    reconnect,
+    numRetries,
   });
 }

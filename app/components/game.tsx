@@ -73,8 +73,16 @@ export default function GameComponent({
   roomName: string;
   url: string;
 } & RoomProps) {
-  const { boardControl, connectionState, lastMessageAt, players, round, type } =
-    useEngineContext();
+  const {
+    boardControl,
+    connectionState,
+    lastMessageAt,
+    numRetries,
+    players,
+    reconnect,
+    round,
+    type,
+  } = useEngineContext();
 
   const [playBoardFillSfx] = useGameSound(BOARD_FILL_SFX);
   const [playFinalSfx] = useGameSound(FINAL_CATEGORY_REVEAL_SFX);
@@ -121,7 +129,12 @@ export default function GameComponent({
             <GameClock roomId={roomId} />
           </div>
           <PlayerScores roomId={roomId} userId={userId} />
-          <Connection state={connectionState} lastMessageAt={lastMessageAt} />
+          <Connection
+            state={connectionState}
+            lastMessageAt={lastMessageAt}
+            numRetries={numRetries}
+            reconnect={reconnect}
+          />
         </div>
         <Prompt roomId={roomId} userId={userId} />
       </div>
