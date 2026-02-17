@@ -1,5 +1,14 @@
+import { useId } from "react";
+
 /** Heroicon name: outline/information-circle */
-export function InformationCircle({ className }: { className?: string }) {
+export function InformationCircle({
+  className,
+  title,
+}: {
+  className?: string;
+  title?: string;
+}) {
+  const titleId = useId();
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -8,10 +17,12 @@ export function InformationCircle({ className }: { className?: string }) {
       strokeWidth="1.5"
       stroke="currentColor"
       className={className}
-      role="img"
-      aria-labelledby="information-circle-title"
+      focusable="false"
+      role={title ? "img" : undefined}
+      aria-labelledby={title ? titleId : undefined}
+      aria-hidden={title ? undefined : true}
     >
-      <title id="information-circle-title">Info</title>
+      {title ? <title id={titleId}>{title}</title> : null}
       <path
         strokeLinecap="round"
         strokeLinejoin="round"

@@ -1,5 +1,14 @@
+import { useId } from "react";
+
 /** Heroicon name: outline/user-minus */
-export function UserMinus({ className }: { className?: string }) {
+export function UserMinus({
+  className,
+  title,
+}: {
+  className?: string;
+  title?: string;
+}) {
+  const titleId = useId();
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -8,10 +17,12 @@ export function UserMinus({ className }: { className?: string }) {
       strokeWidth={1.5}
       stroke="currentColor"
       className={className}
-      role="img"
-      aria-labelledby="user-minus-title"
+      focusable="false"
+      role={title ? "img" : undefined}
+      aria-labelledby={title ? titleId : undefined}
+      aria-hidden={title ? undefined : true}
     >
-      <title id="user-minus-title">Remove player</title>
+      {title ? <title id={titleId}>{title}</title> : null}
       <path
         strokeLinecap="round"
         strokeLinejoin="round"

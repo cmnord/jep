@@ -1,15 +1,26 @@
+import { useId } from "react";
+
 /** Heroicon name: solid/paper-airplane */
-export function PaperAirplane({ className }: { className?: string }) {
+export function PaperAirplane({
+  className,
+  title,
+}: {
+  className?: string;
+  title?: string;
+}) {
+  const titleId = useId();
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
       fill="currentColor"
       className={className}
-      role="img"
-      aria-labelledby="paper-airplane-title"
+      focusable="false"
+      role={title ? "img" : undefined}
+      aria-labelledby={title ? titleId : undefined}
+      aria-hidden={title ? undefined : true}
     >
-      <title id="paper-airplane-title">Send</title>
+      {title ? <title id={titleId}>{title}</title> : null}
       <path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" />
     </svg>
   );

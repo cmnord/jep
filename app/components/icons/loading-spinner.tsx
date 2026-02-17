@@ -1,14 +1,25 @@
-export function LoadingSpinner({ className }: { className?: string }) {
+import { useId } from "react";
+
+export function LoadingSpinner({
+  className,
+  title,
+}: {
+  className?: string;
+  title?: string;
+}) {
+  const titleId = useId();
   return (
     <svg
-      className={"h-5 w-5 animate-spin " + className}
+      className={`h-5 w-5 animate-spin${className ? ` ${className}` : ""}`}
+      focusable="false"
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"
-      role="img"
-      aria-labelledby="loading-title"
+      role={title ? "img" : undefined}
+      aria-labelledby={title ? titleId : undefined}
+      aria-hidden={title ? undefined : true}
     >
-      <title id="loading-title">Loading...</title>
+      {title ? <title id={titleId}>{title}</title> : null}
       <circle
         className="opacity-25"
         cx="12"

@@ -71,7 +71,7 @@ function EditPlayer({
             onClick={onBlur}
             className="rounded-xl bg-white/10 px-3 py-2"
           >
-            <PaperAirplane className="h-5 w-5 opacity-50" />
+            <PaperAirplane className="h-5 w-5 opacity-50" title="Submit" />
           </button>
         ) : (
           <button
@@ -79,7 +79,7 @@ function EditPlayer({
             onClick={handleFocus}
             className="rounded-xl bg-white/10 px-3 py-2"
           >
-            <PencilSquare className="h-5 w-5 opacity-50" />
+            <PencilSquare className="h-5 w-5 opacity-50" title="Edit" />
           </button>
         )}
       </div>

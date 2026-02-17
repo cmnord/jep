@@ -1,21 +1,26 @@
+import { useId } from "react";
+
 /** Heroicon name: solid/eye */
 export function Eye({
   className,
   title,
 }: {
-  className: string;
-  title: string;
+  className?: string;
+  title?: string;
 }) {
+  const titleId = useId();
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
       fill="currentColor"
       className={className}
-      role="img"
-      aria-labelledby="eye-title"
+      focusable="false"
+      role={title ? "img" : undefined}
+      aria-labelledby={title ? titleId : undefined}
+      aria-hidden={title ? undefined : true}
     >
-      <title id="eye-title">{title}</title>
+      {title ? <title id={titleId}>{title}</title> : null}
       <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" />
       <path
         fillRule="evenodd"

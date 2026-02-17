@@ -36,7 +36,7 @@ export default function CopyLinkButton({
           }, 100);
         }}
       >
-        <LinkIcon className="h-6 w-6" />
+        <LinkIcon className="h-6 w-6" title="Copy link" />
         {text ? <span className="pr-1 pl-2 text-sm">{text}</span> : null}
       </button>
 
