@@ -132,7 +132,7 @@ function PreviewRoundDialog({
               <PlayerIcon key={i} player={p} />
             ))}
           </div>
-          <WagerHintsControl />
+          <WagerHintsControl theme="dark" />
           <HowToPlay />
           <Link className="mb-2 text-sm text-white" to="/howto">
             Practice buzzing &rarr;
