@@ -12,7 +12,7 @@
     "start": "react-router-serve ./build/server/index.js",
     "test": "vitest --coverage",
     "test:coverage": "open coverage/index.html; vitest --coverage",
-    "test:e2e:dev": "npx playwright test --ui",
+    "test:e2e:dev": "PW_USE_DEV_SERVER=1 npx playwright test --ui",
     "pretest:e2e:run": "npm run build",
     "test:e2e:run": "npx playwright test",
     "typecheck": "react-router typegen && tsc -b",
