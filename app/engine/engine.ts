@@ -14,9 +14,47 @@ import {
   isRoundAction,
   isTransferPlayerAction,
 } from "./actions";
-import { GameState, State, getClueValue, getNumCluesInBoard } from "./state";
+import {
+  type ClueAnswer,
+  GameState,
+  State,
+  getClueValue,
+  getNumCluesInBoard,
+} from "./state";
 
 enableMapSet();
+
+/** getNextAnswerOrder computes the next global answer order from existing clues. */
+function getNextAnswerOrder(isAnswered: ClueAnswer[][][]): number {
+  let max = 0;
+  for (const round of isAnswered) {
+    for (const row of round) {
+      for (const cell of row) {
+        if (cell.answerOrder > max) max = cell.answerOrder;
+      }
+    }
+  }
+  return max + 1;
+}
+
+/** getMostRecentCorrectOrder returns the highest answerOrder of a clue where
+ * the given user answered correctly. Returns 0 if no correct answers found. */
+function getMostRecentCorrectOrder(
+  isAnswered: ClueAnswer[][][],
+  userId: string,
+): number {
+  let max = 0;
+  for (const round of isAnswered) {
+    for (const row of round) {
+      for (const cell of row) {
+        if (cell.answeredBy.get(userId) === true && cell.answerOrder > max) {
+          max = cell.answerOrder;
+        }
+      }
+    }
+  }
+  return max;
+}
 
 export enum ActionType {
   Join = "join",
@@ -448,6 +486,7 @@ export function gameEngine(state: State, action: Action): State {
           draft.type = GameState.RevealAnswerToAll;
           const clueAnswer = draft.isAnswered[draft.round][i][j];
           clueAnswer.isAnswered = true;
+          clueAnswer.answerOrder = getNextAnswerOrder(draft.isAnswered);
           if (clue?.wagerable) {
             clueAnswer.answeredBy.set(userId, false);
           }
@@ -571,6 +610,7 @@ export function gameEngine(state: State, action: Action): State {
 
           const clueAnswer = draft.isAnswered[draft.round][i][j];
           clueAnswer.isAnswered = true;
+          clueAnswer.answerOrder = getNextAnswerOrder(draft.isAnswered);
           clueAnswer.answeredBy.set(userId, correct);
           return;
         }
@@ -585,6 +625,7 @@ export function gameEngine(state: State, action: Action): State {
           draft.numAnswered += 1;
           const clueAnswer = draft.isAnswered[draft.round][i][j];
           clueAnswer.isAnswered = true;
+          clueAnswer.answerOrder = getNextAnswerOrder(draft.isAnswered);
           clueAnswer.answeredBy.set(userId, correct);
           return;
         }
@@ -606,6 +647,7 @@ export function gameEngine(state: State, action: Action): State {
           draft.numAnswered += 1;
           const clueAnswer = draft.isAnswered[draft.round][i][j];
           clueAnswer.isAnswered = true;
+          clueAnswer.answerOrder = getNextAnswerOrder(draft.isAnswered);
           clueAnswer.answeredBy.set(userId, correct);
           return;
         }
@@ -648,6 +690,7 @@ export function gameEngine(state: State, action: Action): State {
           draft.type = GameState.RevealAnswerToAll;
           const clueAnswer = draft.isAnswered[draft.round][i][j];
           clueAnswer.isAnswered = true;
+          clueAnswer.answerOrder = getNextAnswerOrder(draft.isAnswered);
           draft.numAnswered += 1;
           return;
         }
@@ -686,16 +729,40 @@ export function gameEngine(state: State, action: Action): State {
           }
 
           // Board control goes to the player with the lowest score. In the
-          // case of a tie, keep the same player in control.
-          const lowestScoringPlayer = Array.from(draft.players.values()).sort(
+          // case of a tie, the player who most recently answered correctly
+          // gets control. Falls back to keeping the current controller.
+          const sortedPlayers = Array.from(draft.players.values()).sort(
             (a, b) => a.score - b.score,
-          )[0];
+          );
+          const lowestScore = sortedPlayers[0].score;
+          const tiedPlayers = sortedPlayers.filter(
+            (p) => p.score === lowestScore,
+          );
 
-          let newBoardControl = lowestScoringPlayer.userId;
-          if (draft.boardControl) {
-            const controllingPlayer = draft.players.get(draft.boardControl);
-            if (controllingPlayer?.score === lowestScoringPlayer.score) {
-              newBoardControl = controllingPlayer.userId;
+          let newBoardControl: string;
+          if (tiedPlayers.length === 1) {
+            newBoardControl = tiedPlayers[0].userId;
+          } else {
+            // Among tied players, find who answered correctly most recently.
+            const tiedWithRecency = tiedPlayers
+              .map((p) => ({
+                userId: p.userId,
+                lastCorrect: getMostRecentCorrectOrder(
+                  draft.isAnswered,
+                  p.userId,
+                ),
+              }))
+              .sort((a, b) => b.lastCorrect - a.lastCorrect);
+
+            if (tiedWithRecency[0].lastCorrect > 0) {
+              newBoardControl = tiedWithRecency[0].userId;
+            } else if (
+              draft.boardControl &&
+              tiedPlayers.some((p) => p.userId === draft.boardControl)
+            ) {
+              newBoardControl = draft.boardControl;
+            } else {
+              newBoardControl = tiedPlayers[0].userId;
             }
           }
 

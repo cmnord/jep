@@ -24,6 +24,8 @@ export enum GameState {
 export interface ClueAnswer {
   isAnswered: boolean;
   answeredBy: Map<string, boolean>;
+  /** Global order in which this clue was answered. 0 = unanswered. */
+  answerOrder: number;
 }
 
 export interface Player {
@@ -100,6 +102,7 @@ export function stateFromGame(game: Game) {
     state.isAnswered[round] = generateGrid(n, m, {
       isAnswered: false,
       answeredBy: new Map(),
+      answerOrder: 0,
     });
   }
 

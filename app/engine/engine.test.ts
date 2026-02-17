@@ -234,6 +234,7 @@ describe("gameEngine", () => {
         draft.numAnswered = 1;
         const clueAnswer = draft.isAnswered[0][0][0];
         clueAnswer.isAnswered = true;
+        clueAnswer.answerOrder = 1;
         clueAnswer.answeredBy.set(PLAYER1.userId, true);
         draft.players.set(PLAYER1.userId, { ...PLAYER1, score: 200 });
         draft.players.set(PLAYER2.userId, PLAYER2);
@@ -287,6 +288,7 @@ describe("gameEngine", () => {
         draft.numAnswered = 1;
         const clueAnswer = draft.isAnswered[0][0][0];
         clueAnswer.isAnswered = true;
+        clueAnswer.answerOrder = 1;
         clueAnswer.answeredBy.set(PLAYER1.userId, true);
         draft.leftPlayers.set(PLAYER1.userId, {
           ...PLAYER1,
@@ -560,6 +562,7 @@ describe("gameEngine", () => {
 
         const clueState = draft.isAnswered[0][0][0];
         clueState.isAnswered = true;
+        clueState.answerOrder = 1;
         clueState.answeredBy.set(PLAYER1.userId, false);
 
         draft.numAnswered = 1;
@@ -691,6 +694,7 @@ describe("gameEngine", () => {
 
         const clueAnswer = draft.isAnswered[0][0][0];
         clueAnswer.isAnswered = true;
+        clueAnswer.answerOrder = 1;
         clueAnswer.answeredBy.set(PLAYER1.userId, false);
         clueAnswer.answeredBy.set(PLAYER2.userId, true);
 
@@ -740,6 +744,7 @@ describe("gameEngine", () => {
 
         const clueAnswer = draft.isAnswered[0][0][0];
         clueAnswer.isAnswered = true;
+        clueAnswer.answerOrder = 1;
         clueAnswer.answeredBy.set(PLAYER1.userId, true);
 
         draft.numAnswered = 1;
@@ -810,9 +815,11 @@ describe("gameEngine", () => {
 
         const firstClueAnswer = draft.isAnswered[0][0][0];
         firstClueAnswer.isAnswered = true;
+        firstClueAnswer.answerOrder = 1;
         firstClueAnswer.answeredBy.set(PLAYER1.userId, true);
         const secondClueAnswer = draft.isAnswered[0][0][1];
         secondClueAnswer.isAnswered = true;
+        secondClueAnswer.answerOrder = 2;
         secondClueAnswer.answeredBy.set(PLAYER2.userId, true);
 
         draft.numAnswered = 0;
@@ -834,9 +841,11 @@ describe("gameEngine", () => {
 
         const firstClueAnswer = draft.isAnswered[0][0][0];
         firstClueAnswer.isAnswered = true;
+        firstClueAnswer.answerOrder = 1;
         firstClueAnswer.answeredBy.set(PLAYER1.userId, true);
         const secondClueAnswer = draft.isAnswered[0][0][1];
         secondClueAnswer.isAnswered = true;
+        secondClueAnswer.answerOrder = 2;
         secondClueAnswer.answeredBy.set(PLAYER1.userId, true);
 
         draft.numAnswered = 0;
@@ -868,9 +877,11 @@ describe("gameEngine", () => {
 
         const firstClueAnswer = draft.isAnswered[0][0][0];
         firstClueAnswer.isAnswered = true;
+        firstClueAnswer.answerOrder = 1;
         firstClueAnswer.answeredBy.set(PLAYER1.userId, true);
         const secondClueAnswer = draft.isAnswered[0][0][1];
         secondClueAnswer.isAnswered = true;
+        secondClueAnswer.answerOrder = 2;
         secondClueAnswer.answeredBy.set(PLAYER1.userId, true);
 
         draft.numAnswered = 0;
@@ -907,9 +918,11 @@ describe("gameEngine", () => {
 
         const firstClueAnswer = draft.isAnswered[0][0][0];
         firstClueAnswer.isAnswered = true;
+        firstClueAnswer.answerOrder = 1;
         firstClueAnswer.answeredBy.set(PLAYER1.userId, true);
         const secondClueAnswer = draft.isAnswered[0][0][1];
         secondClueAnswer.isAnswered = true;
+        secondClueAnswer.answerOrder = 2;
         secondClueAnswer.answeredBy.set(PLAYER1.userId, true);
 
         draft.numAnswered = 0;
@@ -957,12 +970,15 @@ describe("gameEngine", () => {
 
         const firstClueAnswer = draft.isAnswered[0][0][0];
         firstClueAnswer.isAnswered = true;
+        firstClueAnswer.answerOrder = 1;
         firstClueAnswer.answeredBy.set(PLAYER1.userId, true);
         const secondClueAnswer = draft.isAnswered[0][0][1];
         secondClueAnswer.isAnswered = true;
+        secondClueAnswer.answerOrder = 2;
         secondClueAnswer.answeredBy.set(PLAYER1.userId, true);
         const thirdClueAnswer = draft.isAnswered[1][0][0];
         thirdClueAnswer.isAnswered = true;
+        thirdClueAnswer.answerOrder = 3;
         thirdClueAnswer.answeredBy.set(PLAYER2.userId, true);
 
         draft.numAnswered = 1;
@@ -1013,12 +1029,15 @@ describe("gameEngine", () => {
 
         const firstClueAnswer = draft.isAnswered[0][0][0];
         firstClueAnswer.isAnswered = true;
+        firstClueAnswer.answerOrder = 1;
         firstClueAnswer.answeredBy.set(PLAYER1.userId, true);
         const secondClueAnswer = draft.isAnswered[0][0][1];
         secondClueAnswer.isAnswered = true;
+        secondClueAnswer.answerOrder = 2;
         secondClueAnswer.answeredBy.set(PLAYER1.userId, true);
         const thirdClueAnswer = draft.isAnswered[1][0][0];
         thirdClueAnswer.isAnswered = true;
+        thirdClueAnswer.answerOrder = 3;
         thirdClueAnswer.answeredBy.set(PLAYER2.userId, false);
 
         draft.numAnswered = 1;
@@ -1052,9 +1071,11 @@ describe("gameEngine", () => {
 
         const firstClueAnswer = draft.isAnswered[0][0][0];
         firstClueAnswer.isAnswered = true;
+        firstClueAnswer.answerOrder = 1;
         firstClueAnswer.answeredBy.set(PLAYER1.userId, true);
         const secondClueAnswer = draft.isAnswered[0][0][1];
         secondClueAnswer.isAnswered = true;
+        secondClueAnswer.answerOrder = 2;
         secondClueAnswer.answeredBy.set(PLAYER1.userId, true);
 
         draft.numAnswered = 0;
@@ -1172,10 +1193,12 @@ describe("gameEngine", () => {
             [
               {
                 isAnswered: true,
+                answerOrder: 1,
                 answeredBy: new Map([[PLAYER1.userId, true]]),
               },
               {
                 isAnswered: true,
+                answerOrder: 2,
                 answeredBy: new Map([
                   [PLAYER1.userId, false],
                   [PLAYER2.userId, false],
@@ -1187,10 +1210,12 @@ describe("gameEngine", () => {
             [
               {
                 isAnswered: true,
+                answerOrder: 3,
                 answeredBy: new Map([[PLAYER2.userId, true]]),
               },
               {
                 isAnswered: false,
+                answerOrder: 0,
                 answeredBy: new Map(),
               },
             ],
@@ -1318,10 +1343,12 @@ describe("gameEngine", () => {
             [
               {
                 isAnswered: true,
+                answerOrder: 1,
                 answeredBy: new Map([[PLAYER1.userId, true]]),
               },
               {
                 isAnswered: true,
+                answerOrder: 2,
                 answeredBy: new Map([
                   [PLAYER1.userId, false],
                   [PLAYER2.userId, false],
@@ -1333,10 +1360,12 @@ describe("gameEngine", () => {
             [
               {
                 isAnswered: true,
+                answerOrder: 3,
                 answeredBy: new Map([[PLAYER2.userId, true]]),
               },
               {
                 isAnswered: true,
+                answerOrder: 4,
                 answeredBy: new Map(),
               },
             ],
@@ -1392,12 +1421,15 @@ describe("gameEngine", () => {
 
         const firstClueAnswer = draft.isAnswered[0][0][0];
         firstClueAnswer.isAnswered = true;
+        firstClueAnswer.answerOrder = 1;
         firstClueAnswer.answeredBy.set(PLAYER1.userId, true);
         const secondClueAnswer = draft.isAnswered[0][0][1];
         secondClueAnswer.isAnswered = true;
+        secondClueAnswer.answerOrder = 2;
         secondClueAnswer.answeredBy.set(PLAYER1.userId, true);
         const thirdClueAnswer = draft.isAnswered[1][0][0];
         thirdClueAnswer.isAnswered = true;
+        thirdClueAnswer.answerOrder = 3;
         thirdClueAnswer.answeredBy.set(PLAYER2.userId, true);
 
         draft.numAnswered = 1;
@@ -1456,10 +1488,12 @@ describe("gameEngine", () => {
             [
               {
                 isAnswered: true,
+                answerOrder: 1,
                 answeredBy: new Map([[PLAYER1.userId, true]]),
               },
               {
                 isAnswered: true,
+                answerOrder: 2,
                 answeredBy: new Map([[PLAYER1.userId, true]]),
               },
             ],
@@ -1468,10 +1502,12 @@ describe("gameEngine", () => {
             [
               {
                 isAnswered: true,
+                answerOrder: 3,
                 answeredBy: new Map([[PLAYER2.userId, true]]),
               },
               {
                 isAnswered: false,
+                answerOrder: 0,
                 answeredBy: new Map(),
               },
             ],
@@ -1538,10 +1574,12 @@ describe("gameEngine", () => {
             [
               {
                 isAnswered: true,
+                answerOrder: 1,
                 answeredBy: new Map([[PLAYER1.userId, true]]),
               },
               {
                 isAnswered: true,
+                answerOrder: 2,
                 answeredBy: new Map([[PLAYER1.userId, true]]),
               },
             ],
@@ -1550,10 +1588,12 @@ describe("gameEngine", () => {
             [
               {
                 isAnswered: true,
+                answerOrder: 3,
                 answeredBy: new Map([[PLAYER2.userId, true]]),
               },
               {
                 isAnswered: false,
+                answerOrder: 0,
                 answeredBy: new Map(),
               },
             ],
@@ -1637,10 +1677,12 @@ describe("gameEngine", () => {
             [
               {
                 isAnswered: true,
+                answerOrder: 1,
                 answeredBy: new Map([[PLAYER1.userId, true]]),
               },
               {
                 isAnswered: true,
+                answerOrder: 2,
                 answeredBy: new Map([[PLAYER1.userId, true]]),
               },
             ],
@@ -1649,10 +1691,12 @@ describe("gameEngine", () => {
             [
               {
                 isAnswered: true,
+                answerOrder: 3,
                 answeredBy: new Map([[PLAYER2.userId, true]]),
               },
               {
                 isAnswered: false,
+                answerOrder: 0,
                 answeredBy: new Map(),
               },
             ],
@@ -1721,10 +1765,12 @@ describe("gameEngine", () => {
             [
               {
                 isAnswered: true,
+                answerOrder: 1,
                 answeredBy: new Map([[PLAYER1.userId, true]]),
               },
               {
                 isAnswered: true,
+                answerOrder: 2,
                 answeredBy: new Map([[PLAYER1.userId, true]]),
               },
             ],
@@ -1733,10 +1779,12 @@ describe("gameEngine", () => {
             [
               {
                 isAnswered: true,
+                answerOrder: 3,
                 answeredBy: new Map([[PLAYER2.userId, true]]),
               },
               {
                 isAnswered: false,
+                answerOrder: 0,
                 answeredBy: new Map(),
               },
             ],
@@ -1830,10 +1878,12 @@ describe("gameEngine", () => {
             [
               {
                 isAnswered: true,
+                answerOrder: 1,
                 answeredBy: new Map([[PLAYER1.userId, true]]),
               },
               {
                 isAnswered: true,
+                answerOrder: 2,
                 answeredBy: new Map([[PLAYER1.userId, true]]),
               },
             ],
@@ -1842,10 +1892,12 @@ describe("gameEngine", () => {
             [
               {
                 isAnswered: true,
+                answerOrder: 3,
                 answeredBy: new Map([[PLAYER2.userId, true]]),
               },
               {
                 isAnswered: false,
+                answerOrder: 0,
                 answeredBy: new Map(),
               },
             ],
@@ -1949,10 +2001,12 @@ describe("gameEngine", () => {
             [
               {
                 isAnswered: true,
+                answerOrder: 1,
                 answeredBy: new Map([[PLAYER1.userId, true]]),
               },
               {
                 isAnswered: true,
+                answerOrder: 2,
                 answeredBy: new Map([[PLAYER1.userId, true]]),
               },
             ],
@@ -1961,10 +2015,12 @@ describe("gameEngine", () => {
             [
               {
                 isAnswered: true,
+                answerOrder: 3,
                 answeredBy: new Map([[PLAYER2.userId, true]]),
               },
               {
                 isAnswered: false,
+                answerOrder: 0,
                 answeredBy: new Map([[PLAYER1.userId, false]]),
               },
             ],
@@ -2072,10 +2128,12 @@ describe("gameEngine", () => {
             [
               {
                 isAnswered: true,
+                answerOrder: 1,
                 answeredBy: new Map([[PLAYER1.userId, true]]),
               },
               {
                 isAnswered: true,
+                answerOrder: 2,
                 answeredBy: new Map([[PLAYER1.userId, true]]),
               },
             ],
@@ -2084,10 +2142,12 @@ describe("gameEngine", () => {
             [
               {
                 isAnswered: true,
+                answerOrder: 3,
                 answeredBy: new Map([[PLAYER2.userId, true]]),
               },
               {
                 isAnswered: true,
+                answerOrder: 4,
                 answeredBy: new Map([
                   [PLAYER1.userId, false],
                   [PLAYER2.userId, true],
@@ -2198,10 +2258,12 @@ describe("gameEngine", () => {
             [
               {
                 isAnswered: true,
+                answerOrder: 1,
                 answeredBy: new Map([[PLAYER1.userId, true]]),
               },
               {
                 isAnswered: true,
+                answerOrder: 2,
                 answeredBy: new Map([[PLAYER1.userId, true]]),
               },
             ],
@@ -2210,10 +2272,12 @@ describe("gameEngine", () => {
             [
               {
                 isAnswered: true,
+                answerOrder: 3,
                 answeredBy: new Map([[PLAYER2.userId, true]]),
               },
               {
                 isAnswered: true,
+                answerOrder: 4,
                 answeredBy: new Map([
                   [PLAYER1.userId, false],
                   [PLAYER2.userId, true],
@@ -2334,10 +2398,12 @@ describe("gameEngine", () => {
             [
               {
                 isAnswered: true,
+                answerOrder: 1,
                 answeredBy: new Map([[PLAYER1.userId, true]]),
               },
               {
                 isAnswered: true,
+                answerOrder: 2,
                 answeredBy: new Map([[PLAYER1.userId, true]]),
               },
             ],
@@ -2346,10 +2412,12 @@ describe("gameEngine", () => {
             [
               {
                 isAnswered: true,
+                answerOrder: 3,
                 answeredBy: new Map([[PLAYER2.userId, true]]),
               },
               {
                 isAnswered: false,
+                answerOrder: 0,
                 answeredBy: new Map(),
               },
             ],
@@ -2457,10 +2525,12 @@ describe("gameEngine", () => {
             [
               {
                 isAnswered: true,
+                answerOrder: 1,
                 answeredBy: new Map([[PLAYER1.userId, true]]),
               },
               {
                 isAnswered: true,
+                answerOrder: 2,
                 answeredBy: new Map([[PLAYER1.userId, true]]),
               },
             ],
@@ -2469,10 +2539,12 @@ describe("gameEngine", () => {
             [
               {
                 isAnswered: true,
+                answerOrder: 3,
                 answeredBy: new Map([[PLAYER2.userId, true]]),
               },
               {
                 isAnswered: true,
+                answerOrder: 4,
                 answeredBy: new Map([
                   [PLAYER1.userId, true],
                   [PLAYER2.userId, true],
@@ -2780,6 +2852,73 @@ describe("gameEngine", () => {
     expect(result.players.has(PLAYER1.userId)).toBe(true);
     expect(result.players.has("new-auth-id")).toBe(false);
     expect(result.type).toBe(GameState.GameOver);
+  });
+
+  it("Round transition tiebreaker: most recent correct answerer gets board control, not current controller", () => {
+    // Set up a state where:
+    // - Both players are tied at 200
+    // - PLAYER1 has board control (current controller)
+    // - PLAYER2 answered correctly more recently (answerOrder=2 vs 1)
+    // Under the new rule, PLAYER2 should get control.
+    const state = produce(stateFromGame(MOCK_GAME), (draft) => {
+      draft.type = GameState.RevealAnswerToAll;
+      draft.round = 0;
+      draft.activeClue = [0, 1];
+      draft.numAnswered = 2;
+      draft.numCluesInBoard = 2;
+      draft.boardControl = PLAYER1.userId;
+      draft.players.set(PLAYER1.userId, { ...PLAYER1, score: 200 });
+      draft.players.set(PLAYER2.userId, { ...PLAYER2, score: 200 });
+      draft.isAnswered[0][0][0].isAnswered = true;
+      draft.isAnswered[0][0][0].answerOrder = 1;
+      draft.isAnswered[0][0][0].answeredBy.set(PLAYER1.userId, true);
+      draft.isAnswered[0][0][1].isAnswered = true;
+      draft.isAnswered[0][0][1].answerOrder = 2;
+      draft.isAnswered[0][0][1].answeredBy.set(PLAYER2.userId, true);
+      draft.clockRunning = true;
+      draft.clockLastResumedAt = 0;
+    });
+
+    const result = gameEngine(state, {
+      type: ActionType.NextClue,
+      payload: { userId: PLAYER1.userId, i: 0, j: 1 },
+      ts: 0,
+    });
+
+    expect(result.type).toBe(GameState.PreviewRound);
+    expect(result.boardControl).toBe(PLAYER2.userId);
+    expect(result.round).toBe(1);
+  });
+
+  it("Round transition tiebreaker: falls back to current controller when no tied player has correct answer", () => {
+    // Both players tied at 0, neither answered correctly (all clues timed out).
+    // Current controller (PLAYER1) should keep control.
+    const state = produce(stateFromGame(MOCK_GAME), (draft) => {
+      draft.type = GameState.RevealAnswerToAll;
+      draft.round = 0;
+      draft.activeClue = [0, 1];
+      draft.numAnswered = 2;
+      draft.numCluesInBoard = 2;
+      draft.boardControl = PLAYER1.userId;
+      draft.players.set(PLAYER1.userId, PLAYER1);
+      draft.players.set(PLAYER2.userId, PLAYER2);
+      draft.isAnswered[0][0][0].isAnswered = true;
+      draft.isAnswered[0][0][0].answerOrder = 1;
+      draft.isAnswered[0][0][1].isAnswered = true;
+      draft.isAnswered[0][0][1].answerOrder = 2;
+      draft.clockRunning = true;
+      draft.clockLastResumedAt = 0;
+    });
+
+    const result = gameEngine(state, {
+      type: ActionType.NextClue,
+      payload: { userId: PLAYER1.userId, i: 0, j: 1 },
+      ts: 0,
+    });
+
+    expect(result.type).toBe(GameState.PreviewRound);
+    expect(result.boardControl).toBe(PLAYER1.userId);
+    expect(result.round).toBe(1);
   });
 });
 

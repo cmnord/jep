@@ -43,6 +43,7 @@ describe("getCoryat", () => {
       [alice.userId, true],
       [carol.userId, false],
     ]),
+    answerOrder: 1,
   };
 
   interface TestCase {
