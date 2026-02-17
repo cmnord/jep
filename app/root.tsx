@@ -16,8 +16,9 @@ import Footer from "~/components/footer";
 import Header from "~/components/header";
 import { getValidAuthSession } from "~/models/auth";
 import { getUserByEmail } from "~/models/user";
+import { parseUserSettings } from "~/models/user-settings.server";
 import { BASE_URL, getBrowserEnv, NODE_ENV } from "~/utils";
-import { SoundContext } from "~/utils/use-sound";
+import { UserSettingsProvider } from "~/utils/user-settings";
 
 import type { Route } from "./+types/root";
 
@@ -54,8 +55,9 @@ export const links: Route.LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
 ];
 
-/** Skip revalidating the root loader for game actions. The root loader fetches
- * the user from the DB, which doesn't change during gameplay.
+/** Skip revalidating the root loader for game actions and settings saves.
+ * The root loader fetches the user from the DB, which doesn't change during
+ * gameplay. Settings are managed optimistically in local state.
  */
 export function shouldRevalidate({
   formAction,
@@ -64,7 +66,7 @@ export function shouldRevalidate({
   formAction?: string;
   defaultShouldRevalidate: boolean;
 }) {
-  if (formAction?.match(/^\/room\/\d+\//)) {
+  if (formAction?.match(/^\/room\/\d+\//) || formAction === "/settings") {
     return false;
   }
   return defaultShouldRevalidate;
@@ -78,10 +80,12 @@ export async function loader({ request }: Route.LoaderArgs) {
     const user = authSession
       ? await getUserByEmail(authSession.email, authSession.accessToken)
       : undefined;
-    return { user, env, BASE_URL, NODE_ENV };
+    const userSettings = user ? parseUserSettings(user.settings) : undefined;
+    return { user, userSettings, env, BASE_URL, NODE_ENV };
   } catch {
     return {
       user: undefined,
+      userSettings: undefined,
       env,
       BASE_URL,
       NODE_ENV,
@@ -90,9 +94,6 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export default function App({ loaderData }: Route.ComponentProps) {
-  const [volume, setVolume] = React.useState(0.5);
-  const [mute, setMute] = React.useState(false);
-
   return (
     <html lang="en">
       <head>
@@ -103,13 +104,9 @@ export default function App({ loaderData }: Route.ComponentProps) {
       </head>
       <body className="relative flex min-h-screen flex-col">
         {loaderData.NODE_ENV === "production" ? <Analytics /> : null}
-        <SoundContext.Provider
-          value={{
-            volume,
-            setVolume,
-            mute,
-            setMute,
-          }}
+        <UserSettingsProvider
+          initialSettings={loaderData.userSettings}
+          loggedIn={!!loaderData.user}
         >
           <ToastPrimitive.Provider swipeDirection="right">
             <ToastPrimitive.Viewport
@@ -126,7 +123,7 @@ export default function App({ loaderData }: Route.ComponentProps) {
             />
             <Scripts />
           </ToastPrimitive.Provider>
-        </SoundContext.Provider>
+        </UserSettingsProvider>
       </body>
     </html>
   );

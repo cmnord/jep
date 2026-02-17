@@ -48,7 +48,7 @@ export function MuteToggle({
       onPressedChange={onPressChange}
       aria-label="Mute"
       title="Mute"
-      className={`flex items-center justify-center rounded-md p-1 text-slate-500 group-hover:text-slate-700 focus:ring-2 focus:ring-blue-500`}
+      className={`flex items-center justify-center rounded-md p-1 text-slate-600 hover:text-slate-800 focus:ring-2 focus:ring-blue-500`}
     >
       {pressed ? <SpeakerXMark /> : <SpeakerWave />}
     </TogglePrimitive.Root>
