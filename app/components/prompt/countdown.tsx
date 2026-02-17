@@ -36,7 +36,7 @@ export function Countdown({
 
       setCount(newCount);
 
-      if (count <= numBars / 2) {
+      if (newCount > 0) {
         requestId = requestAnimationFrame(() => animate(timeMs));
       }
     };
@@ -46,7 +46,7 @@ export function Countdown({
     }
 
     return () => cancelAnimationFrame(requestId);
-  }, [count, startTime, durationSec, numBars]);
+  }, [startTime, durationSec, numBars]);
 
   const bars = Array.from({ length: numBars }, (_, i) => (
     <div

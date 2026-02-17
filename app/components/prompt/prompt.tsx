@@ -402,11 +402,7 @@ function ReadCluePrompt({
     if (buzzerOpenAt && myBuzzDurationMs === undefined) {
       const deltaMs = Date.now() - buzzerOpenAt;
       for (const [buzzUserId, buzz] of buzzes) {
-        if (
-          buzzUserId !== userId &&
-          buzz !== CANT_BUZZ_FLAG &&
-          buzz + QUANTIZATION_FACTOR_MS < deltaMs
-        ) {
+        if (buzzUserId !== userId && buzz !== CANT_BUZZ_FLAG) {
           // How much of the quantization window is left for us to buzz.
           // If we buzz within this window, our buzz is in the same bucket
           // and clients will resolve the tie.

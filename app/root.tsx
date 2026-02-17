@@ -54,6 +54,22 @@ export const links: Route.LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
 ];
 
+/** Skip revalidating the root loader for game actions. The root loader fetches
+ * the user from the DB, which doesn't change during gameplay.
+ */
+export function shouldRevalidate({
+  formAction,
+  defaultShouldRevalidate,
+}: {
+  formAction?: string;
+  defaultShouldRevalidate: boolean;
+}) {
+  if (formAction?.match(/^\/room\/\d+\//)) {
+    return false;
+  }
+  return defaultShouldRevalidate;
+}
+
 export async function loader({ request }: Route.LoaderArgs) {
   const authSession = await getValidAuthSession(request);
   const env = getBrowserEnv();

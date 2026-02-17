@@ -123,7 +123,9 @@ export function useGameEngine(
   roomId: number,
   accessToken?: AuthSession["accessToken"],
 ) {
-  const [, setRoomEvents] = React.useState(serverRoomEvents);
+  const seenEventIds = React.useRef(
+    new Set(serverRoomEvents.map((e) => e.id)),
+  );
 
   const [connectionState, setConnectionState] = React.useState<ConnectionState>(
     ConnectionState.DISCONNECTED,
@@ -169,13 +171,10 @@ export function useGameEngine(
                 "unhandled room event type from DB: " + newEvent.type,
               );
             }
-            setRoomEvents((re) => {
-              if (!re.find((re) => re.id === newEvent.id)) {
-                setRoomEvents((prev) => [...prev, newEvent]);
-                dispatch(newEvent);
-              }
-              return re;
-            });
+            if (!seenEventIds.current.has(newEvent.id)) {
+              seenEventIds.current.add(newEvent.id);
+              dispatch(newEvent);
+            }
           },
         )
         .subscribe((status, err) => {
