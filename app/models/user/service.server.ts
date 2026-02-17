@@ -71,6 +71,31 @@ async function tryCreateUser({
   }
 }
 
+/** ensureAccountExists checks if an accounts record exists for this user
+ * and creates one if not. Used for OAuth sign-ins where Supabase creates the
+ * auth.users record automatically but we need the public.accounts record.
+ */
+export async function ensureAccountExists({
+  userId,
+  email,
+}: Pick<AuthSession, "userId" | "email">) {
+  const { data: existing } = await getSupabaseAdmin()
+    .from("accounts")
+    .select("id")
+    .eq("id", userId)
+    .single();
+
+  if (existing) return;
+
+  const { error } = await getSupabaseAdmin()
+    .from("accounts")
+    .insert({ id: userId, email });
+
+  if (error) {
+    console.error("Failed to create account for OAuth user:", error);
+  }
+}
+
 /** createUserAccount creates an auth account for this email, then
  * a user account for this email.
  *

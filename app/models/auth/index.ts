@@ -1,6 +1,7 @@
 export {
   createEmailAuthAccount,
   deleteAuthAccount,
+  exchangeOAuthCode,
   refreshAccessToken,
   sendMagicLink,
   signInWithEmail,

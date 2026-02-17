@@ -90,6 +90,20 @@ export async function refreshAccessToken(
   return mapAuthSession(data.session);
 }
 
+export async function exchangeOAuthCode(
+  code: string,
+): Promise<AuthSession | null> {
+  const { data, error } =
+    await getSupabaseAdmin().auth.exchangeCodeForSession(code);
+
+  if (error || !data.session) {
+    console.error("OAuth code exchange error:", error);
+    return null;
+  }
+
+  return mapAuthSession(data.session);
+}
+
 export async function verifyAuthSession(authSession: AuthSession) {
   const authAccount = await getAuthAccountByAccessToken(
     authSession.accessToken,
