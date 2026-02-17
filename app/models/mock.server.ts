@@ -1,17 +1,4 @@
-import { readFile } from "fs/promises";
-
-import { Convert } from "~/models/convert.server";
 import type { Game } from "~/models/game.server";
-
-/** Find the absolute path of the json directory.
- *
- * Note: Vercel doesn't include the json directory when using process.cwd() or
- * path.join(). The workaround is to use __dirname and concatenate the json
- * directory to it.
- */
-const JSON_DIRECTORY = import.meta.dirname + "/../static";
-
-const MOCK_FILE_PATH = JSON_DIRECTORY + "/mock.jep.json";
 
 /**
  * MOCK_GAME has two rounds. Each round has 2 categories with 1 clue each.
@@ -62,7 +49,5 @@ export const MOCK_GAME: Game = {
 };
 
 export async function getMockGame(): Promise<Game> {
-  const fileContents = await readFile(MOCK_FILE_PATH, "utf8");
-  const game = Convert.toGame(fileContents);
-  return { id: "mock", visibility: "PUBLIC", ...game };
+  return MOCK_GAME;
 }
