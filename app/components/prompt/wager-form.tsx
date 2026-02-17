@@ -14,7 +14,7 @@ import {
 } from "~/engine";
 import { formatDollars } from "~/utils";
 import useSoloAction from "~/utils/use-solo-action";
-import { useWagerHintsContext } from "~/utils/use-wager-hints";
+import { useWagerHintsSettings } from "~/utils/user-settings";
 import type { WagerRecommendation } from "~/utils/wager-strategy";
 import { getFinalClueStrategy } from "~/utils/wager-strategy";
 
@@ -175,11 +175,11 @@ function WagerForm({
             setWagerValue(e.target.value)
           }
           className="min-w-0 flex-1 font-handwriting text-xl font-bold placeholder:font-sans placeholder:font-normal"
-          placeholder="amount"
+          placeholder="choose wager amount"
           required
         />
         <Button type="default" htmlType="submit" loading={loading}>
-          Place wager
+          Submit
         </Button>
       </div>
 
@@ -188,7 +188,7 @@ function WagerForm({
         type="primary"
         onClick={() => setWagerValue(maxWager.toString())}
       >
-        All-in ({formatDollars(maxWager)})
+        All-in (<span className="font-handwriting font-bold">{formatDollars(maxWager)}</span>)
       </Button>
 
       {/* Suggestions drawer */}
@@ -207,7 +207,7 @@ function WagerForm({
 export function ConnectedWagerForm({ roomId, userId }: RoomProps) {
   const { activeClue, buzzes, board, clue, players, soloDispatch, wagers } =
     useEngineContext();
-  const { wagerHints } = useWagerHintsContext();
+  const { wagerHints } = useWagerHintsSettings();
   const fetcher = useFetcher<Action>();
   useSoloAction(fetcher, soloDispatch);
   const loading = fetcher.state === "loading";

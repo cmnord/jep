@@ -1,9 +1,7 @@
 import * as Tabs from "@radix-ui/react-tabs";
 
-import {
-  type WagerHintsMode,
-  useWagerHintsContext,
-} from "~/utils/use-wager-hints";
+import type { WagerHintsMode } from "~/models/user-settings.server";
+import { useWagerHintsSettings } from "~/utils/user-settings";
 
 const WAGER_HINTS_OPTIONS: { value: WagerHintsMode; label: string }[] = [
   { value: "show", label: "Always" },
@@ -12,7 +10,7 @@ const WAGER_HINTS_OPTIONS: { value: WagerHintsMode; label: string }[] = [
 ];
 
 export default function WagerHintsControl() {
-  const { wagerHints, setWagerHints } = useWagerHintsContext();
+  const { wagerHints, setWagerHints } = useWagerHintsSettings();
 
   return (
     <div className="flex flex-col gap-1">
