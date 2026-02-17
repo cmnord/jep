@@ -83,12 +83,12 @@ export default function Profile({ loaderData }: Route.ComponentProps) {
       <Main>
         <h1 className="mb-4 text-2xl font-semibold">Profile</h1>
         <p className="mb-4">{loaderData.user?.email}</p>
-        <h2 className="mb-4 text-2xl font-semibold">Settings</h2>
-        <div className="mb-6 flex items-center gap-3">
-          <span className="text-sm text-slate-600">Sound</span>
+        <h2 className="mb-2 text-2xl font-semibold">Settings</h2>
+        <p className="mb-4 text-sm text-slate-500">
+          Apply these settings across all games.
+        </p>
+        <div className="mb-6 flex flex-col gap-4">
           <SoundControl />
-        </div>
-        <div className="mb-6">
           <WagerHintsControl />
         </div>
         <h2 className="mb-4 text-2xl font-semibold">My Games</h2>

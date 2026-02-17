@@ -19,7 +19,7 @@ export default function WagerHintsControl() {
         value={wagerHints}
         onValueChange={(value) => setWagerHints(value as WagerHintsMode)}
       >
-        <Tabs.List className="flex overflow-hidden rounded-md border border-current/30">
+        <Tabs.List className="flex w-fit overflow-hidden rounded-lg border border-current/20 shadow-sm transition-colors hover:border-blue-500">
           {WAGER_HINTS_OPTIONS.map((opt) => (
             <Tabs.Trigger
               key={opt.value}

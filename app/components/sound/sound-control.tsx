@@ -5,7 +5,13 @@ import { useSoundSettings } from "~/utils/user-settings";
 import { MuteToggle } from "./mute-toggle";
 import { VolumeSlider } from "./volume-slider";
 
-export function SoundControl({ showSlider = true }: { showSlider?: boolean }) {
+export function SoundControl({
+  showLabel = true,
+  showSlider = true,
+}: {
+  showLabel?: boolean;
+  showSlider?: boolean;
+}) {
   const sound = useSoundSettings();
 
   // Local state for responsive slider — writes through to context
@@ -24,32 +30,35 @@ export function SoundControl({ showSlider = true }: { showSlider?: boolean }) {
   }
 
   return (
-    <form className="group flex grow items-center gap-2">
-      <MuteToggle
-        pressed={mute}
-        onPressChange={(pressed) => {
-          setMute(pressed);
-          if (pressed) {
-            prevVolume.current = volume;
-            setVolume(0);
-          } else {
-            setVolume(prevVolume.current);
-          }
-        }}
-      />
-      {showSlider && (
-        <VolumeSlider
-          value={volume}
-          onValueChange={(value) => {
-            setVolume(value);
-            if (value === 0) {
-              setMute(true);
+    <div className="flex flex-col gap-1">
+      {showLabel && <span className="text-sm opacity-70">Game sounds</span>}
+      <form className="group flex grow items-center gap-2">
+        <MuteToggle
+          pressed={mute}
+          onPressChange={(pressed) => {
+            setMute(pressed);
+            if (pressed) {
+              prevVolume.current = volume;
+              setVolume(0);
             } else {
-              setMute(false);
+              setVolume(prevVolume.current);
             }
           }}
         />
-      )}
-    </form>
+        {showSlider && (
+          <VolumeSlider
+            value={volume}
+            onValueChange={(value) => {
+              setVolume(value);
+              if (value === 0) {
+                setMute(true);
+              } else {
+                setMute(false);
+              }
+            }}
+          />
+        )}
+      </form>
+    </div>
   );
 }

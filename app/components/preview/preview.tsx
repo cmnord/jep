@@ -107,7 +107,7 @@ function PreviewRoundDialog({
           <span>
             Start round {round + 1} of {numRounds}
           </span>
-          <SoundControl showSlider={false} />
+          <SoundControl showLabel={false} showSlider={false} />
         </div>
       }
       description={

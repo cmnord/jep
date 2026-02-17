@@ -79,8 +79,8 @@ export default function Login({ actionData }: Route.ComponentProps) {
       <Main>
         <h1 className="mb-4 text-2xl font-semibold">Log in</h1>
         <p className="mb-4">
-          Log in to upload unlisted or private games, edit games, or delete
-          games.
+          Log in to upload unlisted or private games, edit games, delete games,
+          and save your settings across all games.
         </p>
         <OAuthButtons redirectTo={redirectTo} disabled={disabled} />
         <div className="relative my-4">

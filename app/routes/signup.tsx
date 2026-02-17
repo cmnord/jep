@@ -86,8 +86,8 @@ export default function Signup({ actionData }: Route.ComponentProps) {
       <Main>
         <h1 className="mb-4 text-2xl font-semibold">Sign up</h1>
         <p className="mb-4">
-          Sign up to upload unlisted or private games, edit games, or delete
-          games.
+          Sign up to upload unlisted or private games, edit games, delete games,
+          and save your settings across all games.
         </p>
         <OAuthButtons redirectTo={redirectTo} disabled={loading} />
         <div className="relative my-4">
