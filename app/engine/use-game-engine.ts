@@ -223,7 +223,7 @@ export function useGameEngine(
         for (const event of data) {
           if (!seenEventIds.current.has(event.id) && isTypedRoomEvent(event)) {
             seenEventIds.current.add(event.id);
-            dispatch(event);
+            dispatch(roomEventToAction(event));
           }
         }
         if (data.length > 0) {
