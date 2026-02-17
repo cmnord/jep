@@ -2336,120 +2336,125 @@ describe("gameEngine", () => {
         );
       }),
     },
-    {
-      name: "Clock starts running on StartRound",
-      state: initialState,
-      actions: [
-        { ...PLAYER1_JOIN_ACTION, ts: 1704067200000 },
+    // Clock test timestamps: T0 is an arbitrary epoch base; offsets in seconds.
+    ...(() => {
+      const T0 = 1_704_067_200_000; // 2024-01-01T00:00:00Z
+      const sec = (s: number) => T0 + s * 1000;
+
+      return [
         {
-          type: ActionType.StartRound,
-          payload: { round: 0, userId: PLAYER1.userId },
-          ts: 1704067205000,
-        },
-      ],
-      expectedState: produce(initialState, (draft) => {
-        draft.type = GameState.ShowBoard;
-        draft.boardControl = PLAYER1.userId;
-        draft.players.set(PLAYER1.userId, PLAYER1);
-        draft.clockRunning = true;
-        draft.clockAccumulatedMs = 0;
-        draft.clockLastResumedAt = 1704067205000;
-      }),
-    },
-    {
-      name: "ToggleClock pauses a running clock",
-      state: initialState,
-      actions: [
-        { ...PLAYER1_JOIN_ACTION, ts: 1704067200000 },
-        {
-          type: ActionType.StartRound,
-          payload: { round: 0, userId: PLAYER1.userId },
-          ts: 1704067205000,
+          name: "Clock starts running on StartRound",
+          state: initialState,
+          actions: [
+            { ...PLAYER1_JOIN_ACTION, ts: sec(0) },
+            {
+              type: ActionType.StartRound,
+              payload: { round: 0, userId: PLAYER1.userId },
+              ts: sec(5),
+            },
+          ],
+          expectedState: produce(initialState, (draft) => {
+            draft.type = GameState.ShowBoard;
+            draft.boardControl = PLAYER1.userId;
+            draft.players.set(PLAYER1.userId, PLAYER1);
+            draft.clockRunning = true;
+            draft.clockAccumulatedMs = 0;
+            draft.clockLastResumedAt = sec(5);
+          }),
         },
         {
-          type: ActionType.ToggleClock,
-          ts: 1704067215000,
+          name: "ToggleClock pauses a running clock",
+          state: initialState,
+          actions: [
+            { ...PLAYER1_JOIN_ACTION, ts: sec(0) },
+            {
+              type: ActionType.StartRound,
+              payload: { round: 0, userId: PLAYER1.userId },
+              ts: sec(5),
+            },
+            { type: ActionType.ToggleClock, ts: sec(15) },
+          ],
+          expectedState: produce(initialState, (draft) => {
+            draft.type = GameState.ShowBoard;
+            draft.boardControl = PLAYER1.userId;
+            draft.players.set(PLAYER1.userId, PLAYER1);
+            draft.clockRunning = false;
+            draft.clockAccumulatedMs = 10_000;
+            draft.clockLastResumedAt = null;
+          }),
         },
-      ],
-      expectedState: produce(initialState, (draft) => {
-        draft.type = GameState.ShowBoard;
-        draft.boardControl = PLAYER1.userId;
-        draft.players.set(PLAYER1.userId, PLAYER1);
-        draft.clockRunning = false;
-        draft.clockAccumulatedMs = 10000;
-        draft.clockLastResumedAt = null;
-      }),
-    },
-    {
-      name: "ToggleClock resumes a paused clock",
-      state: initialState,
-      actions: [
-        { ...PLAYER1_JOIN_ACTION, ts: 1704067200000 },
         {
-          type: ActionType.StartRound,
-          payload: { round: 0, userId: PLAYER1.userId },
-          ts: 1704067205000,
+          name: "ToggleClock resumes a paused clock",
+          state: initialState,
+          actions: [
+            { ...PLAYER1_JOIN_ACTION, ts: sec(0) },
+            {
+              type: ActionType.StartRound,
+              payload: { round: 0, userId: PLAYER1.userId },
+              ts: sec(5),
+            },
+            { type: ActionType.ToggleClock, ts: sec(15) },
+            { type: ActionType.ToggleClock, ts: sec(20) },
+          ],
+          expectedState: produce(initialState, (draft) => {
+            draft.type = GameState.ShowBoard;
+            draft.boardControl = PLAYER1.userId;
+            draft.players.set(PLAYER1.userId, PLAYER1);
+            draft.clockRunning = true;
+            draft.clockAccumulatedMs = 10_000;
+            draft.clockLastResumedAt = sec(20);
+          }),
         },
-        { type: ActionType.ToggleClock, ts: 1704067215000 },
-        { type: ActionType.ToggleClock, ts: 1704067220000 },
-      ],
-      expectedState: produce(initialState, (draft) => {
-        draft.type = GameState.ShowBoard;
-        draft.boardControl = PLAYER1.userId;
-        draft.players.set(PLAYER1.userId, PLAYER1);
-        draft.clockRunning = true;
-        draft.clockAccumulatedMs = 10000;
-        draft.clockLastResumedAt = 1704067220000;
-      }),
-    },
-    {
-      name: "ChooseClue auto-resumes a paused clock",
-      state: initialState,
-      actions: [
-        { ...PLAYER1_JOIN_ACTION, ts: 1704067200000 },
         {
-          type: ActionType.StartRound,
-          payload: { round: 0, userId: PLAYER1.userId },
-          ts: 1704067205000,
+          name: "ChooseClue auto-resumes a paused clock",
+          state: initialState,
+          actions: [
+            { ...PLAYER1_JOIN_ACTION, ts: sec(0) },
+            {
+              type: ActionType.StartRound,
+              payload: { round: 0, userId: PLAYER1.userId },
+              ts: sec(5),
+            },
+            { type: ActionType.ToggleClock, ts: sec(15) },
+            {
+              type: ActionType.ChooseClue,
+              payload: { userId: PLAYER1.userId, i: 0, j: 0 },
+              ts: sec(25),
+            },
+          ],
+          expectedState: produce(initialState, (draft) => {
+            draft.type = GameState.ReadClue;
+            draft.activeClue = [0, 0];
+            draft.boardControl = PLAYER1.userId;
+            draft.players.set(PLAYER1.userId, PLAYER1);
+            draft.clockRunning = true;
+            draft.clockAccumulatedMs = 10_000;
+            draft.clockLastResumedAt = sec(25);
+          }),
         },
-        { type: ActionType.ToggleClock, ts: 1704067215000 },
         {
-          type: ActionType.ChooseClue,
-          payload: { userId: PLAYER1.userId, i: 0, j: 0 },
-          ts: 1704067225000,
+          name: "ToggleClock ignored after GameOver",
+          state: initialState,
+          actions: [
+            { ...PLAYER1_JOIN_ACTION, ts: sec(0) },
+            {
+              type: ActionType.StartRound,
+              payload: { round: 0, userId: PLAYER1.userId },
+              ts: sec(5),
+            },
+            { type: ActionType.ToggleClock, ts: sec(15) },
+          ],
+          expectedState: produce(initialState, (draft) => {
+            draft.type = GameState.ShowBoard;
+            draft.boardControl = PLAYER1.userId;
+            draft.players.set(PLAYER1.userId, PLAYER1);
+            draft.clockRunning = false;
+            draft.clockAccumulatedMs = 10_000;
+            draft.clockLastResumedAt = null;
+          }),
         },
-      ],
-      expectedState: produce(initialState, (draft) => {
-        draft.type = GameState.ReadClue;
-        draft.activeClue = [0, 0];
-        draft.boardControl = PLAYER1.userId;
-        draft.players.set(PLAYER1.userId, PLAYER1);
-        draft.clockRunning = true;
-        draft.clockAccumulatedMs = 10000;
-        draft.clockLastResumedAt = 1704067225000;
-      }),
-    },
-    {
-      name: "ToggleClock ignored after GameOver",
-      state: initialState,
-      actions: [
-        { ...PLAYER1_JOIN_ACTION, ts: 1704067200000 },
-        {
-          type: ActionType.StartRound,
-          payload: { round: 0, userId: PLAYER1.userId },
-          ts: 1704067205000,
-        },
-        { type: ActionType.ToggleClock, ts: 1704067215000 },
-      ],
-      expectedState: produce(initialState, (draft) => {
-        draft.type = GameState.ShowBoard;
-        draft.boardControl = PLAYER1.userId;
-        draft.players.set(PLAYER1.userId, PLAYER1);
-        draft.clockRunning = false;
-        draft.clockAccumulatedMs = 10000;
-        draft.clockLastResumedAt = null;
-      }),
-    },
+      ];
+    })(),
   ];
 
   for (const tc of testCases) {
