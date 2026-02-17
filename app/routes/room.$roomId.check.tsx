@@ -26,7 +26,11 @@ export async function action({ request, params }: Route.ActionArgs) {
   }
 
   if (roomId === -1) {
-    return { type: ActionType.Check, payload: { i, j, userId, correct } };
+    return {
+      type: ActionType.Check,
+      payload: { i, j, userId, correct },
+      ts: Date.now(),
+    };
   }
 
   const authSession = await getValidAuthSession(request);

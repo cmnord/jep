@@ -23,7 +23,11 @@ export async function action({ request, params }: Route.ActionArgs) {
   }
 
   if (roomId === -1) {
-    return { type: ActionType.StartRound, payload: { round, userId } };
+    return {
+      type: ActionType.StartRound,
+      payload: { round, userId },
+      ts: Date.now(),
+    };
   }
 
   const authSession = await getValidAuthSession(request);

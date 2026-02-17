@@ -6,6 +6,7 @@ export {
   cyrb53,
   formatDollars,
   formatDollarsWithSign,
+  formatElapsedTime,
   generateGrid,
   getRandomWord,
   stringToHslColor,

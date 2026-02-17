@@ -7,7 +7,11 @@ import { getSupabase } from "~/supabase";
 
 import type { Action } from "./engine";
 import { gameEngine, getWinningBuzzer } from "./engine";
-import { applyRoomEventsToState, isTypedRoomEvent } from "./room-event";
+import {
+  applyRoomEventsToState,
+  isTypedRoomEvent,
+  roomEventToAction,
+} from "./room-event";
 import { State, getClueValue, stateFromGame } from "./state";
 
 export enum ConnectionState {
@@ -89,6 +93,9 @@ function stateToGameEngine(
     boardControl: state.boardControl,
     wagers: state.wagers.get(clueKey) ?? new Map<string, number>(),
     winningBuzzer,
+    clockRunning: state.clockRunning,
+    clockAccumulatedMs: state.clockAccumulatedMs,
+    clockLastResumedAt: state.clockLastResumedAt,
   };
 }
 
@@ -123,9 +130,7 @@ export function useGameEngine(
   roomId: number,
   accessToken?: AuthSession["accessToken"],
 ) {
-  const seenEventIds = React.useRef(
-    new Set(serverRoomEvents.map((e) => e.id)),
-  );
+  const seenEventIds = React.useRef(new Set(serverRoomEvents.map((e) => e.id)));
 
   const [connectionState, setConnectionState] = React.useState<ConnectionState>(
     ConnectionState.DISCONNECTED,
@@ -173,7 +178,7 @@ export function useGameEngine(
             }
             if (!seenEventIds.current.has(newEvent.id)) {
               seenEventIds.current.add(newEvent.id);
-              dispatch(newEvent);
+              dispatch(roomEventToAction(newEvent));
             }
           },
         )

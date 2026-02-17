@@ -1,7 +1,12 @@
 import { PlayerScore } from "~/components/player";
 import type { Route } from "./+types/route";
 
-import { applyRoomEventsToState, isTypedRoomEvent } from "~/engine/room-event";
+import { ClockDisplay } from "~/components/game-clock";
+import {
+  applyRoomEventsToState,
+  isTypedRoomEvent,
+  roomEventToAction,
+} from "~/engine/room-event";
 import { GameState, stateFromGame } from "~/engine/state";
 import { getValidAuthSession } from "~/models/auth";
 import { getGame } from "~/models/game.server";
@@ -105,6 +110,9 @@ export default function PlayGame({ loaderData }: Route.ComponentProps) {
         className={`mx-auto flex w-full max-w-screen-lg flex-col gap-4 p-3 text-slate-100 sm:p-6 md:p-12`}
       >
         <h2 className="text-2xl">Congrats, {winningPlayers.join(" and ")}!</h2>
+        {state.clockAccumulatedMs > 0 && (
+          <ClockDisplay displayMs={state.clockAccumulatedMs} disabled />
+        )}
         <div className="flex flex-col gap-2 sm:grid sm:grid-cols-3">
           {loaderData.sortedPlayers.map((p) => (
             <PlayerScore
@@ -160,7 +168,9 @@ export default function PlayGame({ loaderData }: Route.ComponentProps) {
         <ScoreChart
           game={loaderData.game}
           players={allSorted}
-          roomEvents={loaderData.roomEvents.filter(isTypedRoomEvent)}
+          roomEvents={loaderData.roomEvents
+            .filter(isTypedRoomEvent)
+            .map(roomEventToAction)}
         />
       </div>
       <GameSummary game={loaderData.game} state={state} />

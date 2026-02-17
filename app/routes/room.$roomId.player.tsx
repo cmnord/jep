@@ -48,7 +48,7 @@ export async function action({ request, params }: Route.ActionArgs) {
         : request.method === "PATCH"
           ? ActionType.ChangeName
           : ActionType.Kick;
-    return { type, payload: { userId, name } };
+    return { type, payload: { userId, name }, ts: Date.now() };
   }
 
   const authSession = await getValidAuthSession(request);

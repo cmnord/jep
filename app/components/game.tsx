@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 
 import BoardComponent from "~/components/board";
 import Connection from "~/components/connection";
+import GameClock from "~/components/game-clock";
 import Link from "~/components/link";
 import { PlayerScores } from "~/components/player";
 import Preview from "~/components/preview";
@@ -109,13 +110,16 @@ export default function GameComponent({
         <div
           className={`mx-auto flex w-full max-w-screen-lg flex-col gap-4 p-3 text-slate-100 sm:p-6 md:p-12`}
         >
-          <CallToAction
-            boardController={boardController}
-            type={type}
-            isSingleLongFormClue={isSingleLongFormClue}
-            roomName={roomName}
-            userId={userId}
-          />
+          <div className="flex items-center justify-between">
+            <CallToAction
+              boardController={boardController}
+              type={type}
+              isSingleLongFormClue={isSingleLongFormClue}
+              roomName={roomName}
+              userId={userId}
+            />
+            <GameClock roomId={roomId} />
+          </div>
           <PlayerScores roomId={roomId} userId={userId} />
           <Connection state={connectionState} lastMessageAt={lastMessageAt} />
         </div>
