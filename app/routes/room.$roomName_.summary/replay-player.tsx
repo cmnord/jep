@@ -174,6 +174,7 @@ export default function ReplayPlayer({
         allPlayers={allPlayers}
         currentState={displayState}
         playing={playing}
+        speed={speed}
       />
     </div>
   );

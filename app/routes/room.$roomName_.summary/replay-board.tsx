@@ -283,10 +283,12 @@ export function ReplayScoreBar({
   allPlayers,
   currentState,
   playing,
+  speed,
 }: {
   allPlayers: Player[];
   currentState: ReplayFrame["state"] | undefined;
   playing: boolean;
+  speed: number;
 }) {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const positionsRef = React.useRef<Map<string, DOMRect>>(new Map());
@@ -323,14 +325,27 @@ export function ReplayScoreBar({
     const children = Array.from(
       container.querySelectorAll<HTMLElement>("[data-user-id]"),
     );
-    const newPositions = new Map<string, DOMRect>();
 
+    // Cancel any in-flight animations so we measure true final positions,
+    // not mid-animation intermediate ones (which cause accumulating drift).
+    for (const child of children) {
+      child.style.transition = "none";
+      child.style.transform = "";
+    }
+
+    // Force reflow so the browser settles into final CSS-order positions
+    container.getBoundingClientRect();
+
+    const newPositions = new Map<string, DOMRect>();
     for (const child of children) {
       const userId = child.dataset.userId!;
       newPositions.set(userId, child.getBoundingClientRect());
     }
 
     if (playing) {
+      // Scale duration with speed so animation finishes before the next frame
+      const durationMs = Math.max(50, Math.floor(200 / speed));
+
       // Apply inverse transforms for any items that moved
       for (const child of children) {
         const userId = child.dataset.userId!;
@@ -343,20 +358,13 @@ export function ReplayScoreBar({
         if (deltaX === 0 && deltaY === 0) continue;
 
         // Apply inverse transform (no transition)
-        child.style.transition = "none";
         child.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
 
         // Force reflow
         child.getBoundingClientRect();
 
         // Animate to final position
-        child.style.transition = "transform 300ms ease-out";
-        child.style.transform = "";
-      }
-    } else {
-      // Scrubbing: clear any in-flight transforms so items snap into place
-      for (const child of children) {
-        child.style.transition = "none";
+        child.style.transition = `transform ${durationMs}ms ease-out`;
         child.style.transform = "";
       }
     }
