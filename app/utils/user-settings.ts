@@ -5,7 +5,7 @@ import { useFetcher } from "react-router";
 import {
   type UserSettings,
   WagerHintsMode,
-} from "~/models/user-settings.server";
+} from "~/models/user-settings";
 
 const DEFAULT_SETTINGS: UserSettings = {};
 const DEFAULT_VOLUME = 0.5;

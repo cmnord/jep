@@ -1,6 +1,6 @@
 import * as Tabs from "@radix-ui/react-tabs";
 
-import { WagerHintsMode } from "~/models/user-settings.server";
+import { WagerHintsMode } from "~/models/user-settings";
 import { useWagerHintsSettings } from "~/utils/user-settings";
 
 const WAGER_HINTS_OPTIONS: { value: WagerHintsMode; label: string }[] = [

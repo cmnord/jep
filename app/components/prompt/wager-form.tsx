@@ -14,7 +14,7 @@ import {
 } from "~/engine";
 import { formatDollars } from "~/utils";
 import useSoloAction from "~/utils/use-solo-action";
-import { WagerHintsMode } from "~/models/user-settings.server";
+import { WagerHintsMode } from "~/models/user-settings";
 import { useWagerHintsSettings } from "~/utils/user-settings";
 import type { WagerRecommendation } from "~/utils/wager-strategy";
 import { getFinalClueStrategy } from "~/utils/wager-strategy";
