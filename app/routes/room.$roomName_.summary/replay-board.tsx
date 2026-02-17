@@ -407,7 +407,7 @@ export function ReplayScoreBar({
   return (
     <div
       ref={containerRef}
-      className="flex flex-wrap justify-center gap-3 text-sm"
+      className="flex flex-col items-center gap-2 text-sm sm:flex-row sm:flex-wrap sm:justify-center sm:gap-3"
     >
       {allPlayers.map((p) => {
         const current =
