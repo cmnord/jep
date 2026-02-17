@@ -4,10 +4,13 @@ import * as React from "react";
 import { Category } from "~/components/board/category";
 import Button from "~/components/button";
 import Popover from "~/components/popover";
+import type { Action } from "~/engine";
 import { clueIsPlayable, State } from "~/engine";
+import type { Player } from "~/engine/state";
 import { getPlayer } from "~/engine/state";
 import type { Board, Clue, Game } from "~/models/convert.server";
 import { formatDollarsWithSign, generateGrid, stringToHslColor } from "~/utils";
+import ReplayPlayer from "./replay-player";
 
 function PlayerPoints({
   name,
@@ -243,20 +246,63 @@ function RoundButtons({
   );
 }
 
-export default function Summary({ game, state }: { game: Game; state: State }) {
+export default function Summary({
+  game,
+  state,
+  actions,
+  allPlayers,
+}: {
+  game: Game;
+  state: State;
+  actions: Action[];
+  allPlayers: Player[];
+}) {
+  const [mode, setMode] = React.useState<"replay" | "summary">("replay");
   const [round, setRound] = React.useState(0);
   const board = game.boards[round];
 
   return (
     <div>
-      {game.boards.length > 1 ? (
-        <RoundButtons
-          round={round}
-          setRound={setRound}
-          numRounds={game.boards.length}
-        />
-      ) : null}
-      <PostGameBoard board={board} state={state} round={round} />
+      {/* Mode toggle */}
+      <div className="flex items-center justify-center gap-1 py-2">
+        <button
+          onClick={() => setMode("replay")}
+          className={clsx(
+            "rounded px-3 py-1 text-sm transition-colors",
+            mode === "replay"
+              ? "bg-blue-600 text-white"
+              : "text-slate-400 hover:text-white",
+          )}
+        >
+          Replay
+        </button>
+        <button
+          onClick={() => setMode("summary")}
+          className={clsx(
+            "rounded px-3 py-1 text-sm transition-colors",
+            mode === "summary"
+              ? "bg-blue-600 text-white"
+              : "text-slate-400 hover:text-white",
+          )}
+        >
+          Summary
+        </button>
+      </div>
+
+      {mode === "replay" ? (
+        <ReplayPlayer game={game} actions={actions} allPlayers={allPlayers} />
+      ) : (
+        <>
+          {game.boards.length > 1 ? (
+            <RoundButtons
+              round={round}
+              setRound={setRound}
+              numRounds={game.boards.length}
+            />
+          ) : null}
+          <PostGameBoard board={board} state={state} round={round} />
+        </>
+      )}
     </div>
   );
 }

@@ -172,7 +172,14 @@ export default function PlayGame({ loaderData }: Route.ComponentProps) {
             .map(roomEventToAction)}
         />
       </div>
-      <GameSummary game={loaderData.game} state={state} />
+      <GameSummary
+        game={loaderData.game}
+        state={state}
+        actions={loaderData.roomEvents
+          .filter(isTypedRoomEvent)
+          .map(roomEventToAction)}
+        allPlayers={allSorted}
+      />
     </div>
   );
 }

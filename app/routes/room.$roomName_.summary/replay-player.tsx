@@ -1,0 +1,166 @@
+import * as React from "react";
+
+import type { Action, Player } from "~/engine";
+import { stateFromGame } from "~/engine/state";
+import type { Game } from "~/models/convert.server";
+import { formatDollars } from "~/utils";
+import { ReplayBoard, ReplayScoreBar } from "./replay-board";
+import { ReplayControls } from "./replay-controls";
+import { buildReplayFrames } from "./replay";
+import { useReplay } from "./use-replay";
+
+interface ReplayPlayerProps {
+  game: Game;
+  actions: Action[];
+  allPlayers: Player[];
+}
+
+export default function ReplayPlayer({
+  game,
+  actions,
+  allPlayers,
+}: ReplayPlayerProps) {
+  const frames = React.useMemo(
+    () => buildReplayFrames(game, actions),
+    [game, actions],
+  );
+
+  const {
+    currentFrameIndex,
+    playing,
+    speed,
+    play,
+    pause,
+    setFrame,
+    setSpeed,
+  } = useReplay(frames.length);
+
+  const currentFrame =
+    currentFrameIndex >= 0 ? frames[currentFrameIndex] : undefined;
+
+  // Initial state for before replay starts
+  const initialState = React.useMemo(() => {
+    // Apply all non-clue events (joins, name changes, etc.) to get player info
+    // but use the first frame's state if available, otherwise create initial
+    if (frames.length > 0) {
+      return frames[0].state;
+    }
+    return stateFromGame(game);
+  }, [frames, game]);
+
+  const displayState = currentFrame?.state ?? initialState;
+
+  // Determine which round/board to show
+  const displayRound = currentFrame?.round ?? 0;
+  const board = game.boards[displayRound];
+
+  // Build clue label
+  const clueLabel = React.useMemo(() => {
+    if (!currentFrame) return "Ready";
+    if (
+      currentFrameIndex === frames.length - 1 &&
+      currentFrame.phase === "resolved"
+    ) {
+      // Check if this is the very last clue
+      const nextFrameExists = currentFrameIndex + 1 < frames.length;
+      if (!nextFrameExists) {
+        return "Game Over";
+      }
+    }
+    const [ci, cj] = currentFrame.clue;
+    const category =
+      game.boards[currentFrame.round]?.categories?.[cj];
+    const clue = category?.clues?.[ci];
+    if (!category || !clue) return "";
+    const value = clue.wagerable
+      ? clue.longForm
+        ? "Final"
+        : "DD"
+      : formatDollars(clue.value);
+    return `${category.name} for ${value}`;
+  }, [currentFrame, currentFrameIndex, frames.length, game.boards]);
+
+  // Round transition banner
+  const prevFrameRef = React.useRef(currentFrameIndex);
+  const [showRoundBanner, setShowRoundBanner] = React.useState(false);
+  const [bannerRound, setBannerRound] = React.useState(0);
+
+  React.useEffect(() => {
+    const prevIdx = prevFrameRef.current;
+    const prevRound =
+      prevIdx >= 0 ? frames[prevIdx]?.round : undefined;
+    const currRound = currentFrame?.round;
+
+    if (
+      currRound !== undefined &&
+      prevRound !== undefined &&
+      currRound !== prevRound
+    ) {
+      setBannerRound(currRound);
+      setShowRoundBanner(true);
+      const timer = setTimeout(() => setShowRoundBanner(false), 1500);
+      prevFrameRef.current = currentFrameIndex;
+      return () => clearTimeout(timer);
+    }
+    prevFrameRef.current = currentFrameIndex;
+  }, [currentFrameIndex, currentFrame?.round, frames]);
+
+  // Keyboard shortcuts
+  const handleKeyDown = React.useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === " ") {
+        e.preventDefault();
+        playing ? pause() : play();
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        setFrame(currentFrameIndex - 1);
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        setFrame(currentFrameIndex + 1);
+      }
+    },
+    [playing, play, pause, setFrame, currentFrameIndex],
+  );
+
+  if (!board) return null;
+
+  return (
+    <div
+      className="relative flex flex-col gap-4 outline-none"
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
+    >
+      {/* Round transition banner */}
+      {showRoundBanner && (
+        <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-blue-1000/80 animate-content-show">
+          <h2 className="font-inter text-4xl font-bold text-white text-shadow-lg">
+            Round {bannerRound + 1}
+          </h2>
+        </div>
+      )}
+
+      <ReplayBoard
+        board={board}
+        game={game}
+        round={displayRound}
+        frames={frames}
+        currentFrameIndex={currentFrameIndex}
+        allPlayers={allPlayers}
+      />
+
+      <ReplayScoreBar allPlayers={allPlayers} currentState={displayState} />
+
+      <ReplayControls
+        playing={playing}
+        speed={speed}
+        currentFrame={currentFrameIndex}
+        totalFrames={frames.length}
+        clueLabel={clueLabel}
+        onPlay={play}
+        onPause={pause}
+        onSeek={setFrame}
+        onSpeedChange={setSpeed}
+      />
+    </div>
+  );
+}
