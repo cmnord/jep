@@ -4,6 +4,7 @@ import Button from "~/components/button";
 import CopyLinkButton from "~/components/copy-link-button";
 import * as DropdownMenu from "~/components/dropdown-menu";
 import SoundControl from "~/components/sound";
+import WagerHintsControl from "~/components/wager-hints-control";
 import type { Game } from "~/models/game.server";
 import { stringToHslColor } from "~/utils";
 
@@ -153,6 +154,14 @@ function GameSettings({ game, url }: { game: Game; url: string }) {
           >
             <div className="w-full">
               <SoundControl />
+            </div>
+          </DropdownMenu.Item>
+          <DropdownMenu.Item
+            className="relative flex items-center rounded-md p-1"
+            onSelect={(e: Event) => e.preventDefault()}
+          >
+            <div className="w-full">
+              <WagerHintsControl />
             </div>
           </DropdownMenu.Item>
           <DropdownMenu.Item

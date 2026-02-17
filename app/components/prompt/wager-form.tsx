@@ -1,17 +1,23 @@
+import * as Collapsible from "@radix-ui/react-collapsible";
 import * as React from "react";
 import { useFetcher } from "react-router";
 
 import Button from "~/components/button";
 import type { RoomProps } from "~/components/game";
 import Input from "~/components/input";
+import Popover from "~/components/popover";
 import type { Action, Player } from "~/engine";
 import {
   CANT_BUZZ_FLAG,
   getHighestClueValue,
   useEngineContext,
 } from "~/engine";
+import { WagerHintsMode } from "~/models/user-settings";
 import { formatDollars } from "~/utils";
 import useSoloAction from "~/utils/use-solo-action";
+import { useWagerHintsSettings } from "~/utils/user-settings";
+import type { WagerRecommendation } from "~/utils/wager-strategy";
+import { getFinalClueStrategy } from "~/utils/wager-strategy";
 
 type PlayerAndCanWager = Player & { canWager: boolean; hasWager: boolean };
 
@@ -48,6 +54,67 @@ function PlayerScores({
   );
 }
 
+function WhyButton({ reason }: { reason: string }) {
+  return (
+    <Popover content={<p>{reason}</p>}>
+      <button
+        type="button"
+        className="flex h-5 w-5 items-center justify-center rounded-full border border-slate-500 text-xs text-slate-400 transition-colors hover:border-white hover:text-white"
+      >
+        ?
+      </button>
+    </Popover>
+  );
+}
+
+function SuggestedDrawer({
+  allInReason,
+  recommendations,
+  onSelectAmount,
+  defaultOpen,
+}: {
+  allInReason?: string;
+  recommendations: WagerRecommendation[];
+  onSelectAmount: (amount: number) => void;
+  defaultOpen: boolean;
+}) {
+  const totalCount = recommendations.length + (allInReason ? 1 : 0);
+  if (totalCount === 0) return null;
+
+  return (
+    <Collapsible.Root defaultOpen={defaultOpen} className="w-full">
+      <Collapsible.Trigger className="group flex items-center gap-1.5 text-sm text-slate-300 transition-colors hover:text-white">
+        <span>Suggestions</span>
+        <span className="rounded-full bg-slate-700 px-1.5 text-xs text-slate-400">
+          {totalCount}
+        </span>
+        <span className="text-xs transition-transform group-data-[state=open]:rotate-90">
+          ›
+        </span>
+      </Collapsible.Trigger>
+      <Collapsible.Content className="flex flex-wrap items-center gap-2 pt-2">
+        {allInReason ? (
+          <div className="flex items-center gap-1">
+            <span className="text-sm text-slate-300">All-in</span>
+            <WhyButton reason={allInReason} />
+          </div>
+        ) : null}
+        {recommendations.map((rec, i) => (
+          <div key={i} className="flex items-center gap-1">
+            <Button type="primary" onClick={() => onSelectAmount(rec.amount)}>
+              {rec.label}:{" "}
+              <span className="font-handwriting font-bold">
+                {formatDollars(rec.amount)}
+              </span>
+            </Button>
+            <WhyButton reason={rec.reason} />
+          </div>
+        ))}
+      </Collapsible.Content>
+    </Collapsible.Root>
+  );
+}
+
 function WagerForm({
   highestClueValue,
   score,
@@ -55,6 +122,8 @@ function WagerForm({
   longForm,
   players,
   userId,
+  strategy,
+  wagerHints,
 }: {
   highestClueValue: number;
   score: number;
@@ -62,10 +131,21 @@ function WagerForm({
   longForm: boolean;
   players: PlayerAndCanWager[];
   userId: string;
+  strategy?: { recommendations: WagerRecommendation[] };
+  wagerHints: string;
 }) {
   const maxWager = longForm ? score : Math.max(score, highestClueValue);
+  const [wagerValue, setWagerValue] = React.useState("");
 
-  const [inputRequired, setInputRequired] = React.useState(true);
+  // Split recommendations: All-in reason vs other chips
+  const allInRec = strategy?.recommendations.find((r) => r.amount === maxWager);
+  const otherRecs = React.useMemo(() => {
+    if (!strategy) return [];
+    return strategy.recommendations.filter((r) => r.amount !== maxWager);
+  }, [strategy, maxWager]);
+
+  const hasAnySuggestion =
+    (allInRec || otherRecs.length > 0) && wagerHints !== WagerHintsMode.Never;
 
   return (
     <div className="flex flex-col items-center gap-4 p-2">
@@ -78,39 +158,46 @@ function WagerForm({
         </p>
         <PlayerScores players={players} userId={userId} />
       </div>
-      <div className="flex gap-2">
+
+      {/* Input + submit row */}
+      <div className="flex w-full items-center gap-2">
         <Input
           type="number"
           min={longForm ? 0 : 5}
           max={maxWager}
           id="wager"
           name="wager"
-          className={`min-w-48 font-handwriting text-xl font-bold placeholder:font-sans placeholder:font-normal`}
+          value={wagerValue}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setWagerValue(e.target.value)
+          }
+          className="min-w-0 flex-1 font-handwriting text-xl font-bold placeholder:font-sans placeholder:font-normal"
           placeholder="choose wager amount"
-          required={inputRequired}
+          required
         />
-        <Button
-          type="default"
-          htmlType="submit"
-          loading={loading}
-          onClick={() => setInputRequired(true)}
-        >
-          submit
+        <Button type="default" htmlType="submit" loading={loading}>
+          Submit
         </Button>
       </div>
-      <Button
-        type="primary"
-        htmlType="submit"
-        name="full"
-        value={maxWager.toString()}
-        loading={loading}
-        onClick={() => setInputRequired(false)}
-      >
-        Wager all:
-        <span className="font-xl font-handwriting font-bold">
+
+      {/* All-in button */}
+      <Button type="primary" onClick={() => setWagerValue(maxWager.toString())}>
+        All-in (
+        <span className="font-handwriting font-bold">
           {formatDollars(maxWager)}
         </span>
+        )
       </Button>
+
+      {/* Suggestions drawer */}
+      {hasAnySuggestion ? (
+        <SuggestedDrawer
+          allInReason={allInRec?.reason}
+          recommendations={otherRecs}
+          onSelectAmount={(amount) => setWagerValue(amount.toString())}
+          defaultOpen={wagerHints === WagerHintsMode.Show}
+        />
+      ) : null}
     </div>
   );
 }
@@ -118,6 +205,7 @@ function WagerForm({
 export function ConnectedWagerForm({ roomId, userId }: RoomProps) {
   const { activeClue, buzzes, board, clue, players, soloDispatch, wagers } =
     useEngineContext();
+  const { wagerHints } = useWagerHintsSettings();
   const fetcher = useFetcher<Action>();
   useSoloAction(fetcher, soloDispatch);
   const loading = fetcher.state === "loading";
@@ -137,6 +225,21 @@ export function ConnectedWagerForm({ roomId, userId }: RoomProps) {
     canWager: buzzes.get(p.userId) !== CANT_BUZZ_FLAG,
     hasWager: wagers.has(p.userId),
   }));
+
+  const longForm = clue?.longForm ?? false;
+
+  const strategy = React.useMemo(() => {
+    if (wagerHints === "never") return undefined;
+    if (!longForm || score <= 0) return undefined;
+
+    const otherScores = Array.from(players.values())
+      .filter(
+        (p) => p.userId !== userId && buzzes.get(p.userId) !== CANT_BUZZ_FLAG,
+      )
+      .map((p) => p.score);
+
+    return getFinalClueStrategy(score, otherScores);
+  }, [wagerHints, longForm, score, players, buzzes, userId]);
 
   if (wager !== undefined) {
     return (
@@ -167,7 +270,9 @@ export function ConnectedWagerForm({ roomId, userId }: RoomProps) {
         players={playersList}
         score={score}
         userId={userId}
-        longForm={clue?.longForm ?? false}
+        longForm={longForm}
+        strategy={strategy}
+        wagerHints={wagerHints}
       />
     </fetcher.Form>
   );

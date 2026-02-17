@@ -1,0 +1,112 @@
+{
+  "title": "Test: Wager Strategy",
+  "author": "Claude",
+  "copyright": "",
+  "note": "Quick game to test wager strategy UI. Easy clues build scores fast, then two final clues let you test the Suggested drawer with different score states.",
+  "boards": [
+    {
+      "categoryNames": ["Easy Math", "Common Knowledge"],
+      "categories": [
+        {
+          "name": "Easy Math",
+          "clues": [
+            {
+              "clue": "2 + 2",
+              "answer": "4",
+              "value": 400
+            },
+            {
+              "clue": "10 × 5",
+              "answer": "50",
+              "value": 800
+            }
+          ]
+        },
+        {
+          "name": "Common Knowledge",
+          "clues": [
+            {
+              "clue": "The color of the sky on a clear day",
+              "answer": "Blue",
+              "value": 400
+            },
+            {
+              "clue": "The number of legs on a spider",
+              "answer": "8",
+              "value": 800
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "categoryNames": ["U.S. Presidents"],
+      "categories": [
+        {
+          "name": "U.S. Presidents",
+          "clues": [
+            {
+              "clue": "He was the first president of the United States and appears on the one-dollar bill",
+              "answer": "George Washington",
+              "value": 0,
+              "wagerable": true,
+              "longForm": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "categoryNames": ["More Easy Math", "Animals"],
+      "categories": [
+        {
+          "name": "More Easy Math",
+          "clues": [
+            {
+              "clue": "100 ÷ 10",
+              "answer": "10",
+              "value": 1000
+            },
+            {
+              "clue": "7 × 7",
+              "answer": "49",
+              "value": 2000
+            }
+          ]
+        },
+        {
+          "name": "Animals",
+          "clues": [
+            {
+              "clue": "Man's best friend",
+              "answer": "Dog",
+              "value": 1000
+            },
+            {
+              "clue": "The largest animal on Earth",
+              "answer": "Blue whale",
+              "value": 2000
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "categoryNames": ["World Capitals"],
+      "categories": [
+        {
+          "name": "World Capitals",
+          "clues": [
+            {
+              "clue": "This city, home to the Eiffel Tower, is the capital of France",
+              "answer": "Paris",
+              "value": 0,
+              "wagerable": true,
+              "longForm": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

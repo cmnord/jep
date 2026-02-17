@@ -5,6 +5,7 @@ import { ErrorMessage, SuccessMessage } from "~/components/error";
 import Main from "~/components/main";
 import SoundControl from "~/components/sound";
 import Upload from "~/components/upload";
+import WagerHintsControl from "~/components/wager-hints-control";
 import { requireAuthSession } from "~/models/auth";
 import { getGamesForUser } from "~/models/game.server";
 import { getSolvesForUser } from "~/models/solves.server";
@@ -86,6 +87,9 @@ export default function Profile({ loaderData }: Route.ComponentProps) {
         <div className="mb-6 flex items-center gap-3">
           <span className="text-sm text-slate-600">Sound</span>
           <SoundControl />
+        </div>
+        <div className="mb-6">
+          <WagerHintsControl />
         </div>
         <h2 className="mb-4 text-2xl font-semibold">My Games</h2>
         <Upload

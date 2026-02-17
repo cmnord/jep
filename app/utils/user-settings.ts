@@ -2,7 +2,7 @@ import { produce } from "immer";
 import * as React from "react";
 import { useFetcher } from "react-router";
 
-import type { UserSettings } from "~/models/user-settings.server";
+import { type UserSettings, WagerHintsMode } from "~/models/user-settings";
 
 const DEFAULT_SETTINGS: UserSettings = {};
 const DEFAULT_VOLUME = 0.5;
@@ -69,6 +69,23 @@ export function UserSettingsProvider({
 
 export function useUserSettings() {
   return React.useContext(UserSettingsContext);
+}
+
+const DEFAULT_WAGER_HINTS = WagerHintsMode.Show;
+
+export function useWagerHintsSettings() {
+  const { settings, saveSettings } = useUserSettings();
+  const wagerHints = settings.wagerHints ?? DEFAULT_WAGER_HINTS;
+
+  const setWagerHints = React.useCallback(
+    (mode: WagerHintsMode) =>
+      saveSettings((draft) => {
+        draft.wagerHints = mode;
+      }),
+    [saveSettings],
+  );
+
+  return { wagerHints, setWagerHints };
 }
 
 /** useSoundSettings provides the same API shape as the old SoundContext. */

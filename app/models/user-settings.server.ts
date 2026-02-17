@@ -1,28 +1,16 @@
-import { z } from "zod";
-
 import type { AuthSession } from "~/models/auth";
 import { getSupabase } from "~/supabase";
 
-const soundSchema = z.object({
-  /** Float between 0 and 1 (matches HTMLAudioElement.volume). Default: 0.5 */
-  volume: z.number().min(0).max(1),
-  mute: z.boolean(),
-});
-
-export const userSettingsSchema = z.object({
-  sound: soundSchema.optional(),
-});
-
-export type UserSettings = z.infer<typeof userSettingsSchema>;
-
-export function parseUserSettings(raw: unknown): UserSettings {
-  const result = userSettingsSchema.safeParse(raw);
-  return result.success ? result.data : {};
-}
+export {
+  type UserSettings,
+  WagerHintsMode,
+  parseUserSettings,
+  userSettingsSchema,
+} from "~/models/user-settings";
 
 export async function updateUserSettings(
   userId: string,
-  settings: UserSettings,
+  settings: import("~/models/user-settings").UserSettings,
   accessToken: AuthSession["accessToken"],
 ) {
   const { error } = await getSupabase(accessToken)

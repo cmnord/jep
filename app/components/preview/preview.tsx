@@ -8,6 +8,7 @@ import HowToPlay from "~/components/how-to-play";
 import Link from "~/components/link";
 import { EditPlayerForm, PlayerIcon } from "~/components/player";
 import SoundControl from "~/components/sound";
+import WagerHintsControl from "~/components/wager-hints-control";
 import type { Player } from "~/engine";
 import { Action, GameState, useEngineContext } from "~/engine";
 import { Board } from "~/models/convert.server";
@@ -131,6 +132,7 @@ function PreviewRoundDialog({
               <PlayerIcon key={i} player={p} />
             ))}
           </div>
+          <WagerHintsControl />
           <HowToPlay />
           <Link className="mb-2 text-sm text-white" to="/howto">
             Practice buzzing &rarr;
