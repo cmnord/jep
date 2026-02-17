@@ -77,7 +77,6 @@ export default function GameComponent({
     boardControl,
     connectionState,
     lastMessageAt,
-    numRetries,
     players,
     reconnect,
     round,
@@ -132,7 +131,6 @@ export default function GameComponent({
           <Connection
             state={connectionState}
             lastMessageAt={lastMessageAt}
-            numRetries={numRetries}
             reconnect={reconnect}
           />
         </div>

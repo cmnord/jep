@@ -21,7 +21,6 @@ export const GameEngineContext = React.createContext<
   soloDispatch: () => null,
   isAnswered: () => false,
   lastMessageAt: undefined,
-  numRetries: 0,
   players: new Map(),
   reconnect: () => {},
   round: 0,

@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import * as React from "react";
 
-import { ConnectionState, MAX_RETRIES } from "~/engine/use-game-engine";
+import { ConnectionState } from "~/engine/use-game-engine";
 import useDebounce from "~/utils/use-debounce";
 
 import Popover from "./popover";
@@ -67,12 +67,10 @@ function DurationLabel({
 export default function Connection({
   state,
   lastMessageAt,
-  numRetries,
   reconnect,
 }: {
   state: ConnectionState;
   lastMessageAt?: number;
-  numRetries: number;
   reconnect: () => void;
 }) {
   const debouncedState = useDebounce(state, 500);
@@ -198,9 +196,7 @@ export default function Connection({
     return (
       <div className="flex items-center gap-2 text-sm text-yellow-300">
         <div className="h-2 w-2 shrink-0 animate-pulse rounded-full bg-yellow-500" />
-        <span>
-          Reconnecting (attempt {numRetries}/{MAX_RETRIES})...
-        </span>
+        <span>Reconnecting...</span>
       </div>
     );
   }
