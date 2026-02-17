@@ -7,6 +7,7 @@
     "db:start": "npx supabase start -x storage-api,imgproxy,edge-runtime,logflare,supavisor,vector",
     "dev": "react-router dev",
     "format": "oxfmt --write .",
+    "format:check": "oxfmt --check .",
     "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint .",
     "start": "react-router-serve ./build/server/index.js",
     "test": "vitest --coverage",
