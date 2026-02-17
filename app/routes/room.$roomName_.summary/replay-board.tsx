@@ -2,14 +2,13 @@ import clsx from "clsx";
 import * as React from "react";
 
 import { Category } from "~/components/board/category";
+import CluePopoverContent from "~/components/clue-popover-content";
 import Popover from "~/components/popover";
 import { clueIsPlayable } from "~/engine";
 import type { Player } from "~/engine/state";
-import { getPlayer } from "~/engine/state";
 import type { Board, Clue, Game } from "~/models/convert.server";
 import {
   formatDollars,
-  formatDollarsWithSign,
   generateGrid,
   stringToHslColor,
 } from "~/utils";
@@ -62,65 +61,6 @@ function BuzzDots({
           +{overflow}
         </div>
       )}
-    </div>
-  );
-}
-
-function CluePopoverContent({
-  clue,
-  resolvedState,
-  round,
-  i,
-  j,
-}: {
-  clue: Clue;
-  resolvedState: ReplayFrame["state"];
-  round: number;
-  i: number;
-  j: number;
-}) {
-  const key = `${round},${i},${j}`;
-  const wagers = resolvedState.wagers.get(key);
-  const answers = resolvedState.answers.get(key);
-  const clueAnswer = resolvedState.isAnswered[round]?.[i]?.[j];
-
-  if (!clueAnswer) return null;
-
-  return (
-    <div>
-      <p>{clue.clue}</p>
-      <p className="uppercase">{clue.answer}</p>
-      {clue.wagerable && wagers ? (
-        <div className="pt-2">
-          {Array.from(wagers.entries()).map(([userId, wager]) => {
-            const player = getPlayer(resolvedState, userId);
-            if (!player) return null;
-            const answer = answers?.get(userId);
-            const correct = clueAnswer.answeredBy.get(userId) ?? false;
-            return (
-              <p key={userId} className="font-mono text-xs">
-                {player.name} {formatDollarsWithSign(correct ? wager : -wager)}
-                {answer ? `: "${answer}"` : ""}
-              </p>
-            );
-          })}
-        </div>
-      ) : clueAnswer.answeredBy.size ? (
-        <div className="pt-2">
-          {Array.from(clueAnswer.answeredBy.entries()).map(
-            ([userId, correct]) => {
-              const player = getPlayer(resolvedState, userId);
-              if (!player) return null;
-              return (
-                <p key={userId} className="font-mono text-xs">
-                  {player.name}{" "}
-                  {formatDollarsWithSign(correct ? clue.value : -clue.value)}
-                </p>
-              );
-            },
-          )}
-        </div>
-      ) : null}
     </div>
   );
 }
@@ -246,7 +186,7 @@ function ReplayClue({
           content={
             <CluePopoverContent
               clue={clue}
-              resolvedState={resolvedState}
+              state={resolvedState}
               round={round}
               i={i}
               j={j}
@@ -412,7 +352,7 @@ export function ReplayScoreBar({
         child.getBoundingClientRect();
 
         // Animate to final position
-        child.style.transition = "transform 300ms ease";
+        child.style.transition = "transform 300ms ease-out";
         child.style.transform = "";
       }
     } else {

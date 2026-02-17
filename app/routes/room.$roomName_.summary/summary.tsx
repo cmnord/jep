@@ -1,33 +1,17 @@
+import * as Tabs from "@radix-ui/react-tabs";
 import clsx from "clsx";
 import * as React from "react";
 
 import { Category } from "~/components/board/category";
 import Button from "~/components/button";
+import CluePopoverContent from "~/components/clue-popover-content";
 import Popover from "~/components/popover";
 import type { Action } from "~/engine";
 import { clueIsPlayable, State } from "~/engine";
 import type { Player } from "~/engine/state";
-import { getPlayer } from "~/engine/state";
 import type { Board, Clue, Game } from "~/models/convert.server";
-import { formatDollarsWithSign, generateGrid, stringToHslColor } from "~/utils";
+import { generateGrid, stringToHslColor } from "~/utils";
 import ReplayPlayer from "./replay-player";
-
-function PlayerPoints({
-  name,
-  value,
-  answer,
-}: {
-  name: string;
-  value: number;
-  answer?: string;
-}) {
-  return (
-    <p className="font-mono text-xs">
-      {name} {formatDollarsWithSign(value)}
-      {answer ? `: "${answer}"` : ""}
-    </p>
-  );
-}
 
 interface Props {
   clue: Clue;
@@ -35,55 +19,6 @@ interface Props {
   round: number;
   i: number;
   j: number;
-}
-
-function CluePopover({ clue, state, round, i, j }: Props) {
-  const key = `${round},${i},${j}`;
-  const wagers = state.wagers.get(key);
-  const answers = state.answers.get(key);
-
-  const clueAnswer = state.isAnswered[round][i][j];
-
-  return (
-    <div>
-      <p>{clue.clue}</p>
-      <p className="uppercase">{clue.answer}</p>
-      {clue.wagerable && wagers ? (
-        <div className="pt-2">
-          {Array.from(wagers.entries()).map(([userId, wager]) => {
-            const player = getPlayer(state, userId);
-            if (!player) return null;
-            const answer = answers?.get(userId);
-            const correct = clueAnswer.answeredBy.get(userId) ?? false;
-            return (
-              <PlayerPoints
-                key={userId}
-                name={player.name}
-                answer={answer}
-                value={correct ? wager : -wager}
-              />
-            );
-          })}
-        </div>
-      ) : clueAnswer.answeredBy.size ? (
-        <div className="pt-2">
-          {Array.from(clueAnswer.answeredBy.entries()).map(
-            ([userId, correct]) => {
-              const player = getPlayer(state, userId);
-              if (!player) return null;
-              return (
-                <PlayerPoints
-                  key={userId}
-                  name={player.name}
-                  value={correct ? clue.value : -clue.value}
-                />
-              );
-            },
-          )}
-        </div>
-      ) : null}
-    </div>
-  );
 }
 
 function PostGameClue({ clue, state, round, i, j }: Props) {
@@ -126,7 +61,7 @@ function PostGameClue({ clue, state, round, i, j }: Props) {
     <td className="h-full sm:p-1">
       <Popover
         content={
-          <CluePopover clue={clue} state={state} round={round} i={i} j={j} />
+          <CluePopoverContent clue={clue} state={state} round={round} i={i} j={j} />
         }
       >
         <button
@@ -257,52 +192,39 @@ export default function Summary({
   actions: Action[];
   allPlayers: Player[];
 }) {
-  const [mode, setMode] = React.useState<"replay" | "summary">("replay");
   const [round, setRound] = React.useState(0);
   const board = game.boards[round];
 
   return (
-    <div>
-      {/* Mode toggle */}
-      <div className="flex items-center justify-center gap-1 py-2">
-        <button
-          onClick={() => setMode("replay")}
-          className={clsx(
-            "rounded px-3 py-1 text-sm transition-colors",
-            mode === "replay"
-              ? "bg-blue-600 text-white"
-              : "text-slate-400 hover:text-white",
-          )}
+    <Tabs.Root defaultValue="replay">
+      <Tabs.List className="flex items-center justify-center gap-1 py-2">
+        <Tabs.Trigger
+          value="replay"
+          className="rounded px-3 py-1 text-sm text-slate-400 transition-colors hover:text-white data-[state=active]:bg-blue-600 data-[state=active]:text-white"
         >
           Replay
-        </button>
-        <button
-          onClick={() => setMode("summary")}
-          className={clsx(
-            "rounded px-3 py-1 text-sm transition-colors",
-            mode === "summary"
-              ? "bg-blue-600 text-white"
-              : "text-slate-400 hover:text-white",
-          )}
+        </Tabs.Trigger>
+        <Tabs.Trigger
+          value="summary"
+          className="rounded px-3 py-1 text-sm text-slate-400 transition-colors hover:text-white data-[state=active]:bg-blue-600 data-[state=active]:text-white"
         >
           Summary
-        </button>
-      </div>
+        </Tabs.Trigger>
+      </Tabs.List>
 
-      {mode === "replay" ? (
+      <Tabs.Content value="replay">
         <ReplayPlayer game={game} actions={actions} allPlayers={allPlayers} />
-      ) : (
-        <>
-          {game.boards.length > 1 ? (
-            <RoundButtons
-              round={round}
-              setRound={setRound}
-              numRounds={game.boards.length}
-            />
-          ) : null}
-          <PostGameBoard board={board} state={state} round={round} />
-        </>
-      )}
-    </div>
+      </Tabs.Content>
+      <Tabs.Content value="summary">
+        {game.boards.length > 1 ? (
+          <RoundButtons
+            round={round}
+            setRound={setRound}
+            numRounds={game.boards.length}
+          />
+        ) : null}
+        <PostGameBoard board={board} state={state} round={round} />
+      </Tabs.Content>
+    </Tabs.Root>
   );
 }
