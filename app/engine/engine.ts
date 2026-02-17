@@ -39,7 +39,7 @@ export interface Action {
   type: ActionType;
   payload?: unknown;
   /** Epoch milliseconds from the room event (Postgres) or injected for solo play. */
-  ts?: number;
+  ts: number;
 }
 
 /** CLUE_TIMEOUT_MS is the total amount of time a contestant has to buzz in after
@@ -158,7 +158,7 @@ function resumeClock(draft: Draft<State>, ts: number) {
 /** pauseClock accumulates elapsed time and marks the clock as paused.
  * No-op if already paused. */
 function pauseClock(draft: Draft<State>, ts: number) {
-  if (!draft.clockRunning || !draft.clockLastResumedAt) return;
+  if (!draft.clockRunning || draft.clockLastResumedAt === null) return;
   const elapsed = ts - draft.clockLastResumedAt;
   draft.clockAccumulatedMs += Math.max(0, elapsed);
   draft.clockRunning = false;
@@ -271,7 +271,7 @@ export function gameEngine(state: State, action: Action): State {
         }
 
         draft.type = GameState.ShowBoard;
-        if (action.ts) resumeClock(draft, action.ts);
+        resumeClock(draft, action.ts);
       });
     case ActionType.ChooseClue:
       if (!isClueAction(action)) {
@@ -302,7 +302,7 @@ export function gameEngine(state: State, action: Action): State {
           return;
         }
 
-        if (action.ts) resumeClock(draft, action.ts);
+        resumeClock(draft, action.ts);
 
         if (clue.wagerable) {
           // If long-form, anyone with a positive score can buzz. If not, only the
@@ -368,7 +368,7 @@ export function gameEngine(state: State, action: Action): State {
           return;
         }
 
-        if (action.ts) resumeClock(draft, action.ts);
+        resumeClock(draft, action.ts);
 
         // Validate wager amount
         const minWager = clue.longForm ? 0 : 5;
@@ -415,7 +415,7 @@ export function gameEngine(state: State, action: Action): State {
           return;
         }
 
-        if (action.ts) resumeClock(draft, action.ts);
+        resumeClock(draft, action.ts);
 
         // Accept this buzz if the user has not already buzzed.
         if (!draft.buzzes.has(userId)) {
@@ -474,7 +474,7 @@ export function gameEngine(state: State, action: Action): State {
           return;
         }
 
-        if (action.ts) resumeClock(draft, action.ts);
+        resumeClock(draft, action.ts);
 
         const key = `${draft.round},${i},${j}`;
         const clueAnswer = draft.answers.get(key) ?? new Map<string, string>();
@@ -530,7 +530,7 @@ export function gameEngine(state: State, action: Action): State {
           }
         }
 
-        if (action.ts) resumeClock(draft, action.ts);
+        resumeClock(draft, action.ts);
 
         const clueValue = getClueValue(draft, [i, j], userId);
         const newScore = correct
@@ -639,14 +639,14 @@ export function gameEngine(state: State, action: Action): State {
           return;
         }
 
-        if (action.ts) resumeClock(draft, action.ts);
+        resumeClock(draft, action.ts);
 
         if (draft.numAnswered === draft.numCluesInBoard) {
           const newRound = draft.round + 1;
           const board = draft.game.boards.at(newRound);
 
           if (!board) {
-            if (action.ts) pauseClock(draft, action.ts);
+            pauseClock(draft, action.ts);
             draft.type = GameState.GameOver;
             draft.activeClue = null;
             draft.boardControl = null;
@@ -687,7 +687,7 @@ export function gameEngine(state: State, action: Action): State {
       });
     case ActionType.ToggleClock:
       return produce(state, (draft) => {
-        if (draft.type === GameState.GameOver || !action.ts) {
+        if (draft.type === GameState.GameOver) {
           return;
         }
         if (draft.clockRunning) {

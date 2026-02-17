@@ -24,7 +24,11 @@ export async function action({ request, params }: Route.ActionArgs) {
   }
 
   if (roomId === -1) {
-    return { type: ActionType.Buzz, payload: { i, j, userId, deltaMs } };
+    return {
+      type: ActionType.Buzz,
+      payload: { i, j, userId, deltaMs },
+      ts: Date.now(),
+    };
   }
 
   const authSession = await getValidAuthSession(request);

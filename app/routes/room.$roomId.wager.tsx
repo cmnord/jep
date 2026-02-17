@@ -40,7 +40,11 @@ export async function action({ request, params }: Route.ActionArgs) {
   }
 
   if (roomId === -1) {
-    return { type: ActionType.SetClueWager, payload: { i, j, userId, wager } };
+    return {
+      type: ActionType.SetClueWager,
+      payload: { i, j, userId, wager },
+      ts: Date.now(),
+    };
   }
 
   const authSession = await getValidAuthSession(request);

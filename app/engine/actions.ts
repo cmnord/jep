@@ -19,7 +19,7 @@ const CheckPayload = CluePayload.extend({ correct: z.boolean() });
 export function isClueAction(action: Action): action is {
   type: ActionType.ChooseClue | ActionType.NextClue;
   payload: { userId: string; i: number; j: number };
-  ts?: number;
+  ts: number;
 } {
   return (
     (action.type === ActionType.ChooseClue ||
@@ -31,7 +31,7 @@ export function isClueAction(action: Action): action is {
 export function isClueWagerAction(action: Action): action is {
   type: ActionType.SetClueWager;
   payload: { userId: string; i: number; j: number; wager: number };
-  ts?: number;
+  ts: number;
 } {
   return (
     action.type === ActionType.SetClueWager &&
@@ -46,7 +46,7 @@ export function isPlayerAction(action: Action): action is {
     | ActionType.Kick
     | ActionType.Leave;
   payload: { userId: string; name: string };
-  ts?: number;
+  ts: number;
 } {
   return (
     (action.type === ActionType.Join ||
@@ -60,7 +60,7 @@ export function isPlayerAction(action: Action): action is {
 export function isRoundAction(action: Action): action is {
   type: ActionType.StartRound;
   payload: { round: number; userId: string };
-  ts?: number;
+  ts: number;
 } {
   return (
     action.type === ActionType.StartRound &&
@@ -71,7 +71,7 @@ export function isRoundAction(action: Action): action is {
 export function isBuzzAction(action: Action): action is {
   type: ActionType.Buzz;
   payload: { userId: string; i: number; j: number; deltaMs: number };
-  ts?: number;
+  ts: number;
 } {
   return (
     action.type === ActionType.Buzz &&
@@ -82,7 +82,7 @@ export function isBuzzAction(action: Action): action is {
 export function isAnswerAction(action: Action): action is {
   type: ActionType.Answer;
   payload: { userId: string; i: number; j: number; answer: string };
-  ts?: number;
+  ts: number;
 } {
   return (
     action.type === ActionType.Answer &&
@@ -93,7 +93,7 @@ export function isAnswerAction(action: Action): action is {
 export function isCheckAction(action: Action): action is {
   type: ActionType.Check;
   payload: { userId: string; i: number; j: number; correct: boolean };
-  ts?: number;
+  ts: number;
 } {
   return (
     action.type === ActionType.Check &&

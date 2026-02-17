@@ -14,6 +14,9 @@ import {
 import type { Player } from "./state";
 import { GameState, State, stateFromGame } from "./state";
 
+/** TestAction allows omitting ts; the test runner defaults it to 0. */
+type TestAction = Omit<Action, "ts"> & { ts?: number };
+
 const PLAYER1: Player = {
   name: "Player 1",
   userId: "1",
@@ -26,27 +29,27 @@ const PLAYER2: Player = {
   score: 0,
 };
 
-const PLAYER1_JOIN_ACTION: Action = {
+const PLAYER1_JOIN_ACTION: TestAction = {
   type: ActionType.Join,
   payload: { name: PLAYER1.name, userId: PLAYER1.userId },
 };
 
-const PLAYER1_KICK_ACTION: Action = {
+const PLAYER1_KICK_ACTION: TestAction = {
   type: ActionType.Kick,
   payload: { name: PLAYER1.name, userId: PLAYER1.userId },
 };
 
-const PLAYER1_LEAVE_ACTION: Action = {
+const PLAYER1_LEAVE_ACTION: TestAction = {
   type: ActionType.Leave,
   payload: { name: PLAYER1.name, userId: PLAYER1.userId },
 };
 
-const PLAYER2_JOIN_ACTION: Action = {
+const PLAYER2_JOIN_ACTION: TestAction = {
   type: ActionType.Join,
   payload: { name: PLAYER2.name, userId: PLAYER2.userId },
 };
 
-const TWO_PLAYERS_ROUND_0: Action[] = [
+const TWO_PLAYERS_ROUND_0: TestAction[] = [
   PLAYER1_JOIN_ACTION,
   PLAYER2_JOIN_ACTION,
   {
@@ -55,7 +58,7 @@ const TWO_PLAYERS_ROUND_0: Action[] = [
   },
 ];
 
-const TWO_PLAYERS_ROUND_1: Action[] = [
+const TWO_PLAYERS_ROUND_1: TestAction[] = [
   ...TWO_PLAYERS_ROUND_0,
   {
     type: ActionType.ChooseClue,
@@ -113,11 +116,17 @@ describe("gameEngine", () => {
   interface TestCase {
     name: string;
     state: State;
-    actions: Action[];
+    actions: TestAction[];
     expectedState: State;
   }
 
   const initialState = stateFromGame(MOCK_GAME);
+
+  /** Base expected state for tests whose actions include StartRound. */
+  const clockStartedState = produce(initialState, (draft) => {
+    draft.clockRunning = true;
+    draft.clockLastResumedAt = 0;
+  });
 
   const testCases: TestCase[] = [
     {
@@ -219,7 +228,7 @@ describe("gameEngine", () => {
           payload: { name: PLAYER2.name, userId: PLAYER2.userId },
         },
       ],
-      expectedState: produce(initialState, (draft) => {
+      expectedState: produce(clockStartedState, (draft) => {
         draft.type = GameState.ShowBoard;
         draft.boardControl = PLAYER1.userId;
         draft.numAnswered = 1;
@@ -272,7 +281,7 @@ describe("gameEngine", () => {
         },
         PLAYER1_LEAVE_ACTION,
       ],
-      expectedState: produce(initialState, (draft) => {
+      expectedState: produce(clockStartedState, (draft) => {
         draft.type = GameState.ShowBoard;
         draft.boardControl = PLAYER2.userId;
         draft.numAnswered = 1;
@@ -314,7 +323,7 @@ describe("gameEngine", () => {
           payload: { round: 0, userId: PLAYER1.userId },
         },
       ],
-      expectedState: produce(initialState, (draft) => {
+      expectedState: produce(clockStartedState, (draft) => {
         draft.type = GameState.ShowBoard;
         draft.boardControl = PLAYER1.userId;
         draft.players.set(PLAYER1.userId, PLAYER1);
@@ -334,7 +343,7 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER1.userId, i: 0, j: 0 },
         },
       ],
-      expectedState: produce(initialState, (draft) => {
+      expectedState: produce(clockStartedState, (draft) => {
         draft.type = GameState.ReadClue;
         draft.activeClue = [0, 0];
         draft.boardControl = PLAYER1.userId;
@@ -359,7 +368,7 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER1.userId, i: 0, j: 0, deltaMs: 123 },
         },
       ],
-      expectedState: produce(initialState, (draft) => {
+      expectedState: produce(clockStartedState, (draft) => {
         draft.type = GameState.RevealAnswerToBuzzer;
         draft.activeClue = [0, 0];
         draft.boardControl = PLAYER1.userId;
@@ -381,7 +390,7 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER1.userId, i: 0, j: 0, deltaMs: 123 },
         },
       ],
-      expectedState: produce(initialState, (draft) => {
+      expectedState: produce(clockStartedState, (draft) => {
         draft.type = GameState.ReadClue;
         draft.activeClue = [0, 0];
         draft.boardControl = PLAYER1.userId;
@@ -408,7 +417,7 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER2.userId, i: 0, j: 0, deltaMs: 456 },
         },
       ],
-      expectedState: produce(initialState, (draft) => {
+      expectedState: produce(clockStartedState, (draft) => {
         draft.type = GameState.RevealAnswerToBuzzer;
         draft.activeClue = [0, 0];
         draft.boardControl = PLAYER1.userId;
@@ -441,7 +450,7 @@ describe("gameEngine", () => {
           },
         },
       ],
-      expectedState: produce(initialState, (draft) => {
+      expectedState: produce(clockStartedState, (draft) => {
         draft.type = GameState.RevealAnswerToBuzzer;
         draft.activeClue = [0, 0];
         draft.boardControl = PLAYER1.userId;
@@ -474,7 +483,7 @@ describe("gameEngine", () => {
           },
         },
       ],
-      expectedState: produce(initialState, (draft) => {
+      expectedState: produce(clockStartedState, (draft) => {
         draft.type = GameState.ReadClue;
         draft.activeClue = [0, 0];
         draft.boardControl = PLAYER1.userId;
@@ -511,7 +520,7 @@ describe("gameEngine", () => {
           },
         },
       ],
-      expectedState: produce(initialState, (draft) => {
+      expectedState: produce(clockStartedState, (draft) => {
         draft.type = GameState.RevealAnswerToBuzzer;
         draft.activeClue = [0, 0];
         draft.boardControl = PLAYER1.userId;
@@ -543,7 +552,7 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER1.userId, i: 0, j: 0, correct: false },
         },
       ],
-      expectedState: produce(initialState, (draft) => {
+      expectedState: produce(clockStartedState, (draft) => {
         draft.type = GameState.RevealAnswerToAll;
         draft.activeClue = [0, 0];
         draft.boardControl = PLAYER1.userId;
@@ -584,7 +593,7 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER1.userId, i: 0, j: 0, correct: false },
         },
       ],
-      expectedState: produce(initialState, (draft) => {
+      expectedState: produce(clockStartedState, (draft) => {
         draft.type = GameState.ReadClue;
         draft.activeClue = [0, 0];
         draft.boardControl = PLAYER1.userId;
@@ -627,7 +636,7 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER2.userId, i: 0, j: 0, deltaMs: 123 },
         },
       ],
-      expectedState: produce(initialState, (draft) => {
+      expectedState: produce(clockStartedState, (draft) => {
         draft.type = GameState.RevealAnswerToBuzzer;
         draft.activeClue = [0, 0];
         draft.boardControl = PLAYER1.userId;
@@ -676,7 +685,7 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER2.userId, i: 0, j: 0, correct: true },
         },
       ],
-      expectedState: produce(initialState, (draft) => {
+      expectedState: produce(clockStartedState, (draft) => {
         draft.type = GameState.RevealAnswerToAll;
         draft.activeClue = [0, 0];
 
@@ -725,7 +734,7 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER1.userId, i: 0, j: 0 },
         },
       ],
-      expectedState: produce(initialState, (draft) => {
+      expectedState: produce(clockStartedState, (draft) => {
         draft.type = GameState.ShowBoard;
         draft.boardControl = PLAYER1.userId;
 
@@ -795,7 +804,7 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER2.userId, i: 0, j: 1 },
         },
       ],
-      expectedState: produce(initialState, (draft) => {
+      expectedState: produce(clockStartedState, (draft) => {
         draft.type = GameState.PreviewRound;
         draft.boardControl = PLAYER2.userId;
 
@@ -819,7 +828,7 @@ describe("gameEngine", () => {
       name: "Dismiss clue to go back to the board (round over), player with lowest score gets board control",
       state: initialState,
       actions: TWO_PLAYERS_ROUND_1,
-      expectedState: produce(initialState, (draft) => {
+      expectedState: produce(clockStartedState, (draft) => {
         draft.type = GameState.PreviewRound;
         draft.boardControl = PLAYER2.userId;
 
@@ -851,7 +860,7 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER2.userId, i: 0, j: 0 },
         },
       ],
-      expectedState: produce(initialState, (draft) => {
+      expectedState: produce(clockStartedState, (draft) => {
         draft.type = GameState.WagerClue;
         draft.activeClue = [0, 0];
         draft.buzzes.set(PLAYER1.userId, CANT_BUZZ_FLAG);
@@ -890,7 +899,7 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER2.userId, i: 0, j: 0, wager: 345 },
         },
       ],
-      expectedState: produce(initialState, (draft) => {
+      expectedState: produce(clockStartedState, (draft) => {
         draft.type = GameState.ReadWagerableClue;
         draft.activeClue = [0, 0];
         draft.boardControl = PLAYER2.userId;
@@ -938,7 +947,7 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER2.userId, i: 0, j: 0, correct: true },
         },
       ],
-      expectedState: produce(initialState, (draft) => {
+      expectedState: produce(clockStartedState, (draft) => {
         draft.type = GameState.RevealAnswerToAll;
         draft.activeClue = [0, 0];
         draft.boardControl = PLAYER2.userId;
@@ -994,7 +1003,7 @@ describe("gameEngine", () => {
           },
         },
       ],
-      expectedState: produce(initialState, (draft) => {
+      expectedState: produce(clockStartedState, (draft) => {
         draft.type = GameState.RevealAnswerToAll;
         draft.activeClue = [0, 0];
         draft.boardControl = PLAYER2.userId;
@@ -1035,7 +1044,7 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER2.userId, i: 0, j: 1 },
         },
       ],
-      expectedState: produce(initialState, (draft) => {
+      expectedState: produce(clockStartedState, (draft) => {
         draft.type = GameState.WagerClue;
         draft.activeClue = [0, 1];
         draft.boardControl = PLAYER2.userId;
@@ -1148,7 +1157,7 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER2.userId, i: 0, j: 1 },
         },
       ],
-      expectedState: produce(initialState, (draft) => {
+      expectedState: produce(clockStartedState, (draft) => {
         draft.type = GameState.RevealAnswerToAll;
         draft.activeClue = [0, 1];
         draft.boardControl = PLAYER2.userId;
@@ -1225,7 +1234,7 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER2.userId, i: 0, j: 1 },
         },
       ],
-      expectedState: produce(initialState, (draft) => {
+      expectedState: produce(clockStartedState, (draft) => {
         draft.type = GameState.WagerClue;
         draft.activeClue = [0, 1];
         draft.boardControl = PLAYER2.userId;
@@ -1287,7 +1296,7 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER1.userId, i: 0, j: 1, wager: 400 },
         },
       ],
-      expectedState: produce(initialState, (draft) => {
+      expectedState: produce(clockStartedState, (draft) => {
         draft.type = GameState.WagerClue;
         draft.activeClue = [0, 1];
         draft.boardControl = PLAYER2.userId;
@@ -1369,7 +1378,7 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER2.userId, i: 0, j: 1, wager: 400 },
         },
       ],
-      expectedState: produce(initialState, (draft) => {
+      expectedState: produce(clockStartedState, (draft) => {
         draft.type = GameState.ReadLongFormClue;
         draft.activeClue = [0, 1];
         draft.boardControl = PLAYER2.userId;
@@ -1466,7 +1475,7 @@ describe("gameEngine", () => {
           },
         },
       ],
-      expectedState: produce(initialState, (draft) => {
+      expectedState: produce(clockStartedState, (draft) => {
         draft.type = GameState.ReadLongFormClue;
         draft.activeClue = [0, 1];
         draft.answers.set("1,0,1", new Map([[PLAYER1.userId, "right answer"]]));
@@ -1552,7 +1561,7 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER1.userId, i: 0, j: 1, wager: 0 },
         },
       ],
-      expectedState: produce(initialState, (draft) => {
+      expectedState: produce(clockStartedState, (draft) => {
         draft.type = GameState.WagerClue;
         draft.activeClue = [0, 1];
         draft.boardControl = PLAYER2.userId;
@@ -1652,7 +1661,7 @@ describe("gameEngine", () => {
           },
         },
       ],
-      expectedState: produce(initialState, (draft) => {
+      expectedState: produce(clockStartedState, (draft) => {
         draft.type = GameState.RevealAnswerLongForm;
         draft.activeClue = [0, 1];
         draft.answers.set(
@@ -1771,7 +1780,7 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER1.userId, i: 0, j: 1, correct: false },
         },
       ],
-      expectedState: produce(initialState, (draft) => {
+      expectedState: produce(clockStartedState, (draft) => {
         draft.type = GameState.RevealAnswerLongForm;
         draft.activeClue = [0, 1];
         draft.answers.set(
@@ -1894,7 +1903,7 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER2.userId, i: 0, j: 1, correct: true },
         },
       ],
-      expectedState: produce(initialState, (draft) => {
+      expectedState: produce(clockStartedState, (draft) => {
         draft.type = GameState.RevealAnswerToAll;
         draft.activeClue = [0, 1];
         draft.answers.set(
@@ -2020,7 +2029,7 @@ describe("gameEngine", () => {
           payload: { userId: PLAYER1.userId, i: 0, j: 1, correct: false },
         },
       ],
-      expectedState: produce(initialState, (draft) => {
+      expectedState: produce(clockStartedState, (draft) => {
         draft.type = GameState.RevealAnswerToAll;
         draft.activeClue = [0, 1];
         draft.answers.set(
@@ -2156,7 +2165,7 @@ describe("gameEngine", () => {
           },
         },
       ],
-      expectedState: produce(initialState, (draft) => {
+      expectedState: produce(clockStartedState, (draft) => {
         draft.type = GameState.RevealAnswerLongForm;
         draft.activeClue = [0, 1];
         draft.answers.set(
@@ -2212,7 +2221,7 @@ describe("gameEngine", () => {
       }),
     },
     {
-      name: "Game ends in GameOver state",
+      name: "Game ends in GameOver state (clock paused back to defaults)",
       state: initialState,
       actions: [
         ...TWO_PLAYERS_ROUND_1,
@@ -2353,7 +2362,7 @@ describe("gameEngine", () => {
               ts: sec(5),
             },
           ],
-          expectedState: produce(initialState, (draft) => {
+          expectedState: produce(clockStartedState, (draft) => {
             draft.type = GameState.ShowBoard;
             draft.boardControl = PLAYER1.userId;
             draft.players.set(PLAYER1.userId, PLAYER1);
@@ -2374,7 +2383,7 @@ describe("gameEngine", () => {
             },
             { type: ActionType.ToggleClock, ts: sec(15) },
           ],
-          expectedState: produce(initialState, (draft) => {
+          expectedState: produce(clockStartedState, (draft) => {
             draft.type = GameState.ShowBoard;
             draft.boardControl = PLAYER1.userId;
             draft.players.set(PLAYER1.userId, PLAYER1);
@@ -2396,7 +2405,7 @@ describe("gameEngine", () => {
             { type: ActionType.ToggleClock, ts: sec(15) },
             { type: ActionType.ToggleClock, ts: sec(20) },
           ],
-          expectedState: produce(initialState, (draft) => {
+          expectedState: produce(clockStartedState, (draft) => {
             draft.type = GameState.ShowBoard;
             draft.boardControl = PLAYER1.userId;
             draft.players.set(PLAYER1.userId, PLAYER1);
@@ -2422,7 +2431,7 @@ describe("gameEngine", () => {
               ts: sec(25),
             },
           ],
-          expectedState: produce(initialState, (draft) => {
+          expectedState: produce(clockStartedState, (draft) => {
             draft.type = GameState.ReadClue;
             draft.activeClue = [0, 0];
             draft.boardControl = PLAYER1.userId;
@@ -2444,7 +2453,7 @@ describe("gameEngine", () => {
             },
             { type: ActionType.ToggleClock, ts: sec(15) },
           ],
-          expectedState: produce(initialState, (draft) => {
+          expectedState: produce(clockStartedState, (draft) => {
             draft.type = GameState.ShowBoard;
             draft.boardControl = PLAYER1.userId;
             draft.players.set(PLAYER1.userId, PLAYER1);
@@ -2461,7 +2470,7 @@ describe("gameEngine", () => {
     it(tc.name, () => {
       let state = tc.state;
       for (const action of tc.actions) {
-        state = gameEngine(state, action);
+        state = gameEngine(state, { ts: 0, ...action });
       }
       // Previous state is not mutated
       expect(tc.state).toStrictEqual(initialState);

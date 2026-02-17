@@ -11,7 +11,7 @@ export async function action({ request, params }: Route.ActionArgs) {
   }
 
   if (roomId === -1) {
-    return { type: ActionType.ToggleClock };
+    return { type: ActionType.ToggleClock, ts: Date.now() };
   }
 
   const authSession = await getValidAuthSession(request);

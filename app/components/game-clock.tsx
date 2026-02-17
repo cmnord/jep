@@ -49,7 +49,7 @@ export default function GameClock({ roomId }: Pick<RoomProps, "roomId">) {
   const [displayMs, setDisplayMs] = React.useState(clockAccumulatedMs);
 
   React.useEffect(() => {
-    if (!clockRunning || !clockLastResumedAt) {
+    if (!clockRunning || clockLastResumedAt === null) {
       setDisplayMs(clockAccumulatedMs);
       return;
     }
