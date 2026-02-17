@@ -150,6 +150,7 @@ export default function Index({ loaderData }: Route.ComponentProps) {
             key={`game-${i}`}
             game={game}
             solve={solvesMap.get(game.id)}
+            loggedIn={loaderData.authSession !== null}
           />
         ))}
       </div>

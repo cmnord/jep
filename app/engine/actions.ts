@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import type { Action } from "./engine";
 import { ActionType } from "./engine";
+import type { State } from "./state";
 
 const CluePayload = z.object({
   userId: z.string(),
@@ -18,6 +19,12 @@ const CheckPayload = CluePayload.extend({ correct: z.boolean() });
 const TransferPlayerPayload = z.object({
   oldUserId: z.string(),
   newUserId: z.string(),
+});
+const RestorePayload = z.object({
+  type: z.string(),
+  players: z.instanceof(Map),
+  round: z.number(),
+  game: z.record(z.string(), z.unknown()),
 });
 
 export function isClueAction(action: Action): action is {
@@ -113,5 +120,16 @@ export function isTransferPlayerAction(action: Action): action is {
   return (
     action.type === ActionType.TransferPlayer &&
     TransferPlayerPayload.safeParse(action.payload).success
+  );
+}
+
+export function isRestoreAction(action: Action): action is {
+  type: ActionType.Restore;
+  payload: State;
+  ts: number;
+} {
+  return (
+    action.type === ActionType.Restore &&
+    RestorePayload.safeParse(action.payload).success
   );
 }

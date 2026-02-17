@@ -4,10 +4,12 @@ import type { Action } from "./engine";
 import { ActionType, gameEngine, parseUtcMs } from "./engine";
 import type { State } from "./state";
 
+const actionTypes = new Set<string>(Object.values(ActionType));
+
 export function isTypedRoomEvent(
   re: DbRoomEvent,
 ): re is DbRoomEvent & { type: ActionType } {
-  return Object.values(ActionType).includes(re.type as ActionType);
+  return actionTypes.has(re.type);
 }
 
 /** roomEventToAction converts a DB room event to an engine Action, parsing the

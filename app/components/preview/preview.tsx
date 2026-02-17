@@ -156,6 +156,7 @@ function PreviewRoundDialog({
 }
 
 export function Preview({
+  disabled = false,
   gameTitle,
   name,
   numRounds,
@@ -164,6 +165,7 @@ export function Preview({
   roomId,
   userId,
 }: {
+  disabled?: boolean;
   gameTitle: string;
   name: string;
   numRounds: number;
@@ -176,6 +178,7 @@ export function Preview({
   const fetcher = useFetcher<Action>();
   useSoloAction(fetcher, soloDispatch);
 
+  if (disabled) return null;
   if (!board) return null;
 
   const userInGame = players.has(userId);

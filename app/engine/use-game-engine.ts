@@ -12,7 +12,7 @@ import {
   isTypedRoomEvent,
   roomEventToAction,
 } from "./room-event";
-import { State, getClueValue, stateFromGame } from "./state";
+import { type State, getClueValue, stateFromGame } from "./state";
 
 export enum ConnectionState {
   /** Initial connection attempt (first load). */
@@ -31,7 +31,7 @@ const STALENESS_CHECK_MS = 30_000;
 /** How long to remain in RECONNECTING before escalating to DISCONNECTED. */
 const RECONNECTING_TIMEOUT_MS = 60_000;
 
-function stateToGameEngine(
+export function stateToGameEngine(
   game: Game,
   state: State,
   dispatch: React.Dispatch<Action>,
@@ -42,7 +42,7 @@ function stateToGameEngine(
   }: {
     connectionState: ConnectionState;
     lastMessageAt?: number;
-    reconnect: () => void;
+    reconnect?: () => void;
   },
 ) {
   // Board may be undefined
@@ -107,21 +107,6 @@ function stateToGameEngine(
     clockAccumulatedMs: state.clockAccumulatedMs,
     clockLastResumedAt: state.clockLastResumedAt,
   };
-}
-
-/** useSoloGameEngine sets up solo play without any server room events. This
- * means that once the page refreshes the game loses all progress.
- */
-export function useSoloGameEngine(game: Game) {
-  const [state, dispatch] = React.useReducer(gameEngine, game, (arg) =>
-    stateFromGame(arg),
-  );
-
-  return stateToGameEngine(game, state, dispatch, {
-    connectionState: ConnectionState.CONNECTED,
-    lastMessageAt: undefined,
-    reconnect: () => {},
-  });
 }
 
 /** useGameEngine provides all the state variables associated with a game.  The

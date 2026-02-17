@@ -71,7 +71,7 @@ export default function Connection({
 }: {
   state: ConnectionState;
   lastMessageAt?: number;
-  reconnect: () => void;
+  reconnect?: () => void;
 }) {
   const debouncedState = useDebounce(state, 500);
 
@@ -157,7 +157,9 @@ export default function Connection({
       <div className="flex items-center gap-3 rounded-md bg-red-900/50 px-4 py-3 text-sm text-red-200">
         <div className="h-2 w-2 shrink-0 rounded-full bg-red-500" />
         <div className="flex grow flex-col gap-1">
-          <span className="font-medium text-red-100">Connection lost</span>
+          <span className="font-medium text-red-100">
+            {reconnect ? "Connection lost" : "Offline"}
+          </span>
           {disconnectedSince && disconnectedMsg && (
             <span className="text-red-300">
               Disconnected{" "}
@@ -181,12 +183,14 @@ export default function Connection({
             </span>
           )}
         </div>
-        <button
-          onClick={reconnect}
-          className="shrink-0 rounded bg-red-700 px-3 py-1 text-sm font-medium text-red-100 transition-colors hover:bg-red-600"
-        >
-          Reconnect
-        </button>
+        {reconnect ? (
+          <button
+            onClick={reconnect}
+            className="shrink-0 rounded bg-red-700 px-3 py-1 text-sm font-medium text-red-100 transition-colors hover:bg-red-600"
+          >
+            Reconnect
+          </button>
+        ) : null}
       </div>
     );
   }
@@ -203,12 +207,13 @@ export default function Connection({
 
   // Default compact indicator for healthy / initial connection states.
   const isDisconnected = debouncedState === ConnectionState.DISCONNECTED;
+  const disconnectedLabel = reconnect ? "Disconnected" : "Offline";
 
   const message = isConnected
     ? "Connected"
     : debouncedState === ConnectionState.CONNECTING
       ? "Connecting"
-      : "Disconnected";
+      : disconnectedLabel;
 
   // Pick the best timestamp to display:
   // - Connected with last event → "Connected · last event [time]"
@@ -236,7 +241,7 @@ export default function Connection({
   } else if (isDisconnected && disconnectedSince && disconnectedMsg) {
     timeLabel = (
       <DurationLabel
-        label="Disconnected"
+        label={disconnectedLabel}
         timestamp={disconnectedSince}
         durationMsg={disconnectedMsg}
         decorationColor="decoration-slate-500"
@@ -254,7 +259,7 @@ export default function Connection({
         })}
       />
       {timeLabel ?? message}
-      {isDisconnected && (
+      {isDisconnected && reconnect && (
         <button
           onClick={reconnect}
           className="shrink-0 rounded bg-slate-700 px-3 py-1 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-600"

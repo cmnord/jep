@@ -12,6 +12,7 @@ import {
   isClueWagerAction,
   isPlayerAction,
   isRoundAction,
+  isRestoreAction,
   isTransferPlayerAction,
 } from "./actions";
 import {
@@ -73,6 +74,8 @@ export enum ActionType {
   NextClue = "next_clue",
   ToggleClock = "toggle_clock",
   TransferPlayer = "transfer_player",
+  /** Restore replaces the entire state (used for restoring saved solo games). */
+  Restore = "restore",
 }
 
 export interface Action {
@@ -872,5 +875,10 @@ export function gameEngine(state: State, action: Action): State {
           }
         }
       });
+    case ActionType.Restore:
+      if (!isRestoreAction(action)) {
+        throw new Error("Restore action must have a State payload");
+      }
+      return action.payload;
   }
 }

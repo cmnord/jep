@@ -65,12 +65,14 @@ export default function GameComponent({
   name,
   roomId,
   roomName,
+  suppressDialogs = false,
   userId,
   url,
 }: {
   game: Game;
   name: string;
   roomName: string;
+  suppressDialogs?: boolean;
   url: string;
 } & RoomProps) {
   const {
@@ -104,6 +106,7 @@ export default function GameComponent({
   return (
     <>
       <Preview
+        disabled={suppressDialogs}
         gameTitle={game.title}
         name={name}
         numRounds={game.boards.length}
