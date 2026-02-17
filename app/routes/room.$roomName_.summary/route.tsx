@@ -1,7 +1,11 @@
 import { PlayerScore } from "~/components/player";
 import type { Route } from "./+types/route";
 
-import { applyRoomEventsToState, isTypedRoomEvent } from "~/engine/room-event";
+import {
+  applyRoomEventsToState,
+  isTypedRoomEvent,
+  roomEventToAction,
+} from "~/engine/room-event";
 import { GameState, stateFromGame } from "~/engine/state";
 import { getValidAuthSession } from "~/models/auth";
 import { getGame } from "~/models/game.server";
@@ -165,7 +169,9 @@ export default function PlayGame({ loaderData }: Route.ComponentProps) {
         <ScoreChart
           game={loaderData.game}
           players={allSorted}
-          roomEvents={loaderData.roomEvents.filter(isTypedRoomEvent)}
+          roomEvents={loaderData.roomEvents
+            .filter(isTypedRoomEvent)
+            .map(roomEventToAction)}
         />
       </div>
       <GameSummary game={loaderData.game} state={state} />

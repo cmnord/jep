@@ -38,8 +38,8 @@ export enum ActionType {
 export interface Action {
   type: ActionType;
   payload?: unknown;
-  /** ISO timestamp from the room event (Postgres) or injected for solo play. */
-  ts?: string;
+  /** Epoch milliseconds from the room event (Postgres) or injected for solo play. */
+  ts?: number;
 }
 
 /** CLUE_TIMEOUT_MS is the total amount of time a contestant has to buzz in after
@@ -142,24 +142,24 @@ function transferBoardControl(draft: Draft<State>, userId: string) {
 
 /** parseUtcMs converts an ISO timestamp string to epoch milliseconds,
  * treating timezone-naive strings (from Postgres) as UTC. */
-function parseUtcMs(ts: string): number {
+export function parseUtcMs(ts: string): number {
   if (/Z|[+-]\d{2}(:\d{2})?$/.test(ts)) return new Date(ts).getTime();
   return new Date(ts + "Z").getTime();
 }
 
 /** resumeClock sets the clock to running, recording when it was resumed.
  * No-op if already running. */
-function resumeClock(draft: Draft<State>, ts: string) {
+function resumeClock(draft: Draft<State>, ts: number) {
   if (draft.clockRunning) return;
   draft.clockRunning = true;
-  draft.clockLastResumedAt = parseUtcMs(ts);
+  draft.clockLastResumedAt = ts;
 }
 
 /** pauseClock accumulates elapsed time and marks the clock as paused.
  * No-op if already paused. */
-function pauseClock(draft: Draft<State>, ts: string) {
+function pauseClock(draft: Draft<State>, ts: number) {
   if (!draft.clockRunning || !draft.clockLastResumedAt) return;
-  const elapsed = parseUtcMs(ts) - draft.clockLastResumedAt;
+  const elapsed = ts - draft.clockLastResumedAt;
   draft.clockAccumulatedMs += Math.max(0, elapsed);
   draft.clockRunning = false;
   draft.clockLastResumedAt = null;

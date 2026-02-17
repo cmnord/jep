@@ -9,6 +9,7 @@ import {
   CLUE_TIMEOUT_MS,
   gameEngine,
   getWinningBuzzer,
+  parseUtcMs,
 } from "./engine";
 import type { Player } from "./state";
 import { GameState, State, stateFromGame } from "./state";
@@ -2339,11 +2340,11 @@ describe("gameEngine", () => {
       name: "Clock starts running on StartRound",
       state: initialState,
       actions: [
-        { ...PLAYER1_JOIN_ACTION, ts: "2024-01-01T00:00:00.000Z" },
+        { ...PLAYER1_JOIN_ACTION, ts: 1704067200000 },
         {
           type: ActionType.StartRound,
           payload: { round: 0, userId: PLAYER1.userId },
-          ts: "2024-01-01T00:00:05.000Z",
+          ts: 1704067205000,
         },
       ],
       expectedState: produce(initialState, (draft) => {
@@ -2359,15 +2360,15 @@ describe("gameEngine", () => {
       name: "ToggleClock pauses a running clock",
       state: initialState,
       actions: [
-        { ...PLAYER1_JOIN_ACTION, ts: "2024-01-01T00:00:00.000Z" },
+        { ...PLAYER1_JOIN_ACTION, ts: 1704067200000 },
         {
           type: ActionType.StartRound,
           payload: { round: 0, userId: PLAYER1.userId },
-          ts: "2024-01-01T00:00:05.000Z",
+          ts: 1704067205000,
         },
         {
           type: ActionType.ToggleClock,
-          ts: "2024-01-01T00:00:15.000Z",
+          ts: 1704067215000,
         },
       ],
       expectedState: produce(initialState, (draft) => {
@@ -2383,14 +2384,14 @@ describe("gameEngine", () => {
       name: "ToggleClock resumes a paused clock",
       state: initialState,
       actions: [
-        { ...PLAYER1_JOIN_ACTION, ts: "2024-01-01T00:00:00.000Z" },
+        { ...PLAYER1_JOIN_ACTION, ts: 1704067200000 },
         {
           type: ActionType.StartRound,
           payload: { round: 0, userId: PLAYER1.userId },
-          ts: "2024-01-01T00:00:05.000Z",
+          ts: 1704067205000,
         },
-        { type: ActionType.ToggleClock, ts: "2024-01-01T00:00:15.000Z" },
-        { type: ActionType.ToggleClock, ts: "2024-01-01T00:00:20.000Z" },
+        { type: ActionType.ToggleClock, ts: 1704067215000 },
+        { type: ActionType.ToggleClock, ts: 1704067220000 },
       ],
       expectedState: produce(initialState, (draft) => {
         draft.type = GameState.ShowBoard;
@@ -2405,17 +2406,17 @@ describe("gameEngine", () => {
       name: "ChooseClue auto-resumes a paused clock",
       state: initialState,
       actions: [
-        { ...PLAYER1_JOIN_ACTION, ts: "2024-01-01T00:00:00.000Z" },
+        { ...PLAYER1_JOIN_ACTION, ts: 1704067200000 },
         {
           type: ActionType.StartRound,
           payload: { round: 0, userId: PLAYER1.userId },
-          ts: "2024-01-01T00:00:05.000Z",
+          ts: 1704067205000,
         },
-        { type: ActionType.ToggleClock, ts: "2024-01-01T00:00:15.000Z" },
+        { type: ActionType.ToggleClock, ts: 1704067215000 },
         {
           type: ActionType.ChooseClue,
           payload: { userId: PLAYER1.userId, i: 0, j: 0 },
-          ts: "2024-01-01T00:00:25.000Z",
+          ts: 1704067225000,
         },
       ],
       expectedState: produce(initialState, (draft) => {
@@ -2432,34 +2433,13 @@ describe("gameEngine", () => {
       name: "ToggleClock ignored after GameOver",
       state: initialState,
       actions: [
-        { ...PLAYER1_JOIN_ACTION, ts: "2024-01-01T00:00:00.000Z" },
+        { ...PLAYER1_JOIN_ACTION, ts: 1704067200000 },
         {
           type: ActionType.StartRound,
           payload: { round: 0, userId: PLAYER1.userId },
-          ts: "2024-01-01T00:00:05.000Z",
+          ts: 1704067205000,
         },
-        { type: ActionType.ToggleClock, ts: "2024-01-01T00:00:15.000Z" },
-      ],
-      expectedState: produce(initialState, (draft) => {
-        draft.type = GameState.ShowBoard;
-        draft.boardControl = PLAYER1.userId;
-        draft.players.set(PLAYER1.userId, PLAYER1);
-        draft.clockRunning = false;
-        draft.clockAccumulatedMs = 10000;
-        draft.clockLastResumedAt = null;
-      }),
-    },
-    {
-      name: "Clock normalizes Postgres timestamps without timezone to UTC",
-      state: initialState,
-      actions: [
-        { ...PLAYER1_JOIN_ACTION, ts: "2024-01-01T00:00:00" },
-        {
-          type: ActionType.StartRound,
-          payload: { round: 0, userId: PLAYER1.userId },
-          ts: "2024-01-01T00:00:05",
-        },
-        { type: ActionType.ToggleClock, ts: "2024-01-01T00:00:15" },
+        { type: ActionType.ToggleClock, ts: 1704067215000 },
       ],
       expectedState: produce(initialState, (draft) => {
         draft.type = GameState.ShowBoard;
@@ -2524,5 +2504,20 @@ describe("getWinningBuzzer", () => {
     const k = 435;
     expect(player1Wins).toBeGreaterThan(k);
     expect(player1Wins).toBeLessThan(n_trials - k);
+  });
+});
+
+describe("parseUtcMs", () => {
+  it("parses an ISO string with Z suffix", () => {
+    expect(parseUtcMs("2024-01-01T00:00:05.000Z")).toBe(1704067205000);
+  });
+
+  it("treats a timezone-naive string (Postgres) as UTC", () => {
+    expect(parseUtcMs("2024-01-01T00:00:05")).toBe(1704067205000);
+  });
+
+  it("parses an ISO string with a positive offset", () => {
+    // +05:00 means the local clock reads 05:00:05 at the same instant as 00:00:05Z
+    expect(parseUtcMs("2024-01-01T05:00:05.000+05:00")).toBe(1704067205000);
   });
 });

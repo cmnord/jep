@@ -7,7 +7,11 @@ import { getSupabase } from "~/supabase";
 
 import type { Action } from "./engine";
 import { gameEngine, getWinningBuzzer } from "./engine";
-import { applyRoomEventsToState, isTypedRoomEvent } from "./room-event";
+import {
+  applyRoomEventsToState,
+  isTypedRoomEvent,
+  roomEventToAction,
+} from "./room-event";
 import { State, getClueValue, stateFromGame } from "./state";
 
 export enum ConnectionState {
@@ -175,7 +179,7 @@ export function useGameEngine(
             setRoomEvents((re) => {
               if (!re.find((re) => re.id === newEvent.id)) {
                 setRoomEvents((prev) => [...prev, newEvent]);
-                dispatch(newEvent);
+                dispatch(roomEventToAction(newEvent));
               }
               return re;
             });

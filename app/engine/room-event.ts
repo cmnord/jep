@@ -1,15 +1,25 @@
 import type { DbRoomEvent } from "~/models/room-event.server";
 
-import { ActionType, gameEngine } from "./engine";
+import type { Action } from "./engine";
+import { ActionType, gameEngine, parseUtcMs } from "./engine";
 import type { State } from "./state";
 
-interface RoomEvent extends DbRoomEvent {
-  type: ActionType;
-  payload: { [key: string]: string | number | boolean };
+export function isTypedRoomEvent(
+  re: DbRoomEvent,
+): re is DbRoomEvent & { type: ActionType } {
+  return Object.values(ActionType).includes(re.type as ActionType);
 }
 
-export function isTypedRoomEvent(re: DbRoomEvent): re is RoomEvent {
-  return Object.values(ActionType).includes(re.type as ActionType);
+/** roomEventToAction converts a DB room event to an engine Action, parsing the
+ * timestamp string to epoch milliseconds. */
+export function roomEventToAction(
+  re: DbRoomEvent & { type: ActionType },
+): Action {
+  return {
+    type: re.type,
+    payload: re.payload as Record<string, string | number | boolean>,
+    ts: parseUtcMs(re.ts),
+  };
 }
 
 /** applyRoomEventsToState mutates State to account for each room event. */
@@ -21,7 +31,7 @@ export function applyRoomEventsToState(
     if (!isTypedRoomEvent(re)) {
       throw new Error("unhandled room event type from DB: " + re.type);
     }
-    state = gameEngine(state, re);
+    state = gameEngine(state, roomEventToAction(re));
   }
   return state;
 }
