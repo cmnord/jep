@@ -130,9 +130,7 @@ export function useGameEngine(
   roomId: number,
   accessToken?: AuthSession["accessToken"],
 ) {
-  const seenEventIds = React.useRef(
-    new Set(serverRoomEvents.map((e) => e.id)),
-  );
+  const seenEventIds = React.useRef(new Set(serverRoomEvents.map((e) => e.id)));
 
   const [connectionState, setConnectionState] = React.useState<ConnectionState>(
     ConnectionState.DISCONNECTED,
