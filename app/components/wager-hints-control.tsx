@@ -1,12 +1,12 @@
 import * as Tabs from "@radix-ui/react-tabs";
 
-import type { WagerHintsMode } from "~/models/user-settings.server";
+import { WagerHintsMode } from "~/models/user-settings.server";
 import { useWagerHintsSettings } from "~/utils/user-settings";
 
 const WAGER_HINTS_OPTIONS: { value: WagerHintsMode; label: string }[] = [
-  { value: "show", label: "Always" },
-  { value: "tap_to_reveal", label: "On tap" },
-  { value: "never", label: "Never" },
+  { value: WagerHintsMode.Show, label: "Always" },
+  { value: WagerHintsMode.TapToReveal, label: "On tap" },
+  { value: WagerHintsMode.Never, label: "Never" },
 ];
 
 export default function WagerHintsControl() {

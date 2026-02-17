@@ -9,9 +9,13 @@ const soundSchema = z.object({
   mute: z.boolean(),
 });
 
-const wagerHintsSchema = z.enum(["show", "tap_to_reveal", "never"]);
+export enum WagerHintsMode {
+  Show = "show",
+  TapToReveal = "tap_to_reveal",
+  Never = "never",
+}
 
-export type WagerHintsMode = z.infer<typeof wagerHintsSchema>;
+const wagerHintsSchema = z.nativeEnum(WagerHintsMode);
 
 export const userSettingsSchema = z.object({
   sound: soundSchema.optional(),

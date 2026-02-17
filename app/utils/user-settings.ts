@@ -2,8 +2,8 @@ import { produce } from "immer";
 import * as React from "react";
 import { useFetcher } from "react-router";
 
-import type {
-  UserSettings,
+import {
+  type UserSettings,
   WagerHintsMode,
 } from "~/models/user-settings.server";
 
@@ -74,7 +74,7 @@ export function useUserSettings() {
   return React.useContext(UserSettingsContext);
 }
 
-const DEFAULT_WAGER_HINTS: WagerHintsMode = "show";
+const DEFAULT_WAGER_HINTS = WagerHintsMode.Show;
 
 export function useWagerHintsSettings() {
   const { settings, saveSettings } = useUserSettings();

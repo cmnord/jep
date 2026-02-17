@@ -14,6 +14,7 @@ import {
 } from "~/engine";
 import { formatDollars } from "~/utils";
 import useSoloAction from "~/utils/use-solo-action";
+import { WagerHintsMode } from "~/models/user-settings.server";
 import { useWagerHintsSettings } from "~/utils/user-settings";
 import type { WagerRecommendation } from "~/utils/wager-strategy";
 import { getFinalClueStrategy } from "~/utils/wager-strategy";
@@ -148,7 +149,7 @@ function WagerForm({
   }, [strategy, maxWager]);
 
   const hasAnySuggestion =
-    (allInRec || otherRecs.length > 0) && wagerHints !== "never";
+    (allInRec || otherRecs.length > 0) && wagerHints !== WagerHintsMode.Never;
 
   return (
     <div className="flex flex-col items-center gap-4 p-2">
@@ -197,7 +198,7 @@ function WagerForm({
           allInReason={allInRec?.reason}
           recommendations={otherRecs}
           onSelectAmount={(amount) => setWagerValue(amount.toString())}
-          defaultOpen={wagerHints === "show"}
+          defaultOpen={wagerHints === WagerHintsMode.Show}
         />
       ) : null}
     </div>
