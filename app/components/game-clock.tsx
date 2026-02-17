@@ -11,6 +11,35 @@ const UPDATE_INTERVAL_MS = 200;
 const PAUSE_SYMBOL = "\u23F8"; // ⏸
 const PLAY_SYMBOL = "\u25B6"; // ▶
 
+/** ClockDisplay is the presentational component for the game clock.
+ * Use this directly when you need a static (non-interactive) clock display. */
+export function ClockDisplay({
+  displayMs,
+  running = false,
+  disabled = false,
+  onToggle,
+}: {
+  displayMs: number;
+  running?: boolean;
+  disabled?: boolean;
+  onToggle?: () => void;
+}) {
+  return (
+    <button
+      onClick={onToggle}
+      disabled={disabled}
+      className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-slate-300 transition-colors hover:bg-white/10 hover:text-white disabled:pointer-events-none"
+      title={running ? "Pause clock" : "Resume clock"}
+    >
+      <span className="text-base">{running ? PAUSE_SYMBOL : PLAY_SYMBOL}</span>
+      <span className="font-mono tabular-nums">
+        {formatElapsedTime(displayMs)}
+      </span>
+    </button>
+  );
+}
+
+/** GameClock is the interactive clock connected to the engine context. */
 export default function GameClock({ roomId }: Pick<RoomProps, "roomId">) {
   const { clockRunning, clockAccumulatedMs, clockLastResumedAt, soloDispatch } =
     useEngineContext();
@@ -50,15 +79,10 @@ export default function GameClock({ roomId }: Pick<RoomProps, "roomId">) {
   }
 
   return (
-    <button
-      onClick={handleToggle}
-      className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-slate-300 transition-colors hover:bg-white/10 hover:text-white"
-      title={clockRunning ? "Pause clock" : "Resume clock"}
-    >
-      <span className="text-base">{clockRunning ? PAUSE_SYMBOL : PLAY_SYMBOL}</span>
-      <span className="font-mono tabular-nums">
-        {formatElapsedTime(displayMs)}
-      </span>
-    </button>
+    <ClockDisplay
+      displayMs={displayMs}
+      running={clockRunning}
+      onToggle={handleToggle}
+    />
   );
 }

@@ -17,7 +17,7 @@ export function roomEventToAction(
 ): Action {
   return {
     type: re.type,
-    payload: re.payload as Record<string, string | number | boolean>,
+    payload: re.payload,
     ts: parseUtcMs(re.ts),
   };
 }
