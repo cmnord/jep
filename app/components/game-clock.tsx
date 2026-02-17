@@ -8,6 +8,8 @@ import { formatElapsedTime } from "~/utils";
 import useSoloAction from "~/utils/use-solo-action";
 
 const UPDATE_INTERVAL_MS = 200;
+const PAUSE_SYMBOL = "\u23F8"; // ⏸
+const PLAY_SYMBOL = "\u25B6"; // ▶
 
 export default function GameClock({ roomId }: Pick<RoomProps, "roomId">) {
   const { clockRunning, clockAccumulatedMs, clockLastResumedAt, soloDispatch } =
@@ -53,7 +55,7 @@ export default function GameClock({ roomId }: Pick<RoomProps, "roomId">) {
       className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-slate-300 transition-colors hover:bg-white/10 hover:text-white"
       title={clockRunning ? "Pause clock" : "Resume clock"}
     >
-      <span className="text-base">{clockRunning ? "\u23F8" : "\u25B6"}</span>
+      <span className="text-base">{clockRunning ? PAUSE_SYMBOL : PLAY_SYMBOL}</span>
       <span className="font-mono tabular-nums">
         {formatElapsedTime(displayMs)}
       </span>
