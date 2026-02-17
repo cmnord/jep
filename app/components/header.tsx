@@ -8,7 +8,7 @@ import WagerHintsControl from "~/components/wager-hints-control";
 import type { Game } from "~/models/game.server";
 import { stringToHslColor } from "~/utils";
 
-import { ExclamationTriangle } from "./icons";
+import { ExclamationTriangle, InformationCircle, Logout, User } from "./icons";
 
 function LoginButton({ pathname }: { pathname: string }) {
   const to =
@@ -50,22 +50,7 @@ function AccountButton({ user }: { user: { id: string; email: string } }) {
           <DropdownMenu.Separator className="m-1 h-px bg-slate-200" />
           <DropdownMenu.Item asChild>
             <Link to="/profile">
-              {/* Heroicon name: solid/user */}
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                className="absolute left-0 m-1 h-5 w-5"
-                role="img"
-                aria-labelledby="user-title"
-              >
-                <title id="user-title">Profile</title>
-                <path
-                  fillRule="evenodd"
-                  d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z"
-                  clipRule="evenodd"
-                />
-              </svg>
+              <User className="absolute left-0 m-1 h-5 w-5" />
               <p className="pl-7">Profile</p>
             </Link>
           </DropdownMenu.Item>
@@ -76,22 +61,7 @@ function AccountButton({ user }: { user: { id: string; email: string } }) {
           >
             <Form method="POST" action="/logout">
               <button type="submit" className="flex grow items-center">
-                {/* Heroicon name: solid/logout */}
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  className="absolute left-0 m-1 h-5 w-5"
-                  role="img"
-                  aria-labelledby="logout-title"
-                >
-                  <title id="logout-title">Log out</title>
-                  <path
-                    fillRule="evenodd"
-                    d="M7.5 3.75A1.5 1.5 0 006 5.25v13.5a1.5 1.5 0 001.5 1.5h6a1.5 1.5 0 001.5-1.5V15a.75.75 0 011.5 0v3.75a3 3 0 01-3 3h-6a3 3 0 01-3-3V5.25a3 3 0 013-3h6a3 3 0 013 3V9A.75.75 0 0115 9V5.25a1.5 1.5 0 00-1.5-1.5h-6zm5.03 4.72a.75.75 0 010 1.06l-1.72 1.72h10.94a.75.75 0 010 1.5H10.81l1.72 1.72a.75.75 0 11-1.06 1.06l-3-3a.75.75 0 010-1.06l3-3a.75.75 0 011.06 0z"
-                    clipRule="evenodd"
-                  />
-                </svg>
+                <Logout className="absolute left-0 m-1 h-5 w-5" />
                 <p className="pl-7">Log out</p>
               </button>
             </Form>
@@ -110,21 +80,7 @@ function GameSettings({ game, url }: { game: Game; url: string }) {
           className={`flex h-6 w-6 items-center justify-center text-white hover:text-slate-300 data-[state=open]:text-slate-300`}
           aria-label="Customise options"
         >
-          {/* Heroicon name: outline/information-circle */}
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth="1.5"
-            stroke="currentColor"
-            className="h-6 w-6"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"
-            />
-          </svg>
+          <InformationCircle className="h-6 w-6" />
         </button>
       </DropdownMenu.Trigger>
 
