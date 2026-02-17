@@ -25,15 +25,8 @@ export default function ReplayPlayer({
     [game, actions],
   );
 
-  const {
-    currentFrameIndex,
-    playing,
-    speed,
-    play,
-    pause,
-    setFrame,
-    setSpeed,
-  } = useReplay(frames.length);
+  const { currentFrameIndex, playing, speed, play, pause, setFrame, setSpeed } =
+    useReplay(frames.length);
 
   const currentFrame =
     currentFrameIndex >= 0 ? frames[currentFrameIndex] : undefined;
@@ -68,8 +61,7 @@ export default function ReplayPlayer({
       }
     }
     const [ci, cj] = currentFrame.clue;
-    const category =
-      game.boards[currentFrame.round]?.categories?.[cj];
+    const category = game.boards[currentFrame.round]?.categories?.[cj];
     const clue = category?.clues?.[ci];
     if (!category || !clue) return "";
     const value = clue.wagerable
@@ -123,7 +115,11 @@ export default function ReplayPlayer({
     (e: React.KeyboardEvent) => {
       if (e.key === " ") {
         e.preventDefault();
-        playing ? pause() : play();
+        if (playing) {
+          pause();
+        } else {
+          play();
+        }
       } else if (e.key === "ArrowLeft") {
         e.preventDefault();
         setFrame(currentFrameIndex - 1);
@@ -153,13 +149,12 @@ export default function ReplayPlayer({
           </div>
         )}
         <ReplayBoard
-        board={board}
-        game={game}
-        round={displayRound}
-        frames={frames}
-        currentFrameIndex={currentFrameIndex}
-        allPlayers={allPlayers}
-      />
+          board={board}
+          round={displayRound}
+          frames={frames}
+          currentFrameIndex={currentFrameIndex}
+          allPlayers={allPlayers}
+        />
       </div>
 
       <ReplayControls
@@ -175,7 +170,11 @@ export default function ReplayPlayer({
         onSpeedChange={setSpeed}
       />
 
-      <ReplayScoreBar allPlayers={allPlayers} currentState={displayState} playing={playing} />
+      <ReplayScoreBar
+        allPlayers={allPlayers}
+        currentState={displayState}
+        playing={playing}
+      />
     </div>
   );
 }

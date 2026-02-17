@@ -6,12 +6,8 @@ import CluePopoverContent from "~/components/clue-popover-content";
 import Popover from "~/components/popover";
 import { clueIsPlayable } from "~/engine";
 import type { Player } from "~/engine/state";
-import type { Board, Clue, Game } from "~/models/convert.server";
-import {
-  formatDollars,
-  generateGrid,
-  stringToHslColor,
-} from "~/utils";
+import type { Board, Clue } from "~/models/convert.server";
+import { formatDollars, generateGrid, stringToHslColor } from "~/utils";
 import type { ClueLookup, ReplayFrame } from "./replay";
 import { buildClueLookup } from "./replay";
 
@@ -99,7 +95,8 @@ function ReplayClue({
   }
 
   // Determine visual state based on current frame vs clue's frames
-  const notReached = !clueLookup || currentFrameIndex < clueLookup.chosenFrameIndex;
+  const notReached =
+    !clueLookup || currentFrameIndex < clueLookup.chosenFrameIndex;
 
   if (notReached) {
     return (
@@ -137,12 +134,11 @@ function ReplayClue({
   }
   const isGreyedOut = isResolved && !clueLookup.correctUserId;
 
-  const clueValue =
-    clue.wagerable
-      ? clue.longForm
-        ? "Final"
-        : "DD"
-      : clue.value;
+  const clueValue = clue.wagerable
+    ? clue.longForm
+      ? "Final"
+      : "DD"
+    : clue.value;
 
   const cellContent = (
     <div
@@ -204,14 +200,12 @@ function ReplayClue({
 
 export function ReplayBoard({
   board,
-  game,
   round,
   frames,
   currentFrameIndex,
   allPlayers,
 }: {
   board: Board;
-  game: Game;
   round: number;
   frames: ReplayFrame[];
   currentFrameIndex: number;
@@ -302,11 +296,15 @@ export function ReplayScoreBar({
     if (!currentState) return allPlayers;
     return [...allPlayers].sort((a, b) => {
       const scoreA =
-        (currentState.players.get(a.userId) ??
-          currentState.leftPlayers.get(a.userId))?.score ?? 0;
+        (
+          currentState.players.get(a.userId) ??
+          currentState.leftPlayers.get(a.userId)
+        )?.score ?? 0;
       const scoreB =
-        (currentState.players.get(b.userId) ??
-          currentState.leftPlayers.get(b.userId))?.score ?? 0;
+        (
+          currentState.players.get(b.userId) ??
+          currentState.leftPlayers.get(b.userId)
+        )?.score ?? 0;
       return scoreB - scoreA;
     });
   }, [allPlayers, currentState]);

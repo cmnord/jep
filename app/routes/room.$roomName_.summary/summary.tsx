@@ -61,7 +61,13 @@ function PostGameClue({ clue, state, round, i, j }: Props) {
     <td className="h-full sm:p-1">
       <Popover
         content={
-          <CluePopoverContent clue={clue} state={state} round={round} i={i} j={j} />
+          <CluePopoverContent
+            clue={clue}
+            state={state}
+            round={round}
+            i={i}
+            j={j}
+          />
         }
       >
         <button
