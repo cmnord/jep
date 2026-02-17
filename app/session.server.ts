@@ -60,6 +60,21 @@ export async function getUserSession(request: Request) {
   return null;
 }
 
+/**
+ * Validates that the claimed userId from form data matches the authenticated
+ * session. Throws a 403 Response if they don't match, preventing impersonation.
+ */
+export async function requireSessionUserId(
+  request: Request,
+  claimedUserId: string,
+  authSession: { userId: string } | null,
+): Promise<void> {
+  const sessionUserId = authSession?.userId ?? (await getUserSession(request));
+  if (sessionUserId !== claimedUserId) {
+    throw new Response("userId does not match session", { status: 403 });
+  }
+}
+
 /** createUserSession appends to existing headers if provided. */
 async function createUserSession(
   request: Request,
