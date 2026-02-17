@@ -68,7 +68,7 @@ export interface State {
   // clock state
   readonly clockRunning: boolean;
   readonly clockAccumulatedMs: number;
-  readonly clockLastResumedAt: string | null;
+  readonly clockLastResumedAt: number | null;
 }
 
 /** stateFromGame creates a new initial state based on the game. */

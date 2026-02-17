@@ -2352,7 +2352,7 @@ describe("gameEngine", () => {
         draft.players.set(PLAYER1.userId, PLAYER1);
         draft.clockRunning = true;
         draft.clockAccumulatedMs = 0;
-        draft.clockLastResumedAt = "2024-01-01T00:00:05.000Z";
+        draft.clockLastResumedAt = 1704067205000;
       }),
     },
     {
@@ -2398,7 +2398,7 @@ describe("gameEngine", () => {
         draft.players.set(PLAYER1.userId, PLAYER1);
         draft.clockRunning = true;
         draft.clockAccumulatedMs = 10000;
-        draft.clockLastResumedAt = "2024-01-01T00:00:20.000Z";
+        draft.clockLastResumedAt = 1704067220000;
       }),
     },
     {
@@ -2425,7 +2425,7 @@ describe("gameEngine", () => {
         draft.players.set(PLAYER1.userId, PLAYER1);
         draft.clockRunning = true;
         draft.clockAccumulatedMs = 10000;
-        draft.clockLastResumedAt = "2024-01-01T00:00:25.000Z";
+        draft.clockLastResumedAt = 1704067225000;
       }),
     },
     {

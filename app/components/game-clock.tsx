@@ -29,7 +29,7 @@ export default function GameClock({ roomId }: Pick<RoomProps, "roomId">) {
     const tick = () => {
       const now = Date.now();
       if (now - lastUpdate >= UPDATE_INTERVAL_MS) {
-        const liveDelta = now - new Date(clockLastResumedAt).getTime();
+        const liveDelta = now - clockLastResumedAt;
         setDisplayMs(clockAccumulatedMs + Math.max(0, liveDelta));
         lastUpdate = now;
       }

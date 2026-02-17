@@ -140,12 +140,11 @@ function transferBoardControl(draft: Draft<State>, userId: string) {
   }
 }
 
-/** ensureUtc appends a 'Z' suffix to ISO timestamps that lack timezone info.
- * Postgres `timestamp` (without timezone) omits the suffix, causing JS Date to
- * interpret the string as local time instead of UTC. */
-function ensureUtc(ts: string): string {
-  if (/Z|[+-]\d{2}(:\d{2})?$/.test(ts)) return ts;
-  return ts + "Z";
+/** parseUtcMs converts an ISO timestamp string to epoch milliseconds,
+ * treating timezone-naive strings (from Postgres) as UTC. */
+function parseUtcMs(ts: string): number {
+  if (/Z|[+-]\d{2}(:\d{2})?$/.test(ts)) return new Date(ts).getTime();
+  return new Date(ts + "Z").getTime();
 }
 
 /** resumeClock sets the clock to running, recording when it was resumed.
@@ -153,16 +152,14 @@ function ensureUtc(ts: string): string {
 function resumeClock(draft: Draft<State>, ts: string) {
   if (draft.clockRunning) return;
   draft.clockRunning = true;
-  draft.clockLastResumedAt = ensureUtc(ts);
+  draft.clockLastResumedAt = parseUtcMs(ts);
 }
 
 /** pauseClock accumulates elapsed time and marks the clock as paused.
  * No-op if already paused. */
 function pauseClock(draft: Draft<State>, ts: string) {
   if (!draft.clockRunning || !draft.clockLastResumedAt) return;
-  const elapsed =
-    new Date(ensureUtc(ts)).getTime() -
-    new Date(draft.clockLastResumedAt).getTime();
+  const elapsed = parseUtcMs(ts) - draft.clockLastResumedAt;
   draft.clockAccumulatedMs += Math.max(0, elapsed);
   draft.clockRunning = false;
   draft.clockLastResumedAt = null;
