@@ -159,8 +159,7 @@ export function buildClueLookup(
     if (!existing) {
       map.set(key, {
         chosenFrameIndex: frame.index,
-        buzzedFrameIndex:
-          frame.phase === CluePhase.Buzzed ? frame.index : null,
+        buzzedFrameIndex: frame.phase === CluePhase.Buzzed ? frame.index : null,
         resolvedFrameIndex:
           frame.phase === CluePhase.Resolved ? frame.index : -1,
         participantIds: frame.participantIds,

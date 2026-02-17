@@ -4,6 +4,7 @@ import clsx from "clsx";
 
 import * as DropdownMenu from "~/components/dropdown-menu";
 import { Pause, Play } from "~/components/icons";
+
 import type { Speed } from "./use-replay";
 
 const SPEEDS: Speed[] = [1, 2, 4];
@@ -11,7 +12,7 @@ const SPEEDS: Speed[] = [1, 2, 4];
 /** Compute thumb position as a CSS percentage along the scrubber track. */
 function thumbPercent(currentFrame: number, totalFrames: number): number {
   if (totalFrames <= 1) return 50;
-  return ((currentFrame - (-1)) / (totalFrames - 1 - (-1))) * 100;
+  return ((currentFrame - -1) / (totalFrames - 1 - -1)) * 100;
 }
 
 interface ReplayControlsProps {
@@ -52,11 +53,7 @@ export function ReplayControls({
         aria-label={playing ? "Pause replay" : "Play replay"}
         className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
       >
-        {playing ? (
-          <Pause className="h-5 w-5" />
-        ) : (
-          <Play className="h-5 w-5" />
-        )}
+        {playing ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
       </Toggle.Root>
 
       {/* Scrubber + floating clue label */}
@@ -88,8 +85,7 @@ export function ReplayControls({
             {/* Round boundary tick marks */}
             {totalFrames > 1 &&
               roundBoundaries.map((boundary) => {
-                const pct =
-                  ((boundary - (-1)) / (totalFrames - 1 - (-1))) * 100;
+                const pct = ((boundary - -1) / (totalFrames - 1 - -1)) * 100;
                 return (
                   <button
                     key={boundary}
@@ -106,7 +102,7 @@ export function ReplayControls({
                 );
               })}
           </Slider.Track>
-          <Slider.Thumb className="block h-4 w-4 rounded-full bg-white shadow-md transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <Slider.Thumb className="block h-4 w-4 rounded-full bg-white shadow-md transition-transform hover:scale-110 focus:ring-2 focus:ring-blue-500 focus:outline-none" />
         </Slider.Root>
       </div>
 

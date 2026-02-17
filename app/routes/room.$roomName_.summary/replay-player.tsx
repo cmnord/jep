@@ -4,9 +4,10 @@ import type { Action, Player } from "~/engine";
 import { stateFromGame } from "~/engine/state";
 import type { Game } from "~/models/convert.server";
 import { formatDollars } from "~/utils";
+
+import { buildReplayFrames } from "./replay";
 import { ReplayBoard, ReplayScoreBar } from "./replay-board";
 import { ReplayControls } from "./replay-controls";
-import { buildReplayFrames } from "./replay";
 import { useReplay } from "./use-replay";
 
 interface ReplayPlayerProps {
@@ -142,7 +143,7 @@ export default function ReplayPlayer({
       {/* Board + round banner wrapper */}
       <div className="relative">
         {showRoundBanner && (
-          <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-blue-1000/80 animate-content-show">
+          <div className="pointer-events-none absolute inset-0 z-10 flex animate-content-show items-center justify-center bg-blue-1000/80">
             <h2 className="font-inter text-4xl font-bold text-white text-shadow-lg">
               Round {bannerRound + 1}
             </h2>

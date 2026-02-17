@@ -8,6 +8,7 @@ import { clueIsPlayable } from "~/engine";
 import type { Player } from "~/engine/state";
 import type { Board, Clue } from "~/models/convert.server";
 import { formatDollars, generateGrid, stringToHslColor } from "~/utils";
+
 import type { ClueLookup, ReplayFrame } from "./replay";
 import { buildClueLookup } from "./replay";
 
@@ -30,7 +31,7 @@ function BuzzDots({
   const overflow = playerIds.length - MAX_MOBILE_DOTS;
 
   return (
-    <div className="absolute bottom-0.5 right-0.5 flex gap-px sm:bottom-1 sm:right-1 sm:gap-0.5">
+    <div className="absolute right-0.5 bottom-0.5 flex gap-px sm:right-1 sm:bottom-1 sm:gap-0.5">
       {playerIds.map((userId, idx) => {
         const player = allPlayers.find((p) => p.userId === userId);
         if (!player) return null;
