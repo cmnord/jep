@@ -161,8 +161,6 @@ export default function ReplayPlayer({
       />
       </div>
 
-      <ReplayScoreBar allPlayers={allPlayers} currentState={displayState} />
-
       <ReplayControls
         playing={playing}
         speed={speed}
@@ -175,6 +173,8 @@ export default function ReplayPlayer({
         onSeek={setFrame}
         onSpeedChange={setSpeed}
       />
+
+      <ReplayScoreBar allPlayers={allPlayers} currentState={displayState} />
     </div>
   );
 }

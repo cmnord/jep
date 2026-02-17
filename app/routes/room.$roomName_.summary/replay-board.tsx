@@ -20,6 +20,9 @@ import { buildClueLookup } from "./replay";
 const COMPOUND_EMOJI_REGEX =
   /\p{RI}\p{RI}|\p{Emoji}(\p{EMod}|\u{FE0F}\u{20E3}?|[\u{E0020}-\u{E007E}]+\u{E007F})?(\u{200D}\p{Emoji}(\p{EMod}|\u{FE0F}\u{20E3}?|[\u{E0020}-\u{E007E}]+\u{E007F})?)*|./gsu;
 
+/** Max dots visible on small screens before showing "+N" overflow. */
+const MAX_MOBILE_DOTS = 3;
+
 function BuzzDots({
   playerIds,
   allPlayers,
@@ -29,9 +32,11 @@ function BuzzDots({
 }) {
   if (playerIds.length === 0) return null;
 
+  const overflow = playerIds.length - MAX_MOBILE_DOTS;
+
   return (
-    <div className="absolute bottom-1 right-1 flex gap-0.5">
-      {playerIds.map((userId) => {
+    <div className="absolute bottom-0.5 right-0.5 flex gap-px sm:bottom-1 sm:right-1 sm:gap-0.5">
+      {playerIds.map((userId, idx) => {
         const player = allPlayers.find((p) => p.userId === userId);
         if (!player) return null;
         const bg = stringToHslColor(userId);
@@ -40,7 +45,11 @@ function BuzzDots({
         return (
           <div
             key={userId}
-            className="flex h-5 w-5 animate-fade-scale-in items-center justify-center rounded-full text-[10px] font-mono font-bold text-white"
+            className={clsx(
+              "flex animate-fade-scale-in items-center justify-center rounded-full font-mono font-bold text-white",
+              "h-3.5 w-3.5 text-[8px] sm:h-5 sm:w-5 sm:text-[10px]",
+              idx >= MAX_MOBILE_DOTS && "hidden sm:flex",
+            )}
             style={{ backgroundColor: bg }}
             title={player.name}
           >
@@ -48,6 +57,11 @@ function BuzzDots({
           </div>
         );
       })}
+      {overflow > 0 && (
+        <div className="flex h-3.5 w-3.5 animate-fade-scale-in items-center justify-center rounded-full bg-slate-600 font-mono text-[8px] font-bold text-white sm:hidden">
+          +{overflow}
+        </div>
+      )}
     </div>
   );
 }
@@ -414,18 +428,22 @@ export function ReplayScoreBar({
           currentState.players.get(p.userId) ??
           currentState.leftPlayers.get(p.userId);
         if (!current) return null;
+        const matches = current.name.match(COMPOUND_EMOJI_REGEX);
+        const firstChar = matches ? matches[0] : current.name[0];
         return (
           <div
             key={p.userId}
             data-user-id={p.userId}
             className="flex items-center gap-1.5"
             style={{ order: orderMap.get(p.userId) ?? 0 }}
+            title={current.name}
           >
             <div
-              className="h-4 w-4 rounded-full"
+              className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full font-mono text-xs font-bold text-white"
               style={{ backgroundColor: stringToHslColor(p.userId) }}
-            />
-            <span className="text-slate-300">{current.name}</span>
+            >
+              {firstChar}
+            </div>
             <span
               className={clsx(
                 "font-mono font-bold",

@@ -37,8 +37,8 @@ export function ReplayControls({
   const disabled = totalFrames === 0;
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg bg-white/5 px-4 py-3 sm:flex-row sm:items-center sm:gap-4">
-      {/* Play/Pause */}
+    <div className="flex flex-wrap items-center gap-3 rounded-lg bg-white/5 px-4 py-3 sm:gap-4">
+      {/* Play/Pause — always on the same line as scrubber */}
       <Toggle.Root
         pressed={playing}
         onPressedChange={(pressed) => (pressed ? onPlay() : onPause())}
@@ -53,8 +53,8 @@ export function ReplayControls({
         )}
       </Toggle.Root>
 
-      {/* Scrubber */}
-      <div className="flex-1">
+      {/* Scrubber — fills remaining space on the play/pause line */}
+      <div className="min-w-0 flex-1">
         <Slider.Root
           className="relative flex h-5 w-full touch-none items-center select-none"
           value={[currentFrame]}
@@ -92,8 +92,8 @@ export function ReplayControls({
         </Slider.Root>
       </div>
 
-      {/* Clue label */}
-      <p className="min-w-0 shrink-0 truncate text-center text-sm text-slate-300 sm:max-w-48">
+      {/* Clue label — wraps to second line on narrow screens */}
+      <p className="min-w-0 truncate text-sm text-slate-300 sm:max-w-48">
         {clueLabel}
       </p>
 
