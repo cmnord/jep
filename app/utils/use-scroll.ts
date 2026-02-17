@@ -56,6 +56,7 @@ export default function useInfiniteScroll<TData, TItem>(
   // Append new items when the fetcher returns data.
   React.useEffect(() => {
     if (!fetcher.data) return;
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- fetcher.data is untyped by React Router; callers control the shape via getItems
     const newItems = getItemsRef.current(fetcher.data as TData);
     if (newItems.length === 0) {
       setShouldLoadMore(false);

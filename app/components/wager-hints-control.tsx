@@ -9,6 +9,11 @@ const WAGER_HINTS_OPTIONS: { value: WagerHintsMode; label: string }[] = [
   { value: WagerHintsMode.Never, label: "Never" },
 ];
 
+const wagerHintsModes = new Set<string>(Object.values(WagerHintsMode));
+function isWagerHintsMode(v: string): v is WagerHintsMode {
+  return wagerHintsModes.has(v);
+}
+
 const themes = {
   light: {
     label: "text-sm text-slate-600",
@@ -37,7 +42,9 @@ export default function WagerHintsControl({
       <span className={t.label}>Show suggested wagers</span>
       <Tabs.Root
         value={wagerHints}
-        onValueChange={(value) => setWagerHints(value as WagerHintsMode)}
+        onValueChange={(v) => {
+          if (isWagerHintsMode(v)) setWagerHints(v);
+        }}
       >
         <Tabs.List
           className={`flex w-fit overflow-hidden rounded-lg shadow-sm transition-colors ${t.list}`}

@@ -6,6 +6,10 @@ import * as DropdownMenu from "~/components/dropdown-menu";
 import SoundControl from "~/components/sound";
 import WagerHintsControl from "~/components/wager-hints-control";
 import type { Game } from "~/models/game.server";
+
+function isGameLoaderData(data: unknown): data is { game: Game } {
+  return typeof data === "object" && data !== null && "game" in data;
+}
 import { stringToHslColor } from "~/utils";
 
 import { ExclamationTriangle, InformationCircle, Logout, User } from "./icons";
@@ -153,16 +157,10 @@ export default function Header({
   BASE_URL?: string;
 }) {
   const matches = useMatches();
-  const gameRoute = matches.find((match) => {
-    const loaderData = match.loaderData;
-    return loaderData && typeof loaderData === "object" && "game" in loaderData;
-  });
+  const gameRoute = matches.find((m) => isGameLoaderData(m.loaderData));
   const game =
-    gameRoute &&
-    typeof gameRoute.loaderData === "object" &&
-    gameRoute.loaderData !== null &&
-    "game" in gameRoute.loaderData
-      ? (gameRoute.loaderData.game as Game)
+    gameRoute && isGameLoaderData(gameRoute.loaderData)
+      ? gameRoute.loaderData.game
       : undefined;
   const pathname = matches[matches.length - 1].pathname;
 

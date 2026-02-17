@@ -15,6 +15,10 @@ export default defineConfig(
   {
     rules: {
       "@typescript-eslint/no-namespace": ["error", { allowDeclarations: true }],
+      "@typescript-eslint/consistent-type-assertions": [
+        "warn",
+        { assertionStyle: "never" },
+      ],
     },
   },
 );

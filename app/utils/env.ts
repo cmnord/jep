@@ -31,6 +31,7 @@ function getEnv(
 
   const source = (isBrowser ? window.env : process.env) ?? {};
 
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- keyof narrows to declared env var keys, preserving the `string` return type for consumers
   const value = source[name as keyof typeof source];
 
   if (!value && isRequired) {

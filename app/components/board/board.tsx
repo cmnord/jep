@@ -155,8 +155,8 @@ export function ConnectedBoardComponent({ roomId, userId }: RoomProps) {
     }
     const tdElement = row?.children.item(j);
     const cellButton = tdElement?.children.item(0);
-    if (cellButton) {
-      (cellButton as HTMLElement).focus();
+    if (cellButton instanceof HTMLElement) {
+      cellButton.focus();
     }
   }
 
@@ -185,8 +185,8 @@ export function ConnectedBoardComponent({ roomId, userId }: RoomProps) {
       case "ArrowUp": {
         const upTd = currentRow?.previousElementSibling?.children.item(j);
         const cellButton = upTd?.children.item(0);
-        if (cellButton) {
-          return (cellButton as HTMLElement).focus();
+        if (cellButton instanceof HTMLElement) {
+          return cellButton.focus();
         }
         break;
       }
@@ -194,8 +194,8 @@ export function ConnectedBoardComponent({ roomId, userId }: RoomProps) {
       case "ArrowDown": {
         const downTd = currentRow?.nextElementSibling?.children.item(j);
         const cellButton = downTd?.children.item(0);
-        if (cellButton) {
-          (cellButton as HTMLElement).focus();
+        if (cellButton instanceof HTMLElement) {
+          cellButton.focus();
         }
         break;
       }

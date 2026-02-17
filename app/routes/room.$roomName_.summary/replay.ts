@@ -4,6 +4,15 @@ import type { State } from "~/engine/state";
 import { stateFromGame } from "~/engine/state";
 import type { Game } from "~/models/convert.server";
 
+function hasUserId(p: unknown): p is { userId: string } {
+  return (
+    typeof p === "object" &&
+    p !== null &&
+    "userId" in p &&
+    typeof p.userId === "string"
+  );
+}
+
 /** The visual phase of a clue in the replay. */
 export enum CluePhase {
   /** Clue was just chosen -- highlight it with a border flash. */
@@ -77,16 +86,13 @@ export function buildReplayFrames(
     }
 
     // Accumulate participant info (Buzz and Answer events)
-    if (action.type === ActionType.Buzz && currentClue) {
-      const payload = action.payload as { userId: string };
-      if (!participantIds.includes(payload.userId)) {
-        participantIds.push(payload.userId);
-      }
-    }
-    if (action.type === ActionType.Answer && currentClue) {
-      const payload = action.payload as { userId: string };
-      if (!participantIds.includes(payload.userId)) {
-        participantIds.push(payload.userId);
+    if (
+      (action.type === ActionType.Buzz || action.type === ActionType.Answer) &&
+      currentClue &&
+      hasUserId(action.payload)
+    ) {
+      if (!participantIds.includes(action.payload.userId)) {
+        participantIds.push(action.payload.userId);
       }
     }
 
