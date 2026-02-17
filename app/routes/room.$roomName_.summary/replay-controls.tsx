@@ -14,6 +14,8 @@ interface ReplayControlsProps {
   currentFrame: number;
   totalFrames: number;
   clueLabel: string;
+  /** Frame indices where new rounds start, used for scrubber tick marks. */
+  roundBoundaries: number[];
   onPlay: () => void;
   onPause: () => void;
   onSeek: (index: number) => void;
@@ -26,6 +28,7 @@ export function ReplayControls({
   currentFrame,
   totalFrames,
   clueLabel,
+  roundBoundaries,
   onPlay,
   onPause,
   onSeek,
@@ -64,6 +67,26 @@ export function ReplayControls({
         >
           <Slider.Track className="relative h-1 w-full grow rounded-full bg-white/20">
             <Slider.Range className="absolute h-full rounded-full bg-blue-500" />
+            {/* Round boundary tick marks */}
+            {totalFrames > 1 &&
+              roundBoundaries.map((boundary) => {
+                const pct =
+                  ((boundary - (-1)) / (totalFrames - 1 - (-1))) * 100;
+                return (
+                  <button
+                    key={boundary}
+                    type="button"
+                    className="absolute top-1/2 z-[1] h-3 w-0.5 -translate-y-1/2 rounded-full bg-white/50 transition-colors hover:bg-white"
+                    style={{ left: `${pct}%` }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSeek(boundary);
+                    }}
+                    aria-label={`Jump to round boundary`}
+                    tabIndex={-1}
+                  />
+                );
+              })}
           </Slider.Track>
           <Slider.Thumb className="block h-4 w-4 rounded-full bg-white shadow-md transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500" />
         </Slider.Root>

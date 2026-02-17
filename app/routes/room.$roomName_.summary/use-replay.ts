@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 export type Speed = 1 | 2 | 4;
 
 /** Base interval per frame at 1x speed (milliseconds). */
-const BASE_INTERVAL_MS = 1000;
+const BASE_INTERVAL_MS = 250;
 
 export interface UseReplayReturn {
   /** Current frame index, or -1 if before the first frame. */

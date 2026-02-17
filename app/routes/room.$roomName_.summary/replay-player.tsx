@@ -80,6 +80,17 @@ export default function ReplayPlayer({
     return `${category.name} for ${value}`;
   }, [currentFrame, currentFrameIndex, frames.length, game.boards]);
 
+  // Compute frame indices where each new round starts (for scrubber tick marks)
+  const roundBoundaries = React.useMemo(() => {
+    const boundaries: number[] = [];
+    for (let i = 1; i < frames.length; i++) {
+      if (frames[i].round !== frames[i - 1].round) {
+        boundaries.push(frames[i].index);
+      }
+    }
+    return boundaries;
+  }, [frames]);
+
   // Round transition banner
   const prevRoundRef = React.useRef<number | undefined>(undefined);
   const [showRoundBanner, setShowRoundBanner] = React.useState(false);
@@ -131,16 +142,16 @@ export default function ReplayPlayer({
       tabIndex={0}
       onKeyDown={handleKeyDown}
     >
-      {/* Round transition banner */}
-      {showRoundBanner && (
-        <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-blue-1000/80 animate-content-show">
-          <h2 className="font-inter text-4xl font-bold text-white text-shadow-lg">
-            Round {bannerRound + 1}
-          </h2>
-        </div>
-      )}
-
-      <ReplayBoard
+      {/* Board + round banner wrapper */}
+      <div className="relative">
+        {showRoundBanner && (
+          <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-blue-1000/80 animate-content-show">
+            <h2 className="font-inter text-4xl font-bold text-white text-shadow-lg">
+              Round {bannerRound + 1}
+            </h2>
+          </div>
+        )}
+        <ReplayBoard
         board={board}
         game={game}
         round={displayRound}
@@ -148,6 +159,7 @@ export default function ReplayPlayer({
         currentFrameIndex={currentFrameIndex}
         allPlayers={allPlayers}
       />
+      </div>
 
       <ReplayScoreBar allPlayers={allPlayers} currentState={displayState} />
 
@@ -157,6 +169,7 @@ export default function ReplayPlayer({
         currentFrame={currentFrameIndex}
         totalFrames={frames.length}
         clueLabel={clueLabel}
+        roundBoundaries={roundBoundaries}
         onPlay={play}
         onPause={pause}
         onSeek={setFrame}
