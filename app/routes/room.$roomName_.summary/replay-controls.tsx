@@ -8,6 +8,12 @@ import type { Speed } from "./use-replay";
 
 const SPEEDS: Speed[] = [1, 2, 4];
 
+/** Compute thumb position as a CSS percentage along the scrubber track. */
+function thumbPercent(currentFrame: number, totalFrames: number): number {
+  if (totalFrames <= 1) return 50;
+  return ((currentFrame - (-1)) / (totalFrames - 1 - (-1))) * 100;
+}
+
 interface ReplayControlsProps {
   playing: boolean;
   speed: Speed;
@@ -53,8 +59,20 @@ export function ReplayControls({
         )}
       </Toggle.Root>
 
-      {/* Scrubber — fills remaining space on the play/pause line */}
-      <div className="min-w-0 flex-1">
+      {/* Scrubber + floating clue label */}
+      <div className="relative min-w-0 flex-1 pt-7">
+        {/* Floating clue label above the scrubber, like YouTube section headers */}
+        {clueLabel && (
+          <p
+            className="pointer-events-none absolute top-0 max-w-full truncate rounded-full bg-white/10 px-2.5 py-0.5 text-xs text-slate-200"
+            style={{
+              left: `clamp(0%, ${thumbPercent(currentFrame, totalFrames)}%, 100%)`,
+              transform: "translateX(-50%)",
+            }}
+          >
+            {clueLabel}
+          </p>
+        )}
         <Slider.Root
           className="relative flex h-5 w-full touch-none items-center select-none"
           value={[currentFrame]}
@@ -91,11 +109,6 @@ export function ReplayControls({
           <Slider.Thumb className="block h-4 w-4 rounded-full bg-white shadow-md transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500" />
         </Slider.Root>
       </div>
-
-      {/* Clue label — wraps to second line on narrow screens */}
-      <p className="min-w-0 truncate text-sm text-slate-300 sm:max-w-48">
-        {clueLabel}
-      </p>
 
       {/* Speed selector */}
       <DropdownMenu.Root>
