@@ -1,6 +1,6 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
-import { AuthSession } from "~/models/auth";
 
+import { AuthSession } from "~/models/auth";
 import type { Database } from "~/models/database.types";
 import {
   isBrowser,

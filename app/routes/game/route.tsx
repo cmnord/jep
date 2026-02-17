@@ -1,13 +1,12 @@
 import { parseFormData } from "@mjackson/form-data-parser";
 import { redirect } from "react-router";
 
-import type { Route } from "./+types/route";
-
 import { getValidAuthSession } from "~/models/auth";
 import { flashFormState } from "~/session.server";
 import { BASE_URL } from "~/utils";
 import { getRedirectTo, safeRedirect } from "~/utils/http.server";
 
+import type { Route } from "./+types/route";
 import { newUploadHandler } from "./file-upload-handler.server";
 
 export function loader({ request }: Route.LoaderArgs) {

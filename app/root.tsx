@@ -11,8 +11,6 @@ import {
   useRouteError,
 } from "react-router";
 
-import type { Route } from "./+types/root";
-
 import { CodeBlock } from "~/components/code";
 import Footer from "~/components/footer";
 import Header from "~/components/header";
@@ -20,6 +18,8 @@ import { getValidAuthSession } from "~/models/auth";
 import { getUserByEmail } from "~/models/user";
 import { BASE_URL, getBrowserEnv, NODE_ENV } from "~/utils";
 import { SoundContext } from "~/utils/use-sound";
+
+import type { Route } from "./+types/root";
 
 import stylesheet from "./styles.css?url";
 

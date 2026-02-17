@@ -1,7 +1,5 @@
-import { PlayerScore } from "~/components/player";
-import type { Route } from "./+types/route";
-
 import { ClockDisplay } from "~/components/game-clock";
+import { PlayerScore } from "~/components/player";
 import {
   applyRoomEventsToState,
   isTypedRoomEvent,
@@ -12,9 +10,10 @@ import { getValidAuthSession } from "~/models/auth";
 import { getGame } from "~/models/game.server";
 import { getRoomEvents } from "~/models/room-event.server";
 import { getRoom } from "~/models/room.server";
+import { getSolve, markSolved } from "~/models/solves.server";
 import { BASE_URL, formatDollars } from "~/utils";
 
-import { getSolve, markSolved } from "~/models/solves.server";
+import type { Route } from "./+types/route";
 import ScoreChart from "./chart";
 import { getBattingAverage, getCoryat } from "./coryat";
 import GameSummary from "./summary";

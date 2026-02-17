@@ -3,6 +3,7 @@ import * as React from "react";
 
 import { ConnectionState, MAX_RETRIES } from "~/engine/use-game-engine";
 import useDebounce from "~/utils/use-debounce";
+
 import Popover from "./popover";
 
 const DURATION_UPDATE_INTERVAL_MS = 500;

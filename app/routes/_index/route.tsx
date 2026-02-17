@@ -7,7 +7,6 @@ import {
   useSearchParams,
   useSubmit,
 } from "react-router";
-import type { Route } from "./+types/route";
 
 import {
   DefaultErrorBoundary,
@@ -25,6 +24,7 @@ import { getSessionFormState } from "~/session.server";
 import useDebounce from "~/utils/use-debounce";
 import useInfiniteScroll from "~/utils/use-scroll";
 
+import type { Route } from "./+types/route";
 import GameCard from "./game-card";
 
 export async function loader({ request }: Route.LoaderArgs) {

@@ -8,5 +8,10 @@
   "yaml.schemas": {
     "https://json.schemastore.org/github-workflow.json": "/.github/workflows/deploy.yml"
   },
-  "testing.automaticallyOpenPeekView": "never"
+  "testing.automaticallyOpenPeekView": "never",
+  "editor.defaultFormatter": "oxc.oxc-vscode",
+  "editor.formatOnSave": true,
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  }
 }

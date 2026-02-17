@@ -1,6 +1,7 @@
 import Code, { CodeBlock } from "~/components/code";
 import Link, { Anchor } from "~/components/link";
 import Main from "~/components/main";
+
 import type { Route } from "./+types/help";
 
 export const meta: Route.MetaFunction = () => [{ title: "Help" }];

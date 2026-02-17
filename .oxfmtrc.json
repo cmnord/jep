@@ -1,0 +1,10 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "experimentalTailwindcss": {
+    "stylesheet": "./app/styles.css"
+  },
+  "experimentalSortImports": {},
+  "printWidth": 80,
+  "experimentalSortPackageJson": false,
+  "ignorePatterns": []
+}

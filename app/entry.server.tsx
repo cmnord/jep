@@ -11,6 +11,7 @@ import { isbot } from "isbot";
 import { renderToPipeableStream } from "react-dom/server";
 import type { EntryContext } from "react-router";
 import { ServerRouter } from "react-router";
+
 import { SUPABASE_URL } from "~/utils";
 
 export const streamTimeout = 5_000;

@@ -1,5 +1,4 @@
 import { data, redirect, useMatches } from "react-router";
-import type { Route } from "./+types/room.$roomName";
 
 import GameComponent from "~/components/game";
 import { ActionType, GameEngineContext, useGameEngine } from "~/engine";
@@ -12,6 +11,8 @@ import { getRoom } from "~/models/room.server";
 import { getUserByEmail } from "~/models/user";
 import { getOrCreateUserSession, getUserSession } from "~/session.server";
 import { BASE_URL, getRandomEmoji } from "~/utils";
+
+import type { Route } from "./+types/room.$roomName";
 
 export const meta: Route.MetaFunction = ({ data }) => {
   try {

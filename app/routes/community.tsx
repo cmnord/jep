@@ -1,5 +1,6 @@
 import Link, { Anchor } from "~/components/link";
 import Main from "~/components/main";
+
 import type { Route } from "./+types/community";
 
 export const meta: Route.MetaFunction = () => [

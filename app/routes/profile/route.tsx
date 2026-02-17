@@ -1,6 +1,5 @@
 import * as React from "react";
 import { data, redirect, useFetcher } from "react-router";
-import type { Route } from "./+types/route";
 
 import { ErrorMessage, SuccessMessage } from "~/components/error";
 import Main from "~/components/main";
@@ -12,6 +11,7 @@ import { getUserByEmail } from "~/models/user/service.server";
 import { getSessionFormState } from "~/session.server";
 import { BASE_URL } from "~/utils";
 
+import type { Route } from "./+types/route";
 import { GameInfo } from "./game-info";
 import SolveInfo from "./solve-info";
 

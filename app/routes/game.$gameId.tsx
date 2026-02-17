@@ -1,8 +1,6 @@
 import { redirect } from "react-router";
 import { z } from "zod";
 
-import type { Route } from "./+types/game.$gameId";
-
 import { getValidAuthSession } from "~/models/auth";
 import {
   deleteGame,
@@ -12,6 +10,8 @@ import {
 } from "~/models/game.server";
 import { flashFormState } from "~/session.server";
 import { parseFormData } from "~/utils/http.server";
+
+import type { Route } from "./+types/game.$gameId";
 
 const visibilitySchema = z.object({
   visibility: z.enum(["PUBLIC", "PRIVATE", "UNLISTED"]),

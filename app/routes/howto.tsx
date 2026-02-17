@@ -1,5 +1,4 @@
 import * as React from "react";
-import type { Route } from "./+types/howto";
 
 import Button from "~/components/button";
 import { ErrorMessage, SuccessMessage } from "~/components/error";
@@ -12,6 +11,8 @@ import { ReadClueTimer } from "~/components/prompt/read-clue-timer";
 import { CLUE_TIMEOUT_MS } from "~/engine";
 import useKeyPress from "~/utils/use-key-press";
 import useTimeout from "~/utils/use-timeout";
+
+import type { Route } from "./+types/howto";
 
 export const meta: Route.MetaFunction = () => [{ title: "How to Play" }];
 

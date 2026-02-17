@@ -1,5 +1,4 @@
 import { data, useMatches } from "react-router";
-import type { Route } from "./+types/game_.$gameId.solo";
 
 import GameComponent from "~/components/game";
 import { GameEngineContext, useSoloGameEngine } from "~/engine";
@@ -8,6 +7,8 @@ import { getGame } from "~/models/game.server";
 import { getUserByEmail } from "~/models/user";
 import { getOrCreateUserSession } from "~/session.server";
 import { BASE_URL, getRandomEmoji } from "~/utils";
+
+import type { Route } from "./+types/game_.$gameId.solo";
 
 export const meta: Route.MetaFunction = ({ data }) => {
   try {

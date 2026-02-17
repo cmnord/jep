@@ -1,6 +1,4 @@
 import { data, Form } from "react-router";
-import type { Route } from "./+types/report";
-
 import { z } from "zod";
 
 import Button from "~/components/button";
@@ -14,6 +12,8 @@ import { insertReport } from "~/models/report.server";
 import { getRoom } from "~/models/room.server";
 import { BASE_URL, GITHUB_URL } from "~/utils";
 import { parseFormData } from "~/utils/http.server";
+
+import type { Route } from "./+types/report";
 
 export const meta: Route.MetaFunction = () => [{ title: "Report a game" }];
 

@@ -1,8 +1,10 @@
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import { useFetcher } from "react-router";
+
 import type { Action, Player } from "~/engine";
 import { useEngineContext } from "~/engine";
 import useSoloAction from "~/utils/use-solo-action";
+
 import { PlayerIcon } from "./player";
 
 export function KickablePlayerIcon({

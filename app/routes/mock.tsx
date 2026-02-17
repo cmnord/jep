@@ -1,10 +1,11 @@
 import { useMatches } from "react-router";
-import type { Route } from "./+types/mock";
 
 import GameComponent from "~/components/game";
 import { GameEngineContext, useSoloGameEngine } from "~/engine";
 import { getMockGame } from "~/models/mock.server";
 import { BASE_URL } from "~/utils";
+
+import type { Route } from "./+types/mock";
 
 export const meta: Route.MetaFunction = ({ data }) => {
   try {

@@ -7,7 +7,6 @@ import {
   useSearchParams,
 } from "react-router";
 import { z } from "zod";
-import type { Route } from "./+types/login";
 
 import Button from "~/components/button";
 import { ErrorMessage } from "~/components/error";
@@ -25,6 +24,8 @@ import {
   getRedirectTo,
   parseFormData,
 } from "~/utils/http.server";
+
+import type { Route } from "./+types/login";
 
 const formSchema = z.object({ email: z.string(), password: z.string() });
 

@@ -1,7 +1,5 @@
 import { z } from "zod";
 
-import type { Route } from "./+types/room.$roomId.player";
-
 import { ActionType } from "~/engine";
 import { getValidAuthSession } from "~/models/auth";
 import { createRoomEvent } from "~/models/room-event.server";
@@ -9,6 +7,8 @@ import { getRoom } from "~/models/room.server";
 import { getSolve, markAttempted } from "~/models/solves.server";
 import { getUserSession, requireSessionUserId } from "~/session.server";
 import { parseFormData } from "~/utils/http.server";
+
+import type { Route } from "./+types/room.$roomId.player";
 
 const formSchema = z.object({
   name: z.string(),
