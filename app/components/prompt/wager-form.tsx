@@ -67,45 +67,57 @@ function WhyButton({ reason }: { reason: string }) {
 }
 
 function SuggestedDrawer({
+  allInReason,
   recommendations,
   onSelectAmount,
   defaultOpen,
 }: {
+  allInReason?: string;
   recommendations: WagerRecommendation[];
   onSelectAmount: (amount: number) => void;
   defaultOpen: boolean;
 }) {
-  if (recommendations.length === 0) return null;
+  const totalCount =
+    recommendations.length + (allInReason ? 1 : 0);
+  if (totalCount === 0) return null;
 
   return (
     <Collapsible.Root defaultOpen={defaultOpen} className="w-full">
       <Collapsible.Trigger className="group flex items-center gap-1.5 text-sm text-slate-300 transition-colors hover:text-white">
-        <span>Suggested</span>
+        <span>Suggestions</span>
         <span className="rounded-full bg-slate-700 px-1.5 text-xs text-slate-400">
-          {recommendations.length}
+          {totalCount}
         </span>
         <span className="text-xs transition-transform group-data-[state=open]:rotate-90">
           ›
         </span>
       </Collapsible.Trigger>
-      <Collapsible.Content className="pt-2">
-        <div className="flex flex-wrap gap-2">
-          {recommendations.map((rec, i) => (
-            <div key={i} className="flex items-center gap-1">
-              <button
-                type="button"
-                onClick={() => onSelectAmount(rec.amount)}
-                className="rounded-full border border-blue-400/60 px-3 py-1 text-sm text-blue-200 transition-colors hover:border-blue-300 hover:bg-blue-600/40 hover:text-white"
-              >
-                {rec.label}:{" "}
-                <span className="font-handwriting font-bold">
-                  {formatDollars(rec.amount)}
-                </span>
-              </button>
-              <WhyButton reason={rec.reason} />
-            </div>
-          ))}
-        </div>
+      <Collapsible.Content className="flex flex-col gap-2 pt-2">
+        {allInReason ? (
+          <p className="text-sm text-slate-300">
+            <span className="font-medium text-blue-300">All-in:</span>{" "}
+            {allInReason}
+          </p>
+        ) : null}
+        {recommendations.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {recommendations.map((rec, i) => (
+              <div key={i} className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => onSelectAmount(rec.amount)}
+                  className="rounded-full border border-blue-400/60 px-3 py-1 text-sm text-blue-200 transition-colors hover:border-blue-300 hover:bg-blue-600/40 hover:text-white"
+                >
+                  {rec.label}:{" "}
+                  <span className="font-handwriting font-bold">
+                    {formatDollars(rec.amount)}
+                  </span>
+                </button>
+                <WhyButton reason={rec.reason} />
+              </div>
+            ))}
+          </div>
+        ) : null}
       </Collapsible.Content>
     </Collapsible.Root>
   );
@@ -133,14 +145,15 @@ function WagerForm({
   const maxWager = longForm ? score : Math.max(score, highestClueValue);
   const [wagerValue, setWagerValue] = React.useState("");
 
-  // Split recommendations: All-in match vs drawer chips
+  // Split recommendations: All-in reason vs other chips
   const allInRec = strategy?.recommendations.find((r) => r.amount === maxWager);
-  const drawerRecs = React.useMemo(() => {
+  const otherRecs = React.useMemo(() => {
     if (!strategy) return [];
     return strategy.recommendations.filter((r) => r.amount !== maxWager);
   }, [strategy, maxWager]);
 
-  const showDrawer = drawerRecs.length > 0 && wagerHints !== "never";
+  const hasAnySuggestion =
+    (allInRec || otherRecs.length > 0) && wagerHints !== "never";
 
   return (
     <div className="flex flex-col items-center gap-4 p-2">
@@ -154,7 +167,7 @@ function WagerForm({
         <PlayerScores players={players} userId={userId} />
       </div>
 
-      {/* Input row */}
+      {/* Input + submit row */}
       <div className="flex w-full items-center gap-2">
         <Input
           type="number"
@@ -170,35 +183,28 @@ function WagerForm({
           placeholder="amount"
           required
         />
-        <div className="flex shrink-0 items-center gap-1">
-          <Button
-            type={allInRec ? "primary" : "default"}
-            onClick={() => setWagerValue(maxWager.toString())}
-          >
-            All-in
-            {allInRec ? (
-              <span className="ml-1 rounded-full bg-white/20 px-1.5 py-0.5 text-xs">
-                Suggested
-              </span>
-            ) : null}
-          </Button>
-          {allInRec ? <WhyButton reason={allInRec.reason} /> : null}
-        </div>
+        <Button type="default" htmlType="submit" loading={loading}>
+          Place wager
+        </Button>
       </div>
 
-      {/* Suggested drawer */}
-      {showDrawer ? (
+      {/* All-in button */}
+      <Button
+        type="primary"
+        onClick={() => setWagerValue(maxWager.toString())}
+      >
+        All-in ({formatDollars(maxWager)})
+      </Button>
+
+      {/* Suggestions drawer */}
+      {hasAnySuggestion ? (
         <SuggestedDrawer
-          recommendations={drawerRecs}
+          allInReason={allInRec?.reason}
+          recommendations={otherRecs}
           onSelectAmount={(amount) => setWagerValue(amount.toString())}
           defaultOpen={wagerHints === "show"}
         />
       ) : null}
-
-      {/* Confirm */}
-      <Button type="primary" htmlType="submit" loading={loading}>
-        Place wager
-      </Button>
     </div>
   );
 }
