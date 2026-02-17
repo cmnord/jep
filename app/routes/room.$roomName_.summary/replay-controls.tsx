@@ -64,7 +64,7 @@ export function ReplayControls({
         {/* Floating clue label above the scrubber, like YouTube section headers */}
         {clueLabel && (
           <p
-            className="pointer-events-none absolute top-0 max-w-full truncate rounded-full bg-white/10 px-2.5 py-0.5 text-xs text-slate-200"
+            className="pointer-events-none absolute top-0 max-w-full truncate rounded-full bg-white/10 px-3 py-0.5 text-sm text-slate-200"
             style={{
               left: `clamp(0%, ${thumbPercent(currentFrame, totalFrames)}%, 100%)`,
               transform: "translateX(-50%)",

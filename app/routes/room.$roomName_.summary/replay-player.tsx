@@ -110,12 +110,13 @@ export default function ReplayPlayer({
     prevRoundRef.current = currRound;
   }, [currRound]);
 
-  // Auto-dismiss banner after 1.5s
+  // Auto-dismiss banner — scales with playback speed, snappy when scrubbing
   React.useEffect(() => {
     if (!showRoundBanner) return;
-    const timer = setTimeout(() => setShowRoundBanner(false), 1500);
+    const durationMs = playing ? 1500 / speed : 500;
+    const timer = setTimeout(() => setShowRoundBanner(false), durationMs);
     return () => clearTimeout(timer);
-  }, [showRoundBanner]);
+  }, [showRoundBanner, playing, speed]);
 
   // Keyboard shortcuts
   const handleKeyDown = React.useCallback(
