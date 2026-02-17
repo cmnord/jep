@@ -1,5 +1,5 @@
 {
-  "exclude": ["./cypress", "./cypress.config.ts", "./vitest.config.ts"],
+  "exclude": ["./e2e", "./vitest.config.ts"],
   "include": ["**/*.ts", "**/*.tsx", ".react-router/types/**/*.ts"],
   "compilerOptions": {
     "lib": ["DOM", "DOM.Iterable", "ES2022"],

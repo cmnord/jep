@@ -9,8 +9,9 @@ node_modules
 /api/
 /build/
 
-/cypress/screenshots
-/cypress/videos
+/test-results/
+/playwright-report/
+/playwright/.cache/
 /coverage
 
 *.tsbuildinfo
