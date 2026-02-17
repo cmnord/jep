@@ -150,7 +150,7 @@ function ReplayClue({
   if (notReached) {
     return (
       <td className="h-full sm:p-1">
-        <div className="h-full w-full bg-blue-bright px-4 py-3">
+        <div className="h-full w-full border-2 border-transparent bg-blue-bright px-4 py-3">
           <p className="flex items-center justify-center font-inter font-bold text-yellow-1000 text-shadow-md sm:text-shadow-lg">
             <span className="text-sm sm:text-3xl lg:text-4xl">$</span>
             <span className="text-md sm:text-4xl lg:text-5xl">
@@ -192,11 +192,14 @@ function ReplayClue({
 
   const cellContent = (
     <div
-      className={clsx("relative h-full w-full px-4 py-3 transition-all duration-300", {
-        "bg-blue-bright": !isResolved,
-        "animate-border-pulse border-2": isChosen || isBuzzed,
-        "bg-slate-800": isGreyedOut,
-      })}
+      className={clsx(
+        "relative h-full w-full border-2 border-transparent px-4 py-3 transition-all duration-300",
+        {
+          "bg-blue-bright": !isResolved,
+          "animate-border-pulse": isChosen || isBuzzed,
+          "bg-slate-800": isGreyedOut,
+        },
+      )}
       style={backgroundColor ? { backgroundColor } : undefined}
     >
       <p
@@ -335,17 +338,89 @@ export function ReplayScoreBar({
   allPlayers: Player[];
   currentState: ReplayFrame["state"] | undefined;
 }) {
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const positionsRef = React.useRef<Map<string, DOMRect>>(new Map());
+
+  // Sort players by current score descending
+  const sortedPlayers = React.useMemo(() => {
+    if (!currentState) return allPlayers;
+    return [...allPlayers].sort((a, b) => {
+      const scoreA =
+        (currentState.players.get(a.userId) ??
+          currentState.leftPlayers.get(a.userId))?.score ?? 0;
+      const scoreB =
+        (currentState.players.get(b.userId) ??
+          currentState.leftPlayers.get(b.userId))?.score ?? 0;
+      return scoreB - scoreA;
+    });
+  }, [allPlayers, currentState]);
+
+  // Build order map: userId -> visual index
+  const orderMap = React.useMemo(
+    () => new Map(sortedPlayers.map((p, i) => [p.userId, i])),
+    [sortedPlayers],
+  );
+
+  // FLIP animation: after DOM update, animate from old positions to new
+  React.useLayoutEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const children = Array.from(
+      container.querySelectorAll<HTMLElement>("[data-user-id]"),
+    );
+    const newPositions = new Map<string, DOMRect>();
+
+    for (const child of children) {
+      const userId = child.dataset.userId!;
+      newPositions.set(userId, child.getBoundingClientRect());
+    }
+
+    // Apply inverse transforms for any items that moved
+    for (const child of children) {
+      const userId = child.dataset.userId!;
+      const oldRect = positionsRef.current.get(userId);
+      const newRect = newPositions.get(userId);
+      if (!oldRect || !newRect) continue;
+
+      const deltaX = oldRect.left - newRect.left;
+      const deltaY = oldRect.top - newRect.top;
+      if (deltaX === 0 && deltaY === 0) continue;
+
+      // Apply inverse transform (no transition)
+      child.style.transition = "none";
+      child.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+
+      // Force reflow
+      child.getBoundingClientRect();
+
+      // Animate to final position
+      child.style.transition = "transform 300ms ease";
+      child.style.transform = "";
+    }
+
+    positionsRef.current = newPositions;
+  });
+
   if (!currentState) return null;
 
   return (
-    <div className="flex flex-wrap justify-center gap-3 text-sm">
+    <div
+      ref={containerRef}
+      className="flex flex-wrap justify-center gap-3 text-sm"
+    >
       {allPlayers.map((p) => {
         const current =
           currentState.players.get(p.userId) ??
           currentState.leftPlayers.get(p.userId);
         if (!current) return null;
         return (
-          <div key={p.userId} className="flex items-center gap-1.5">
+          <div
+            key={p.userId}
+            data-user-id={p.userId}
+            className="flex items-center gap-1.5"
+            style={{ order: orderMap.get(p.userId) ?? 0 }}
+          >
             <div
               className="h-4 w-4 rounded-full"
               style={{ backgroundColor: stringToHslColor(p.userId) }}

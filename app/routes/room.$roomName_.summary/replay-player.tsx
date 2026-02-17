@@ -81,29 +81,30 @@ export default function ReplayPlayer({
   }, [currentFrame, currentFrameIndex, frames.length, game.boards]);
 
   // Round transition banner
-  const prevFrameRef = React.useRef(currentFrameIndex);
+  const prevRoundRef = React.useRef<number | undefined>(undefined);
   const [showRoundBanner, setShowRoundBanner] = React.useState(false);
   const [bannerRound, setBannerRound] = React.useState(0);
 
+  // Detect round changes
+  const currRound = currentFrame?.round;
   React.useEffect(() => {
-    const prevIdx = prevFrameRef.current;
-    const prevRound =
-      prevIdx >= 0 ? frames[prevIdx]?.round : undefined;
-    const currRound = currentFrame?.round;
-
     if (
       currRound !== undefined &&
-      prevRound !== undefined &&
-      currRound !== prevRound
+      prevRoundRef.current !== undefined &&
+      currRound !== prevRoundRef.current
     ) {
       setBannerRound(currRound);
       setShowRoundBanner(true);
-      const timer = setTimeout(() => setShowRoundBanner(false), 1500);
-      prevFrameRef.current = currentFrameIndex;
-      return () => clearTimeout(timer);
     }
-    prevFrameRef.current = currentFrameIndex;
-  }, [currentFrameIndex, currentFrame?.round, frames]);
+    prevRoundRef.current = currRound;
+  }, [currRound]);
+
+  // Auto-dismiss banner after 1.5s
+  React.useEffect(() => {
+    if (!showRoundBanner) return;
+    const timer = setTimeout(() => setShowRoundBanner(false), 1500);
+    return () => clearTimeout(timer);
+  }, [showRoundBanner]);
 
   // Keyboard shortcuts
   const handleKeyDown = React.useCallback(
