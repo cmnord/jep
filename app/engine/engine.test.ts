@@ -2496,8 +2496,12 @@ describe("gameEngine", () => {
       expect(state.type).toBe(tc.expectedState.type);
       expect(state.wagers).toStrictEqual(tc.expectedState.wagers);
       expect(state.clockRunning).toBe(tc.expectedState.clockRunning);
-      expect(state.clockAccumulatedMs).toBe(tc.expectedState.clockAccumulatedMs);
-      expect(state.clockLastResumedAt).toBe(tc.expectedState.clockLastResumedAt);
+      expect(state.clockAccumulatedMs).toBe(
+        tc.expectedState.clockAccumulatedMs,
+      );
+      expect(state.clockLastResumedAt).toBe(
+        tc.expectedState.clockLastResumedAt,
+      );
     });
   }
 });
