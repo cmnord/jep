@@ -1,5 +1,11 @@
 import { z } from "zod";
 
+import {
+  coercePlayerColor,
+  PLAYER_COLOR_HEX_REGEX,
+  type PlayerColor,
+} from "~/models/player-color";
+
 import type { Action } from "./engine";
 import { ActionType } from "./engine";
 import type { State } from "./state";
@@ -11,7 +17,16 @@ const CluePayload = z.object({
 });
 
 const ClueWagerPayload = CluePayload.extend({ wager: z.number() });
-const PlayerPayload = z.object({ userId: z.string(), name: z.string() });
+export const PlayerPayload = z.object({
+  userId: z.string(),
+  name: z.string(),
+  color: z
+    .preprocess(
+      (value) => coercePlayerColor(value),
+      z.string().regex(PLAYER_COLOR_HEX_REGEX),
+    )
+    .optional(),
+});
 const RoundPayload = z.object({ round: z.number(), userId: z.string() });
 const BuzzPayload = CluePayload.extend({ deltaMs: z.number() });
 const AnswerPayload = CluePayload.extend({ answer: z.string() });
@@ -56,15 +71,19 @@ export function isPlayerAction(action: Action): action is {
     | ActionType.ChangeName
     | ActionType.Kick
     | ActionType.Leave;
-  payload: { userId: string; name: string };
+  payload: { userId: string; name: string; color?: PlayerColor };
   ts: number;
 } {
+  const parsed = PlayerPayload.safeParse(action.payload);
+  if (!parsed.success) {
+    return false;
+  }
+  action.payload = parsed.data;
   return (
-    (action.type === ActionType.Join ||
-      action.type === ActionType.ChangeName ||
-      action.type === ActionType.Kick ||
-      action.type === ActionType.Leave) &&
-    PlayerPayload.safeParse(action.payload).success
+    action.type === ActionType.Join ||
+    action.type === ActionType.ChangeName ||
+    action.type === ActionType.Kick ||
+    action.type === ActionType.Leave
   );
 }
 

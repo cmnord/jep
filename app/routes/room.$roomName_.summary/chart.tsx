@@ -19,7 +19,7 @@ import {
   stateFromGame,
 } from "~/engine/state";
 import { Game } from "~/models/game.server";
-import { stringToHslColor } from "~/utils";
+import { getPlayerColor } from "~/utils";
 
 interface DataPoint {
   x: number;
@@ -163,7 +163,7 @@ export default function Chart({
               key={player.userId}
               type="stepAfter"
               dataKey={player.userId}
-              stroke={stringToHslColor(player.userId)}
+              stroke={getPlayerColor(player)}
               dot={(props) => <CustomDot {...props} />}
             />
           ))}

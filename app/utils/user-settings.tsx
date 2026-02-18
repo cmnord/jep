@@ -3,6 +3,7 @@ import { produce } from "immer";
 import * as React from "react";
 import { useFetcher } from "react-router";
 
+import type { PlayerColor } from "~/models/player-color";
 import { type UserSettings, WagerHintsMode } from "~/models/user-settings";
 
 const DEFAULT_SETTINGS: UserSettings = {};
@@ -123,6 +124,37 @@ export function useWagerHintsSettings() {
   );
 
   return { wagerHints, setWagerHints };
+}
+
+export function useGameDefaults() {
+  const { settings, saveSettings } = useUserSettings();
+  const gameDefaults = settings.gameDefaults;
+
+  const setPlayerName = React.useCallback(
+    (name: string | undefined) =>
+      saveSettings((draft) => {
+        if (!draft.gameDefaults) draft.gameDefaults = {};
+        const trimmed = name?.trim();
+        draft.gameDefaults.playerName = trimmed ? trimmed : undefined;
+      }),
+    [saveSettings],
+  );
+
+  const setPlayerColor = React.useCallback(
+    (color: PlayerColor | undefined) =>
+      saveSettings((draft) => {
+        if (!draft.gameDefaults) draft.gameDefaults = {};
+        draft.gameDefaults.playerColor = color;
+      }),
+    [saveSettings],
+  );
+
+  return {
+    playerName: gameDefaults?.playerName,
+    playerColor: gameDefaults?.playerColor,
+    setPlayerName,
+    setPlayerColor,
+  };
 }
 
 /** useSoundSettings provides the same API shape as the old SoundContext. */

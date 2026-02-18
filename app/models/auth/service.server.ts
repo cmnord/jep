@@ -25,7 +25,7 @@ export async function createEmailAuthAccount(email: string, password: string) {
 }
 
 export async function signInWithEmail(email: string, password: string) {
-  const { data, error } = await getSupabaseAdmin().auth.signInWithPassword({
+  const { data, error } = await getSupabase().auth.signInWithPassword({
     email,
     password,
   });
@@ -102,6 +102,68 @@ export async function exchangeOAuthCode(
   }
 
   return mapAuthSession(data.session);
+}
+
+export async function updateAuthPassword(
+  accessToken: string,
+  newPassword: string,
+  refreshToken?: string,
+) {
+  const client = refreshToken ? getSupabase() : getSupabase(accessToken);
+
+  if (refreshToken) {
+    const { error: sessionError } = await client.auth.setSession({
+      access_token: accessToken,
+      refresh_token: refreshToken,
+    });
+    if (sessionError) {
+      throw new Error(sessionError.message);
+    }
+  }
+
+  const { error } = await client.auth.updateUser({
+    password: newPassword,
+  });
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
+export async function updateAuthEmail(
+  accessToken: string,
+  newEmail: string,
+  refreshToken?: string,
+) {
+  const client = refreshToken ? getSupabase() : getSupabase(accessToken);
+
+  if (refreshToken) {
+    const { error: sessionError } = await client.auth.setSession({
+      access_token: accessToken,
+      refresh_token: refreshToken,
+    });
+    if (sessionError) {
+      throw new Error(sessionError.message);
+    }
+  }
+
+  const { error } = await client.auth.updateUser({
+    email: newEmail,
+  });
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
+export async function sendPasswordResetEmail(
+  email: string,
+  redirectTo: string,
+) {
+  const { error } = await getSupabaseAdmin().auth.resetPasswordForEmail(email, {
+    redirectTo,
+  });
+  if (error) {
+    throw new Error(error.message);
+  }
 }
 
 export async function verifyAuthSession(authSession: AuthSession) {

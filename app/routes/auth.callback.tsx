@@ -1,7 +1,10 @@
 import { redirect } from "react-router";
 
 import { createAuthSession, exchangeOAuthCode } from "~/models/auth";
-import { ensureAccountExists } from "~/models/user/service.server";
+import {
+  ensureAccountExists,
+  updateAccountEmail,
+} from "~/models/user/service.server";
 
 import type { Route } from "./+types/auth.callback";
 
@@ -19,10 +22,16 @@ export async function loader({ request }: Route.LoaderArgs) {
     throw redirect("/login");
   }
 
-  await ensureAccountExists({
+  const existing = await ensureAccountExists({
     userId: authSession.userId,
     email: authSession.email,
   });
+
+  // If the account existed but the email in auth.users has changed (e.g. after
+  // an email change confirmation), sync the public.accounts record.
+  if (existing && existing.email !== authSession.email) {
+    await updateAccountEmail(authSession.userId, authSession.email);
+  }
 
   return createAuthSession({
     request,

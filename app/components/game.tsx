@@ -10,6 +10,7 @@ import Preview from "~/components/preview";
 import Prompt from "~/components/prompt";
 import { GameState, Player, useEngineContext } from "~/engine";
 import type { Game } from "~/models/convert.server";
+import type { PlayerColor } from "~/models/player-color";
 import useGameSound from "~/utils/use-sound";
 
 const BOARD_FILL_SFX = "/sounds/board-fill.mp3";
@@ -63,6 +64,7 @@ function CallToAction({
 export default function GameComponent({
   game,
   name,
+  playerColor,
   roomId,
   roomName,
   suppressDialogs = false,
@@ -71,6 +73,7 @@ export default function GameComponent({
 }: {
   game: Game;
   name: string;
+  playerColor?: PlayerColor;
   roomName: string;
   suppressDialogs?: boolean;
   url: string;
@@ -111,6 +114,7 @@ export default function GameComponent({
         name={name}
         numRounds={game.boards.length}
         onDismiss={isSingleLongFormClue ? playFinalSfx : playBoardFillSfx}
+        playerColor={playerColor}
         url={url}
         roomId={roomId}
         userId={userId}

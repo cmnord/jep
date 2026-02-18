@@ -1,6 +1,7 @@
 export { ArrowDownTray } from "./arrow-down-tray";
 export { Check } from "./check";
 export { CheckCircle } from "./check-circle";
+export { Cog6Tooth } from "./cog-6-tooth";
 export { Discord } from "./discord";
 export { DocumentArrowUp } from "./document-arrow-up";
 export { EllipsisHorizontal } from "./ellipsis-horizontal";

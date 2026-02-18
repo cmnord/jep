@@ -12,6 +12,7 @@ import {
 import { getValidAuthSession } from "~/models/auth";
 import { getGame } from "~/models/game.server";
 import { getUserByEmail } from "~/models/user";
+import { parseUserSettings } from "~/models/user-settings";
 import { getOrCreateUserSession } from "~/session.server";
 import { BASE_URL, getRandomEmoji } from "~/utils";
 import {
@@ -49,16 +50,20 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     ? await getUserByEmail(authSession.email, authSession.accessToken)
     : null;
 
-  const name = getRandomEmoji();
+  const gameDefaults = user
+    ? parseUserSettings(user.settings).gameDefaults
+    : undefined;
+  const name = gameDefaults?.playerName ?? getRandomEmoji();
+  const playerColor = gameDefaults?.playerColor;
 
   // Add the user to the room. If they are logged in, their ID is their user ID.
   // If they are a guest, their ID is their guest session ID.
   if (user) {
-    return { game, userId: user.id, name, BASE_URL };
+    return { game, userId: user.id, name, playerColor, BASE_URL };
   } else {
     const headers = new Headers();
     const userId = await getOrCreateUserSession(request, headers);
-    return data({ game, userId, name, BASE_URL }, { headers });
+    return data({ game, userId, name, playerColor, BASE_URL }, { headers });
   }
 }
 
@@ -107,6 +112,7 @@ export async function clientLoader({
       game: cached.game,
       userId,
       name: getRandomEmoji(),
+      playerColor: undefined,
       BASE_URL: window.location.origin,
     };
   }
@@ -183,6 +189,7 @@ export default function SoloGame({ loaderData }: Route.ComponentProps) {
       <GameComponent
         game={game}
         name={name}
+        playerColor={loaderData.playerColor}
         roomId={-1}
         roomName="-1-solo"
         suppressDialogs={resumeGateActive}

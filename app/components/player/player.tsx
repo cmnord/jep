@@ -2,7 +2,7 @@ import clsx from "clsx";
 
 import type { Player } from "~/engine";
 import { GameState, useEngineContext } from "~/engine";
-import { formatDollars, stringToHslColor } from "~/utils";
+import { formatDollars, getPlayerColor } from "~/utils";
 
 import { RoomProps } from "../game";
 import { EditPlayerForm } from "./edit-player";
@@ -88,9 +88,9 @@ export function PlayerScore({
 export function PlayerIcon({
   player,
 }: {
-  player: Pick<Player, "name" | "userId">;
+  player: Pick<Player, "name" | "userId" | "color">;
 }) {
-  const backgroundColor = stringToHslColor(player.userId);
+  const backgroundColor = getPlayerColor(player);
   const matches = player.name.match(COMPOUND_EMOJI_REGEX);
   const firstChar = matches ? matches[0] : player.name[0];
   return (

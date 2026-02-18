@@ -1,4 +1,4 @@
-import { Form, Link, useMatches } from "react-router";
+import { Link, useMatches } from "react-router";
 
 import Button from "~/components/button";
 import CopyLinkButton from "~/components/copy-link-button";
@@ -11,8 +11,9 @@ function isGameLoaderData(data: unknown): data is { game: Game } {
   return typeof data === "object" && data !== null && "game" in data;
 }
 import { stringToHslColor } from "~/utils";
+import { useGameDefaults } from "~/utils/user-settings";
 
-import { ExclamationTriangle, InformationCircle, Logout, User } from "./icons";
+import { ExclamationTriangle, InformationCircle } from "./icons";
 
 function LoginButton({ pathname }: { pathname: string }) {
   const to =
@@ -26,53 +27,21 @@ function LoginButton({ pathname }: { pathname: string }) {
   );
 }
 
-/** AccountButton shows an avatar for the user and a dropddown to their profile
- * and a logout button.
- */
 function AccountButton({ user }: { user: { id: string; email: string } }) {
-  const backgroundColor = stringToHslColor(user.id);
-  const email = user.email;
+  const { playerColor } = useGameDefaults();
+  const backgroundColor =
+    playerColor != null ? playerColor : stringToHslColor(user.id);
   return (
-    <DropdownMenu.Root>
-      <DropdownMenu.Trigger asChild>
-        <button
-          className={`flex items-center justify-center rounded-full p-1 transition-colors hover:bg-blue-700 data-[state=open]:bg-blue-700`}
-          style={{ backgroundColor }}
-          aria-label="Account"
-        >
-          <div className="flex h-6 w-6 items-center justify-center text-blue-1000 uppercase">
-            {email.slice(0, 1)}
-          </div>
-        </button>
-      </DropdownMenu.Trigger>
-
-      <DropdownMenu.Portal>
-        <DropdownMenu.Content>
-          <DropdownMenu.Label className="p-1 font-bold">
-            {email}
-          </DropdownMenu.Label>
-          <DropdownMenu.Separator className="m-1 h-px bg-slate-200" />
-          <DropdownMenu.Item asChild>
-            <Link to="/profile">
-              <User className="absolute left-0 m-1 h-5 w-5" />
-              <p className="pl-7">Profile</p>
-            </Link>
-          </DropdownMenu.Item>
-          <DropdownMenu.Item
-            asChild
-            // Prevent the dropdown menu from closing
-            onSelect={(e: Event) => e.preventDefault()}
-          >
-            <Form method="POST" action="/logout">
-              <button type="submit" className="flex grow items-center">
-                <Logout className="absolute left-0 m-1 h-5 w-5" />
-                <p className="pl-7">Log out</p>
-              </button>
-            </Form>
-          </DropdownMenu.Item>
-        </DropdownMenu.Content>
-      </DropdownMenu.Portal>
-    </DropdownMenu.Root>
+    <Link
+      to="/profile"
+      className="flex items-center justify-center rounded-full p-1 transition-colors hover:bg-blue-700"
+      style={{ backgroundColor }}
+      aria-label="Profile"
+    >
+      <div className="flex h-6 w-6 items-center justify-center text-blue-1000 uppercase">
+        {user.email.slice(0, 1)}
+      </div>
+    </Link>
   );
 }
 

@@ -7,7 +7,7 @@ import Popover from "~/components/popover";
 import { clueIsPlayable } from "~/engine";
 import type { Player } from "~/engine/state";
 import type { Board, Clue } from "~/models/convert.server";
-import { formatDollars, generateGrid, stringToHslColor } from "~/utils";
+import { formatDollars, generateGrid, getPlayerColor } from "~/utils";
 
 import type { ClueLookup, ReplayFrame } from "./replay";
 import { buildClueLookup } from "./replay";
@@ -35,7 +35,7 @@ function BuzzDots({
       {playerIds.map((userId, idx) => {
         const player = allPlayers.find((p) => p.userId === userId);
         if (!player) return null;
-        const bg = stringToHslColor(userId);
+        const bg = getPlayerColor(player);
         const matches = player.name.match(COMPOUND_EMOJI_REGEX);
         const firstChar = matches ? matches[0] : player.name[0];
         return (
@@ -131,7 +131,10 @@ function ReplayClue({
   // Background color for resolved clues
   let backgroundColor: string | undefined;
   if (isResolved && clueLookup.correctUserId) {
-    backgroundColor = stringToHslColor(clueLookup.correctUserId);
+    const correctPlayer = allPlayers.find(
+      (p) => p.userId === clueLookup.correctUserId,
+    );
+    backgroundColor = correctPlayer ? getPlayerColor(correctPlayer) : undefined;
   }
   const isGreyedOut = isResolved && !clueLookup.correctUserId;
 
@@ -397,7 +400,7 @@ export function ReplayScoreBar({
           >
             <div
               className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full font-mono text-xs font-bold text-white"
-              style={{ backgroundColor: stringToHslColor(p.userId) }}
+              style={{ backgroundColor: getPlayerColor(p) }}
             >
               {firstChar}
             </div>

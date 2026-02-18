@@ -74,6 +74,8 @@ async function tryCreateUser({
 /** ensureAccountExists checks if an accounts record exists for this user
  * and creates one if not. Used for OAuth sign-ins where Supabase creates the
  * auth.users record automatically but we need the public.accounts record.
+ *
+ * Returns the existing record if found, or null if a new one was created.
  */
 export async function ensureAccountExists({
   userId,
@@ -81,11 +83,11 @@ export async function ensureAccountExists({
 }: Pick<AuthSession, "userId" | "email">) {
   const { data: existing } = await getSupabaseAdmin()
     .from("accounts")
-    .select("id")
+    .select("id, email")
     .eq("id", userId)
     .single();
 
-  if (existing) return;
+  if (existing) return existing;
 
   const { error } = await getSupabaseAdmin()
     .from("accounts")
@@ -93,6 +95,22 @@ export async function ensureAccountExists({
 
   if (error) {
     console.error("Failed to create account for OAuth user:", error);
+  }
+
+  return null;
+}
+
+/** updateAccountEmail updates the email on the public.accounts record.
+ * Used when an email change is confirmed via Supabase Auth callback.
+ */
+export async function updateAccountEmail(userId: string, newEmail: string) {
+  const { error } = await getSupabaseAdmin()
+    .from("accounts")
+    .update({ email: newEmail })
+    .eq("id", userId);
+
+  if (error) {
+    console.error("Failed to sync account email:", error);
   }
 }
 

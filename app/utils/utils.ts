@@ -1,3 +1,6 @@
+import type { Player } from "~/engine/state";
+import { coercePlayerColor, hueToHslColor } from "~/models/player-color";
+
 export const GITHUB_URL = "https://github.com/cmnord/jep";
 
 // http://www.thephonicspage.org/On%20Reading/Resources/NonsenseWordsByType.pdf
@@ -5,9 +8,6 @@ const gameWords =
   "troff glon yomp bruss jank fress masp smub zint jeft vusk hipt splect sunt phrist dimp bosp zoft yact spluff drid criff jing strod vept luft splob fesp kemp cesk flact thrund clud nund fect swug ust phropt ceft drast fleff scrim omp drap gleck jift jund chand smed noct pron snid vonk trag nept yuft sclack plusk snaff zamp skob glemp besp fress vosk frep jang unt joct thrag plig hect nund sphob blen jisk yasp bisk glaff treb threck plash thrump prash glap thren gaft vesk yeft thrun thomp ont sask trunt blit jemp phrint namp glap prash".split(
     " ",
   );
-
-const SATURATION = 60;
-const LIGHTNESS = 60;
 
 const formatter = Intl.NumberFormat("en-US", {
   style: "currency",
@@ -76,10 +76,27 @@ export function formatElapsedTime(totalMs: number): string {
   return `${minutes}:${pad(seconds)}`;
 }
 
+/** stringToHue generates a deterministic hue from the input str. */
+export function stringToHue(str: string): number {
+  const hash = cyrb53(str, 123);
+  return ((hash % 360) + 360) % 360;
+}
+
 /** stringToHslColor generates a deterministic hue from the input str and then
  * adds saturation and lightness to make an HSL color string. */
 export function stringToHslColor(str: string) {
-  const hash = cyrb53(str, 123);
-  const h = hash % 360;
-  return `hsl(${h}, ${SATURATION}%, ${LIGHTNESS}%)`;
+  return hueToHslColor(stringToHue(str));
+}
+
+/** getPlayerColor returns the player's custom color or falls back to a
+ * deterministic hash-based color. */
+export function getPlayerColor(
+  player: Pick<Player, "userId" | "color">,
+): string {
+  const normalizedColor =
+    player.color != null ? coercePlayerColor(player.color) : undefined;
+  if (normalizedColor != null) {
+    return normalizedColor;
+  }
+  return stringToHslColor(player.userId);
 }

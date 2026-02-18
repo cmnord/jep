@@ -8,6 +8,8 @@ export {
   formatDollarsWithSign,
   formatElapsedTime,
   generateGrid,
+  getPlayerColor,
   getRandomWord,
+  stringToHue,
   stringToHslColor,
 } from "./utils";

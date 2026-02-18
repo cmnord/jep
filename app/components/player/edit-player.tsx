@@ -56,7 +56,7 @@ function EditPlayer({
           type="text"
           id="name"
           name="name"
-          className={`placeholder:text-opacity-40 block w-full bg-transparent font-handwriting text-2xl font-bold placeholder:font-sans placeholder:text-sm placeholder:font-normal placeholder:text-white`}
+          className="block w-full bg-transparent font-handwriting text-2xl font-bold placeholder:font-sans placeholder:text-sm placeholder:font-normal placeholder:text-white/40"
           placeholder="Enter your name"
           defaultValue={player.name}
           onChange={(e) => onChangeName(e.target.value)}

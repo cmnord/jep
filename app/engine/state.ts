@@ -1,4 +1,5 @@
 import type { Clue, Game } from "~/models/convert.server";
+import type { PlayerColor } from "~/models/player-color";
 import { generateGrid } from "~/utils";
 
 /** UNREVEALED_PLACEHOLDER is used when a field was not revealed in the game
@@ -32,6 +33,8 @@ export interface Player {
   userId: string;
   name: string;
   score: number;
+  /** CSS hex color chosen by the player (e.g. #7a8ae0). */
+  color?: PlayerColor;
 }
 
 export function clueIsPlayable(clue: Clue) {

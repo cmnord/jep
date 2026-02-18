@@ -9,6 +9,7 @@ import { getGame } from "~/models/game.server";
 import { createRoomEvent, getRoomEvents } from "~/models/room-event.server";
 import { getRoom } from "~/models/room.server";
 import { getUserByEmail } from "~/models/user";
+import { parseUserSettings } from "~/models/user-settings";
 import { getOrCreateUserSession, getUserSession } from "~/session.server";
 import { BASE_URL, getRandomEmoji } from "~/utils";
 
@@ -48,7 +49,11 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   const accessToken = authSession?.accessToken;
 
   const roomEvents = await getRoomEvents(room.id, accessToken);
-  const name = getRandomEmoji();
+  const gameDefaults = user
+    ? parseUserSettings(user.settings).gameDefaults
+    : undefined;
+  const name = gameDefaults?.playerName ?? getRandomEmoji();
+  const playerColor = gameDefaults?.playerColor;
 
   const state = applyRoomEventsToState(stateFromGame(game), roomEvents);
 
@@ -81,6 +86,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       return {
         game,
         name,
+        playerColor,
         roomEvents: updatedRoomEvents,
         roomId,
         roomName,
@@ -93,6 +99,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     return {
       game,
       name,
+      playerColor,
       roomEvents,
       roomId,
       roomName,
@@ -108,6 +115,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     {
       game,
       name,
+      playerColor,
       roomEvents,
       roomId,
       roomName,
@@ -135,6 +143,7 @@ export default function PlayGame({ loaderData }: Route.ComponentProps) {
       <GameComponent
         game={loaderData.game}
         name={loaderData.name}
+        playerColor={loaderData.playerColor}
         roomId={loaderData.roomId}
         roomName={loaderData.roomName}
         userId={loaderData.userId}

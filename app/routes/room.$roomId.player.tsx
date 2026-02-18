@@ -1,6 +1,5 @@
-import { z } from "zod";
-
 import { ActionType } from "~/engine";
+import { PlayerPayload } from "~/engine/actions";
 import { getValidAuthSession } from "~/models/auth";
 import { createRoomEvent } from "~/models/room-event.server";
 import { getRoom } from "~/models/room.server";
@@ -9,11 +8,6 @@ import { getUserSession, requireSessionUserId } from "~/session.server";
 import { parseFormData } from "~/utils/http.server";
 
 import type { Route } from "./+types/room.$roomId.player";
-
-const formSchema = z.object({
-  name: z.string(),
-  userId: z.string(),
-});
 
 async function getDeleteActionType(
   request: Request,
@@ -34,7 +28,7 @@ export async function action({ request, params }: Route.ActionArgs) {
     throw new Response("method not allowed", { status: 405 });
   }
   const formData = await request.formData();
-  const { name, userId } = parseFormData(formData, formSchema);
+  const { name, userId, color } = parseFormData(formData, PlayerPayload);
 
   const roomId = params.roomId ? parseInt(params.roomId) : undefined;
   if (!roomId) {
@@ -48,7 +42,7 @@ export async function action({ request, params }: Route.ActionArgs) {
         : request.method === "PATCH"
           ? ActionType.ChangeName
           : ActionType.Kick;
-    return { type, payload: { userId, name }, ts: Date.now() };
+    return { type, payload: { userId, name, color }, ts: Date.now() };
   }
 
   const authSession = await getValidAuthSession(request);
@@ -92,6 +86,7 @@ export async function action({ request, params }: Route.ActionArgs) {
     {
       userId,
       name,
+      color,
     },
     authSession?.accessToken,
   );

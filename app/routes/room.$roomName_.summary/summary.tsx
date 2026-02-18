@@ -10,7 +10,7 @@ import type { Action } from "~/engine";
 import { clueIsPlayable, State } from "~/engine";
 import type { Player } from "~/engine/state";
 import type { Board, Clue, Game } from "~/models/convert.server";
-import { generateGrid, stringToHslColor } from "~/utils";
+import { generateGrid, getPlayerColor } from "~/utils";
 
 import ReplayPlayer from "./replay-player";
 
@@ -54,8 +54,12 @@ function PostGameClue({ clue, state, round, i, j }: Props) {
     ([, correct]) => correct,
   );
 
-  const backgroundColor = winningPlayers.length
-    ? stringToHslColor(winningPlayers[0][0])
+  const winnerUserId = winningPlayers.length ? winningPlayers[0][0] : undefined;
+  const winnerPlayer = winnerUserId
+    ? (state.players.get(winnerUserId) ?? state.leftPlayers.get(winnerUserId))
+    : undefined;
+  const backgroundColor = winnerPlayer
+    ? getPlayerColor(winnerPlayer)
     : undefined;
 
   return (

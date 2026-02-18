@@ -2,9 +2,13 @@ export {
   createEmailAuthAccount,
   deleteAuthAccount,
   exchangeOAuthCode,
+  getAuthAccountByAccessToken,
   refreshAccessToken,
   sendMagicLink,
+  sendPasswordResetEmail,
   signInWithEmail,
+  updateAuthEmail,
+  updateAuthPassword,
 } from "./service.server";
 export {
   commitAuthSession,

@@ -12,13 +12,15 @@ import WagerHintsControl from "~/components/wager-hints-control";
 import type { Player } from "~/engine";
 import { Action, GameState, useEngineContext } from "~/engine";
 import { Board } from "~/models/convert.server";
-import { stringToHslColor } from "~/utils";
+import type { PlayerColor } from "~/models/player-color";
+import { getPlayerColor } from "~/utils";
 import useSoloAction from "~/utils/use-solo-action";
 
 function JoinGameDialog({
   Form,
   gameTitle,
   name,
+  playerColor,
   players,
   roomId,
   type,
@@ -27,6 +29,7 @@ function JoinGameDialog({
   Form: typeof fetcherForm;
   gameTitle: string;
   name: string;
+  playerColor?: PlayerColor;
   players: Map<string, Player>;
   type: GameState;
 } & RoomProps) {
@@ -40,7 +43,7 @@ function JoinGameDialog({
     >
       <ul className="mb-4 list-inside list-disc font-handwriting text-xl font-bold">
         {Array.from(players.values()).map((p, i) => (
-          <li key={i} style={{ color: stringToHslColor(p.userId) }}>
+          <li key={i} style={{ color: getPlayerColor(p) }}>
             {p.name}
           </li>
         ))}
@@ -49,6 +52,9 @@ function JoinGameDialog({
         <Form method="POST" action={`/room/${roomId}/player`}>
           <input type="hidden" name="userId" value={userId} />
           <input type="hidden" name="name" value={name} />
+          {playerColor != null && (
+            <input type="hidden" name="color" value={playerColor} />
+          )}
           <Button type="primary" htmlType="submit">
             Join game
           </Button>
@@ -96,7 +102,7 @@ function PreviewRoundDialog({
     board.categories[0].clues[0].longForm;
 
   const borderColor = boardController
-    ? stringToHslColor(boardController.userId)
+    ? getPlayerColor(boardController)
     : "gray";
 
   return (
@@ -161,6 +167,7 @@ export function Preview({
   name,
   numRounds,
   onDismiss,
+  playerColor,
   url,
   roomId,
   userId,
@@ -170,6 +177,7 @@ export function Preview({
   name: string;
   numRounds: number;
   onDismiss: () => void;
+  playerColor?: PlayerColor;
   url: string;
 } & RoomProps) {
   const { type, board, boardControl, players, round, soloDispatch } =
@@ -206,6 +214,7 @@ export function Preview({
       Form={fetcher.Form}
       gameTitle={gameTitle}
       name={name}
+      playerColor={playerColor}
       players={players}
       roomId={roomId}
       userId={userId}
