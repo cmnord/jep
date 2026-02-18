@@ -17,33 +17,29 @@ function CheckForm({
   longForm,
   loading,
   myAnswer,
-  isHostMode = false,
   playerName,
 }: {
   answer: string;
   longForm: boolean;
   loading: boolean;
   myAnswer?: string;
-  isHostMode?: boolean;
   playerName?: string;
 }) {
   return (
     <div className="flex flex-col items-center gap-2 p-2">
       {longForm ? null : (
         <>
-          {!isHostMode && (
-            <>
-              <p className="text-center font-korinna text-2xl font-bold text-slate-300 uppercase shadow-sm">
-                {answer}
-              </p>
-              <p className="text-center text-sm text-slate-300">
-                (don't spoil the answer for others!)
-              </p>
-            </>
+          <p className="text-center font-korinna text-2xl font-bold text-slate-300 uppercase shadow-sm">
+            {answer}
+          </p>
+          {!playerName && (
+            <p className="text-center text-sm text-slate-300">
+              (don't spoil the answer for others!)
+            </p>
           )}
         </>
       )}
-      {myAnswer && !isHostMode && (
+      {myAnswer && !playerName && (
         <p className="text-center text-sm text-slate-300">
           Your answer:{" "}
           <span className="font-handwriting text-2xl font-bold text-white">
@@ -52,9 +48,7 @@ function CheckForm({
         </p>
       )}
       <p className="font-bold text-white">
-        {isHostMode
-          ? `Was ${playerName || "the player"} right?`
-          : "Were you right?"}
+        {playerName ? `Was ${playerName} right?` : "Were you right?"}
       </p>
       <div className="flex gap-2">
         <Button
@@ -90,12 +84,12 @@ export function ConnectedCheckForm({
   longForm = false,
   showAnswer,
   onClickShowAnswer,
-  isHostMode = false,
+  playerName,
 }: {
   longForm?: boolean;
   showAnswer: boolean;
   onClickShowAnswer: () => void;
-  isHostMode?: boolean;
+  playerName?: string;
 } & RoomProps) {
   const {
     activeClue,
@@ -166,7 +160,6 @@ export function ConnectedCheckForm({
   const [i, j] = activeClue;
   const myAnswer = answers.get(userId);
   const checkResult = answeredBy(i, j, userId);
-  const playerName = isHostMode ? players.get(userId)?.name : undefined;
 
   if (checkResult !== undefined) {
     const clueValue = getClueValue(activeClue, userId);
@@ -208,7 +201,6 @@ export function ConnectedCheckForm({
         loading={loading}
         myAnswer={myAnswer}
         answer={clue.answer}
-        isHostMode={isHostMode}
         playerName={playerName}
       />
     </fetcher.Form>

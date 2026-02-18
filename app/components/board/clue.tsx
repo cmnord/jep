@@ -4,7 +4,7 @@ import * as React from "react";
 import Popover from "~/components/popover";
 import { clueIsPlayable } from "~/engine";
 import type { Clue } from "~/models/convert.server";
-import { useIsHostMode } from "~/utils/use-host-mode";
+import { useIsHost, useIsSpectator } from "~/utils/use-room-mode";
 
 type ButtonProps = React.ComponentProps<"button">;
 
@@ -33,7 +33,8 @@ const ClueButton = React.forwardRef<HTMLButtonElement, ButtonProps & Props>(
     ref,
   ) => {
     const [loading, setLoading] = React.useState(false);
-    const isHostMode = useIsHostMode();
+    const isHost = useIsHost();
+    const isSpectator = useIsSpectator();
 
     const playable = clueIsPlayable(clue);
 
@@ -44,8 +45,8 @@ const ClueButton = React.forwardRef<HTMLButtonElement, ButtonProps & Props>(
     }, [answered]);
 
     // disabled must not include `answered` or `hasBoardControl` so we can focus
-    // on clues.
-    const disabled = !playable || loading;
+    // on clues. Hosts and spectators cannot interact with the board.
+    const disabled = !playable || loading || isHost || isSpectator;
 
     return (
       <button
@@ -94,7 +95,7 @@ const ClueButton = React.forwardRef<HTMLButtonElement, ButtonProps & Props>(
           <span className="text-sm sm:text-3xl lg:text-4xl">$</span>
           <span className="text-md sm:text-4xl lg:text-5xl">{clue.value}</span>
         </p>
-        {isHostMode && (
+        {isHost && (
           <div className="mt-1 text-center">
             <p className="text-xs font-medium text-cyan-300">{clue.answer}</p>
             {answered && (
