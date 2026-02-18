@@ -1,5 +1,3 @@
-import * as React from "react";
-
 import type { RoomProps } from "~/components/game";
 import { useEngineContext } from "~/engine";
 
@@ -20,11 +18,53 @@ export function HostModeAnswer({ answer }: { answer: string }) {
 }
 
 /** HostModeCheckForm wraps ConnectedCheckForm for host answer verification.
- * The host checks on behalf of the winning buzzer. */
-export function HostModeCheckForm({ roomId }: { roomId: RoomProps["roomId"] }) {
-  const { winningBuzzer, activeClue } = useEngineContext();
+ * For standard clues, the host checks on behalf of the winning buzzer.
+ * For long-form clues, the host checks each player who submitted an answer. */
+export function HostModeCheckForm({
+  roomId,
+  longForm = false,
+}: {
+  roomId: RoomProps["roomId"];
+  longForm?: boolean;
+}) {
+  const { winningBuzzer, activeClue, answers, players, answeredBy } =
+    useEngineContext();
 
-  if (!activeClue || !winningBuzzer) {
+  if (!activeClue) {
+    return null;
+  }
+
+  const [i, j] = activeClue;
+
+  if (longForm) {
+    // For long-form clues, check each player who submitted an answer.
+    const playersToCheck = Array.from(answers.keys())
+      .filter((uid) => players.has(uid))
+      .filter((uid) => answeredBy(i, j, uid) === undefined);
+
+    if (playersToCheck.length === 0) {
+      return null;
+    }
+
+    return (
+      <>
+        {playersToCheck.map((uid) => (
+          <ConnectedCheckForm
+            key={uid}
+            roomId={roomId}
+            userId={uid}
+            showAnswer={true}
+            onClickShowAnswer={() => {}}
+            longForm={true}
+            playerName={players.get(uid)?.name ?? "Unknown player"}
+          />
+        ))}
+      </>
+    );
+  }
+
+  // Standard clue: check the winning buzzer.
+  if (!winningBuzzer) {
     return null;
   }
 
@@ -34,7 +74,7 @@ export function HostModeCheckForm({ roomId }: { roomId: RoomProps["roomId"] }) {
       userId={winningBuzzer}
       showAnswer={true}
       onClickShowAnswer={() => {}}
-      isHostMode={true}
+      playerName={players.get(winningBuzzer)?.name ?? "Unknown player"}
     />
   );
 }

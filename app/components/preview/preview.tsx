@@ -147,6 +147,10 @@ function PreviewRoundDialog({
       ) : null}
       <Dialog.Footer>
         <CopyLinkButton url={url} text="Copy link to room" />
+        <CopyLinkButton
+          url={url.split("?")[0] + "?mode=spectator"}
+          text="Copy spectator link"
+        />
         {boardControl === userId || isSingleLongFormClue ? (
           <Form method="POST" action={`/room/${roomId}/start`}>
             <input type="hidden" name="round" value={round} />

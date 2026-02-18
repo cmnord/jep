@@ -46,16 +46,18 @@ Host mode is designed for in-person game nights where a dedicated host controls 
 
 **Three-device setup:**
 
-- **Host device** (tablet/laptop): Add `?mode=host` to the room URL, or click "Host Game" on a game card. The host sees all answers on the board, verifies player responses, and cannot buzz in.
-- **Display device** (TV): Open the standard room URL to show the game board for everyone.
-- **Player devices** (phones): Open the standard room URL to play normally.
+- **Host device** (tablet/laptop): Click "Host Game" on a game card. The host is not a player — they see all answers, verify player responses, and cannot buzz in.
+- **Display device** (TV): Use the "Copy spectator link" button in the game preview to get a `?mode=spectator` URL. Spectators see the board and scores in read-only mode with no join dialog or controls.
+- **Player devices** (phones): Share the room link. Players buzz in and answer verbally; the host verifies their responses.
 
-**What the host sees:**
+**How it works:**
 
-- Board clue tiles show the answer text, plus indicators for answered/wagerable/long-form clues
-- Buzzing is disabled — the host cannot accidentally buzz in
-- When a player buzzes, the host gets a "Was [player] right?" prompt to verify their answer
-- The answer is always visible during all prompt states
+- Host mode is stored on the room itself (in the database). All clients in a host-mode room know it's a hosted game.
+- Players in a host-mode room do not see the self-check form — they see "Waiting for the host to verify..." instead.
+- The host sees the answer during all prompt states and gets a "Was [player] right?" form to verify answers.
+- For long-form (final) clues, the host checks each player's answer individually.
+
+**Spectator mode** (`?mode=spectator`) works on any room, not just host-mode rooms. Spectators see the board and player scores but cannot join, buzz, or interact.
 
 ## Supabase
 
