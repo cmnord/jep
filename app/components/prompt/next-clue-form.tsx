@@ -5,7 +5,7 @@ import { useFetcher } from "react-router";
 import Button from "~/components/button";
 import type { RoomProps } from "~/components/game";
 import type { Action } from "~/engine";
-import { GameState, useEngineContext } from "~/engine";
+import { ActionType, GameState, useEngineContext } from "~/engine";
 import { formatDollars, formatDollarsWithSign } from "~/utils";
 import useSoloAction from "~/utils/use-solo-action";
 import useTimeout from "~/utils/use-timeout";
@@ -148,6 +148,7 @@ export function ConnectedNextClueForm({ roomId, userId }: RoomProps) {
     getClueValue,
     players,
     boardControl,
+    optimisticDispatch,
     soloDispatch,
     type,
   } = useEngineContext();
@@ -182,10 +183,28 @@ export function ConnectedNextClueForm({ roomId, userId }: RoomProps) {
   const hasBoardControl = boardControl === userId;
   const isRevealingAnswer = type === GameState.ReadLongFormClue;
 
+  function submitWithOptimistic(form: HTMLFormElement | null) {
+    if (!form) {
+      return;
+    }
+    const formData = new FormData(form);
+    const clientMutationId = optimisticDispatch({
+      type: ActionType.NextClue,
+      payload: { userId, i, j },
+    });
+    if (clientMutationId) {
+      formData.set("clientMutationId", clientMutationId);
+    }
+    fetcher.submit(formData, {
+      method: "post",
+      action: `/room/${roomId}/next-clue`,
+    });
+  }
+
   // Submit the form by default after a few seconds.
   useTimeout(
     () => {
-      fetcher.submit(formRef.current);
+      submitWithOptimistic(formRef.current);
     },
     hasBoardControl && !clue.longForm ? DEFAULT_COUNTDOWN_MS : null,
   );
@@ -195,6 +214,10 @@ export function ConnectedNextClueForm({ roomId, userId }: RoomProps) {
       method="POST"
       action={`/room/${roomId}/next-clue`}
       ref={formRef}
+      onSubmit={(event) => {
+        event.preventDefault();
+        submitWithOptimistic(event.currentTarget);
+      }}
     >
       <input type="hidden" value={userId} name="userId" />
       <input type="hidden" value={i} name="i" />

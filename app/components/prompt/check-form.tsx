@@ -5,12 +5,22 @@ import { useFetcher } from "react-router";
 import Button from "~/components/button";
 import type { RoomProps } from "~/components/game";
 import type { Action, Player } from "~/engine";
-import { useEngineContext } from "~/engine";
+import { ActionType, useEngineContext } from "~/engine";
 import { formatDollarsWithSign } from "~/utils";
 import useSoloAction from "~/utils/use-solo-action";
 import useTimeout from "~/utils/use-timeout";
 
 const REVEAL_ANSWER_DEBOUNCE_MS = 500;
+
+function getSubmitter(formEvent: React.FormEvent<HTMLFormElement>) {
+  const nativeEvent = formEvent.nativeEvent;
+  if (!(nativeEvent instanceof SubmitEvent)) {
+    return undefined;
+  }
+  return nativeEvent.submitter instanceof HTMLButtonElement
+    ? nativeEvent.submitter
+    : undefined;
+}
 
 function CheckForm({
   answer,
@@ -89,6 +99,7 @@ export function ConnectedCheckForm({
     answeredBy,
     answers,
     getClueValue,
+    optimisticDispatch,
     soloDispatch,
     players,
   } = useEngineContext();
@@ -184,7 +195,30 @@ export function ConnectedCheckForm({
   }
 
   return (
-    <fetcher.Form method="POST" action={`/room/${roomId}/check`}>
+    <fetcher.Form
+      method="POST"
+      action={`/room/${roomId}/check`}
+      onSubmit={(event) => {
+        event.preventDefault();
+        const formData = new FormData(event.currentTarget);
+        const submitter = getSubmitter(event);
+        if (submitter) {
+          formData.set(submitter.name, submitter.value);
+        }
+        const correct = formData.get("result") === "correct";
+        const clientMutationId = optimisticDispatch({
+          type: ActionType.Check,
+          payload: { userId, i, j, correct },
+        });
+        if (clientMutationId) {
+          formData.set("clientMutationId", clientMutationId);
+        }
+        fetcher.submit(formData, {
+          method: "post",
+          action: `/room/${roomId}/check`,
+        });
+      }}
+    >
       <input type="hidden" value={userId} name="userId" />
       <input type="hidden" value={i} name="i" />
       <input type="hidden" value={j} name="j" />
