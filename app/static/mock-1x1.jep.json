@@ -1,0 +1,19 @@
+{
+  "title": "Mock 1x1 Game",
+  "author": "Test",
+  "copyright": "",
+  "note": "",
+  "boards": [
+    {
+      "categoryNames": ["Solo Category"],
+      "categories": [
+        {
+          "name": "Solo Category",
+          "clues": [
+            { "clue": "only clue", "answer": "only answer", "value": 200 }
+          ]
+        }
+      ]
+    }
+  ]
+}

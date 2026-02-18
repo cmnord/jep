@@ -15,8 +15,10 @@ export const meta: Route.MetaFunction = ({ data }) => {
   }
 };
 
-export async function loader() {
-  const game = await getMockGame();
+export async function loader({ request }: Route.LoaderArgs) {
+  const url = new URL(request.url);
+  const gameName = url.searchParams.get("game") ?? undefined;
+  const game = await getMockGame(gameName);
 
   return { game, BASE_URL };
 }

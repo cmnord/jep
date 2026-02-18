@@ -1,0 +1,44 @@
+{
+  "title": "Mock Game",
+  "author": "Test",
+  "copyright": "",
+  "note": "",
+  "boards": [
+    {
+      "categoryNames": ["Round 1, Category 1", "Round 1, Category 2"],
+      "categories": [
+        {
+          "name": "Round 1, Category 1",
+          "clues": [{ "clue": "a", "answer": "b", "value": 200 }]
+        },
+        {
+          "name": "Round 1, Category 2",
+          "clues": [{ "clue": "c", "answer": "d", "value": 200 }]
+        }
+      ]
+    },
+    {
+      "categoryNames": ["Round 2, Category 1", "Round 2, Category 2"],
+      "categories": [
+        {
+          "name": "Round 2, Category 1",
+          "clues": [
+            { "clue": "e", "answer": "f", "value": 400, "wagerable": true }
+          ]
+        },
+        {
+          "name": "Round 2, Category 2",
+          "clues": [
+            {
+              "clue": "g",
+              "answer": "h",
+              "value": 400,
+              "wagerable": true,
+              "longForm": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

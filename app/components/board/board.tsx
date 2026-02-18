@@ -130,12 +130,15 @@ export function ConnectedBoardComponent({ roomId, userId }: RoomProps) {
     shouldAnimate,
   );
 
+  // Focus the tracked cell when the user navigates (focusedClueIdx changes)
+  // or when the prompt closes and the board regains interaction (type becomes
+  // ShowBoard). This restores keyboard position after answering a clue.
   React.useEffect(() => {
-    if (focusedClueIdx) {
+    if (type === GameState.ShowBoard && focusedClueIdx) {
       const [i, j] = focusedClueIdx;
       focusCell(i, j);
     }
-  }, [focusedClueIdx]);
+  }, [focusedClueIdx, type]);
 
   const [playWagerSfx] = useGameSound(WAGER_SFX);
 

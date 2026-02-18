@@ -1,0 +1,25 @@
+{
+  "title": "Mock Long Form Game",
+  "author": "Test",
+  "copyright": "",
+  "note": "",
+  "boards": [
+    {
+      "categoryNames": ["Final Category"],
+      "categories": [
+        {
+          "name": "Final Category",
+          "clues": [
+            {
+              "clue": "long form clue",
+              "answer": "long form answer",
+              "value": 200,
+              "wagerable": true,
+              "longForm": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

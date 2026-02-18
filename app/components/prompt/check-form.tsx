@@ -104,6 +104,16 @@ export function ConnectedCheckForm({
     showAnswer ? null : REVEAL_ANSWER_DEBOUNCE_MS,
   );
 
+  // Focus the "Reveal answer" button when the debounce expires.
+  // autoFocus={!disabled} doesn't work because disabled starts true at mount,
+  // and React doesn't re-apply autoFocus on subsequent renders.
+  const revealButtonRef = React.useRef<HTMLButtonElement>(null);
+  React.useEffect(() => {
+    if (!disabled) {
+      revealButtonRef.current?.focus();
+    }
+  }, [disabled]);
+
   if (!activeClue || !clue) {
     throw new Error("No active clue");
   }
@@ -124,9 +134,9 @@ export function ConnectedCheckForm({
             )}
           />
           <Button
+            ref={revealButtonRef}
             type="primary"
             htmlType="button"
-            autoFocus={!disabled}
             disabled={disabled}
             onClick={onClickShowAnswer}
             loading={loading}

@@ -1,0 +1,24 @@
+{
+  "title": "Mock Wager Game",
+  "author": "Test",
+  "copyright": "",
+  "note": "",
+  "boards": [
+    {
+      "categoryNames": ["Wager Category"],
+      "categories": [
+        {
+          "name": "Wager Category",
+          "clues": [
+            {
+              "clue": "wagerable clue",
+              "answer": "wagerable answer",
+              "value": 200,
+              "wagerable": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

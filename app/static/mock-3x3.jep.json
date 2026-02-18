@@ -1,0 +1,37 @@
+{
+  "title": "Mock 3x3 Game",
+  "author": "Test",
+  "copyright": "",
+  "note": "",
+  "boards": [
+    {
+      "categoryNames": ["Cat A", "Cat B", "Cat C"],
+      "categories": [
+        {
+          "name": "Cat A",
+          "clues": [
+            { "clue": "a1", "answer": "a1-answer", "value": 200 },
+            { "clue": "a2", "answer": "a2-answer", "value": 400 },
+            { "clue": "a3", "answer": "a3-answer", "value": 600 }
+          ]
+        },
+        {
+          "name": "Cat B",
+          "clues": [
+            { "clue": "b1", "answer": "b1-answer", "value": 200 },
+            { "clue": "b2", "answer": "b2-answer", "value": 400 },
+            { "clue": "b3", "answer": "b3-answer", "value": 600 }
+          ]
+        },
+        {
+          "name": "Cat C",
+          "clues": [
+            { "clue": "c1", "answer": "c1-answer", "value": 200 },
+            { "clue": "c2", "answer": "c2-answer", "value": 400 },
+            { "clue": "c3", "answer": "c3-answer", "value": 600 }
+          ]
+        }
+      ]
+    }
+  ]
+}
