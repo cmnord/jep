@@ -17,7 +17,6 @@ export function SoundControl({
   // Local state for responsive slider — writes through to context
   const [volume, setLocalVolume] = React.useState(sound.volume);
   const [mute, setLocalMute] = React.useState(sound.mute);
-  const prevVolume = React.useRef(volume);
 
   function setVolume(v: number) {
     setLocalVolume(v);
@@ -35,15 +34,7 @@ export function SoundControl({
       <form className="group flex grow items-center gap-2">
         <MuteToggle
           pressed={mute}
-          onPressChange={(pressed) => {
-            setMute(pressed);
-            if (pressed) {
-              prevVolume.current = volume;
-              setVolume(0);
-            } else {
-              setVolume(prevVolume.current);
-            }
-          }}
+          onPressChange={(pressed) => setMute(pressed)}
         />
         {showSlider && (
           <VolumeSlider

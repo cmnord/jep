@@ -1,3 +1,5 @@
+import path from "path";
+
 import { expect } from "@playwright/test";
 import type { Page } from "@playwright/test";
 
@@ -43,6 +45,35 @@ export async function playOneClueKeyboard(page: Page) {
   await expect(backButton).toBeVisible({ timeout: 5_000 });
   await expect(backButton).toBeFocused({ timeout: 2_000 });
   await page.keyboard.press("Enter");
+}
+
+const MOCK_1x1_PATH = path.resolve("app/static/mock-1x1.jep.json");
+
+/** Upload a .jep.json file on a page that has an Upload widget (/profile or /).
+ *  For authenticated pages the form submits immediately (no confirmation dialog).
+ *  Returns the game ID extracted from the "My Games" list link. */
+export async function uploadGame(
+  page: Page,
+  filePath = MOCK_1x1_PATH,
+): Promise<string> {
+  // Use the filechooser pattern to go through the upload button. This ensures
+  // React has hydrated before the file change event fires (the hidden input's
+  // onChange handler is only attached after hydration).
+  const fileChooserPromise = page.waitForEvent("filechooser");
+  await page.locator("#upload-button").click();
+  const fileChooser = await fileChooserPromise;
+  await fileChooser.setFiles(filePath);
+
+  // Wait for the upload action to complete and the page to update.
+  await expect(page.getByText(/created new/i)).toBeVisible({ timeout: 10_000 });
+
+  // Extract the game ID from the first game link in the "My Games" list.
+  // Links have the form /game/{id}/play.
+  const gameLink = page.locator('a[href*="/game/"][href*="/play"]').first();
+  const href = await gameLink.getAttribute("href");
+  const match = href?.match(/\/game\/([^/]+)\/play/);
+  if (!match) throw new Error(`Could not extract game ID from href: ${href}`);
+  return match[1];
 }
 
 /** Play through a single $200 clue and return to the board. */
