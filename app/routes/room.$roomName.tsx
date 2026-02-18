@@ -49,6 +49,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   const accessToken = authSession?.accessToken;
 
   const roomEvents = await getRoomEvents(room.id, accessToken);
+  const optimisticEnabled =
+    new URL(request.url).searchParams.get("optimistic") === "1";
   const gameDefaults = user
     ? parseUserSettings(user.settings).gameDefaults
     : undefined;
@@ -93,6 +95,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
         userId,
         BASE_URL,
         accessToken,
+        optimisticEnabled,
       };
     }
 
@@ -106,6 +109,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       userId,
       BASE_URL,
       accessToken,
+      optimisticEnabled,
     };
   }
 
@@ -120,6 +124,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       roomId,
       roomName,
       accessToken,
+      optimisticEnabled,
       userId,
       BASE_URL,
     },
@@ -136,6 +141,7 @@ export default function PlayGame({ loaderData }: Route.ComponentProps) {
     loaderData.roomEvents,
     loaderData.roomId,
     loaderData.accessToken,
+    loaderData.optimisticEnabled,
   );
 
   return (
