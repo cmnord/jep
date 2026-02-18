@@ -15,5 +15,11 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   const authSession = await getValidAuthSession(request);
   const roomName = await createRoom(gameId, authSession?.accessToken);
 
-  throw redirect(`/room/${roomName}`);
+  const url = new URL(request.url);
+  const redirectUrl = new URL(`/room/${roomName}`, url.origin);
+  // Preserve query parameters (e.g. ?mode=host) on redirect
+  for (const [key, value] of url.searchParams) {
+    redirectUrl.searchParams.set(key, value);
+  }
+  throw redirect(redirectUrl.pathname + redirectUrl.search);
 }

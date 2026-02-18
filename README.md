@@ -40,6 +40,23 @@ npm run dev
 
 Open up [http://localhost:3000](http://localhost:3000) and you should be ready to go!
 
+## Host Mode
+
+Host mode is designed for in-person game nights where a dedicated host controls the game while others play on their own devices.
+
+**Three-device setup:**
+
+- **Host device** (tablet/laptop): Add `?mode=host` to the room URL, or click "Host Game" on a game card. The host sees all answers on the board, verifies player responses, and cannot buzz in.
+- **Display device** (TV): Open the standard room URL to show the game board for everyone.
+- **Player devices** (phones): Open the standard room URL to play normally.
+
+**What the host sees:**
+
+- Board clue tiles show the answer text, plus indicators for answered/wagerable/long-form clues
+- Buzzing is disabled — the host cannot accidentally buzz in
+- When a player buzzes, the host gets a "Was [player] right?" prompt to verify their answer
+- The answer is always visible during all prompt states
+
 ## Supabase
 
 View the local Supabase dashboard at
@@ -91,6 +108,8 @@ npx supabase gen types typescript --linked > app/models/database.types.ts
   ([source](https://glitch.com/~jarchive-json))
 - [Cluebase](https://cluebase.readthedocs.io/en/latest/)
   ([API](cluebase.lukelav.in/), [source](https://github.com/lukelavin/cluebase))
+- [ryandowner](https://github.com/ryandowner) for the
+  [host mode feature](https://github.com/ryandowner/jep-multiplayer-host)
 
 ## License
 
