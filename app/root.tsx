@@ -104,14 +104,14 @@ export default function App({ loaderData }: Route.ComponentProps) {
       </head>
       <body className="relative flex min-h-screen flex-col">
         {loaderData.NODE_ENV === "production" ? <Analytics /> : null}
-        <UserSettingsProvider
-          initialSettings={loaderData.userSettings}
-          loggedIn={!!loaderData.user}
-        >
-          <ToastPrimitive.Provider swipeDirection="right">
-            <ToastPrimitive.Viewport
-              className={`fixed right-0 bottom-0 z-50 m-0 flex w-96 max-w-full list-none flex-col gap-3 p-[var(--viewport-padding)] outline-none [--viewport-padding:_25px]`}
-            />
+        <ToastPrimitive.Provider swipeDirection="right">
+          <ToastPrimitive.Viewport
+            className={`fixed right-0 bottom-0 z-50 m-0 flex w-96 max-w-full list-none flex-col gap-3 p-[var(--viewport-padding)] outline-none [--viewport-padding:_25px]`}
+          />
+          <UserSettingsProvider
+            initialSettings={loaderData.userSettings}
+            loggedIn={!!loaderData.user}
+          >
             <Header user={loaderData.user} BASE_URL={loaderData.BASE_URL} />
             <Outlet />
             <Footer />
@@ -122,8 +122,8 @@ export default function App({ loaderData }: Route.ComponentProps) {
               }}
             />
             <Scripts />
-          </ToastPrimitive.Provider>
-        </UserSettingsProvider>
+          </UserSettingsProvider>
+        </ToastPrimitive.Provider>
       </body>
     </html>
   );

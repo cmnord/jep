@@ -16,5 +16,5 @@ export async function action({ request }: Route.ActionArgs) {
     authSession.accessToken,
   );
 
-  return new Response(null, { status: 204 });
+  return Response.json({ ok: true });
 }
