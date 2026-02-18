@@ -4,6 +4,7 @@ import * as React from "react";
 import Popover from "~/components/popover";
 import { clueIsPlayable } from "~/engine";
 import type { Clue } from "~/models/convert.server";
+import { useIsHostMode } from "~/utils/use-host-mode";
 
 type ButtonProps = React.ComponentProps<"button">;
 
@@ -32,6 +33,7 @@ const ClueButton = React.forwardRef<HTMLButtonElement, ButtonProps & Props>(
     ref,
   ) => {
     const [loading, setLoading] = React.useState(false);
+    const isHostMode = useIsHostMode();
 
     const playable = clueIsPlayable(clue);
 
@@ -92,6 +94,20 @@ const ClueButton = React.forwardRef<HTMLButtonElement, ButtonProps & Props>(
           <span className="text-sm sm:text-3xl lg:text-4xl">$</span>
           <span className="text-md sm:text-4xl lg:text-5xl">{clue.value}</span>
         </p>
+        {isHostMode && (
+          <div className="mt-1 text-center">
+            <p className="text-xs font-medium text-cyan-300">{clue.answer}</p>
+            {answered && (
+              <p className="text-xs font-medium text-green-300">Answered</p>
+            )}
+            {clue.wagerable && (
+              <p className="text-xs font-medium text-orange-300">Wagerable</p>
+            )}
+            {clue.longForm && (
+              <p className="text-xs font-medium text-purple-300">Long Form</p>
+            )}
+          </div>
+        )}
       </button>
     );
   },
