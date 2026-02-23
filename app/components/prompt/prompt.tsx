@@ -13,6 +13,7 @@ import {
   QUANTIZATION_FACTOR_MS,
   useEngineContext,
 } from "~/engine";
+import useClueAudio from "~/utils/use-clue-audio";
 import useKeyPress from "~/utils/use-key-press";
 import useSoloAction from "~/utils/use-solo-action";
 import useGameSound from "~/utils/use-sound";
@@ -215,7 +216,11 @@ function WagerCluePrompt({ roomId, userId }: RoomProps) {
 /** ReadWagerableCluePrompt handles all frontend behavior while the game
  * state is GameState.ReadWagerableClue.
  */
-function ReadWagerableCluePrompt({ roomId, userId }: RoomProps) {
+function ReadWagerableCluePrompt({
+  roomId,
+  userId,
+  gameId,
+}: RoomProps & { gameId: string }) {
   const {
     activeClue,
     boardControl,
@@ -223,12 +228,15 @@ function ReadWagerableCluePrompt({ roomId, userId }: RoomProps) {
     category,
     clue,
     getClueValue,
+    round,
     soloDispatch,
   } = useEngineContext();
 
   if (!boardControl) throw new Error("No board control found");
   if (!clue) throw new Error("No clue found");
   if (!activeClue) throw new Error("No active clue found");
+
+  useClueAudio(gameId, round, activeClue);
 
   const buzzDurationMs = buzzes.get(boardControl);
   const [buzzerOpenAt, setBuzzerOpenAt] = React.useState<number | undefined>(
@@ -338,13 +346,23 @@ function ReadWagerableCluePrompt({ roomId, userId }: RoomProps) {
 function ReadCluePrompt({
   roomId,
   userId,
+  gameId,
   lockout,
   onLockout,
-}: RoomProps & { lockout: boolean; onLockout: () => void }) {
-  const { activeClue, buzzes, category, clue, getClueValue, soloDispatch } =
-    useEngineContext();
+}: RoomProps & { gameId: string; lockout: boolean; onLockout: () => void }) {
+  const {
+    activeClue,
+    buzzes,
+    category,
+    clue,
+    getClueValue,
+    round,
+    soloDispatch,
+  } = useEngineContext();
 
   if (!clue) throw new Error("No clue found");
+
+  useClueAudio(gameId, round, activeClue);
   const numCharactersInClue = clue.clue.length ?? 0;
 
   // Compute clueDurationMs once at mount so the ReadClueTimer CSS animation
@@ -543,7 +561,11 @@ function ReadCluePrompt({
 /** ReadLongFormCluePrompt handles all frontend behavior while the game state is
  * GameState.ReadLongFormClue.
  */
-function ReadLongFormCluePrompt({ roomId, userId }: RoomProps) {
+function ReadLongFormCluePrompt({
+  roomId,
+  userId,
+  gameId,
+}: RoomProps & { gameId: string }) {
   const {
     activeClue,
     buzzes,
@@ -551,9 +573,12 @@ function ReadLongFormCluePrompt({ roomId, userId }: RoomProps) {
     clue,
     getClueValue,
     players,
+    round,
     soloDispatch,
   } = useEngineContext();
   if (!clue) throw new Error("clue is undefined");
+
+  useClueAudio(gameId, round, activeClue);
 
   const fetcher = useFetcher<Action>();
   useSoloAction(fetcher, soloDispatch);
@@ -841,7 +866,7 @@ function RevealAnswerToAllPrompt({ roomId, userId }: RoomProps) {
   );
 }
 
-export function ConnectedPrompt(props: RoomProps) {
+export function ConnectedPrompt(props: RoomProps & { gameId: string }) {
   const { type } = useEngineContext();
 
   const [lockout, setLockout] = React.useState(false);

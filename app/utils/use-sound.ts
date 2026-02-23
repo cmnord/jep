@@ -4,8 +4,14 @@ interface SoundSettings {
   /** volume is a number between 0 and 1. */
   volume: number;
   mute: boolean;
+  /** ttsEnabled controls whether clue audio (text-to-speech) plays. Separate
+   * from mute so players can keep SFX on but disable TTS (e.g. on a voice
+   * call).
+   */
+  ttsEnabled: boolean;
   setVolume: (volume: number) => void;
   setMute: (mute: boolean) => void;
+  setTtsEnabled: (enabled: boolean) => void;
 }
 
 /** SoundContext stores the volume and mute settings for all sound effects
@@ -14,8 +20,10 @@ interface SoundSettings {
 export const SoundContext = React.createContext<SoundSettings>({
   volume: 1,
   mute: false,
+  ttsEnabled: false,
   setVolume: () => null,
   setMute: () => null,
+  setTtsEnabled: () => null,
 });
 
 export function useSoundContext() {

@@ -4,6 +4,7 @@ import type { AuthSession } from "~/models/auth";
 import { Convert } from "~/models/convert.server";
 import type { GameVisibility } from "~/models/game.server";
 import { createGame } from "~/models/game.server";
+import { generateTtsForGame, isTtsEnabled } from "~/models/tts.server";
 
 /** newUploadHandler creates a function which uploads games to the database.
  */
@@ -36,6 +37,25 @@ export function newUploadHandler(
       userId,
       authSession?.accessToken,
     );
+
+    // Best-effort TTS generation — don't block upload on failure
+    if (isTtsEnabled()) {
+      try {
+        const clues = game.boards.flatMap((board, round) =>
+          board.categories.flatMap((category, categoryIndex) =>
+            category.clues.map((clue, clueIndex) => ({
+              clueText: clue.clue,
+              round,
+              categoryIndex,
+              clueIndex,
+            })),
+          ),
+        );
+        await generateTtsForGame(gameId, clues);
+      } catch (err) {
+        console.error("TTS generation failed for game", gameId, err);
+      }
+    }
 
     return gameId;
   };

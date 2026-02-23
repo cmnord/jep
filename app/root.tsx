@@ -92,6 +92,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 export default function App({ loaderData }: Route.ComponentProps) {
   const [volume, setVolume] = React.useState(0.5);
   const [mute, setMute] = React.useState(false);
+  const [ttsEnabled, setTtsEnabled] = React.useState(false);
 
   return (
     <html lang="en">
@@ -109,6 +110,8 @@ export default function App({ loaderData }: Route.ComponentProps) {
             setVolume,
             mute,
             setMute,
+            ttsEnabled,
+            setTtsEnabled,
           }}
         >
           <ToastPrimitive.Provider swipeDirection="right">

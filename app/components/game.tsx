@@ -9,7 +9,7 @@ import { PlayerScores } from "~/components/player";
 import Preview from "~/components/preview";
 import Prompt from "~/components/prompt";
 import { GameState, Player, useEngineContext } from "~/engine";
-import type { Game } from "~/models/convert.server";
+import type { Game } from "~/models/game.server";
 import useGameSound from "~/utils/use-sound";
 
 const BOARD_FILL_SFX = "/sounds/board-fill.mp3";
@@ -123,7 +123,7 @@ export default function GameComponent({
           <PlayerScores roomId={roomId} userId={userId} />
           <Connection state={connectionState} lastMessageAt={lastMessageAt} />
         </div>
-        <Prompt roomId={roomId} userId={userId} />
+        <Prompt roomId={roomId} userId={userId} gameId={game.id} />
       </div>
     </>
   );
