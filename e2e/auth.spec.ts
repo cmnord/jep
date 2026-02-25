@@ -1,6 +1,10 @@
 import { expect, test } from "@playwright/test";
 
-import { test as authedTest, expect as authedExpect, TEST_EMAIL } from "./fixtures";
+import {
+  test as authedTest,
+  expect as authedExpect,
+  TEST_EMAIL,
+} from "./fixtures";
 
 test.describe("auth (unauthenticated)", () => {
   test("redirects to login when visiting /profile unauthenticated", async ({

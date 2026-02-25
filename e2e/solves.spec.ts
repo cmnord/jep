@@ -13,9 +13,9 @@ test.describe("solves tracking", () => {
     await page.goto(`/game/${gameId}/play`);
 
     // Wait for the room page to load, then join
-    await expect(
-      page.getByRole("button", { name: /join game/i }),
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole("button", { name: /join game/i })).toBeVisible({
+      timeout: 10_000,
+    });
     await page.getByRole("button", { name: /join game/i }).click();
 
     // Start round 1

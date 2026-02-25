@@ -4,8 +4,7 @@ import { test, expect } from "./fixtures";
 function waitForSettingsSave(page: import("@playwright/test").Page) {
   return page.waitForResponse(
     (resp) =>
-      resp.url().includes("/settings") &&
-      resp.request().method() === "POST",
+      resp.url().includes("/settings") && resp.request().method() === "POST",
   );
 }
 
@@ -49,11 +48,8 @@ test.describe("settings persistence", () => {
     // --- Setup: ensure unmuted with a non-zero volume ---
     // Previous buggy runs may have left volume at 0, which would mask the bug
     // where muting destructively zeroes the persisted volume.
-    const isMuted =
-      (await muteButton.getAttribute("data-state")) === "on";
-    const currentVol = Number(
-      await volumeThumb.getAttribute("aria-valuenow"),
-    );
+    const isMuted = (await muteButton.getAttribute("data-state")) === "on";
+    const currentVol = Number(await volumeThumb.getAttribute("aria-valuenow"));
 
     if (isMuted || currentVol === 0) {
       const setupSave = waitForSettingsSave(page);
@@ -89,8 +85,7 @@ test.describe("settings persistence", () => {
     await page.reload();
     await expect(muteButton).toHaveAttribute("data-state", "on");
 
-    const volumeAfterReload =
-      await volumeThumb.getAttribute("aria-valuenow");
+    const volumeAfterReload = await volumeThumb.getAttribute("aria-valuenow");
     expect(volumeAfterReload).toBe(volumeBefore);
 
     // Unmute after reload — volume should still be the original value
@@ -99,8 +94,7 @@ test.describe("settings persistence", () => {
     await unmuteSave;
 
     await expect(muteButton).toHaveAttribute("data-state", "off");
-    const volumeAfterUnmute =
-      await volumeThumb.getAttribute("aria-valuenow");
+    const volumeAfterUnmute = await volumeThumb.getAttribute("aria-valuenow");
     expect(volumeAfterUnmute).toBe(volumeBefore);
   });
 });
