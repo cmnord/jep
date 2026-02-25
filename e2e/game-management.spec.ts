@@ -17,7 +17,9 @@ async function changeVisibility(
   await gameRow.getByRole("button", { name: "More actions" }).click();
   await page.getByText(visibility).click();
   // The PATCH action flashes "Updated game ... to ..." and redirects to /profile.
-  await expect(page.getByText(/updated game/i)).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByText(/updated game/i)).toBeVisible({
+    timeout: 10_000,
+  });
 }
 
 test.describe("game management", () => {
@@ -72,11 +74,15 @@ test.describe("game management", () => {
     const gameRow = page.locator(`li:has(a[href="/game/${gameId}/play"])`);
 
     // Game starts as UNLISTED (from the upload test)
-    await expect(gameRow.locator(".text-xs", { hasText: "UNLISTED" })).toBeVisible();
+    await expect(
+      gameRow.locator(".text-xs", { hasText: "UNLISTED" }),
+    ).toBeVisible();
 
     // Change to private
     await changeVisibility(page, gameRow, "Make private");
-    await expect(gameRow.locator(".text-xs", { hasText: "PRIVATE" })).toBeVisible();
+    await expect(
+      gameRow.locator(".text-xs", { hasText: "PRIVATE" }),
+    ).toBeVisible();
   });
 
   test("private game inaccessible to guests", async ({ browser }) => {

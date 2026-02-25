@@ -53,9 +53,7 @@ export default async function globalSetup() {
     .upsert({ id: userId, email: EMAIL }, { onConflict: "id" });
 
   if (upsertError) {
-    throw new Error(
-      `Failed to upsert accounts row: ${upsertError.message}`,
-    );
+    throw new Error(`Failed to upsert accounts row: ${upsertError.message}`);
   }
 
   console.log(`[global-setup] Test user ready: ${EMAIL} (${userId})`);
