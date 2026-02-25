@@ -47,7 +47,10 @@ export function UserSettingsProvider({
     if (
       prev !== "idle" &&
       fetcher.state === "idle" &&
-      (fetcher.data as { ok?: boolean })?.ok
+      fetcher.data != null &&
+      typeof fetcher.data === "object" &&
+      "ok" in fetcher.data &&
+      fetcher.data.ok
     ) {
       setToastOpen(false);
       window.clearTimeout(toastTimerRef.current);
