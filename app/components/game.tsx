@@ -11,6 +11,7 @@ import Prompt from "~/components/prompt";
 import { GameState, Player, useEngineContext } from "~/engine";
 import type { Game } from "~/models/convert.server";
 import type { PlayerColor } from "~/models/player-color";
+import { useIsHost, useIsSpectator } from "~/utils/use-room-mode";
 import useGameSound from "~/utils/use-sound";
 
 const BOARD_FILL_SFX = "/sounds/board-fill.mp3";
@@ -63,6 +64,7 @@ function CallToAction({
 /** GameComponent maintains the game state. */
 export default function GameComponent({
   game,
+  hostMode = false,
   name,
   playerColor,
   roomId,
@@ -72,6 +74,7 @@ export default function GameComponent({
   url,
 }: {
   game: Game;
+  hostMode?: boolean;
   name: string;
   playerColor?: PlayerColor;
   roomName: string;
@@ -87,6 +90,10 @@ export default function GameComponent({
     round,
     type,
   } = useEngineContext();
+
+  const isHost = useIsHost();
+  const isSpectator = useIsSpectator();
+  const isPassiveViewer = isHost || isSpectator;
 
   const [playBoardFillSfx] = useGameSound(BOARD_FILL_SFX);
   const [playFinalSfx] = useGameSound(FINAL_CATEGORY_REVEAL_SFX);
@@ -109,7 +116,7 @@ export default function GameComponent({
   return (
     <>
       <Preview
-        disabled={suppressDialogs}
+        disabled={suppressDialogs || isPassiveViewer}
         gameTitle={game.title}
         name={name}
         numRounds={game.boards.length}
@@ -141,7 +148,9 @@ export default function GameComponent({
             reconnect={reconnect}
           />
         </div>
-        <Prompt roomId={roomId} userId={userId} />
+        {isSpectator ? null : (
+          <Prompt roomId={roomId} userId={userId} hostMode={hostMode} />
+        )}
       </div>
     </>
   );

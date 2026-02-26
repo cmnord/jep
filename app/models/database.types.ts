@@ -246,16 +246,19 @@ export type Database = {
       rooms: {
         Row: {
           game_id: string;
+          host_mode: boolean;
           id: number;
           name: string;
         };
         Insert: {
           game_id: string;
+          host_mode?: boolean;
           id?: number;
           name: string;
         };
         Update: {
           game_id?: string;
+          host_mode?: boolean;
           id?: number;
           name?: string;
         };
