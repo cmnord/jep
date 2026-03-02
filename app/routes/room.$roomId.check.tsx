@@ -12,12 +12,16 @@ const formSchema = z.object({
   i: z.coerce.number().int(),
   j: z.coerce.number().int(),
   userId: z.string(),
+  clientMutationId: z.string().optional(),
   result: z.string(),
 });
 
 export async function action({ request, params }: Route.ActionArgs) {
   const formData = await request.formData();
-  const { i, j, userId, result } = parseFormData(formData, formSchema);
+  const { i, j, userId, result, clientMutationId } = parseFormData(
+    formData,
+    formSchema,
+  );
 
   const correct = result === "correct";
 
@@ -29,7 +33,7 @@ export async function action({ request, params }: Route.ActionArgs) {
   if (roomId === -1) {
     return {
       type: ActionType.Check,
-      payload: { i, j, userId, correct },
+      payload: { i, j, userId, correct, clientMutationId },
       ts: Date.now(),
     };
   }
@@ -48,6 +52,7 @@ export async function action({ request, params }: Route.ActionArgs) {
       j,
       userId,
       correct,
+      clientMutationId,
     },
     authSession?.accessToken,
   );

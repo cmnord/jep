@@ -18,6 +18,7 @@ export const GameEngineContext = React.createContext<
   clue: undefined,
   connectionState: ConnectionState.DISCONNECTED,
   getClueValue: () => 0,
+  optimisticDispatch: () => "",
   soloDispatch: () => null,
   isAnswered: () => false,
   lastMessageAt: undefined,
