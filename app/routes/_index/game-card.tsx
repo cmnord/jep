@@ -25,11 +25,12 @@ export default function GameCard({
   loggedIn?: boolean;
 }) {
   const [loading, setLoading] = React.useState(false);
+  const [hostLoading, setHostLoading] = React.useState(false);
   const solved = solve?.solved_at !== null;
-  const to =
-    solve && !solve.solved_at
-      ? `/room/${solve.room_id}-${solve.rooms?.name}`
-      : `/game/${game.id}/play`;
+  const hasActiveSolve = solve && !solve.solved_at;
+  const to = hasActiveSolve
+    ? `/room/${solve.room_id}-${solve.rooms?.name}`
+    : `/game/${game.id}/play`;
 
   const [downloadStatus, setDownloadStatus] =
     React.useState<DownloadStatus>("none");
@@ -112,6 +113,20 @@ export default function GameCard({
           </div>
         </div>
       </Link>
+      {loggedIn && !hasActiveSolve && (
+        <div className="border-t border-slate-200 p-2">
+          <Link
+            to={`/game/${game.id}/play?mode=host`}
+            onClick={() => setHostLoading(true)}
+            className={`flex w-full items-center justify-center gap-2 rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 ${
+              hostLoading ? "pointer-events-none opacity-50" : ""
+            }`}
+          >
+            {hostLoading ? <LoadingSpinner className="h-4 w-4" /> : null}
+            Host Game
+          </Link>
+        </div>
+      )}
     </div>
   );
 }
