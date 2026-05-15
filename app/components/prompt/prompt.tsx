@@ -14,6 +14,7 @@ import {
   useEngineContext,
 } from "~/engine";
 import useFitText from "~/utils/use-fit-text";
+import { useIsHost } from "~/utils/use-room-mode";
 import useKeyPress from "~/utils/use-key-press";
 import useSoloAction from "~/utils/use-solo-action";
 import useGameSound from "~/utils/use-sound";
@@ -24,6 +25,7 @@ import { Buzzes } from "./buzz";
 import { ConnectedCheckForm as CheckForm } from "./check-form";
 import { Countdown } from "./countdown";
 import { Fade } from "./fade";
+import { HostModeAnswer, HostModeCheckForm } from "./host-mode";
 import { Kbd } from "./kbd";
 import { Lockout } from "./lockout";
 import { ConnectedNextClueForm as NextClueForm } from "./next-clue-form";
@@ -138,6 +140,7 @@ function ClueText({
 function WagerCluePrompt({ roomId, userId }: RoomProps) {
   const { clue, boardControl, buzzes, category, players } = useEngineContext();
   const { ref, fontSize } = useFitText<HTMLDivElement>({ maxFontSize: 300 });
+  const isHost = useIsHost();
 
   const canWager = buzzes.get(userId) !== CANT_BUZZ_FLAG;
   const wagererName = boardControl
@@ -180,7 +183,9 @@ function WagerCluePrompt({ roomId, userId }: RoomProps) {
           </div>
         )}
       </div>
-      {canWager ? (
+      {isHost && clue ? (
+        <HostModeAnswer answer={clue.answer} />
+      ) : canWager ? (
         <WagerForm roomId={roomId} userId={userId} />
       ) : longForm ? (
         <div className="flex flex-col items-center gap-2 p-2">
@@ -215,6 +220,7 @@ function ReadWagerableCluePrompt({ roomId, userId }: RoomProps) {
     getClueValue,
     soloDispatch,
   } = useEngineContext();
+  const isHost = useIsHost();
 
   if (!boardControl) throw new Error("No board control found");
   if (!clue) throw new Error("No clue found");
@@ -274,6 +280,7 @@ function ReadWagerableCluePrompt({ roomId, userId }: RoomProps) {
   );
 
   const handleClick = (clickedAtMs: number) => {
+    if (isHost) return;
     if (buzzDurationMs !== undefined || buzzerOpenAt === undefined) {
       return;
     }
@@ -304,18 +311,25 @@ function ReadWagerableCluePrompt({ roomId, userId }: RoomProps) {
           <span className="font-bold">${clueValue}</span>)
         </div>
         <span className="text-sm text-slate-300">
-          Click or press <Kbd>Enter</Kbd> to buzz in
+          {isHost ? (
+            "Host mode - buzzing disabled"
+          ) : (
+            <>
+              Click or press <Kbd>Enter</Kbd> to buzz in
+            </>
+          )}
         </span>
       </div>
       <ClueText
         clue={clue.clue}
-        canBuzz={boardControl === userId}
+        canBuzz={!isHost && boardControl === userId}
         onBuzz={() => handleClick(Date.now())}
-        focusOnBuzz
+        focusOnBuzz={!isHost}
         imageSrc={clue.imageSrc}
         showAnswer={false}
         answer={clue.answer}
       />
+      {isHost && <HostModeAnswer answer={clue.answer} />}
       <Countdown startTime={undefined} />
       <Buzzes buzzes={buzzes} />
     </>
@@ -333,6 +347,7 @@ function ReadCluePrompt({
 }: RoomProps & { lockout: boolean; onLockout: () => void }) {
   const { activeClue, buzzes, category, clue, getClueValue, soloDispatch } =
     useEngineContext();
+  const isHost = useIsHost();
 
   if (!clue) throw new Error("No clue found");
   const numCharactersInClue = clue.clue.length ?? 0;
@@ -462,7 +477,7 @@ function ReadCluePrompt({
   );
 
   function handleClick(clickedAtMs: number) {
-    if (lockout || myBuzzDurationMs !== undefined) {
+    if (isHost || lockout || myBuzzDurationMs !== undefined) {
       return;
     }
 
@@ -504,26 +519,36 @@ function ReadCluePrompt({
           <span className="font-bold">${clueValue}</span>
         </div>
         <span className="text-sm text-slate-300">
-          Click or press <Kbd>Enter</Kbd> to buzz in
+          {isHost ? (
+            "Host mode - buzzing disabled"
+          ) : (
+            <>
+              Click or press <Kbd>Enter</Kbd> to buzz in
+            </>
+          )}
         </span>
       </div>
       <ClueText
         clue={clue.clue}
-        canBuzz={!lockout && myBuzzDurationMs === undefined}
+        canBuzz={!isHost && !lockout && myBuzzDurationMs === undefined}
         onBuzz={() => handleClick(Date.now())}
-        focusOnBuzz
+        focusOnBuzz={!isHost}
         imageSrc={clue.imageSrc}
         showAnswer={false}
         answer={clue.answer}
       />
-      <div className="invisible">
-        <CheckForm
-          roomId={roomId}
-          userId={userId}
-          showAnswer={false}
-          onClickShowAnswer={() => null}
-        />
-      </div>
+      {isHost ? (
+        <HostModeAnswer answer={clue.answer} />
+      ) : (
+        <div className="invisible">
+          <CheckForm
+            roomId={roomId}
+            userId={userId}
+            showAnswer={false}
+            onClickShowAnswer={() => null}
+          />
+        </div>
+      )}
       <Countdown startTime={undefined} />
       <Buzzes buzzes={optimisticBuzzes} />
     </>
@@ -543,6 +568,7 @@ function ReadLongFormCluePrompt({ roomId, userId }: RoomProps) {
     players,
     soloDispatch,
   } = useEngineContext();
+  const isHost = useIsHost();
   if (!clue) throw new Error("clue is undefined");
 
   const fetcher = useFetcher<Action>();
@@ -584,7 +610,9 @@ function ReadLongFormCluePrompt({ roomId, userId }: RoomProps) {
         showAnswer={false}
         answer={clue.answer}
       />
-      {canAnswer ? (
+      {isHost ? (
+        <HostModeAnswer answer={clue.answer} />
+      ) : canAnswer ? (
         <AnswerForm roomId={roomId} userId={userId} />
       ) : allPlayersCantAnswer ? (
         <div className="flex flex-col items-center gap-2 p-2">
@@ -612,9 +640,14 @@ function ReadLongFormCluePrompt({ roomId, userId }: RoomProps) {
 /** RevealAnswerToBuzzerPrompt handles all frontend behavior while the game state
  * is GameState.RevealAnswerToBuzzer.
  */
-function RevealAnswerToBuzzerPrompt({ roomId, userId }: RoomProps) {
+function RevealAnswerToBuzzerPrompt({
+  roomId,
+  userId,
+  hostMode,
+}: RoomProps & { hostMode: boolean }) {
   const { activeClue, category, clue, getClueValue, players, winningBuzzer } =
     useEngineContext();
+  const isHost = useIsHost();
   if (!clue) throw new Error("clue is undefined");
   if (!activeClue) throw new Error("activeClue is undefined");
   if (!winningBuzzer) throw new Error("winningBuzzer is undefined");
@@ -631,10 +664,10 @@ function RevealAnswerToBuzzerPrompt({ roomId, userId }: RoomProps) {
   const [playTimesUpSfx] = useGameSound(TIMES_UP_SFX);
   useTimeout(
     playTimesUpSfx,
-    canShowAnswer && !showAnswer ? CLUE_TIMEOUT_MS : null,
+    canShowAnswer && !showAnswer && !hostMode ? CLUE_TIMEOUT_MS : null,
   );
   const [countdownStartedAt] = React.useState(
-    canShowAnswer && !showAnswer ? Date.now() : undefined,
+    canShowAnswer && !showAnswer && !hostMode ? Date.now() : undefined,
   );
 
   const winningPlayerName = winningBuzzer
@@ -666,7 +699,16 @@ function RevealAnswerToBuzzerPrompt({ roomId, userId }: RoomProps) {
         onBuzz={() => null}
         showAnswer={false}
       />
-      {canShowAnswer ? (
+      {isHost ? (
+        <>
+          <HostModeAnswer answer={clue.answer} />
+          <HostModeCheckForm roomId={roomId} />
+        </>
+      ) : hostMode ? (
+        <p className="p-2 text-center font-bold text-white">
+          Waiting for the host to verify {winningPlayerName}...
+        </p>
+      ) : canShowAnswer ? (
         <CheckForm
           roomId={roomId}
           userId={userId}
@@ -686,7 +728,11 @@ function RevealAnswerToBuzzerPrompt({ roomId, userId }: RoomProps) {
   );
 }
 
-function RevealAnswerLongFormPrompt({ roomId, userId }: RoomProps) {
+function RevealAnswerLongFormPrompt({
+  roomId,
+  userId,
+  hostMode,
+}: RoomProps & { hostMode: boolean }) {
   const {
     activeClue,
     answers,
@@ -697,6 +743,7 @@ function RevealAnswerLongFormPrompt({ roomId, userId }: RoomProps) {
     getClueValue,
     players,
   } = useEngineContext();
+  const isHost = useIsHost();
   if (!clue) throw new Error("clue is undefined");
   if (!activeClue) throw new Error("activeClue is undefined");
 
@@ -743,7 +790,16 @@ function RevealAnswerLongFormPrompt({ roomId, userId }: RoomProps) {
         onBuzz={() => null}
         showAnswer
       />
-      {canCheckAnswer ? (
+      {isHost ? (
+        <>
+          <HostModeAnswer answer={clue.answer} />
+          <HostModeCheckForm roomId={roomId} longForm />
+        </>
+      ) : hostMode ? (
+        <p className="p-2 text-center font-bold text-white">
+          Waiting for the host to verify answers...
+        </p>
+      ) : canCheckAnswer ? (
         <CheckForm
           roomId={roomId}
           userId={userId}
@@ -791,6 +847,7 @@ function RevealAnswerLongFormPrompt({ roomId, userId }: RoomProps) {
 function RevealAnswerToAllPrompt({ roomId, userId }: RoomProps) {
   const { activeClue, answeredBy, category, clue, getClueValue } =
     useEngineContext();
+  const isHost = useIsHost();
   if (!clue) throw new Error("clue is undefined");
 
   const clueValue = activeClue ? getClueValue(activeClue, userId) : 0;
@@ -811,7 +868,13 @@ function RevealAnswerToAllPrompt({ roomId, userId }: RoomProps) {
           <span className="font-bold">${clueValue}</span>
         </div>
         <span className="text-sm text-slate-300">
-          Click or press <Kbd>Enter</Kbd> to buzz in
+          {isHost ? (
+            "Host mode - buzzing disabled"
+          ) : (
+            <>
+              Click or press <Kbd>Enter</Kbd> to buzz in
+            </>
+          )}
         </span>
       </div>
 
@@ -824,6 +887,7 @@ function RevealAnswerToAllPrompt({ roomId, userId }: RoomProps) {
         showAnswer
         answer={clue.answer}
       />
+      {isHost && <HostModeAnswer answer={clue.answer} />}
       <NextClueForm roomId={roomId} userId={userId} />
       <Countdown startTime={undefined} />
       <Buzzes />
@@ -831,7 +895,9 @@ function RevealAnswerToAllPrompt({ roomId, userId }: RoomProps) {
   );
 }
 
-export function ConnectedPrompt(props: RoomProps) {
+export function ConnectedPrompt(
+  props: RoomProps & { hostMode: boolean },
+) {
   const { type } = useEngineContext();
 
   const [lockout, setLockout] = React.useState(false);

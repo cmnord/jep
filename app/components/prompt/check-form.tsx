@@ -17,11 +17,13 @@ function CheckForm({
   longForm,
   loading,
   myAnswer,
+  playerName,
 }: {
   answer: string;
   longForm: boolean;
   loading: boolean;
   myAnswer?: string;
+  playerName?: string;
 }) {
   return (
     <div className="flex flex-col items-center gap-2 p-2">
@@ -30,12 +32,14 @@ function CheckForm({
           <p className="text-center font-korinna text-2xl font-bold text-slate-300 uppercase shadow-sm">
             {answer}
           </p>
-          <p className="text-center text-sm text-slate-300">
-            (don't spoil the answer for others!)
-          </p>
+          {!playerName && (
+            <p className="text-center text-sm text-slate-300">
+              (don't spoil the answer for others!)
+            </p>
+          )}
         </>
       )}
-      {myAnswer && (
+      {myAnswer && !playerName && (
         <p className="text-center text-sm text-slate-300">
           Your answer:{" "}
           <span className="font-handwriting text-2xl font-bold text-white">
@@ -43,7 +47,9 @@ function CheckForm({
           </span>
         </p>
       )}
-      <p className="font-bold text-white">Were you right?</p>
+      <p className="font-bold text-white">
+        {playerName ? `Was ${playerName} right?` : "Were you right?"}
+      </p>
       <div className="flex gap-2">
         <Button
           htmlType="submit"
@@ -78,10 +84,12 @@ export function ConnectedCheckForm({
   longForm = false,
   showAnswer,
   onClickShowAnswer,
+  playerName,
 }: {
   longForm?: boolean;
   showAnswer: boolean;
   onClickShowAnswer: () => void;
+  playerName?: string;
 } & RoomProps) {
   const {
     activeClue,
@@ -193,6 +201,7 @@ export function ConnectedCheckForm({
         loading={loading}
         myAnswer={myAnswer}
         answer={clue.answer}
+        playerName={playerName}
       />
     </fetcher.Form>
   );

@@ -12,8 +12,16 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     throw new Response("game ID not found", { status: 404 });
   }
 
-  const authSession = await getValidAuthSession(request);
-  const roomName = await createRoom(gameId, authSession?.accessToken);
+  const url = new URL(request.url);
+  const hostMode = url.searchParams.get("mode") === "host";
 
-  throw redirect(`/room/${roomName}`);
+  const authSession = await getValidAuthSession(request);
+  const roomName = await createRoom(
+    gameId,
+    authSession?.accessToken,
+    hostMode,
+  );
+
+  const redirectUrl = `/room/${roomName}${hostMode ? "?mode=host" : ""}`;
+  throw redirect(redirectUrl);
 }
