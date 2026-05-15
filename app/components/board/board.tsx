@@ -3,7 +3,7 @@ import { useFetcher } from "react-router";
 
 import type { RoomProps } from "~/components/game";
 import type { Action } from "~/engine";
-import { GameState, useEngineContext } from "~/engine";
+import { GameState, clueIsPlayable, useEngineContext } from "~/engine";
 import type { Board, Clue } from "~/models/convert.server";
 import { generateGrid } from "~/utils";
 import useSoloAction from "~/utils/use-solo-action";
@@ -62,14 +62,20 @@ function BoardComponent({
         <table className="h-1 w-full table-fixed bg-blue-bright text-white">
           <thead>
             <tr className="h-1">
-              {board.categories.map((category, j) => (
-                <Category
-                  key={category.name}
-                  name={category.name}
-                  note={category.note}
-                  hidden={!isCategoryRevealed(j)}
-                />
-              ))}
+              {board.categories.map((category, j) => {
+                const allAnswered = category.clues.every(
+                  (clue, i) => !clueIsPlayable(clue) || isAnswered(i, j),
+                );
+                return (
+                  <Category
+                    key={category.name}
+                    name={category.name}
+                    note={category.note}
+                    hidden={!isCategoryRevealed(j)}
+                    allAnswered={allAnswered}
+                  />
+                );
+              })}
             </tr>
           </thead>
           <tbody ref={tbodyRef}>
