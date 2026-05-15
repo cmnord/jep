@@ -29,6 +29,22 @@ export interface ClueAnswer {
   answerOrder: number;
 }
 
+export interface CheckCorrection {
+  round: number;
+  i: number;
+  j: number;
+  boardControlBefore: string | null;
+  checks: Map<string, boolean>;
+}
+
+export interface PlayerCheckCorrection {
+  round: number;
+  i: number;
+  j: number;
+  correct: boolean;
+  value: number;
+}
+
 export interface Player {
   userId: string;
   name: string;
@@ -59,6 +75,7 @@ export interface State {
   readonly leftPlayers: Map<string, Player>;
   readonly wagers: Map<RoundIJKey, Map<string, number>>;
   readonly isAnswered: ClueAnswer[][][];
+  readonly checkCorrection: CheckCorrection | null;
 
   // per round state
   readonly activeClue: [number, number] | null;
@@ -87,6 +104,7 @@ export function stateFromGame(game: Game) {
     game,
     round: 0,
     isAnswered: [],
+    checkCorrection: null,
     numAnswered: 0,
     numCluesInBoard: getNumCluesInBoard(game, 0),
     numExpectedWagers: 0,
@@ -117,25 +135,82 @@ export function getPlayer(state: State, userId: string): Player | undefined {
   return state.players.get(userId) ?? state.leftPlayers.get(userId);
 }
 
+export function getCountedChecks(
+  checks: Map<string, boolean>,
+  longForm: boolean,
+) {
+  if (longForm) {
+    return new Map(checks);
+  }
+
+  const counted = new Map<string, boolean>();
+  for (const [userId, correct] of checks) {
+    counted.set(userId, correct);
+    if (correct) {
+      break;
+    }
+  }
+  return counted;
+}
+
+export function getCheckCorrectionForPlayer(
+  state: State,
+  userId: string,
+): PlayerCheckCorrection | undefined {
+  const correction = state.checkCorrection;
+  if (state.type !== GameState.ShowBoard || !correction) {
+    return undefined;
+  }
+  const { round, i, j, checks } = correction;
+
+  const clue = state.game.boards.at(round)?.categories.at(j)?.clues.at(i);
+  if (!clue) {
+    return undefined;
+  }
+
+  const countedChecks = getCountedChecks(checks, Boolean(clue.longForm));
+  const correct = countedChecks.get(userId);
+  if (correct === undefined) {
+    return undefined;
+  }
+
+  return {
+    round,
+    i,
+    j,
+    correct,
+    value: getClueValueForRound(state, round, [i, j], userId),
+  };
+}
+
+export function getClueValueForRound(
+  state: State,
+  round: number,
+  [i, j]: [number, number],
+  userId: string,
+) {
+  const board = state.game.boards.at(round);
+  const clue = board?.categories.at(j)?.clues.at(i);
+  if (!clue) {
+    throw new Error(`No clue exists at (${i}, ${j}) in round ${round}`);
+  }
+  if (clue.wagerable) {
+    const key = `${round},${i},${j}`;
+    const wagers = state.wagers.get(key);
+    return wagers?.get(userId) ?? 0;
+  }
+  return clue.value;
+}
+
 /** getClueValue gets the clue's wagered value if it's wagerable and its value
- * on the board otherwise.
+ * on the current board otherwise.
  */
 export function getClueValue(
   state: State,
   [i, j]: [number, number],
   userId: string,
 ) {
-  const board = state.game.boards.at(state.round);
-  const clue = board?.categories.at(j)?.clues.at(i);
-  if (!clue) {
-    throw new Error(`No clue exists at (${i}, ${j})`);
-  }
-  if (clue.wagerable) {
-    const key = `${state.round},${i},${j}`;
-    const wagers = state.wagers.get(key);
-    return wagers?.get(userId) ?? 0;
-  }
-  return clue.value;
+  return getClueValueForRound(state, state.round, [i, j], userId);
 }
 
 /** getNumCluesInBoard gets the number of clues in that round of the game.

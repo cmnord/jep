@@ -17,6 +17,7 @@ export const GameEngineContext = React.createContext<
   category: undefined,
   clue: undefined,
   connectionState: ConnectionState.DISCONNECTED,
+  getCheckCorrection: () => undefined,
   getClueValue: () => 0,
   soloDispatch: () => null,
   isAnswered: () => false,

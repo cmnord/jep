@@ -2,6 +2,7 @@ import * as React from "react";
 import { useNavigate } from "react-router";
 
 import BoardComponent from "~/components/board";
+import CheckCorrectionButton from "~/components/check-correction-button";
 import Connection from "~/components/connection";
 import GameClock from "~/components/game-clock";
 import Link from "~/components/link";
@@ -124,7 +125,7 @@ export default function GameComponent({
         <div
           className={`mx-auto flex w-full max-w-screen-lg flex-col gap-4 p-3 text-slate-100 sm:p-6 md:p-12`}
         >
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-2">
             <CallToAction
               boardController={boardController}
               type={type}
@@ -132,6 +133,7 @@ export default function GameComponent({
               roomName={roomName}
               userId={userId}
             />
+            <CheckCorrectionButton roomId={roomId} userId={userId} />
             <GameClock roomId={roomId} />
           </div>
           <PlayerScores roomId={roomId} userId={userId} />
