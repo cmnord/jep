@@ -12,7 +12,12 @@ import {
   isTypedRoomEvent,
   roomEventToAction,
 } from "./room-event";
-import { type State, getClueValue, stateFromGame } from "./state";
+import {
+  type State,
+  getCheckCorrectionForPlayer,
+  getClueValue,
+  stateFromGame,
+} from "./state";
 
 export enum ConnectionState {
   /** Initial connection attempt (first load). */
@@ -93,6 +98,8 @@ export function stateToGameEngine(
     category,
     clue,
     connectionState,
+    getCheckCorrection: (userId: string) =>
+      getCheckCorrectionForPlayer(state, userId),
     getClueValue: getClueValueFn,
     soloDispatch: dispatch,
     isAnswered,

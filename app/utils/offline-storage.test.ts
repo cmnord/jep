@@ -96,6 +96,35 @@ describe("serializeState / deserializeState", () => {
     expect(result.clockAccumulatedMs).toBe(5000);
   });
 
+  it("preserves check-correction metadata", () => {
+    const state = stateFromGame(MOCK_GAME);
+    Object.assign(state, {
+      checkCorrection: {
+        round: 0,
+        i: 0,
+        j: 0,
+        boardControlBefore: "user1",
+        checks: new Map([
+          ["user1", false],
+          ["user2", true],
+        ]),
+      },
+    });
+
+    const result = deserializeState(serializeState(state), MOCK_GAME);
+
+    expect(result.checkCorrection).toEqual({
+      round: 0,
+      i: 0,
+      j: 0,
+      boardControlBefore: "user1",
+      checks: new Map([
+        ["user1", false],
+        ["user2", true],
+      ]),
+    });
+  });
+
   it("preserves activeClue tuple", () => {
     const state = stateFromGame(MOCK_GAME);
     Object.assign(state, { activeClue: [1, 0] });
