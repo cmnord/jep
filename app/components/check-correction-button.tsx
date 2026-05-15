@@ -25,7 +25,6 @@ export default function CheckCorrectionButton({ roomId, userId }: RoomProps) {
     <fetcher.Form
       method="POST"
       action={`/room/${roomId}/correct-check`}
-      className="ml-auto"
     >
       <input type="hidden" name="round" value={correction.round} />
       <input type="hidden" name="i" value={correction.i} />
