@@ -2,6 +2,7 @@ import * as React from "react";
 import { useNavigate } from "react-router";
 
 import BoardComponent from "~/components/board";
+import CheckCorrectionButton from "~/components/check-correction-button";
 import Connection from "~/components/connection";
 import GameClock from "~/components/game-clock";
 import Link from "~/components/link";
@@ -124,15 +125,24 @@ export default function GameComponent({
         <div
           className={`mx-auto flex w-full max-w-screen-lg flex-col gap-4 p-3 text-slate-100 sm:p-6 md:p-12`}
         >
-          <div className="flex items-center justify-between">
-            <CallToAction
-              boardController={boardController}
-              type={type}
-              isSingleLongFormClue={isSingleLongFormClue}
-              roomName={roomName}
-              userId={userId}
-            />
-            <GameClock roomId={roomId} />
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="order-1">
+              <CallToAction
+                boardController={boardController}
+                type={type}
+                isSingleLongFormClue={isSingleLongFormClue}
+                roomName={roomName}
+                userId={userId}
+              />
+            </div>
+
+            <div className="order-3 ml-auto sm:order-2">
+              <CheckCorrectionButton roomId={roomId} userId={userId} />
+            </div>
+
+            <div className="order-2 sm:order-3">
+              <GameClock roomId={roomId} />
+            </div>
           </div>
           <PlayerScores roomId={roomId} userId={userId} />
           <Connection

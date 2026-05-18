@@ -9,6 +9,7 @@ import {
   isBuzzAction,
   isCheckAction,
   isClueAction,
+  isCorrectCheckAction,
   isClueWagerAction,
   isPlayerAction,
   isRoundAction,
@@ -16,10 +17,13 @@ import {
   isTransferPlayerAction,
 } from "./actions";
 import {
+  type CheckCorrection,
   type ClueAnswer,
   GameState,
   State,
   getClueValue,
+  getClueValueForRound,
+  getCountedChecks,
   getNumCluesInBoard,
 } from "./state";
 
@@ -71,6 +75,7 @@ export enum ActionType {
    * points.
    */
   Check = "check",
+  CorrectCheck = "correct_check",
   NextClue = "next_clue",
   ToggleClock = "toggle_clock",
   TransferPlayer = "transfer_player",
@@ -171,15 +176,32 @@ export function getHighestClueValue(board: Board | undefined) {
   return max;
 }
 
-/** Transfer board control away from userId to the next player. */
-function transferBoardControl(draft: Draft<State>, userId: string) {
-  if (draft.boardControl !== userId) return;
+function getNextBoardControl(draft: Draft<State>, userId: string) {
   const otherIds = Array.from(draft.players.keys()).filter(
     (id) => id !== userId,
   );
   otherIds.sort();
-  if (otherIds.length > 0) {
-    draft.boardControl = otherIds[0];
+  return otherIds[0];
+}
+
+/** Transfer board control away from userId to the next player. */
+function transferBoardControl(draft: Draft<State>, userId: string) {
+  if (draft.boardControl !== userId) return;
+  const nextBoardControl = getNextBoardControl(draft, userId);
+  if (nextBoardControl) {
+    draft.boardControl = nextBoardControl;
+  }
+}
+
+function transferCheckCorrectionBoardControl(
+  draft: Draft<State>,
+  userId: string,
+) {
+  const correction = draft.checkCorrection;
+  if (correction?.boardControlBefore !== userId) return;
+  const nextBoardControl = getNextBoardControl(draft, userId);
+  if (nextBoardControl) {
+    correction.boardControlBefore = nextBoardControl;
   }
 }
 
@@ -206,6 +228,139 @@ function pauseClock(draft: Draft<State>, ts: number) {
   draft.clockAccumulatedMs += Math.max(0, elapsed);
   draft.clockRunning = false;
   draft.clockLastResumedAt = null;
+}
+
+function getCheckScoreDelta(correct: boolean | undefined, value: number) {
+  if (correct === undefined) {
+    return 0;
+  }
+  return correct ? value : -value;
+}
+
+function recordCheckCorrection(
+  draft: Draft<State>,
+  i: number,
+  j: number,
+  userId: string,
+  correct: boolean,
+) {
+  const correction = draft.checkCorrection;
+  if (
+    correction &&
+    correction.round === draft.round &&
+    correction.i === i &&
+    correction.j === j
+  ) {
+    correction.checks.set(userId, correct);
+    return;
+  }
+
+  draft.checkCorrection = {
+    round: draft.round,
+    i,
+    j,
+    boardControlBefore: draft.boardControl,
+    checks: new Map([[userId, correct]]),
+  };
+}
+
+function getCorrectBoardControl(
+  checks: Map<string, boolean>,
+  boardControlBefore: string | null,
+) {
+  for (const [userId, correct] of checks) {
+    if (correct) {
+      return userId;
+    }
+  }
+  return boardControlBefore;
+}
+
+function getHighestScoringPlayerId(draft: Draft<State>) {
+  return Array.from(draft.players.entries()).sort(
+    ([, a], [, b]) => b.score - a.score,
+  )[0]?.[0];
+}
+
+function getNextRoundBoardControl(
+  draft: Draft<State>,
+  fallbackBoardControl: string | null,
+) {
+  const sortedPlayers = Array.from(draft.players.values()).sort(
+    (a, b) => a.score - b.score,
+  );
+  const lowestScore = sortedPlayers[0]?.score;
+  if (lowestScore === undefined) {
+    return fallbackBoardControl;
+  }
+
+  const tiedPlayers = sortedPlayers.filter((p) => p.score === lowestScore);
+  if (tiedPlayers.length === 1) {
+    return tiedPlayers[0].userId;
+  }
+
+  const tiedWithRecency = tiedPlayers
+    .map((p) => ({
+      userId: p.userId,
+      lastCorrect: getMostRecentCorrectOrder(draft.isAnswered, p.userId),
+    }))
+    .sort((a, b) => b.lastCorrect - a.lastCorrect);
+
+  if (tiedWithRecency[0].lastCorrect > 0) {
+    return tiedWithRecency[0].userId;
+  }
+  if (
+    fallbackBoardControl &&
+    tiedPlayers.some((p) => p.userId === fallbackBoardControl)
+  ) {
+    return fallbackBoardControl;
+  }
+  return tiedPlayers[0].userId;
+}
+
+function applyCheckCorrection(
+  draft: Draft<State>,
+  correction: Draft<CheckCorrection>,
+  nextChecks: Map<string, boolean>,
+  longForm: boolean,
+) {
+  const { round, i, j } = correction;
+  const clueAnswer = draft.isAnswered[round][i][j];
+  const previousCountedChecks = new Map(clueAnswer.answeredBy);
+  const nextCountedChecks = getCountedChecks(nextChecks, longForm);
+  const affectedUserIds = new Set([
+    ...previousCountedChecks.keys(),
+    ...nextCountedChecks.keys(),
+  ]);
+
+  for (const userId of affectedUserIds) {
+    const player = draft.players.get(userId) ?? draft.leftPlayers.get(userId);
+    if (!player) {
+      continue;
+    }
+    const clueValue = getClueValueForRound(draft, round, [i, j], userId);
+    const previousDelta = getCheckScoreDelta(
+      previousCountedChecks.get(userId),
+      clueValue,
+    );
+    const nextDelta = getCheckScoreDelta(
+      nextCountedChecks.get(userId),
+      clueValue,
+    );
+    player.score += nextDelta - previousDelta;
+  }
+
+  clueAnswer.answeredBy = nextCountedChecks;
+  correction.checks = nextChecks;
+
+  const correctedClueBoardControl = longForm
+    ? (getHighestScoringPlayerId(draft) ?? draft.boardControl)
+    : getCorrectBoardControl(nextCountedChecks, correction.boardControlBefore);
+
+  draft.boardControl =
+    correction.round === draft.round
+      ? correctedClueBoardControl
+      : getNextRoundBoardControl(draft, correctedClueBoardControl);
 }
 
 /** gameEngine is the reducer (aka state machine) which implements the game. */
@@ -271,6 +426,7 @@ export function gameEngine(state: State, action: Action): State {
           return;
         }
         transferBoardControl(draft, action.payload.userId);
+        transferCheckCorrectionBoardControl(draft, action.payload.userId);
         // Move to leftPlayers so they appear in post-game review.
         draft.players.delete(action.payload.userId);
         draft.leftPlayers.set(action.payload.userId, player);
@@ -345,6 +501,7 @@ export function gameEngine(state: State, action: Action): State {
           return;
         }
 
+        draft.checkCorrection = null;
         resumeClock(draft, action.ts);
 
         if (clue.wagerable) {
@@ -575,6 +732,7 @@ export function gameEngine(state: State, action: Action): State {
         }
 
         resumeClock(draft, action.ts);
+        recordCheckCorrection(draft, i, j, userId, correct);
 
         const clueValue = getClueValue(draft, [i, j], userId);
         const newScore = correct
@@ -605,10 +763,7 @@ export function gameEngine(state: State, action: Action): State {
 
           // Give board control to the player with the highest score after all
           // wagers add up.
-          const boardControl = Array.from(draft.players.entries()).sort(
-            ([, a], [, b]) => b.score - a.score,
-          )[0][0];
-          draft.boardControl = boardControl;
+          draft.boardControl = getHighestScoringPlayerId(draft) ?? null;
           draft.numAnswered += 1;
 
           const clueAnswer = draft.isAnswered[draft.round][i][j];
@@ -662,6 +817,49 @@ export function gameEngine(state: State, action: Action): State {
         draft.buzzes = buzzes;
         const clueAnswer = draft.isAnswered[draft.round][i][j];
         clueAnswer.answeredBy.set(userId, correct);
+      });
+    case ActionType.CorrectCheck:
+      if (!isCorrectCheckAction(action)) {
+        throw new Error(
+          "CorrectCheck action must have a round, index, user, and result",
+        );
+      }
+      return produce(state, (draft) => {
+        const { round, userId, i, j, correct } = action.payload;
+        const correction = draft.checkCorrection;
+        if (
+          draft.type !== GameState.ShowBoard ||
+          !correction ||
+          correction.round !== round ||
+          correction.i !== i ||
+          correction.j !== j ||
+          !draft.players.has(userId)
+        ) {
+          return;
+        }
+
+        const clue = draft.game.boards.at(round)?.categories.at(j)?.clues.at(i);
+        if (!clue) {
+          return;
+        }
+
+        const countedChecks = getCountedChecks(
+          correction.checks,
+          Boolean(clue.longForm),
+        );
+        const currentCorrect = countedChecks.get(userId);
+        if (currentCorrect === undefined || currentCorrect === correct) {
+          return;
+        }
+
+        const nextChecks = new Map(correction.checks);
+        nextChecks.set(userId, correct);
+        applyCheckCorrection(
+          draft,
+          correction,
+          nextChecks,
+          Boolean(clue.longForm),
+        );
       });
     case ActionType.NextClue:
       if (!isClueAction(action)) {
@@ -727,6 +925,7 @@ export function gameEngine(state: State, action: Action): State {
             draft.activeClue = null;
             draft.boardControl = null;
             draft.buzzes = new Map();
+            draft.checkCorrection = null;
             draft.numExpectedWagers = 0;
             return;
           }
@@ -734,40 +933,10 @@ export function gameEngine(state: State, action: Action): State {
           // Board control goes to the player with the lowest score. In the
           // case of a tie, the player who most recently answered correctly
           // gets control. Falls back to keeping the current controller.
-          const sortedPlayers = Array.from(draft.players.values()).sort(
-            (a, b) => a.score - b.score,
+          const newBoardControl = getNextRoundBoardControl(
+            draft,
+            draft.boardControl,
           );
-          const lowestScore = sortedPlayers[0].score;
-          const tiedPlayers = sortedPlayers.filter(
-            (p) => p.score === lowestScore,
-          );
-
-          let newBoardControl: string;
-          if (tiedPlayers.length === 1) {
-            newBoardControl = tiedPlayers[0].userId;
-          } else {
-            // Among tied players, find who answered correctly most recently.
-            const tiedWithRecency = tiedPlayers
-              .map((p) => ({
-                userId: p.userId,
-                lastCorrect: getMostRecentCorrectOrder(
-                  draft.isAnswered,
-                  p.userId,
-                ),
-              }))
-              .sort((a, b) => b.lastCorrect - a.lastCorrect);
-
-            if (tiedWithRecency[0].lastCorrect > 0) {
-              newBoardControl = tiedWithRecency[0].userId;
-            } else if (
-              draft.boardControl &&
-              tiedPlayers.some((p) => p.userId === draft.boardControl)
-            ) {
-              newBoardControl = draft.boardControl;
-            } else {
-              newBoardControl = tiedPlayers[0].userId;
-            }
-          }
 
           draft.type = GameState.PreviewRound;
           draft.activeClue = null;
@@ -820,6 +989,7 @@ export function gameEngine(state: State, action: Action): State {
         // player so it doesn't block the game.
         if (draft.players.has(newUserId)) {
           transferBoardControl(draft, oldUserId);
+          transferCheckCorrectionBoardControl(draft, oldUserId);
           draft.players.delete(oldUserId);
           draft.leftPlayers.set(oldUserId, oldPlayer);
           return;
@@ -872,6 +1042,23 @@ export function gameEngine(state: State, action: Action): State {
                 clueAnswer.answeredBy.set(newUserId, value);
               }
             }
+          }
+        }
+
+        // Transfer pending check-correction metadata.
+        if (draft.checkCorrection) {
+          if (draft.checkCorrection.boardControlBefore === oldUserId) {
+            draft.checkCorrection.boardControlBefore = newUserId;
+          }
+          if (draft.checkCorrection.checks.has(oldUserId)) {
+            draft.checkCorrection.checks = new Map(
+              Array.from(draft.checkCorrection.checks.entries()).map(
+                ([checkUserId, value]) => [
+                  checkUserId === oldUserId ? newUserId : checkUserId,
+                  value,
+                ],
+              ),
+            );
           }
         }
       });

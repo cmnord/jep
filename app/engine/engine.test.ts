@@ -12,7 +12,12 @@ import {
   parseUtcMs,
 } from "./engine";
 import type { Player } from "./state";
-import { GameState, State, stateFromGame } from "./state";
+import {
+  GameState,
+  State,
+  getCheckCorrectionForPlayer,
+  stateFromGame,
+} from "./state";
 
 /** TestAction allows omitting ts; the test runner defaults it to 0. */
 type TestAction = Omit<Action, "ts"> & { ts?: number };
@@ -2832,6 +2837,295 @@ describe("gameEngine", () => {
       );
     });
   }
+
+  it("corrects a right buzzed answer to wrong after returning to the board", () => {
+    const actions: TestAction[] = [
+      ...TWO_PLAYERS_ROUND_0,
+      {
+        type: ActionType.ChooseClue,
+        payload: { userId: PLAYER1.userId, i: 0, j: 0 },
+      },
+      {
+        type: ActionType.Buzz,
+        payload: { userId: PLAYER2.userId, i: 0, j: 0, deltaMs: 123 },
+      },
+      {
+        type: ActionType.Buzz,
+        payload: {
+          userId: PLAYER1.userId,
+          i: 0,
+          j: 0,
+          deltaMs: CLUE_TIMEOUT_MS + 1,
+        },
+      },
+      {
+        type: ActionType.Check,
+        payload: { userId: PLAYER2.userId, i: 0, j: 0, correct: true },
+      },
+      {
+        type: ActionType.NextClue,
+        payload: { userId: PLAYER2.userId, i: 0, j: 0 },
+      },
+      {
+        type: ActionType.CorrectCheck,
+        payload: {
+          round: 0,
+          userId: PLAYER2.userId,
+          i: 0,
+          j: 0,
+          correct: false,
+        },
+      },
+    ];
+
+    let state = initialState;
+    for (const action of actions) {
+      state = gameEngine(state, { ts: 0, ...action });
+    }
+
+    expect(state.type).toBe(GameState.ShowBoard);
+    expect(state.boardControl).toBe(PLAYER1.userId);
+    expect(state.players.get(PLAYER2.userId)?.score).toBe(-200);
+    expect(state.isAnswered[0][0][0].answeredBy).toStrictEqual(
+      new Map([[PLAYER2.userId, false]]),
+    );
+    expect(getCheckCorrectionForPlayer(state, PLAYER2.userId)?.correct).toBe(
+      false,
+    );
+  });
+
+  it("restores board control to an active player if the prior controller leaves", () => {
+    const actions: TestAction[] = [
+      ...TWO_PLAYERS_ROUND_0,
+      {
+        type: ActionType.ChooseClue,
+        payload: { userId: PLAYER1.userId, i: 0, j: 0 },
+      },
+      {
+        type: ActionType.Buzz,
+        payload: { userId: PLAYER2.userId, i: 0, j: 0, deltaMs: 123 },
+      },
+      {
+        type: ActionType.Buzz,
+        payload: {
+          userId: PLAYER1.userId,
+          i: 0,
+          j: 0,
+          deltaMs: CLUE_TIMEOUT_MS + 1,
+        },
+      },
+      {
+        type: ActionType.Check,
+        payload: { userId: PLAYER2.userId, i: 0, j: 0, correct: true },
+      },
+      {
+        type: ActionType.NextClue,
+        payload: { userId: PLAYER2.userId, i: 0, j: 0 },
+      },
+      { type: ActionType.Leave, payload: PLAYER1 },
+      {
+        type: ActionType.CorrectCheck,
+        payload: {
+          round: 0,
+          userId: PLAYER2.userId,
+          i: 0,
+          j: 0,
+          correct: false,
+        },
+      },
+    ];
+
+    let state = initialState;
+    for (const action of actions) {
+      state = gameEngine(state, { ts: 0, ...action });
+    }
+
+    expect(state.type).toBe(GameState.ShowBoard);
+    expect(state.boardControl).toBe(PLAYER2.userId);
+    expect(state.players.has(PLAYER1.userId)).toBe(false);
+    expect(state.leftPlayers.has(PLAYER1.userId)).toBe(true);
+    expect(state.players.get(PLAYER2.userId)?.score).toBe(-200);
+  });
+
+  it("restores later answers when undoing a correction", () => {
+    const actions: TestAction[] = [
+      ...TWO_PLAYERS_ROUND_0,
+      {
+        type: ActionType.ChooseClue,
+        payload: { userId: PLAYER1.userId, i: 0, j: 0 },
+      },
+      {
+        type: ActionType.Buzz,
+        payload: { userId: PLAYER1.userId, i: 0, j: 0, deltaMs: 123 },
+      },
+      {
+        type: ActionType.Buzz,
+        payload: {
+          userId: PLAYER2.userId,
+          i: 0,
+          j: 0,
+          deltaMs: CLUE_TIMEOUT_MS + 1,
+        },
+      },
+      {
+        type: ActionType.Check,
+        payload: { userId: PLAYER1.userId, i: 0, j: 0, correct: false },
+      },
+      {
+        type: ActionType.Buzz,
+        payload: { userId: PLAYER2.userId, i: 0, j: 0, deltaMs: 123 },
+      },
+      {
+        type: ActionType.Check,
+        payload: { userId: PLAYER2.userId, i: 0, j: 0, correct: true },
+      },
+      {
+        type: ActionType.NextClue,
+        payload: { userId: PLAYER2.userId, i: 0, j: 0 },
+      },
+      {
+        type: ActionType.CorrectCheck,
+        payload: {
+          round: 0,
+          userId: PLAYER1.userId,
+          i: 0,
+          j: 0,
+          correct: true,
+        },
+      },
+    ];
+
+    let state = initialState;
+    for (const action of actions) {
+      state = gameEngine(state, { ts: 0, ...action });
+    }
+
+    expect(state.boardControl).toBe(PLAYER1.userId);
+    expect(state.players.get(PLAYER1.userId)?.score).toBe(200);
+    expect(state.players.get(PLAYER2.userId)?.score).toBe(0);
+    expect(state.isAnswered[0][0][0].answeredBy).toStrictEqual(
+      new Map([[PLAYER1.userId, true]]),
+    );
+    expect(getCheckCorrectionForPlayer(state, PLAYER2.userId)).toBeUndefined();
+
+    state = gameEngine(state, {
+      type: ActionType.CorrectCheck,
+      payload: {
+        round: 0,
+        userId: PLAYER1.userId,
+        i: 0,
+        j: 0,
+        correct: false,
+      },
+      ts: 0,
+    });
+
+    expect(state.boardControl).toBe(PLAYER2.userId);
+    expect(state.players.get(PLAYER1.userId)?.score).toBe(-200);
+    expect(state.players.get(PLAYER2.userId)?.score).toBe(200);
+    expect(state.isAnswered[0][0][0].answeredBy).toStrictEqual(
+      new Map([
+        [PLAYER1.userId, false],
+        [PLAYER2.userId, true],
+      ]),
+    );
+    expect(getCheckCorrectionForPlayer(state, PLAYER2.userId)?.correct).toBe(
+      true,
+    );
+  });
+
+  it("corrects wagered answers using a double-value score swing", () => {
+    const actions: TestAction[] = [
+      ...TWO_PLAYERS_ROUND_1,
+      {
+        type: ActionType.StartRound,
+        payload: { round: 1, userId: PLAYER2.userId },
+      },
+      {
+        type: ActionType.ChooseClue,
+        payload: { userId: PLAYER2.userId, i: 0, j: 0 },
+      },
+      {
+        type: ActionType.SetClueWager,
+        payload: { userId: PLAYER2.userId, i: 0, j: 0, wager: 345 },
+      },
+      {
+        type: ActionType.Buzz,
+        payload: { userId: PLAYER2.userId, i: 0, j: 0, deltaMs: 123 },
+      },
+      {
+        type: ActionType.Check,
+        payload: { userId: PLAYER2.userId, i: 0, j: 0, correct: true },
+      },
+      {
+        type: ActionType.NextClue,
+        payload: { userId: PLAYER2.userId, i: 0, j: 0 },
+      },
+      {
+        type: ActionType.CorrectCheck,
+        payload: {
+          round: 1,
+          userId: PLAYER2.userId,
+          i: 0,
+          j: 0,
+          correct: false,
+        },
+      },
+    ];
+
+    let state = initialState;
+    for (const action of actions) {
+      state = gameEngine(state, { ts: 0, ...action });
+    }
+
+    expect(state.type).toBe(GameState.ShowBoard);
+    expect(state.players.get(PLAYER2.userId)?.score).toBe(-345);
+    expect(getCheckCorrectionForPlayer(state, PLAYER2.userId)).toMatchObject({
+      correct: false,
+      value: 345,
+    });
+  });
+
+  it("corrects the last answer from the previous round on the next board", () => {
+    const actions: TestAction[] = [
+      ...TWO_PLAYERS_ROUND_1,
+      {
+        type: ActionType.StartRound,
+        payload: { round: 1, userId: PLAYER2.userId },
+      },
+      {
+        type: ActionType.CorrectCheck,
+        payload: {
+          round: 0,
+          userId: PLAYER1.userId,
+          i: 0,
+          j: 1,
+          correct: false,
+        },
+      },
+    ];
+
+    let state = initialState;
+    for (const action of actions) {
+      state = gameEngine(state, { ts: 0, ...action });
+    }
+
+    expect(state.type).toBe(GameState.ShowBoard);
+    expect(state.round).toBe(1);
+    expect(state.boardControl).toBe(PLAYER1.userId);
+    expect(state.players.get(PLAYER1.userId)?.score).toBe(0);
+    expect(state.players.get(PLAYER2.userId)?.score).toBe(0);
+    expect(state.isAnswered[0][0][1].answeredBy).toStrictEqual(
+      new Map([[PLAYER1.userId, false]]),
+    );
+    expect(getCheckCorrectionForPlayer(state, PLAYER1.userId)).toMatchObject({
+      round: 0,
+      i: 0,
+      j: 1,
+      correct: false,
+      value: 200,
+    });
+  });
 
   it("TransferPlayer is no-op after GameOver", () => {
     // Build a GameOver state directly rather than replaying the full game.

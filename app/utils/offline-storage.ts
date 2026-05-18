@@ -134,6 +134,7 @@ interface SerializedState {
   leftPlayers: [string, Player][];
   wagers: [string, [string, number][]][];
   isAnswered: SerializedClueAnswer[][][];
+  checkCorrection?: SerializedCheckCorrection | null;
   activeClue: [number, number] | null;
   numAnswered: number;
   numCluesInBoard: number;
@@ -149,6 +150,14 @@ interface SerializedClueAnswer {
   isAnswered: boolean;
   answeredBy: [string, boolean][];
   answerOrder: number;
+}
+
+interface SerializedCheckCorrection {
+  round: number;
+  i: number;
+  j: number;
+  boardControlBefore: string | null;
+  checks: [string, boolean][];
 }
 
 export function serializeState(state: State): SerializedState {
@@ -174,6 +183,12 @@ export function serializeState(state: State): SerializedState {
         })),
       ),
     ),
+    checkCorrection: state.checkCorrection
+      ? {
+          ...state.checkCorrection,
+          checks: Array.from(state.checkCorrection.checks.entries()),
+        }
+      : null,
     activeClue: state.activeClue,
     numAnswered: state.numAnswered,
     numCluesInBoard: state.numCluesInBoard,
@@ -209,6 +224,12 @@ export function deserializeState(
         ),
       ),
     ),
+    checkCorrection: serialized.checkCorrection
+      ? {
+          ...serialized.checkCorrection,
+          checks: new Map(serialized.checkCorrection.checks),
+        }
+      : null,
     activeClue: serialized.activeClue,
     numAnswered: serialized.numAnswered,
     numCluesInBoard: serialized.numCluesInBoard,
