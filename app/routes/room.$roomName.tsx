@@ -85,6 +85,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       const updatedRoomEvents = await getRoomEvents(room.id, accessToken);
       return {
         game,
+        hostMode: room.host_mode,
         name,
         playerColor,
         roomEvents: updatedRoomEvents,
@@ -98,6 +99,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 
     return {
       game,
+      hostMode: room.host_mode,
       name,
       playerColor,
       roomEvents,
@@ -114,6 +116,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   return data(
     {
       game,
+      hostMode: room.host_mode,
       name,
       playerColor,
       roomEvents,
@@ -142,6 +145,7 @@ export default function PlayGame({ loaderData }: Route.ComponentProps) {
     <GameEngineContext.Provider value={engine}>
       <GameComponent
         game={loaderData.game}
+        hostMode={loaderData.hostMode}
         name={loaderData.name}
         playerColor={loaderData.playerColor}
         roomId={loaderData.roomId}

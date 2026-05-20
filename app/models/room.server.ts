@@ -32,13 +32,21 @@ export async function getRoom(
 
 /* Writes */
 
-export async function createRoom(gameId: string, accessToken?: string) {
+export async function createRoom(
+  gameId: string,
+  accessToken?: string,
+  hostMode?: boolean,
+) {
   const client = getSupabase(accessToken);
   const word = getRandomWord();
 
   const { data, error } = await client
     .from<"rooms", RoomTable>("rooms")
-    .insert<RoomTable["Insert"]>({ name: word, game_id: gameId })
+    .insert<RoomTable["Insert"]>({
+      name: word,
+      game_id: gameId,
+      host_mode: hostMode ?? false,
+    })
     .select();
 
   if (error !== null) {
