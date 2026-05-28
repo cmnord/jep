@@ -88,7 +88,7 @@ export function useSoloGameEngine(
     };
   }, []);
 
-  return stateToGameEngine(game, state, dispatch, {
+  return stateToGameEngine(game, state, dispatch, () => "", {
     connectionState,
     lastMessageAt: undefined,
     reconnect: undefined,

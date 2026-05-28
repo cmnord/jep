@@ -13,11 +13,15 @@ const formSchema = z.object({
   i: z.coerce.number().int(),
   j: z.coerce.number().int(),
   userId: z.string(),
+  clientMutationId: z.string().optional(),
 });
 
 export async function action({ request, params }: Route.ActionArgs) {
   const formData = await request.formData();
-  const { i, j, userId } = parseFormData(formData, formSchema);
+  const { i, j, userId, clientMutationId } = parseFormData(
+    formData,
+    formSchema,
+  );
 
   const roomId = params.roomId ? parseInt(params.roomId) : undefined;
   if (!roomId) {
@@ -27,7 +31,7 @@ export async function action({ request, params }: Route.ActionArgs) {
   if (roomId === -1) {
     return {
       type: ActionType.NextClue,
-      payload: { i, j, userId },
+      payload: { i, j, userId, clientMutationId },
       ts: Date.now(),
     };
   }
@@ -46,6 +50,7 @@ export async function action({ request, params }: Route.ActionArgs) {
       i,
       j,
       userId,
+      clientMutationId,
     },
     authSession?.accessToken,
   );

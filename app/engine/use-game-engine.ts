@@ -30,11 +30,23 @@ const STALENESS_CHECK_MS = 30_000;
 
 /** How long to remain in RECONNECTING before escalating to DISCONNECTED. */
 const RECONNECTING_TIMEOUT_MS = 60_000;
+const STALE_OPTIMISTIC_MUTATION_MS = 10_000;
+
+type OptimisticAction = Omit<Action, "ts">;
+
+function getClientMutationId(payload: unknown): string | undefined {
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+    return undefined;
+  }
+  const mutationId = Reflect.get(payload, "clientMutationId");
+  return typeof mutationId === "string" ? mutationId : undefined;
+}
 
 export function stateToGameEngine(
   game: Game,
   state: State,
   dispatch: React.Dispatch<Action>,
+  optimisticDispatch: (action: OptimisticAction) => string,
   {
     connectionState,
     lastMessageAt,
@@ -94,6 +106,7 @@ export function stateToGameEngine(
     clue,
     connectionState,
     getClueValue: getClueValueFn,
+    optimisticDispatch,
     soloDispatch: dispatch,
     isAnswered,
     lastMessageAt,
@@ -125,6 +138,7 @@ export function useGameEngine(
   serverRoomEvents: DbRoomEvent[],
   roomId: number,
   accessToken?: AuthSession["accessToken"],
+  optimisticEnabled = false,
 ) {
   const seenEventIds = React.useRef(new Set(serverRoomEvents.map((e) => e.id)));
 
@@ -150,6 +164,74 @@ export function useGameEngine(
 
   const client = React.useMemo(() => getSupabase(accessToken), [accessToken]);
 
+  const pendingMutationIds = React.useRef(new Map<string, number>());
+
+  const optimisticDispatch = React.useCallback(
+    (action: OptimisticAction) => {
+      if (!optimisticEnabled) {
+        return "";
+      }
+
+      const clientMutationId = crypto.randomUUID();
+      const payload = action.payload;
+      if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+        console.warn(
+          "optimisticDispatch expected payload object; skipping optimistic dispatch",
+        );
+        return "";
+      }
+
+      const now = Date.now();
+      pendingMutationIds.current.set(clientMutationId, now);
+
+      dispatch({
+        ...action,
+        payload: {
+          ...payload,
+          clientMutationId,
+        },
+        ts: now,
+      });
+      return clientMutationId;
+    },
+    [optimisticEnabled],
+  );
+
+  const pruneStaleOptimisticMutations = React.useCallback(() => {
+    const now = Date.now();
+    for (const [mutationId, submittedAt] of pendingMutationIds.current) {
+      if (now - submittedAt > STALE_OPTIMISTIC_MUTATION_MS) {
+        pendingMutationIds.current.delete(mutationId);
+        console.warn("Action not confirmed — state resynced.");
+      }
+    }
+  }, []);
+
+  const applyServerAction = React.useCallback(
+    (action: Action) => {
+      const mutationId = getClientMutationId(action.payload);
+      if (
+        mutationId &&
+        optimisticEnabled &&
+        pendingMutationIds.current.delete(mutationId)
+      ) {
+        return;
+      }
+      dispatch(action);
+    },
+    [optimisticEnabled],
+  );
+
+  React.useEffect(() => {
+    if (!optimisticEnabled) {
+      pendingMutationIds.current.clear();
+      return;
+    }
+
+    const timer = setInterval(pruneStaleOptimisticMutations, 2_000);
+    return () => clearInterval(timer);
+  }, [optimisticEnabled, pruneStaleOptimisticMutations]);
+
   React.useEffect(() => {
     let disposed = false;
     const channel = client.channel(`realtime:roomId:${roomId}`);
@@ -172,9 +254,10 @@ export function useGameEngine(
         for (const event of data) {
           if (!seenEventIds.current.has(event.id) && isTypedRoomEvent(event)) {
             seenEventIds.current.add(event.id);
-            dispatch(roomEventToAction(event));
+            applyServerAction(roomEventToAction(event));
           }
         }
+        pruneStaleOptimisticMutations();
         if (data.length > 0) {
           setLastMessageAt(Date.now());
         }
@@ -223,7 +306,7 @@ export function useGameEngine(
           }
           if (!seenEventIds.current.has(newEvent.id)) {
             seenEventIds.current.add(newEvent.id);
-            dispatch(roomEventToAction(newEvent));
+            applyServerAction(roomEventToAction(newEvent));
           }
         },
       )
@@ -290,9 +373,15 @@ export function useGameEngine(
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       client.removeChannel(channel);
     };
-  }, [client, roomId, reconnectTrigger]);
+  }, [
+    applyServerAction,
+    client,
+    pruneStaleOptimisticMutations,
+    roomId,
+    reconnectTrigger,
+  ]);
 
-  return stateToGameEngine(game, state, dispatch, {
+  return stateToGameEngine(game, state, dispatch, optimisticDispatch, {
     connectionState,
     lastMessageAt,
     reconnect,
