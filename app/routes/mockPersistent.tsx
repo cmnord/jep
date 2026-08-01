@@ -19,9 +19,9 @@ import {
 
 import type { Route } from "./+types/mockPersistent";
 
-export const meta: Route.MetaFunction = ({ data }) => {
+export const meta: Route.MetaFunction = ({ loaderData }) => {
   try {
-    return [{ title: data?.game.title }];
+    return [{ title: loaderData?.game.title }];
   } catch {
     return [];
   }

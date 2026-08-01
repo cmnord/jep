@@ -7,9 +7,9 @@ import { BASE_URL } from "~/utils";
 
 import type { Route } from "./+types/mock";
 
-export const meta: Route.MetaFunction = ({ data }) => {
+export const meta: Route.MetaFunction = ({ loaderData }) => {
   try {
-    return [{ title: data?.game.title }];
+    return [{ title: loaderData?.game.title }];
   } catch {
     return [];
   }

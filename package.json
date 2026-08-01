@@ -31,26 +31,26 @@
     "@radix-ui/react-tabs": "^1.1.13",
     "@radix-ui/react-toast": "^1.2.15",
     "@radix-ui/react-toggle": "^1.1.10",
-    "@react-router/fs-routes": "^7.0.0",
-    "@react-router/node": "^7.0.0",
+    "@react-router/fs-routes": "^8.3.0",
+    "@react-router/node": "^8.3.0",
     "@supabase/supabase-js": "^2.95.3",
     "@tailwindcss/vite": "^4.3.1",
     "@vercel/analytics": "^1.6.1",
     "clsx": "^2.1.1",
     "immer": "^11.1.4",
     "isbot": "^4",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
     "react-dropzone": "^15.0.0",
-    "react-router": "^7.0.0",
+    "react-router": "^8.3.0",
     "recharts": "^3.7.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
     "@playwright/test": "^1.58.2",
-    "@react-router/dev": "^7.0.0",
-    "@react-router/serve": "^7.0.0",
+    "@react-router/dev": "^8.3.0",
+    "@react-router/serve": "^8.3.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.2.0",
@@ -76,6 +76,6 @@
     "vite": "$vite"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22.22.0"
   }
 }
