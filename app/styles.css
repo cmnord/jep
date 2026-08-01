@@ -47,6 +47,8 @@
   --spacing-1\/6: 16.666667%;
 
   --animate-border-pulse: border-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-score-pulse-green: score-pulse-green 1.6s ease-out 1;
+  --animate-score-pulse-red: score-pulse-red 1.6s ease-out 1;
   --animate-content-show: content-show 300ms cubic-bezier(0.16, 1, 0.3, 1) 20ms
     forwards;
   --animate-fade-scale-in: fade-scale-in 200ms ease-out;
@@ -74,6 +76,26 @@
     }
     50% {
       border-color: rgba(252, 211, 77, 0.5);
+    }
+  }
+
+  @keyframes score-pulse-green {
+    0%,
+    100% {
+      box-shadow: none;
+    }
+    25% {
+      box-shadow: var(--shadow-glow-green-200);
+    }
+  }
+
+  @keyframes score-pulse-red {
+    0%,
+    100% {
+      box-shadow: none;
+    }
+    25% {
+      box-shadow: var(--shadow-glow-red-200);
     }
   }
 

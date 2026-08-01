@@ -97,6 +97,7 @@ export function stateToGameEngine(
     buzzes: state.buzzes,
     category,
     clue,
+    checkCorrection: state.checkCorrection,
     connectionState,
     getCheckCorrection: (userId: string) =>
       getCheckCorrectionForPlayer(state, userId),

@@ -144,6 +144,7 @@ interface SerializedState {
   clockRunning: boolean;
   clockAccumulatedMs: number;
   clockLastResumedAt: number | null;
+  gameOverAt?: number | null;
 }
 
 interface SerializedClueAnswer {
@@ -198,6 +199,7 @@ export function serializeState(state: State): SerializedState {
     clockRunning: state.clockRunning,
     clockAccumulatedMs: state.clockAccumulatedMs,
     clockLastResumedAt: state.clockLastResumedAt,
+    gameOverAt: state.gameOverAt,
   };
 }
 
@@ -239,6 +241,7 @@ export function deserializeState(
     clockRunning: false,
     clockAccumulatedMs: serialized.clockAccumulatedMs,
     clockLastResumedAt: null,
+    gameOverAt: serialized.gameOverAt ?? null,
   };
 }
 

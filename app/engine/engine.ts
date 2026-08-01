@@ -19,8 +19,10 @@ import {
 import {
   type CheckCorrection,
   type ClueAnswer,
+  GAME_OVER_CORRECTION_GRACE_MS,
   GameState,
   State,
+  canCorrectCheck,
   getClueValue,
   getClueValueForRound,
   getCountedChecks,
@@ -265,11 +267,15 @@ function recordCheckCorrection(
 }
 
 function getCorrectBoardControl(
+  draft: Draft<State>,
   checks: Map<string, boolean>,
   boardControlBefore: string | null,
 ) {
   for (const [userId, correct] of checks) {
-    if (correct) {
+    // The first correct answerer may have left the game since checking, in
+    // which case control must not be handed to them or no remaining player
+    // could choose the next clue.
+    if (correct && draft.players.has(userId)) {
       return userId;
     }
   }
@@ -355,7 +361,11 @@ function applyCheckCorrection(
 
   const correctedClueBoardControl = longForm
     ? (getHighestScoringPlayerId(draft) ?? draft.boardControl)
-    : getCorrectBoardControl(nextCountedChecks, correction.boardControlBefore);
+    : getCorrectBoardControl(
+        draft,
+        nextCountedChecks,
+        correction.boardControlBefore,
+      );
 
   draft.boardControl =
     correction.round === draft.round
@@ -828,12 +838,23 @@ export function gameEngine(state: State, action: Action): State {
         const { round, userId, i, j, correct } = action.payload;
         const correction = draft.checkCorrection;
         if (
-          draft.type !== GameState.ShowBoard ||
+          !canCorrectCheck(draft.type) ||
           !correction ||
           correction.round !== round ||
           correction.i !== i ||
           correction.j !== j ||
           !draft.players.has(userId)
+        ) {
+          return;
+        }
+
+        // After game over, corrections are only accepted briefly — long
+        // enough to finish a confirmation armed before the game ended, not
+        // long enough to rewrite final results indefinitely.
+        if (
+          draft.type === GameState.GameOver &&
+          (draft.gameOverAt === null ||
+            action.ts - draft.gameOverAt > GAME_OVER_CORRECTION_GRACE_MS)
         ) {
           return;
         }
@@ -860,6 +881,9 @@ export function gameEngine(state: State, action: Action): State {
           nextChecks,
           Boolean(clue.longForm),
         );
+        if (draft.type === GameState.GameOver) {
+          draft.boardControl = null;
+        }
       });
     case ActionType.NextClue:
       if (!isClueAction(action)) {
@@ -925,7 +949,10 @@ export function gameEngine(state: State, action: Action): State {
             draft.activeClue = null;
             draft.boardControl = null;
             draft.buzzes = new Map();
-            draft.checkCorrection = null;
+            // The correction record survives game over so a player who was
+            // mid-correction when another player advanced can still finish
+            // (within GAME_OVER_CORRECTION_GRACE_MS).
+            draft.gameOverAt = action.ts;
             draft.numExpectedWagers = 0;
             return;
           }

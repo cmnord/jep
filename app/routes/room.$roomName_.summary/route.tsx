@@ -17,6 +17,7 @@ import type { Route } from "./+types/route";
 import ScoreChart from "./chart";
 import { getBattingAverage, getCoryat } from "./coryat";
 import GameSummary from "./summary";
+import { useRoomEventRevalidation } from "./use-room-event-revalidation";
 
 export const meta: Route.MetaFunction = ({ loaderData }) => {
   try {
@@ -87,6 +88,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 }
 
 export default function PlayGame({ loaderData }: Route.ComponentProps) {
+  useRoomEventRevalidation(loaderData.roomId);
+
   const state = applyRoomEventsToState(
     stateFromGame(loaderData.game),
     loaderData.roomEvents,

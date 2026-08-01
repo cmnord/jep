@@ -2,13 +2,13 @@ import * as React from "react";
 import { useNavigate } from "react-router";
 
 import BoardComponent from "~/components/board";
-import CheckCorrectionButton from "~/components/check-correction-button";
 import Connection from "~/components/connection";
 import GameClock from "~/components/game-clock";
 import Link from "~/components/link";
 import { PlayerScores } from "~/components/player";
 import Preview from "~/components/preview";
 import Prompt from "~/components/prompt";
+import { UndoArmingContext, UndoArmingProvider } from "~/components/undo-check";
 import { GameState, Player, useEngineContext } from "~/engine";
 import type { Game } from "~/models/convert.server";
 import type { PlayerColor } from "~/models/player-color";
@@ -62,6 +62,23 @@ function CallToAction({
 }
 
 /** GameComponent maintains the game state. */
+/** GameOverSummaryRedirect navigates to the summary once the game is over —
+ * unless this client's undo confirmation is armed. The correction record
+ * survives game over, so the player can finish their correction before
+ * reviewing the summary. Must render inside UndoArmingProvider.
+ */
+function GameOverSummaryRedirect({ roomName }: { roomName: string }) {
+  const { type } = useEngineContext();
+  const navigate = useNavigate();
+  const { armed } = React.useContext(UndoArmingContext);
+  React.useEffect(() => {
+    if (type === GameState.GameOver && !armed) {
+      navigate(`/room/${roomName}/summary`);
+    }
+  }, [navigate, roomName, type, armed]);
+  return null;
+}
+
 export default function GameComponent({
   game,
   name,
@@ -92,13 +109,6 @@ export default function GameComponent({
   const [playBoardFillSfx] = useGameSound(BOARD_FILL_SFX);
   const [playFinalSfx] = useGameSound(FINAL_CATEGORY_REVEAL_SFX);
 
-  const navigate = useNavigate();
-  React.useEffect(() => {
-    if (type === GameState.GameOver) {
-      navigate(`/room/${roomName}/summary`);
-    }
-  }, [navigate, roomName, type]);
-
   const boardController = boardControl ? players.get(boardControl) : undefined;
 
   const board = game.boards[round];
@@ -108,7 +118,8 @@ export default function GameComponent({
     Boolean(board.categories[0].clues[0].longForm);
 
   return (
-    <>
+    <UndoArmingProvider userId={userId}>
+      <GameOverSummaryRedirect roomName={roomName} />
       <Preview
         disabled={suppressDialogs}
         gameTitle={game.title}
@@ -125,24 +136,15 @@ export default function GameComponent({
         <div
           className={`mx-auto flex w-full max-w-screen-lg flex-col gap-4 p-3 text-slate-100 sm:p-6 md:p-12`}
         >
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="order-1">
-              <CallToAction
-                boardController={boardController}
-                type={type}
-                isSingleLongFormClue={isSingleLongFormClue}
-                roomName={roomName}
-                userId={userId}
-              />
-            </div>
-
-            <div className="order-3 ml-auto sm:order-2">
-              <CheckCorrectionButton roomId={roomId} userId={userId} />
-            </div>
-
-            <div className="order-2 sm:order-3">
-              <GameClock roomId={roomId} />
-            </div>
+          <div className="flex items-center justify-between">
+            <CallToAction
+              boardController={boardController}
+              type={type}
+              isSingleLongFormClue={isSingleLongFormClue}
+              roomName={roomName}
+              userId={userId}
+            />
+            <GameClock roomId={roomId} />
           </div>
           <PlayerScores roomId={roomId} userId={userId} />
           <Connection
@@ -153,6 +155,6 @@ export default function GameComponent({
         </div>
         <Prompt roomId={roomId} userId={userId} />
       </div>
-    </>
+    </UndoArmingProvider>
   );
 }
