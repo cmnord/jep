@@ -1,5 +1,8 @@
+import { produce } from "immer";
+
 import type { Action } from "~/engine";
 import { ActionType, gameEngine } from "~/engine";
+import { isCorrectCheckAction } from "~/engine/actions";
 import type { State } from "~/engine/state";
 import { stateFromGame } from "~/engine/state";
 import type { Game } from "~/models/convert.server";
@@ -64,6 +67,7 @@ export function buildReplayFrames(
   for (const action of actions) {
     const prevNumAnswered = state.numAnswered;
     const prevRound = state.round;
+    const prevState = state;
 
     state = gameEngine(state, action);
 
@@ -146,6 +150,71 @@ export function buildReplayFrames(
 
       currentClue = null;
       participantIds = [];
+    }
+
+    // A correction after resolution rewrites scores, answeredBy, and board
+    // control without emitting new frames, so update the already-emitted
+    // Buzzed/Resolved frames for that clue in place. Only the
+    // correction-derived data is patched into the historical snapshot —
+    // replacing it wholesale would leak later joins, leaves, and renames
+    // into frames recorded before they happened. (A correction during the
+    // long-form reveal lands before any frames exist for the clue; the
+    // frames it eventually emits use the corrected state.)
+    // Only an accepted correction counts: the reducer returns the same
+    // state reference for rejected ones (e.g. a stale event stored after
+    // the window closed), and patching on those could copy unrelated
+    // in-flight scores into historical frames.
+    if (isCorrectCheckAction(action) && state !== prevState) {
+      const { round, i, j } = action.payload;
+      const clueAnswer = state.isAnswered[round]?.[i]?.[j];
+      let correctedUserId: string | null = null;
+      if (clueAnswer) {
+        for (const [userId, correct] of clueAnswer.answeredBy) {
+          if (correct) {
+            correctedUserId = userId;
+            break;
+          }
+        }
+      }
+      for (let f = frames.length - 1; f >= 0; f--) {
+        const frame = frames[f];
+        if (
+          frame.round !== round ||
+          frame.clue[0] !== i ||
+          frame.clue[1] !== j ||
+          frame.phase === CluePhase.Chosen
+        ) {
+          break;
+        }
+        const patchedState = produce(frame.state, (draft) => {
+          const frameClue = draft.isAnswered[round]?.[i]?.[j];
+          const affectedUserIds = new Set([
+            ...(frameClue?.answeredBy.keys() ?? []),
+            ...(clueAnswer?.answeredBy.keys() ?? []),
+          ]);
+          for (const userId of affectedUserIds) {
+            const target =
+              draft.players.get(userId) ?? draft.leftPlayers.get(userId);
+            const source =
+              state.players.get(userId) ?? state.leftPlayers.get(userId);
+            if (target && source) {
+              target.score = source.score;
+            }
+          }
+          if (frameClue && clueAnswer) {
+            frameClue.answeredBy = new Map(clueAnswer.answeredBy);
+          }
+          draft.boardControl = state.boardControl;
+        });
+        frames[f] = {
+          ...frame,
+          state: patchedState,
+          correctUserId:
+            frame.phase === CluePhase.Resolved
+              ? correctedUserId
+              : frame.correctUserId,
+        };
+      }
     }
   }
 

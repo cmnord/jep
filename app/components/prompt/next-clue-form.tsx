@@ -4,6 +4,11 @@ import { useFetcher } from "react-router";
 
 import Button from "~/components/button";
 import type { RoomProps } from "~/components/game";
+import {
+  UndoArmingContext,
+  UndoCheckButton,
+  UndoCheckConfirm,
+} from "~/components/undo-check";
 import type { Action } from "~/engine";
 import { GameState, useEngineContext } from "~/engine";
 import { formatDollars, formatDollarsWithSign } from "~/utils";
@@ -86,65 +91,12 @@ function PlayerScores({
   );
 }
 
-function NextClueForm({
-  hasBoardControl,
-  boardControlName,
-  loading,
-  answerers,
-  wagerable,
-  longForm,
-  buttonText,
-  hidePlayerScores,
-}: {
-  hasBoardControl: boolean;
-  boardControlName: string;
-  loading: boolean;
-  answerers: PlayerScore[];
-  wagerable: boolean;
-  longForm: boolean;
-  buttonText?: string;
-  hidePlayerScores?: boolean;
-}) {
-  return (
-    <div className="flex flex-col items-center gap-2 p-2">
-      {!hidePlayerScores && (
-        <PlayerScores
-          answerers={answerers}
-          boardControlName={boardControlName}
-          wagerable={wagerable}
-          longForm={longForm}
-        />
-      )}
-      {hasBoardControl || longForm ? (
-        <Button
-          type="primary"
-          htmlType="submit"
-          autoFocus
-          loading={loading}
-          className="relative"
-        >
-          <div
-            className="absolute left-0 h-full rounded-md bg-blue-400"
-            style={{
-              animation: longForm
-                ? undefined
-                : `${
-                    DEFAULT_COUNTDOWN_MS / 1000
-                  }s linear 0s 1 growFromLeft forwards`,
-            }}
-          />
-          <span className="relative">{buttonText ?? "Back to board"}</span>
-        </Button>
-      ) : null}
-    </div>
-  );
-}
-
 export function ConnectedNextClueForm({ roomId, userId }: RoomProps) {
   const {
     activeClue,
     answeredBy,
     clue,
+    getCheckCorrection,
     getClueValue,
     players,
     boardControl,
@@ -160,6 +112,9 @@ export function ConnectedNextClueForm({ roomId, userId }: RoomProps) {
   useSoloAction(fetcher, soloDispatch);
   const loading = fetcher.state === "loading";
   const formRef = React.useRef<HTMLFormElement | null>(null);
+
+  const { armed: confirmingUndo, setArmed: setConfirmingUndo } =
+    React.useContext(UndoArmingContext);
 
   const boardController = boardControl ? players.get(boardControl) : undefined;
   const boardControlName = boardController
@@ -181,34 +136,77 @@ export function ConnectedNextClueForm({ roomId, userId }: RoomProps) {
 
   const hasBoardControl = boardControl === userId;
   const isRevealingAnswer = type === GameState.ReadLongFormClue;
+  const correction = getCheckCorrection(userId);
 
-  // Submit the form by default after a few seconds.
+  // Submit the form by default after a few seconds. Pause the countdown
+  // while the undo confirmation is armed so it can't be yanked away
+  // mid-decision.
   useTimeout(
     () => {
       fetcher.submit(formRef.current);
     },
-    hasBoardControl && !clue.longForm ? DEFAULT_COUNTDOWN_MS : null,
+    hasBoardControl && !clue.longForm && !confirmingUndo
+      ? DEFAULT_COUNTDOWN_MS
+      : null,
   );
 
   return (
-    <fetcher.Form
-      method="POST"
-      action={`/room/${roomId}/next-clue`}
-      ref={formRef}
-    >
-      <input type="hidden" value={userId} name="userId" />
-      <input type="hidden" value={i} name="i" />
-      <input type="hidden" value={j} name="j" />
-      <NextClueForm
-        hasBoardControl={hasBoardControl}
-        boardControlName={boardControlName}
-        loading={loading}
-        answerers={answerers}
-        wagerable={clue.wagerable ?? false}
-        longForm={clue.longForm ?? false}
-        buttonText={isRevealingAnswer ? "Reveal answer" : undefined}
-        hidePlayerScores={isRevealingAnswer}
-      />
-    </fetcher.Form>
+    <div className="flex flex-col items-center gap-2 p-2">
+      {!isRevealingAnswer && (
+        <PlayerScores
+          answerers={answerers}
+          boardControlName={boardControlName}
+          wagerable={clue.wagerable ?? false}
+          longForm={clue.longForm ?? false}
+        />
+      )}
+      {correction && confirmingUndo ? (
+        <UndoCheckConfirm
+          roomId={roomId}
+          userId={userId}
+          prompt="Undo your check on this clue?"
+          onCancel={() => setConfirmingUndo(false)}
+        />
+      ) : (
+        <div className="flex gap-2">
+          {correction ? (
+            <UndoCheckButton onClick={() => setConfirmingUndo(true)} />
+          ) : null}
+          {hasBoardControl || clue.longForm ? (
+            <fetcher.Form
+              method="POST"
+              action={`/room/${roomId}/next-clue`}
+              ref={formRef}
+            >
+              <input type="hidden" value={userId} name="userId" />
+              <input type="hidden" value={i} name="i" />
+              <input type="hidden" value={j} name="j" />
+              <Button
+                type="primary"
+                htmlType="submit"
+                autoFocus
+                loading={loading}
+                className="relative"
+              >
+                <div
+                  className="absolute left-0 h-full rounded-md bg-blue-400"
+                  style={{
+                    animation:
+                      clue.longForm || confirmingUndo
+                        ? undefined
+                        : `${
+                            DEFAULT_COUNTDOWN_MS / 1000
+                          }s linear 0s 1 growFromLeft forwards`,
+                  }}
+                />
+                <span className="relative">
+                  {isRevealingAnswer ? "Reveal answer" : "Back to board"}
+                </span>
+              </Button>
+            </fetcher.Form>
+          ) : null}
+        </div>
+      )}
+    </div>
   );
 }

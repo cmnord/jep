@@ -87,6 +87,9 @@ export interface State {
   readonly buzzes: Map<string, number>;
   readonly numExpectedWagers: number;
 
+  /** When the game ended, for bounding post-game corrections. */
+  readonly gameOverAt: number | null;
+
   // clock state
   readonly clockRunning: boolean;
   readonly clockAccumulatedMs: number;
@@ -111,6 +114,7 @@ export function stateFromGame(game: Game) {
     players: new Map(),
     leftPlayers: new Map(),
     wagers: new Map(),
+    gameOverAt: null,
     clockRunning: false,
     clockAccumulatedMs: 0,
     clockLastResumedAt: null,
@@ -153,12 +157,36 @@ export function getCountedChecks(
   return counted;
 }
 
+/** Corrections are allowed in any state where the answer is public and the
+ * next clue hasn't been chosen: the reveal screens, the board, and the
+ * round preview (the last clue of a round transitions straight to the next
+ * round's preview, and the correction window shouldn't have a hole in it).
+ * This keeps corrections score-only — the clue can never return to live
+ * play.
+ */
+/** How long after game over the final clue's checks may still be
+ * corrected. The armed-confirmation carry-over is client-local, so the
+ * engine bounds the window by time instead: long enough to finish an
+ * in-flight confirmation, short enough that final results stay final.
+ */
+export const GAME_OVER_CORRECTION_GRACE_MS = 60_000;
+
+export function canCorrectCheck(type: GameState) {
+  return (
+    type === GameState.RevealAnswerToAll ||
+    type === GameState.RevealAnswerLongForm ||
+    type === GameState.ShowBoard ||
+    type === GameState.PreviewRound ||
+    type === GameState.GameOver
+  );
+}
+
 export function getCheckCorrectionForPlayer(
   state: State,
   userId: string,
 ): PlayerCheckCorrection | undefined {
   const correction = state.checkCorrection;
-  if (state.type !== GameState.ShowBoard || !correction) {
+  if (!canCorrectCheck(state.type) || !correction) {
     return undefined;
   }
   const { round, i, j, checks } = correction;

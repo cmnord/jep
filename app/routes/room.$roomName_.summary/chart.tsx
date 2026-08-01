@@ -12,6 +12,7 @@ import {
 } from "recharts";
 
 import { Action, gameEngine } from "~/engine";
+import { isCorrectCheckAction } from "~/engine/actions";
 import {
   Player,
   getNumCluesInBoard,
@@ -21,7 +22,7 @@ import {
 import { Game } from "~/models/game.server";
 import { getPlayerColor } from "~/utils";
 
-interface DataPoint {
+export interface DataPoint {
   x: number;
   wagerable: number;
   // Per-player score for each clue.
@@ -86,16 +87,15 @@ const CustomDot = (props: {
   return <Dot cx={cx} cy={cy} fill={fill} stroke={stroke} r={4} />;
 };
 
-/** Chart is a line chart of each player's score over time. */
-export default function Chart({
-  game,
-  players,
-  roomEvents,
-}: {
-  game: Game;
-  players: Player[];
-  roomEvents: Action[];
-}) {
+/** buildChartData replays the room events and produces one data point per
+ * answered clue, updating the affected point in place when a check is
+ * corrected afterwards.
+ */
+export function buildChartData(
+  game: Game,
+  players: Player[],
+  roomEvents: Action[],
+): DataPoint[] {
   const initialPoint: DataPoint = {
     x: 0,
     ...Object.fromEntries(players.map((player) => [player.userId, 0])),
@@ -105,16 +105,11 @@ export default function Chart({
 
   let wipState = stateFromGame(game);
   let counter = 0;
-
-  const roundBoundaries = game.boards.reduce((acc, _board, i) => {
-    const cluesInBoard = getNumCluesInBoard(game, i);
-    const prev = acc.length ? acc[acc.length - 1] : 0;
-    const next = prev + cluesInBoard;
-    return [...acc, next];
-  }, new Array<number>());
+  let lastPointClue: string | null = null;
 
   for (const re of roomEvents) {
     const prevNumAnswered = wipState.numAnswered;
+    const prevState = wipState;
 
     wipState = gameEngine(wipState, re);
     const activeClue = wipState.activeClue;
@@ -134,8 +129,54 @@ export default function Chart({
         point[userId] = player?.score ?? 0;
       }
       data.push(point);
+      lastPointClue = `${wipState.round},${i},${j}`;
+    }
+
+    // A correction rewrites scores without advancing numAnswered, so bring
+    // the already-recorded point for that clue up to date. Only an accepted
+    // correction counts: the reducer returns the same state reference for
+    // rejected ones (e.g. a stale event stored after the window closed),
+    // and patching on those could copy unrelated in-flight scores backwards.
+    if (isCorrectCheckAction(re) && wipState !== prevState && data.length > 1) {
+      const { round, i, j } = re.payload;
+      if (lastPointClue === `${round},${i},${j}`) {
+        const lastPoint = data[data.length - 1];
+        const clueAnswer = wipState.isAnswered[round][i][j];
+        const affected = new Set([
+          ...Object.keys(lastPoint).filter(
+            (key) => key !== "x" && key !== "wagerable",
+          ),
+          ...clueAnswer.answeredBy.keys(),
+        ]);
+        for (const userId of affected) {
+          const player = getPlayer(wipState, userId);
+          lastPoint[userId] = player?.score ?? 0;
+        }
+      }
     }
   }
+
+  return data;
+}
+
+/** Chart is a line chart of each player's score over time. */
+export default function Chart({
+  game,
+  players,
+  roomEvents,
+}: {
+  game: Game;
+  players: Player[];
+  roomEvents: Action[];
+}) {
+  const data = buildChartData(game, players, roomEvents);
+
+  const roundBoundaries = game.boards.reduce((acc, _board, i) => {
+    const cluesInBoard = getNumCluesInBoard(game, i);
+    const prev = acc.length ? acc[acc.length - 1] : 0;
+    const next = prev + cluesInBoard;
+    return [...acc, next];
+  }, new Array<number>());
 
   return (
     <>

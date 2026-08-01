@@ -4,12 +4,17 @@ import * as React from "react";
 export default function Popover({
   children,
   content,
+  open,
+  onOpenChange,
 }: {
   children: React.ReactNode;
   content: React.ReactNode;
+  /** Optional controlled open state. */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }) {
   return (
-    <PopoverPrimitive.Root>
+    <PopoverPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <PopoverPrimitive.Trigger asChild>{children}</PopoverPrimitive.Trigger>
       <PopoverPrimitive.Portal>
         <PopoverPrimitive.Content

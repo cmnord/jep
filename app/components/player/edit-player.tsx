@@ -12,7 +12,7 @@ import { useEngineContext } from "~/engine";
 import useDebounce, { useDebounceEnd } from "~/utils/use-debounce";
 import useSoloAction from "~/utils/use-solo-action";
 
-import { PlayerScoreBox } from "./player";
+import { PlayerScoreBox, ScorePulse } from "./player";
 
 function EditPlayer({
   hasBoardControl,
@@ -24,6 +24,10 @@ function EditPlayer({
   onFocus,
   winning,
   icon,
+  scorePopover,
+  scorePopoverKey,
+  scorePopoverAutoOpen,
+  pulse,
 }: {
   hasBoardControl: boolean;
   loading: boolean;
@@ -34,6 +38,10 @@ function EditPlayer({
   onFocus: () => void;
   winning: boolean;
   icon?: React.ReactNode;
+  scorePopover?: React.ReactNode;
+  scorePopoverKey?: boolean;
+  scorePopoverAutoOpen?: boolean;
+  pulse?: ScorePulse;
 }) {
   const inputRef = React.useRef<HTMLInputElement | null>(null);
   const debouncedLoading = useDebounceEnd(loading, 100);
@@ -49,6 +57,10 @@ function EditPlayer({
       hasBoardControl={hasBoardControl}
       winning={winning}
       icon={icon}
+      scorePopover={scorePopover}
+      scorePopoverKey={scorePopoverKey}
+      scorePopoverAutoOpen={scorePopoverAutoOpen}
+      pulse={pulse}
     >
       <div className="flex items-center gap-2 rounded-xl text-white">
         <input
@@ -92,7 +104,18 @@ export function EditPlayerForm({
   userId,
   winning,
   icon,
-}: { winning: boolean; icon?: React.ReactNode } & RoomProps) {
+  scorePopover,
+  scorePopoverKey,
+  scorePopoverAutoOpen,
+  pulse,
+}: {
+  winning: boolean;
+  icon?: React.ReactNode;
+  scorePopover?: React.ReactNode;
+  scorePopoverKey?: boolean;
+  scorePopoverAutoOpen?: boolean;
+  pulse?: ScorePulse;
+} & RoomProps) {
   const { players, soloDispatch, boardControl } = useEngineContext();
 
   const fetcher = useFetcher<Action>();
@@ -157,6 +180,10 @@ export function EditPlayerForm({
         onFocus={() => setEditing(true)}
         winning={winning}
         icon={icon}
+        scorePopover={scorePopover}
+        scorePopoverKey={scorePopoverKey}
+        scorePopoverAutoOpen={scorePopoverAutoOpen}
+        pulse={pulse}
       />
     </fetcher.Form>
   );

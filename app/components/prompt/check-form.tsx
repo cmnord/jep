@@ -4,6 +4,11 @@ import { useFetcher } from "react-router";
 
 import Button from "~/components/button";
 import type { RoomProps } from "~/components/game";
+import {
+  UndoArmingContext,
+  UndoCheckButton,
+  UndoCheckConfirm,
+} from "~/components/undo-check";
 import type { Action, Player } from "~/engine";
 import { useEngineContext } from "~/engine";
 import { formatDollarsWithSign } from "~/utils";
@@ -88,6 +93,7 @@ export function ConnectedCheckForm({
     clue,
     answeredBy,
     answers,
+    getCheckCorrection,
     getClueValue,
     soloDispatch,
     players,
@@ -95,6 +101,9 @@ export function ConnectedCheckForm({
   const fetcher = useFetcher<Action>();
   useSoloAction(fetcher, soloDispatch);
   const loading = fetcher.state === "loading";
+
+  const { armed: confirmingUndo, setArmed: setConfirmingUndo } =
+    React.useContext(UndoArmingContext);
 
   // Disable the "show answer" button briefly on render to prevent
   // double-clicks.
@@ -162,19 +171,39 @@ export function ConnectedCheckForm({
       .filter((p): p is Player => p !== undefined)
       .filter((p) => answeredBy(i, j, p.userId) === undefined);
 
+    const correction = getCheckCorrection(userId);
+
+    if (correction && confirmingUndo) {
+      return (
+        <div className="flex flex-col items-center gap-2 p-2">
+          <UndoCheckConfirm
+            roomId={roomId}
+            userId={userId}
+            prompt="Undo your check on this clue?"
+            onCancel={() => setConfirmingUndo(false)}
+          />
+        </div>
+      );
+    }
+
     return (
       <div className="flex flex-col items-center gap-2 p-2">
-        <p className="font-bold text-white">
-          You {checkResult ? "won" : "lost"}{" "}
-          <span
-            className={clsx("text-shadow", {
-              "text-green-300": checkResult,
-              "text-red-300": !checkResult,
-            })}
-          >
-            {formatDollarsWithSign(value)}
-          </span>
-        </p>
+        <div className="flex items-center gap-3">
+          <p className="font-bold text-white">
+            You {checkResult ? "won" : "lost"}{" "}
+            <span
+              className={clsx("text-shadow", {
+                "text-green-300": checkResult,
+                "text-red-300": !checkResult,
+              })}
+            >
+              {formatDollarsWithSign(value)}
+            </span>
+          </p>
+          {correction ? (
+            <UndoCheckButton onClick={() => setConfirmingUndo(true)} />
+          ) : null}
+        </div>
         <p className="text-sm text-slate-300">
           Waiting for check(s) from{" "}
           {uncheckedPlayers.map((p) => p.name).join(", ")}...

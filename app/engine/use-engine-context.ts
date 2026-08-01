@@ -15,6 +15,7 @@ export const GameEngineContext = React.createContext<
   boardControl: null,
   buzzes: new Map(),
   category: undefined,
+  checkCorrection: null,
   clue: undefined,
   connectionState: ConnectionState.DISCONNECTED,
   getCheckCorrection: () => undefined,

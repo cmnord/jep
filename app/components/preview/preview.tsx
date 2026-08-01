@@ -1,3 +1,4 @@
+import * as React from "react";
 import { Form as fetcherForm, useFetcher } from "react-router";
 
 import Button from "~/components/button";
@@ -8,6 +9,11 @@ import HowToPlay from "~/components/how-to-play";
 import Link from "~/components/link";
 import { EditPlayerForm, PlayerIcon } from "~/components/player";
 import SoundControl from "~/components/sound";
+import {
+  UndoArmingContext,
+  UndoCheckButton,
+  UndoCheckConfirm,
+} from "~/components/undo-check";
 import WagerHintsControl from "~/components/wager-hints-control";
 import type { Player } from "~/engine";
 import { Action, GameState, useEngineContext } from "~/engine";
@@ -89,6 +95,12 @@ function PreviewRoundDialog({
 } & RoomProps) {
   const isOpen = type === GameState.PreviewRound;
 
+  // The dialog is modal, so a correction still pending from the last clue
+  // of the previous round must be reachable from inside it.
+  const { getCheckCorrection } = useEngineContext();
+  const correction = getCheckCorrection(userId);
+  const { armed, setArmed } = React.useContext(UndoArmingContext);
+
   const boardController = boardControl ? players.get(boardControl) : undefined;
   const boardControlName = boardController
     ? boardController.name
@@ -143,6 +155,25 @@ function PreviewRoundDialog({
           <Link className="mb-2 text-sm text-white" to="/howto">
             Practice buzzing &rarr;
           </Link>
+        </div>
+      ) : null}
+      {correction ? (
+        <div className="mb-2 flex justify-center">
+          {armed ? (
+            <UndoCheckConfirm
+              roomId={roomId}
+              userId={userId}
+              prompt="Undo your check on the last clue?"
+              onCancel={() => setArmed(false)}
+            />
+          ) : (
+            <div className="flex items-center gap-3">
+              <p className="text-sm text-slate-300">
+                Need to fix the last clue?
+              </p>
+              <UndoCheckButton onClick={() => setArmed(true)} />
+            </div>
+          )}
         </div>
       ) : null}
       <Dialog.Footer>
