@@ -18,9 +18,9 @@ import ScoreChart from "./chart";
 import { getBattingAverage, getCoryat } from "./coryat";
 import GameSummary from "./summary";
 
-export const meta: Route.MetaFunction = ({ data }) => {
+export const meta: Route.MetaFunction = ({ loaderData }) => {
   try {
-    return [{ title: "Summary: " + data?.game.title }];
+    return [{ title: "Summary: " + loaderData?.game.title }];
   } catch {
     return [];
   }

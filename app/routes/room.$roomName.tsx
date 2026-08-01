@@ -15,9 +15,9 @@ import { BASE_URL, getRandomEmoji } from "~/utils";
 
 import type { Route } from "./+types/room.$roomName";
 
-export const meta: Route.MetaFunction = ({ data }) => {
+export const meta: Route.MetaFunction = ({ loaderData }) => {
   try {
-    return [{ title: data?.game.title }];
+    return [{ title: loaderData?.game.title }];
   } catch {
     return [];
   }
