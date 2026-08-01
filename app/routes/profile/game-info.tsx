@@ -82,7 +82,9 @@ function DeleteGameModal({
           <Button autoFocus onClick={onClickClose} htmlType="button">
             Cancel
           </Button>
-          <Button type="danger">Delete game</Button>
+          <Button type="danger" htmlType="submit">
+            Delete game
+          </Button>
         </Dialog.Footer>
       </fetcher.Form>
     </Dialog>

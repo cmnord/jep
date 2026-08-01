@@ -6,13 +6,17 @@ type ButtonProps = React.ComponentProps<"button">;
 
 type Props = {
   type?: "primary" | "default" | "transparent" | "danger";
+  /** The native button type. Defaults to "button" — a bare <button> inside a
+   * <form> would otherwise default to "submit", so onClick-only buttons
+   * (e.g. wager suggestions) would silently submit the surrounding form.
+   * Pass htmlType="submit" for actual submit buttons. */
   htmlType?: ButtonProps["type"];
   loading?: boolean;
 } & Omit<ButtonProps, "type">;
 
 export default function Button({
   type = "default",
-  htmlType,
+  htmlType = "button",
   loading,
   className,
   children,

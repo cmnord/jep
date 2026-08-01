@@ -1,5 +1,5 @@
 import { test, expect } from "./fixtures";
-import { playOneClue, uploadGame } from "./helpers";
+import { playOneClue, uploadGame, waitForConnected } from "./helpers";
 
 test.describe("solves tracking", () => {
   test("playing a game records a solve on profile", async ({
@@ -12,10 +12,12 @@ test.describe("solves tracking", () => {
     // Navigate to the play route, which creates a real room and redirects
     await page.goto(`/game/${gameId}/play`);
 
-    // Wait for the room page to load, then join
+    // Wait for the room page to load and the realtime subscription to be
+    // established, then join.
     await expect(page.getByRole("button", { name: /join game/i })).toBeVisible({
       timeout: 10_000,
     });
+    await waitForConnected(page);
     await page.getByRole("button", { name: /join game/i }).click();
 
     // Start round 1
