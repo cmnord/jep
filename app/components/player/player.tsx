@@ -1,11 +1,12 @@
 import clsx from "clsx";
 import * as React from "react";
 
+import { Dollars } from "~/components/dollars";
 import Popover from "~/components/popover";
 import { UndoArmingContext, UndoCheckConfirm } from "~/components/undo-check";
 import type { Player } from "~/engine";
 import { GameState, useEngineContext } from "~/engine";
-import { formatDollars, getPlayerColor } from "~/utils";
+import { getPlayerColor } from "~/utils";
 
 import { RoomProps } from "../game";
 import { EditPlayerForm } from "./edit-player";
@@ -65,10 +66,9 @@ export function PlayerScoreBox({
   }, [scorePopoverAutoOpen]);
 
   const score = (
-    <div
-      className={clsx("font-inter font-bold text-shadow-md", {
-        "text-white": player.score >= 0,
-        "text-red-400": player.score < 0,
+    <Dollars
+      amount={player.score}
+      className={clsx("block text-shadow-md", {
         // The decoration must live on the text itself: Safari doesn't
         // propagate text-decoration from a <button> into its children.
         // The decoration color must be opaque: WebKit drops a
@@ -77,9 +77,7 @@ export function PlayerScoreBox({
         "underline decoration-white decoration-dotted decoration-2 underline-offset-4":
           Boolean(scorePopover),
       })}
-    >
-      {formatDollars(player.score)}
-    </div>
+    />
   );
   return (
     <div

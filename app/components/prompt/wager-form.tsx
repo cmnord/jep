@@ -3,6 +3,7 @@ import * as React from "react";
 import { useFetcher } from "react-router";
 
 import Button from "~/components/button";
+import { Dollars } from "~/components/dollars";
 import type { RoomProps } from "~/components/game";
 import Input from "~/components/input";
 import Popover from "~/components/popover";
@@ -47,7 +48,9 @@ function PlayerScores({
               <span> (can't wager)</span>
             )}
           </p>
-          <p className="text-white">{formatDollars(p.score)}</p>
+          <p>
+            <Dollars amount={p.score} />
+          </p>
         </div>
       ))}
     </div>
@@ -246,7 +249,7 @@ export function ConnectedWagerForm({ roomId, userId }: RoomProps) {
       <div className="flex flex-col items-center gap-4 p-2">
         <p className="font-bold text-white">
           Your wager:{" "}
-          <span className="font-handwriting text-xl">
+          <span className="font-handwriting text-xl font-bold">
             {formatDollars(wager)}
           </span>
           <br />

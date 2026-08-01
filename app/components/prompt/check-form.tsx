@@ -3,6 +3,7 @@ import * as React from "react";
 import { useFetcher } from "react-router";
 
 import Button from "~/components/button";
+import { DollarsDiff } from "~/components/dollars";
 import type { RoomProps } from "~/components/game";
 import {
   UndoArmingContext,
@@ -11,7 +12,6 @@ import {
 } from "~/components/undo-check";
 import type { Action, Player } from "~/engine";
 import { useEngineContext } from "~/engine";
-import { formatDollarsWithSign } from "~/utils";
 import useSoloAction from "~/utils/use-solo-action";
 import useTimeout from "~/utils/use-timeout";
 
@@ -190,15 +190,7 @@ export function ConnectedCheckForm({
       <div className="flex flex-col items-center gap-2 p-2">
         <div className="flex items-center gap-3">
           <p className="font-bold text-white">
-            You {checkResult ? "won" : "lost"}{" "}
-            <span
-              className={clsx("text-shadow", {
-                "text-green-300": checkResult,
-                "text-red-300": !checkResult,
-              })}
-            >
-              {formatDollarsWithSign(value)}
-            </span>
+            You {checkResult ? "won" : "lost"} <DollarsDiff amount={value} />
           </p>
           {correction ? (
             <UndoCheckButton onClick={() => setConfirmingUndo(true)} />

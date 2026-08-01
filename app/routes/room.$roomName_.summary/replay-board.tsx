@@ -3,11 +3,12 @@ import * as React from "react";
 
 import { Category } from "~/components/board/category";
 import CluePopoverContent from "~/components/clue-popover-content";
+import { Dollars } from "~/components/dollars";
 import Popover from "~/components/popover";
 import { clueIsPlayable } from "~/engine";
 import type { Player } from "~/engine/state";
 import type { Board, Clue } from "~/models/convert.server";
-import { formatDollars, generateGrid, getPlayerColor } from "~/utils";
+import { generateGrid, getPlayerColor } from "~/utils";
 
 import type { ClueLookup, ReplayFrame } from "./replay";
 import { buildClueLookup } from "./replay";
@@ -404,14 +405,7 @@ export function ReplayScoreBar({
             >
               {firstChar}
             </div>
-            <span
-              className={clsx(
-                "font-mono font-bold",
-                current.score < 0 ? "text-red-400" : "text-white",
-              )}
-            >
-              {formatDollars(current.score)}
-            </span>
+            <Dollars amount={current.score} />
           </div>
         );
       })}

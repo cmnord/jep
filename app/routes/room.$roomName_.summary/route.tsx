@@ -1,3 +1,4 @@
+import { Dollars } from "~/components/dollars";
 import { ClockDisplay } from "~/components/game-clock";
 import { PlayerScore } from "~/components/player";
 import {
@@ -11,7 +12,7 @@ import { getGame } from "~/models/game.server";
 import { getRoomEvents } from "~/models/room-event.server";
 import { getRoom } from "~/models/room.server";
 import { getSolve, markSolved } from "~/models/solves.server";
-import { BASE_URL, formatDollars } from "~/utils";
+import { BASE_URL } from "~/utils";
 
 import type { Route } from "./+types/route";
 import ScoreChart from "./chart";
@@ -143,12 +144,12 @@ export default function PlayGame({ loaderData }: Route.ComponentProps) {
         <h3 className="text-lg">Coryat Scores</h3>
         <p>
           <strong>Combined: </strong>
-          {formatDollars(loaderData.combinedCoryat)}
+          <Dollars amount={loaderData.combinedCoryat} />
         </p>
         <div className="flex flex-col gap-2 sm:grid sm:grid-cols-3">
           {allSorted.map((p, i) => (
             <span key={p.userId}>
-              {p.name}: {formatDollars(loaderData.coryats[i])}
+              {p.name}: <Dollars amount={loaderData.coryats[i]} />
               {i >= leftPlayerOffset && (
                 <span className="text-slate-400"> (left)</span>
               )}
