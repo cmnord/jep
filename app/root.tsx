@@ -52,6 +52,12 @@ export const meta: Route.MetaFunction = () => [
 
 export const links: Route.LinksFunction = () => [
   { rel: "icon", href: "/favicon.ico", type: "image/x-icon", sizes: "16x16" },
+  {
+    rel: "apple-touch-icon",
+    href: "/apple-touch-icon.png",
+    type: "image/png",
+    sizes: "256x256",
+  },
   { rel: "stylesheet", href: stylesheet },
 ];
 
