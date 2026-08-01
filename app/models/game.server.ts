@@ -236,6 +236,7 @@ export async function createGame(
       categoriesToInsert.push({
         game_id: game.id,
         name: category.name,
+        note: category.note ?? null,
         round,
       });
     }
