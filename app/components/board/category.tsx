@@ -12,14 +12,15 @@ export function Category({
   hidden?: boolean;
   allAnswered?: boolean;
 }) {
-  const { fontSize, ref } = useFitText<HTMLParagraphElement>({
+  const { fontSize, ref } = useFitText<HTMLSpanElement>({
     maxFontSize: 80,
   });
 
-  const isHidden = hidden || allAnswered;
+  const isCompleted = allAnswered && !hidden;
+  const isHidden = hidden || isCompleted;
 
   const nameContent = (
-    <p
+    <span
       style={{
         fontSize,
         visibility: isHidden ? "hidden" : "visible",
@@ -31,12 +32,12 @@ export function Category({
       <span className="font-inter font-bold uppercase text-shadow-md sm:text-shadow-lg">
         {name}
       </span>
-    </p>
+    </span>
   );
 
   return (
     <th className="h-full border-2 border-blue-925 bg-black/30 leading-none sm:p-4">
-      {allAnswered ? (
+      {isCompleted ? (
         <Popover
           content={
             <p>
@@ -50,7 +51,11 @@ export function Category({
             </p>
           }
         >
-          <button type="button" className="w-full">
+          <button
+            type="button"
+            className="w-full"
+            aria-label="Show completed category"
+          >
             {nameContent}
           </button>
         </Popover>

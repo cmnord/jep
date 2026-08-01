@@ -1,0 +1,25 @@
+"$schema" = "https://conductor.build/schemas/settings.repo.schema.json"
+
+[scripts]
+setup = "npm ci"
+run_mode = "nonconcurrent"
+
+[scripts.run.dev]
+available_in = ["local"]
+command = "npm run db:start && npm run dev -- --port $CONDUCTOR_PORT"
+default = true
+icon = "play"
+
+[scripts.run.test]
+command = "npm run test"
+icon = "test-tube"
+
+[scripts.run.validate]
+available_in = ["local"]
+command = "npm run db:start && npm run validate"
+icon = "badge-check"
+
+[scripts.run.database]
+available_in = ["local"]
+command = "npm run db:start"
+icon = "database"

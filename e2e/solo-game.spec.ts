@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+import { playOneClue, startMockGame } from "./helpers";
+
 test.describe("solo game", () => {
   test("can play through a mock game clue", async ({ page }) => {
     await page.goto("/mock");
@@ -46,5 +48,41 @@ test.describe("solo game", () => {
     await expect(
       page.getByRole("button", { name: /back to board/i }),
     ).toBeVisible({ timeout: 5_000 });
+  });
+
+  test("hides a completed category name and reveals it on demand", async ({
+    page,
+  }) => {
+    await startMockGame(page);
+
+    const completedCategory = page.getByRole("columnheader", {
+      name: "Round 1, Category 1",
+      exact: true,
+    });
+    const openCategory = page.getByRole("columnheader", {
+      name: "Round 1, Category 2",
+      exact: true,
+    });
+
+    await expect(completedCategory).toBeVisible({ timeout: 10_000 });
+    await playOneClue(page);
+
+    const completedCategoryHeader = page.getByRole("columnheader", {
+      name: "Show completed category",
+    });
+    await expect(completedCategoryHeader).toBeVisible();
+    await expect(
+      completedCategoryHeader.getByText("Round 1, Category 1", {
+        exact: true,
+      }),
+    ).toBeHidden();
+    await expect(openCategory).toBeVisible();
+
+    await page.getByRole("button", { name: "Show completed category" }).click();
+    await expect(
+      page.getByRole("dialog").getByText("Round 1, Category 1", {
+        exact: true,
+      }),
+    ).toBeVisible();
   });
 });
