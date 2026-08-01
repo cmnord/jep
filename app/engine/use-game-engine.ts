@@ -249,9 +249,12 @@ export function useGameEngine(
               ? ConnectionState.RECONNECTING
               : ConnectionState.CONNECTING;
             setConnectionState(nextState);
-            if (nextState === ConnectionState.RECONNECTING) {
-              startReconnectingTimer();
-            }
+            // Escalate to DISCONNECTED if retries don't succeed in time —
+            // including on the first connection attempt, which previously
+            // showed "Connecting..." forever with no manual retry offered
+            // (e.g. when the page loads while the realtime backend is
+            // restarting).
+            startReconnectingTimer();
             if (err) {
               console.warn("Realtime subscription issue:", status, err.message);
             }
