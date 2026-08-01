@@ -5,6 +5,8 @@
   "scripts": {
     "build": "react-router build",
     "db:start": "npx supabase start -x storage-api,imgproxy,edge-runtime,logflare,supavisor,vector",
+    "db:stop": "npx supabase stop",
+    "db:restart": "npm run db:stop && npm run db:start",
     "dev": "react-router dev",
     "format": "oxfmt --write .",
     "format:check": "oxfmt --check .",
