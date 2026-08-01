@@ -77,6 +77,14 @@ export async function uploadGame(
 }
 
 /** Play through a single $200 clue and return to the board. */
+/** Wait for the realtime connection indicator before interacting with a
+ * real (non-mock) room. Events posted before the websocket subscription is
+ * established are only recovered by the missed-event catch-up, so tests
+ * should wait like a player watching the "Connecting..." banner would. */
+export async function waitForConnected(page: Page) {
+  await expect(page.getByText(/^Connected/)).toBeVisible({ timeout: 15_000 });
+}
+
 export async function playOneClue(page: Page) {
   const clueButton = page.getByRole("button", { name: "$ 200" }).first();
 

@@ -55,6 +55,16 @@ export const NODE_ENV = getEnv("NODE_ENV", {
   isSecret: false,
   isRequired: false,
 });
+/** Set by the Vercel platform at build and runtime. Used to skip
+ * Vercel-only integrations (e.g. analytics) in local production builds,
+ * where the injected /_vercel/* endpoints don't exist.
+ */
+export const IS_VERCEL = Boolean(
+  getEnv("VERCEL", {
+    isSecret: false,
+    isRequired: false,
+  }),
+);
 export const SUPABASE_URL = getEnv("SUPABASE_URL", { isSecret: false });
 export const SUPABASE_ANON_KEY = getEnv("SUPABASE_ANON_KEY", {
   isSecret: false,

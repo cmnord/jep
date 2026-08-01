@@ -17,7 +17,7 @@ import Header from "~/components/header";
 import { getValidAuthSession } from "~/models/auth";
 import { getUserByEmail } from "~/models/user";
 import { parseUserSettings } from "~/models/user-settings.server";
-import { BASE_URL, getBrowserEnv, NODE_ENV } from "~/utils";
+import { BASE_URL, getBrowserEnv, IS_VERCEL, NODE_ENV } from "~/utils";
 import { UserSettingsProvider } from "~/utils/user-settings";
 
 import type { Route } from "./+types/root";
@@ -81,7 +81,7 @@ export async function loader({ request }: Route.LoaderArgs) {
       ? await getUserByEmail(authSession.email, authSession.accessToken)
       : undefined;
     const userSettings = user ? parseUserSettings(user.settings) : undefined;
-    return { user, userSettings, env, BASE_URL, NODE_ENV };
+    return { user, userSettings, env, BASE_URL, NODE_ENV, IS_VERCEL };
   } catch {
     return {
       user: undefined,
@@ -89,6 +89,7 @@ export async function loader({ request }: Route.LoaderArgs) {
       env,
       BASE_URL,
       NODE_ENV,
+      IS_VERCEL,
     };
   }
 }
@@ -103,7 +104,9 @@ export default function App({ loaderData }: Route.ComponentProps) {
         <Links />
       </head>
       <body className="relative flex min-h-screen flex-col">
-        {loaderData.NODE_ENV === "production" ? <Analytics /> : null}
+        {loaderData.NODE_ENV === "production" && loaderData.IS_VERCEL ? (
+          <Analytics />
+        ) : null}
         <ToastPrimitive.Provider swipeDirection="right">
           <ToastPrimitive.Viewport
             className={`fixed right-0 bottom-0 z-50 m-0 flex w-96 max-w-full list-none flex-col gap-3 p-[var(--viewport-padding)] outline-none [--viewport-padding:_25px]`}

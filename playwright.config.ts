@@ -21,7 +21,27 @@ export default defineConfig({
     trace: "on-first-retry",
   },
 
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  // Specs that hit the shared database (auth, uploads, real rooms) are
+  // split into their own project that runs after the solo-game specs and
+  // without intra-file parallelism, so they don't race each other or the
+  // mock-game specs for the shared server and Supabase instance.
+  projects: [
+    {
+      name: "solo",
+      use: { ...devices["Desktop Chrome"] },
+      testIgnore: /(auth|solves|game-management|settings)\.spec\.ts/,
+    },
+    {
+      name: "db",
+      use: { ...devices["Desktop Chrome"] },
+      testMatch: /(auth|solves|game-management|settings)\.spec\.ts/,
+      dependencies: ["solo"],
+      // These specs share one test user and one database, so they cannot
+      // run concurrently with each other.
+      workers: 1,
+      fullyParallel: false,
+    },
+  ],
 
   webServer: {
     command: webServerCommand,
