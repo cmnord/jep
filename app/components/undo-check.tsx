@@ -2,12 +2,12 @@ import * as React from "react";
 import { useFetcher } from "react-router";
 
 import Button from "~/components/button";
+import { DollarsDiff } from "~/components/dollars";
 import type { RoomProps } from "~/components/game";
 import { ArrowUturnLeft } from "~/components/icons";
 import type { Action } from "~/engine";
 import { GameState, useEngineContext } from "~/engine";
 import { GAME_OVER_CORRECTION_GRACE_MS } from "~/engine/state";
-import { formatDollarsWithSign } from "~/utils";
 import useSoloAction from "~/utils/use-solo-action";
 import useTimeout from "~/utils/use-timeout";
 
@@ -163,7 +163,9 @@ export function UndoCheckConfirm({
           disabled={justArmed}
         >
           <ArrowUturnLeft className="h-4 w-4" />
-          undo ({formatDollarsWithSign(scoreSwing)})
+          undo (
+          <DollarsDiff amount={scoreSwing} onLight={commitType === "default"} />
+          )
         </Button>
         {onCancel ? (
           <Button htmlType="button" onClick={onCancel}>

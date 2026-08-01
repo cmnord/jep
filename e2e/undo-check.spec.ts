@@ -82,7 +82,7 @@ test.describe("undo check", () => {
 
     // Arm again and commit. The swing is double the $200 clue value.
     await undoButton.click();
-    await page.getByRole("button", { name: /undo \(-\$400\)/i }).click();
+    await page.getByRole("button", { name: /undo \(\s*-\$400\s*\)/i }).click();
 
     // The correction is applied: the floating delta flips to -$200 and the
     // undo remains available to flip back.
@@ -121,7 +121,7 @@ test.describe("undo check", () => {
     ).toBeVisible();
     await shot(page, "board-popover-confirm");
 
-    await page.getByRole("button", { name: /undo \(-\$400\)/i }).click();
+    await page.getByRole("button", { name: /undo \(\s*-\$400\s*\)/i }).click();
 
     // The score flips to -$200 and the affected card pulses.
     await expect(
@@ -136,7 +136,7 @@ test.describe("undo check", () => {
     await expect(
       page.getByText("Undo your check on the last clue?"),
     ).toBeVisible();
-    await page.getByRole("button", { name: /undo \(\+\$400\)/i }).click();
+    await page.getByRole("button", { name: /undo \(\s*\+\$400\s*\)/i }).click();
     await expect(
       page.getByRole("button", { name: "$200", exact: true }),
     ).toBeVisible({ timeout: 5_000 });
@@ -161,7 +161,7 @@ test.describe("undo check", () => {
       page.getByText("Undo your check on the last clue?"),
     ).toBeVisible();
     await shot(page, "preview-dialog-confirm");
-    await page.getByRole("button", { name: /undo \(-\$400\)/i }).click();
+    await page.getByRole("button", { name: /undo \(\s*-\$400\s*\)/i }).click();
 
     // The confirmation closes on commit; re-arming offers the flip back.
     await expect(
@@ -169,7 +169,7 @@ test.describe("undo check", () => {
     ).not.toBeVisible();
     await page.getByRole("button", { name: /^undo$/i }).click();
     await expect(
-      page.getByRole("button", { name: /undo \(\+\$400\)/i }),
+      page.getByRole("button", { name: /undo \(\s*\+\$400\s*\)/i }),
     ).toBeVisible();
     await shot(page, "preview-dialog-after-undo");
   });

@@ -1,7 +1,7 @@
+import { DollarsDiff } from "~/components/dollars";
 import { getPlayer } from "~/engine/state";
 import type { State } from "~/engine/state";
 import type { Clue } from "~/models/convert.server";
-import { formatDollarsWithSign } from "~/utils";
 
 function PlayerPoints({
   name,
@@ -13,8 +13,8 @@ function PlayerPoints({
   answer?: string;
 }) {
   return (
-    <p className="font-mono text-xs">
-      {name} {formatDollarsWithSign(value)}
+    <p className="text-xs">
+      {name} <DollarsDiff amount={value} />
       {answer ? `: "${answer}"` : ""}
     </p>
   );

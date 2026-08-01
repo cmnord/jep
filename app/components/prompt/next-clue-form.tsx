@@ -1,8 +1,8 @@
-import clsx from "clsx";
 import * as React from "react";
 import { useFetcher } from "react-router";
 
 import Button from "~/components/button";
+import { Dollars, DollarsDiff } from "~/components/dollars";
 import type { RoomProps } from "~/components/game";
 import {
   UndoArmingContext,
@@ -11,7 +11,6 @@ import {
 } from "~/components/undo-check";
 import type { Action } from "~/engine";
 import { GameState, useEngineContext } from "~/engine";
-import { formatDollars, formatDollarsWithSign } from "~/utils";
 import useSoloAction from "~/utils/use-solo-action";
 import useTimeout from "~/utils/use-timeout";
 
@@ -55,35 +54,18 @@ function PlayerScores({
   return (
     <div className="flex gap-2">
       {answerers.map(({ name, correct, value, score }, i) => {
-        const clueValueStr = formatDollarsWithSign(
-          correct ? value : -1 * value,
-        );
         return (
           <div className="relative" key={i}>
             <div className="flex flex-col items-center text-shadow" key={i}>
               <span className="font-handwriting text-xl font-bold text-slate-300">
                 {name}
               </span>
-              <span
-                className={clsx("font-inter text-xl font-bold", {
-                  "text-white": score >= 0,
-                  "text-red-400": score < 0,
-                })}
-              >
-                {formatDollars(score)}
-              </span>
+              <Dollars amount={score} className="text-xl" />
             </div>
-            <span
-              className={clsx(
-                "absolute -top-1/4 -right-1/2 animate-bounce font-inter font-bold whitespace-nowrap text-shadow",
-                {
-                  "text-green-300": correct,
-                  "text-red-300": !correct,
-                },
-              )}
-            >
-              {clueValueStr}
-            </span>
+            <DollarsDiff
+              amount={correct ? value : -1 * value}
+              className="absolute -top-1/4 -right-1/2 animate-bounce whitespace-nowrap"
+            />
           </div>
         );
       })}
