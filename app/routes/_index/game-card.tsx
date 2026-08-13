@@ -26,10 +26,6 @@ export default function GameCard({
 }) {
   const [loading, setLoading] = React.useState(false);
   const solved = solve?.solved_at !== null;
-  const to =
-    solve && !solve.solved_at
-      ? `/room/${solve.room_id}-${solve.rooms?.name}`
-      : `/game/${game.id}`;
 
   const [downloadStatus, setDownloadStatus] =
     React.useState<DownloadStatus>("none");
@@ -69,7 +65,11 @@ export default function GameCard({
 
   return (
     <div className="group flex w-full basis-full flex-col rounded-lg border border-slate-300 shadow-sm transition-colors hover:border-blue-500 hover:shadow-sm sm:basis-auto">
-      <Link to={to} className="w-full grow" onClick={() => setLoading(true)}>
+      <Link
+        to={`/game/${game.id}`}
+        className="w-full grow"
+        onClick={() => setLoading(true)}
+      >
         <div className="flex h-full min-w-0 grow flex-col items-start gap-2 p-4">
           <div className="flex w-full justify-between">
             <strong className="text-left text-lg" title={game.title}>

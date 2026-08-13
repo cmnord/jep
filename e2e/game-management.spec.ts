@@ -104,8 +104,9 @@ test.describe("game management", () => {
     const gameRow = page.locator(`li:has(a[href="/game/${gameId}/play"])`);
     await changeVisibility(page, gameRow, "Make public");
 
-    const previewResponse = await page.goto(`/game/${gameId}`);
-    expect(previewResponse?.status()).toBe(200);
+    await page.goto("/");
+    await page.locator(`a[href="/game/${gameId}"]`).first().click();
+    await expect(page).toHaveURL(`/game/${gameId}`);
     await expect(
       page.getByRole("heading", { level: 1, name: "Mock 1x1 Game" }),
     ).toBeVisible();
