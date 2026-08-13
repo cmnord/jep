@@ -68,15 +68,7 @@ export function PlayerScoreBox({
   const score = (
     <Dollars
       amount={player.score}
-      className={clsx("block text-shadow-md", {
-        // The decoration must live on the text itself: Safari doesn't
-        // propagate text-decoration from a <button> into its children.
-        // The decoration color must be opaque: WebKit drops a
-        // semi-transparent decoration entirely when the text has a
-        // text-shadow, leaving only the dots' black shadows visible.
-        "underline decoration-white decoration-dotted decoration-2 underline-offset-4":
-          Boolean(scorePopover),
-      })}
+      variant={scorePopover ? "interactiveScore" : "score"}
     />
   );
   return (
@@ -328,7 +320,7 @@ export function PlayerScores({ roomId, userId }: RoomProps) {
       roomId={roomId}
       userId={userId}
       prompt="Undo your check on the last clue?"
-      commitType="default"
+      commitType="secondary"
     />
   ) : undefined;
 

@@ -9,12 +9,17 @@ import { Kbd } from "~/components/prompt/kbd";
 import { Lockout } from "~/components/prompt/lockout";
 import { ReadClueTimer } from "~/components/prompt/read-clue-timer";
 import { CLUE_TIMEOUT_MS } from "~/engine";
+import { getPageMetadata } from "~/utils/seo";
 import useKeyPress from "~/utils/use-key-press";
 import useTimeout from "~/utils/use-timeout";
 
 import type { Route } from "./+types/howto";
 
-export const meta: Route.MetaFunction = () => [{ title: "How to Play" }];
+export const meta: Route.MetaFunction = () =>
+  getPageMetadata(
+    "How to Play Jep!",
+    "Learn how to choose clues, buzz in, answer out loud, check responses, and play Jep! with friends online.",
+  );
 
 const CLUE_DURATION_MS = 5000;
 const LOCKOUT_MS = 250;

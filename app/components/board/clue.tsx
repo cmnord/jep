@@ -5,6 +5,8 @@ import Popover from "~/components/popover";
 import { clueIsPlayable } from "~/engine";
 import type { Clue } from "~/models/convert.server";
 
+import { getClueButtonClassName } from "./layout";
+
 type ButtonProps = React.ComponentProps<"button">;
 
 interface Props {
@@ -68,14 +70,7 @@ const ClueButton = React.forwardRef<HTMLButtonElement, ButtonProps & Props>(
           }
           onKeyDown(event);
         }}
-        className={clsx(
-          "group relative h-full w-full bg-blue-bright px-4 py-3 transition-colors",
-          {
-            "hover:bg-blue-700 focus:bg-blue-700": playable,
-            "bg-slate-800": !playable,
-            "border-spin opacity-75": loading,
-          },
-        )}
+        className={getClueButtonClassName({ loading, playable })}
         ref={ref}
         {...rest}
       >

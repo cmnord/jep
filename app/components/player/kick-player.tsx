@@ -1,6 +1,6 @@
-import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import { useFetcher } from "react-router";
 
+import * as DropdownMenu from "~/components/dropdown-menu";
 import { UserMinus } from "~/components/icons";
 import type { Action, Player } from "~/engine";
 import { useEngineContext } from "~/engine";
@@ -23,46 +23,38 @@ export function KickablePlayerIcon({
   useSoloAction(fetcher, soloDispatch);
 
   return (
-    <DropdownMenuPrimitive.Root>
-      <DropdownMenuPrimitive.Trigger asChild>
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger asChild>
         <button
           className="cursor-pointer self-start rounded-full focus:ring-2 focus:ring-blue-500 focus:outline-none"
           aria-label={isSelf ? "Leave game" : `Kick player ${player.name}`}
         >
           <PlayerIcon player={player} />
         </button>
-      </DropdownMenuPrimitive.Trigger>
-      <DropdownMenuPrimitive.Portal>
-        <DropdownMenuPrimitive.Content
-          className="w-56 rounded-md bg-blue-600 p-1 text-white shadow-lg will-change-[opacity,transform] data-[side=bottom]:animate-slide-up-and-fade data-[side=left]:animate-slide-right-and-fade data-[side=right]:animate-slide-left-and-fade data-[side=top]:animate-slide-down-and-fade"
-          sideOffset={5}
-        >
-          <DropdownMenuPrimitive.Label className="p-1 font-bold">
-            {player.name}
-          </DropdownMenuPrimitive.Label>
-          <DropdownMenuPrimitive.Separator className="m-1 h-px bg-white/30" />
-          <DropdownMenuPrimitive.Item
+      </DropdownMenu.Trigger>
+      <DropdownMenu.Portal>
+        <DropdownMenu.Content>
+          <DropdownMenu.Label>
+            <span className="font-bold">{player.name}</span>
+          </DropdownMenu.Label>
+          <DropdownMenu.Separator />
+          <DropdownMenu.Item
             asChild
             onSelect={(e: Event) => e.preventDefault()}
-            className="group relative flex cursor-pointer items-center rounded-md p-1 outline-none select-none data-[highlighted]:bg-white/10"
           >
             <fetcher.Form method="DELETE" action={`/room/${roomId}/player`}>
               <input type="hidden" name="userId" value={player.userId} />
               <input type="hidden" name="name" value={player.name} />
-              <button
-                type="submit"
-                className="flex grow cursor-pointer items-center text-red-200"
-              >
+              <DropdownMenu.Action type="submit">
                 <UserMinus className="absolute left-0 m-1 h-5 w-5" />
                 <span className="pl-7">
                   {isSelf ? "Leave game" : "Kick player"}
                 </span>
-              </button>
+              </DropdownMenu.Action>
             </fetcher.Form>
-          </DropdownMenuPrimitive.Item>
-          <DropdownMenuPrimitive.Arrow className="fill-blue-600" />
-        </DropdownMenuPrimitive.Content>
-      </DropdownMenuPrimitive.Portal>
-    </DropdownMenuPrimitive.Root>
+          </DropdownMenu.Item>
+        </DropdownMenu.Content>
+      </DropdownMenu.Portal>
+    </DropdownMenu.Root>
   );
 }

@@ -45,7 +45,7 @@ export default function GameCard({
   async function handleDownload() {
     setDownloadStatus("downloading");
     try {
-      const resp = await fetch(`/game/${game.id}`);
+      const resp = await fetch(`/game/${game.id}/json`);
       if (!resp.ok) throw new Error("fetch failed");
       const gameData = await resp.json();
       await cacheGame({

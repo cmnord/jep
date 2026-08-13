@@ -12,6 +12,7 @@ import useGameSound from "~/utils/use-sound";
 import { Category } from "./category";
 import { ClueComponent } from "./clue";
 import { FinalClue } from "./final-clue";
+import { BoardLayout } from "./layout";
 import { useBoardFill } from "./use-board-fill";
 
 const WAGER_SFX = "/sounds/wager.mp3";
@@ -54,55 +55,48 @@ function BoardComponent({
   }
 
   return (
-    <div className="w-full overflow-x-scroll">
-      <div
-        className="mx-auto max-w-screen-lg"
-        style={{ minWidth: `${board.categoryNames.length * 50}px` }}
-      >
-        <table className="h-1 w-full table-fixed bg-blue-bright text-white">
-          <thead>
-            <tr className="h-1">
-              {board.categories.map((category, j) => {
-                const allAnswered = category.clues.every(
-                  (clue, i) => !clueIsPlayable(clue) || isAnswered(i, j),
-                );
-                return (
-                  <Category
-                    key={category.name}
-                    name={category.name}
-                    note={category.note}
-                    hidden={!isCategoryRevealed(j)}
-                    allAnswered={allAnswered}
-                  />
-                );
-              })}
-            </tr>
-          </thead>
-          <tbody ref={tbodyRef}>
-            {rows.map((category, i) => (
-              <tr key={i}>
-                {category.map((clue, j) =>
-                  clue ? (
-                    <ClueComponent
-                      key={`clue-${i}-${j}`}
-                      clue={clue}
-                      answered={isAnswered(i, j)}
-                      hasBoardControl={hasBoardControl}
-                      hidden={!isClueRevealed(i, j)}
-                      onFocus={() => onFocusClue(i, j)}
-                      onClick={() => onClickClue(i, j)}
-                      onKeyDown={(e) => onKeyDownClue(e, i, j)}
-                    />
-                  ) : (
-                    <td key={`clue-${i}-${j}`} />
-                  ),
-                )}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+    <BoardLayout columns={board.categoryNames.length}>
+      <thead>
+        <tr className="h-1">
+          {board.categories.map((category, j) => {
+            const allAnswered = category.clues.every(
+              (clue, i) => !clueIsPlayable(clue) || isAnswered(i, j),
+            );
+            return (
+              <Category
+                key={category.name}
+                name={category.name}
+                note={category.note}
+                hidden={!isCategoryRevealed(j)}
+                allAnswered={allAnswered}
+              />
+            );
+          })}
+        </tr>
+      </thead>
+      <tbody ref={tbodyRef}>
+        {rows.map((category, i) => (
+          <tr key={i}>
+            {category.map((clue, j) =>
+              clue ? (
+                <ClueComponent
+                  key={`clue-${i}-${j}`}
+                  clue={clue}
+                  answered={isAnswered(i, j)}
+                  hasBoardControl={hasBoardControl}
+                  hidden={!isClueRevealed(i, j)}
+                  onFocus={() => onFocusClue(i, j)}
+                  onClick={() => onClickClue(i, j)}
+                  onKeyDown={(e) => onKeyDownClue(e, i, j)}
+                />
+              ) : (
+                <td key={`clue-${i}-${j}`} />
+              ),
+            )}
+          </tr>
+        ))}
+      </tbody>
+    </BoardLayout>
   );
 }
 

@@ -7,6 +7,7 @@ import {
   PaperAirplane,
   PencilSquare,
 } from "~/components/icons";
+import Input from "~/components/input";
 import type { Action, Player } from "~/engine";
 import { useEngineContext } from "~/engine";
 import useDebounce, { useDebounceEnd } from "~/utils/use-debounce";
@@ -63,12 +64,12 @@ function EditPlayer({
       pulse={pulse}
     >
       <div className="flex items-center gap-2 rounded-xl text-white">
-        <input
+        <Input
+          variant="player"
           ref={inputRef}
           type="text"
           id="name"
           name="name"
-          className="block w-full bg-transparent font-handwriting text-2xl font-bold placeholder:font-sans placeholder:text-sm placeholder:font-normal placeholder:text-white/40"
           placeholder="Enter your name"
           defaultValue={player.name}
           onChange={(e) => onChangeName(e.target.value)}

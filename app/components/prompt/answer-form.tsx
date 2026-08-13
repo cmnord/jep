@@ -30,15 +30,17 @@ function AnswerForm({
         </>
       ) : null}
       <div className="flex gap-2">
-        <Input
-          type="text"
-          id="answer"
-          name="answer"
-          placeholder="What is..."
-          required
-          className={`min-w-48 font-handwriting text-xl font-bold placeholder:font-sans placeholder:font-normal`}
-        />
-        <Button type="primary" htmlType="submit" loading={loading}>
+        <div className="min-w-48 flex-1">
+          <Input
+            variant="game"
+            type="text"
+            id="answer"
+            name="answer"
+            placeholder="What is..."
+            required
+          />
+        </div>
+        <Button variant="primary" type="submit" loading={loading}>
           submit
         </Button>
       </div>

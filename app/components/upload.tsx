@@ -4,7 +4,7 @@ import { useDropzone } from "react-dropzone";
 import type { FetcherWithComponents } from "react-router";
 import { useLocation, useSubmit } from "react-router";
 
-import Button from "~/components/button";
+import Button, { ButtonLink } from "~/components/button";
 import Dialog from "~/components/dialog";
 import { WarningMessage } from "~/components/error";
 import {
@@ -102,7 +102,7 @@ function UploadBox({
           onChange={(e) => onChange(e.target.files?.[0])}
         />
       </button>
-      <Link to="/help">
+      <Link to="/upload-help">
         <p id="upload_help" className="mt-1 text-sm">
           Upload help
         </p>
@@ -151,7 +151,7 @@ export default function Upload({
             <p>Confirm public upload</p>
           </div>
         }
-        onClickClose={() => setShowModal(false)}
+        onClose={() => setShowModal(false)}
         description={`Do you want to upload the game "${
           file?.name ?? "unknown"
         }" publicly?`}
@@ -175,17 +175,17 @@ export default function Upload({
           >
             Upload publicly
           </Button>
-          <Link
+          <ButtonLink
+            variant="primary"
+            autoFocus
             to={
               location.pathname === "/"
                 ? "/login"
                 : `/login?redirectTo=${encodeURIComponent(location.pathname)}`
             }
           >
-            <Button type="primary" htmlType="button" autoFocus>
-              Log in
-            </Button>
-          </Link>
+            Log in
+          </ButtonLink>
         </Dialog.Footer>
       </Dialog>
       <UploadBox

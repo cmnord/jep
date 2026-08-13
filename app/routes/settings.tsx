@@ -165,7 +165,7 @@ function ChangePasswordForm({ hasPassword }: { hasPassword: boolean }) {
         />
       </div>
       <div className="flex flex-wrap items-center gap-3 pt-1">
-        <Button type="primary" htmlType="submit" disabled={isSubmitting}>
+        <Button variant="primary" type="submit" disabled={isSubmitting}>
           {hasPassword ? "Change password" : "Set password"}
         </Button>
         {success && <SuccessMessage>Password updated.</SuccessMessage>}
@@ -220,7 +220,7 @@ function ChangeEmailForm({ email }: { email?: string }) {
         />
       </div>
       <div className="flex flex-wrap items-center gap-3 pt-1">
-        <Button type="primary" htmlType="submit" disabled={isSubmitting}>
+        <Button variant="primary" type="submit" disabled={isSubmitting}>
           Change email
         </Button>
         {success && (
@@ -262,9 +262,7 @@ export default function Settings({ loaderData }: Route.ComponentProps) {
           </SettingsSection>
 
           <Form method="POST" action="/logout">
-            <Button type="default" htmlType="submit">
-              Log out
-            </Button>
+            <Button type="submit">Log out</Button>
           </Form>
 
           <SettingsSection title="Danger zone" tone="danger">
@@ -297,8 +295,8 @@ export default function Settings({ loaderData }: Route.ComponentProps) {
               </div>
               <div className="flex flex-wrap items-center gap-3 pt-1">
                 <Button
-                  type="danger"
-                  htmlType="submit"
+                  variant="danger"
+                  type="submit"
                   disabled={!canDelete || isDeleting}
                 >
                   Delete account

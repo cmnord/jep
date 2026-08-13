@@ -118,8 +118,8 @@ export function ReplayControls({
         </DropdownMenu.Trigger>
         <DropdownMenu.Portal>
           <DropdownMenu.Content align="end">
-            <DropdownMenu.Label className="p-1 text-xs text-slate-400">
-              Speed
+            <DropdownMenu.Label>
+              <span className="text-xs text-slate-400">Speed</span>
             </DropdownMenu.Label>
             {SPEEDS.map((s) => (
               <DropdownMenu.Item key={s} onSelect={() => onSpeedChange(s)}>

@@ -1,8 +1,9 @@
-import { Link, useMatches } from "react-router";
+import { Link as RouterLink, useMatches } from "react-router";
 
-import Button from "~/components/button";
+import { ButtonLink } from "~/components/button";
 import CopyLinkButton from "~/components/copy-link-button";
 import * as DropdownMenu from "~/components/dropdown-menu";
+import Link from "~/components/link";
 import SoundControl from "~/components/sound";
 import WagerHintsControl from "~/components/wager-hints-control";
 import type { Game } from "~/models/game.server";
@@ -13,7 +14,11 @@ function isGameLoaderData(data: unknown): data is { game: Game } {
 import { stringToHslColor } from "~/utils";
 import { useGameDefaults } from "~/utils/user-settings";
 
-import { ExclamationTriangle, InformationCircle } from "./icons";
+import {
+  ArrowTopRightOnSquare,
+  ExclamationTriangle,
+  InformationCircle,
+} from "./icons";
 
 function LoginButton({ pathname }: { pathname: string }) {
   const to =
@@ -21,9 +26,9 @@ function LoginButton({ pathname }: { pathname: string }) {
       ? "/login"
       : `/login?redirectTo=${encodeURIComponent(pathname)}`;
   return (
-    <Link to={to}>
-      <Button type="transparent">Log in</Button>
-    </Link>
+    <ButtonLink to={to} variant="inverse">
+      Log in
+    </ButtonLink>
   );
 }
 
@@ -32,7 +37,7 @@ function AccountButton({ user }: { user: { id: string; email: string } }) {
   const backgroundColor =
     playerColor != null ? playerColor : stringToHslColor(user.id);
   return (
-    <Link
+    <RouterLink
       to="/profile"
       className="flex items-center justify-center rounded-full p-1 transition-colors hover:bg-blue-700"
       style={{ backgroundColor }}
@@ -41,7 +46,23 @@ function AccountButton({ user }: { user: { id: string; email: string } }) {
       <div className="flex h-6 w-6 items-center justify-center text-blue-1000 uppercase">
         {user.email.slice(0, 1)}
       </div>
-    </Link>
+    </RouterLink>
+  );
+}
+
+function SiteLinks({ className }: { className?: string }) {
+  return (
+    <div className={className} aria-label="Learn more">
+      <Link variant="inverse" to="/howto">
+        How to Play
+      </Link>
+      <Link variant="inverse" to="/upload-help">
+        Upload a Game
+      </Link>
+      <Link variant="inverse" to="/about">
+        About
+      </Link>
+    </div>
   );
 }
 
@@ -59,25 +80,38 @@ function GameSettings({ game, url }: { game: Game; url: string }) {
 
       <DropdownMenu.Portal>
         <DropdownMenu.Content>
-          <DropdownMenu.Label className="p-1 font-bold">
-            {game.title}
+          <DropdownMenu.Label>
+            <span className="font-bold">{game.title}</span>
           </DropdownMenu.Label>
-          <DropdownMenu.Label className="p-1 text-slate-400">
-            {game.author} &middot; {game.copyright}
+          <DropdownMenu.Label>
+            <span className="text-slate-400">
+              {game.author} &middot; {game.copyright}
+            </span>
           </DropdownMenu.Label>
           {game.note && (
             <DropdownMenu.Label>
-              <p className="p-1 text-sm break-words">{game.note}</p>
+              <p className="text-sm break-words">{game.note}</p>
             </DropdownMenu.Label>
           )}
-          <DropdownMenu.Label className="p-1 text-sm text-slate-400">
-            {game.boards.length} round{game.boards.length === 1 ? "" : "s"}
+          <DropdownMenu.Label>
+            <span className="text-sm text-slate-400">
+              {game.boards.length} round{game.boards.length === 1 ? "" : "s"}
+            </span>
           </DropdownMenu.Label>
 
-          <DropdownMenu.Separator className="m-1 h-px bg-slate-200" />
+          <DropdownMenu.Separator />
 
+          <DropdownMenu.Item asChild>
+            <RouterLink
+              to={`/game/${game.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <ArrowTopRightOnSquare className="absolute left-0 m-1 h-5 w-5" />
+              <p className="pl-7">Game details</p>
+            </RouterLink>
+          </DropdownMenu.Item>
           <DropdownMenu.Item
-            className="relative flex items-center rounded-md p-1"
             // Prevent the dropdown menu from closing
             onSelect={(e: Event) => e.preventDefault()}
           >
@@ -85,10 +119,7 @@ function GameSettings({ game, url }: { game: Game; url: string }) {
               <SoundControl />
             </div>
           </DropdownMenu.Item>
-          <DropdownMenu.Item
-            className="relative flex items-center rounded-md p-1"
-            onSelect={(e: Event) => e.preventDefault()}
-          >
+          <DropdownMenu.Item onSelect={(e: Event) => e.preventDefault()}>
             <div className="w-full">
               <WagerHintsControl />
             </div>
@@ -97,20 +128,18 @@ function GameSettings({ game, url }: { game: Game; url: string }) {
             // Prevent the dropdown menu from closing
             onSelect={(e: Event) => e.preventDefault()}
           >
-            <CopyLinkButton
-              className="grow"
-              url={url}
-              text="Copy link to room"
-            />
+            <div className="w-full">
+              <CopyLinkButton url={url} text="Copy link to room" />
+            </div>
           </DropdownMenu.Item>
-          <DropdownMenu.Item>
-            <Link to={`/report?gameId=${game.id}`}>
+          <DropdownMenu.Item asChild>
+            <RouterLink to={`/report?gameId=${game.id}`}>
               <ExclamationTriangle
                 title="Report"
                 className="absolute left-0 m-1 h-5 w-5"
               />
               <p className="pl-7">Report game</p>
-            </Link>
+            </RouterLink>
           </DropdownMenu.Item>
         </DropdownMenu.Content>
       </DropdownMenu.Portal>
@@ -126,7 +155,11 @@ export default function Header({
   BASE_URL?: string;
 }) {
   const matches = useMatches();
-  const gameRoute = matches.find((m) => isGameLoaderData(m.loaderData));
+  const gameRoute = matches.find(
+    (match) =>
+      match.id !== "routes/game_.$gameId_" &&
+      isGameLoaderData(match.loaderData),
+  );
   const game =
     gameRoute && isGameLoaderData(gameRoute.loaderData)
       ? gameRoute.loaderData.game
@@ -134,14 +167,17 @@ export default function Header({
   const pathname = matches[matches.length - 1].pathname;
 
   return (
-    <nav className="bg-blue-bright p-4">
+    <nav className="bg-blue-bright p-4" aria-label="Primary navigation">
       <div className="flex items-center justify-between">
-        <Link to="/">
+        <RouterLink to="/">
           <h1 className="font-korinna text-2xl font-bold text-white text-shadow-md">
             Jep!
           </h1>
-        </Link>
+        </RouterLink>
         <div className="flex items-center gap-2">
+          {!game && (
+            <SiteLinks className="mr-4 hidden items-center gap-6 sm:flex" />
+          )}
           {user ? (
             <AccountButton user={user} />
           ) : (
@@ -150,6 +186,9 @@ export default function Header({
           {game && <GameSettings game={game} url={BASE_URL + pathname} />}
         </div>
       </div>
+      {!game && (
+        <SiteLinks className="mt-3 flex items-center justify-center gap-5 border-t border-blue-500 pt-3 sm:hidden" />
+      )}
     </nav>
   );
 }

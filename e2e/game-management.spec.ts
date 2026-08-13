@@ -97,15 +97,42 @@ test.describe("game management", () => {
     await guestContext.close();
   });
 
-  test("offline download menu visible only for logged-in users", async ({
+  test("public game has a preview and separate JSON download", async ({
     authedPage: page,
-    browser,
   }) => {
-    // Change from private → public so it appears on the home page for everyone
     await page.goto("/profile");
     const gameRow = page.locator(`li:has(a[href="/game/${gameId}/play"])`);
     await changeVisibility(page, gameRow, "Make public");
 
+    // The visibility action intentionally keeps this menu open while the
+    // fetcher updates the row, so the details action remains available.
+    const previewPagePromise = page.waitForEvent("popup");
+    await page.getByRole("menuitem", { name: "Game details" }).click();
+    const previewPage = await previewPagePromise;
+    await expect(previewPage).toHaveURL(`/game/${gameId}`);
+    await expect(
+      previewPage.getByRole("heading", {
+        level: 1,
+        name: "Mock 1x1 Game",
+      }),
+    ).toBeVisible();
+    await expect(
+      previewPage.getByRole("link", { name: "Play with friends" }),
+    ).toBeVisible();
+    await expect(previewPage.getByText("Solo Category")).not.toBeVisible();
+    expect(await previewPage.content()).not.toContain("Solo Category");
+
+    const jsonResponse = await page.request.get(`/game/${gameId}/json`);
+    expect(jsonResponse.status()).toBe(200);
+    expect(jsonResponse.headers()["content-type"]).toContain(
+      "application/json",
+    );
+  });
+
+  test("offline download menu visible only for logged-in users", async ({
+    authedPage: page,
+    browser,
+  }) => {
     // As authed user on /, find the game card and verify "More actions" is visible.
     await page.goto("/");
     const authedCard = page.locator(`a[href="/game/${gameId}/play"]`).first();

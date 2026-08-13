@@ -6,7 +6,6 @@ import Dialog from "~/components/dialog";
 import * as DropdownMenu from "~/components/dropdown-menu";
 import {
   ArrowDownTray,
-  EllipsisHorizontal,
   ExclamationTriangle,
   LoadingSpinner,
   Play,
@@ -36,14 +35,14 @@ function RemoveDownloadModal({
           <p>Remove download</p>
         </div>
       }
-      onClickClose={onClickClose}
+      onClose={onClickClose}
       description={`Remove the offline download for "${gameTitle}"? You won't be able to play this game offline until you download it again.`}
     >
       <Dialog.Footer>
-        <Button onClick={onClickClose} htmlType="button">
+        <Button onClick={onClickClose} type="button">
           Cancel
         </Button>
-        <Button type="danger" onClick={onConfirm} htmlType="button">
+        <Button variant="danger" onClick={onConfirm} type="button">
           Remove download
         </Button>
       </Dialog.Footer>
@@ -76,15 +75,7 @@ export default function OfflineMenu({
         gameTitle={game.title}
       />
       <DropdownMenu.Root>
-        <DropdownMenu.Trigger asChild>
-          <button
-            className="rounded-md p-0.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-            title="More actions"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <EllipsisHorizontal className="h-5 w-5" />
-          </button>
-        </DropdownMenu.Trigger>
+        <DropdownMenu.MoreActionsTrigger onClick={(e) => e.stopPropagation()} />
         <DropdownMenu.Portal>
           <DropdownMenu.Content>
             {downloadStatus === "downloaded" ? (
@@ -102,8 +93,7 @@ export default function OfflineMenu({
                   asChild
                   onSelect={(e: Event) => e.preventDefault()}
                 >
-                  <button
-                    className="w-full"
+                  <DropdownMenu.Action
                     onClick={(e) => {
                       e.stopPropagation();
                       setShowRemoveModal(true);
@@ -111,7 +101,7 @@ export default function OfflineMenu({
                   >
                     <Trash className="absolute left-0 m-1 h-5 w-5 text-red-600 group-hover:text-red-700" />
                     <p className="pl-7">Remove download</p>
-                  </button>
+                  </DropdownMenu.Action>
                 </DropdownMenu.Item>
               </>
             ) : (
@@ -119,8 +109,7 @@ export default function OfflineMenu({
                 asChild
                 onSelect={(e: Event) => e.preventDefault()}
               >
-                <button
-                  className="flex w-full items-center"
+                <DropdownMenu.Action
                   onClick={(e) => {
                     e.stopPropagation();
                     onDownload();
@@ -133,7 +122,7 @@ export default function OfflineMenu({
                     <ArrowDownTray className="absolute left-0 m-1 h-5 w-5" />
                   )}
                   <p className="pl-7">Download for offline</p>
-                </button>
+                </DropdownMenu.Action>
               </DropdownMenu.Item>
             )}
           </DropdownMenu.Content>

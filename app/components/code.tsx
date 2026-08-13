@@ -1,15 +1,5 @@
-export default function Code({
-  className,
-  children,
-}: {
-  className?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <code className={(className ?? "") + " rounded-md bg-slate-200 px-1 py-2"}>
-      {children}
-    </code>
-  );
+export default function Code({ children }: { children: React.ReactNode }) {
+  return <code className="rounded-md bg-slate-200 px-1 py-2">{children}</code>;
 }
 
 export function CodeBlock({ text }: { text: string }) {

@@ -40,7 +40,7 @@ export default function OAuthButtons({
   return (
     <div className="flex flex-col gap-3">
       <Button
-        htmlType="button"
+        type="button"
         onClick={() => handleOAuthLogin("google")}
         disabled={disabled}
       >
@@ -48,11 +48,9 @@ export default function OAuthButtons({
         Continue with Google
       </Button>
       <Button
-        type="primary"
-        htmlType="button"
+        type="button"
         onClick={() => handleOAuthLogin("discord")}
         disabled={disabled}
-        className="border-discord bg-discord hover:bg-discord-hover"
       >
         <Discord className="h-5 w-5" />
         Continue with Discord

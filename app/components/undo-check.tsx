@@ -97,7 +97,7 @@ export function UndoArmingProvider({
  */
 export function UndoCheckButton({ onClick }: { onClick: () => void }) {
   return (
-    <Button htmlType="button" onClick={onClick}>
+    <Button type="button" onClick={onClick}>
       <ArrowUturnLeft className="h-4 w-4" />
       undo
     </Button>
@@ -119,9 +119,9 @@ export function UndoCheckConfirm({
   /** When set, renders a "cancel" button. Omit inside popovers, where
    * tapping outside dismisses instead. */
   onCancel?: () => void;
-  /** Use "default" on blue popover backgrounds where a primary button would
+  /** Use "secondary" on blue popover backgrounds where a primary button would
    * blend in. */
-  commitType?: "primary" | "default";
+  commitType?: "primary" | "secondary";
 } & RoomProps) {
   const { getCheckCorrection, soloDispatch } = useEngineContext();
   const correction = getCheckCorrection(userId);
@@ -155,8 +155,8 @@ export function UndoCheckConfirm({
       <p className="font-bold text-white">{prompt}</p>
       <div className="flex gap-2">
         <Button
-          type={commitType}
-          htmlType="submit"
+          variant={commitType}
+          type="submit"
           name="result"
           value={result}
           loading={loading}
@@ -164,11 +164,14 @@ export function UndoCheckConfirm({
         >
           <ArrowUturnLeft className="h-4 w-4" />
           undo (
-          <DollarsDiff amount={scoreSwing} onLight={commitType === "default"} />
+          <DollarsDiff
+            amount={scoreSwing}
+            variant={commitType === "secondary" ? "onLight" : "default"}
+          />
           )
         </Button>
         {onCancel ? (
-          <Button htmlType="button" onClick={onCancel}>
+          <Button type="button" onClick={onCancel}>
             cancel
           </Button>
         ) : null}

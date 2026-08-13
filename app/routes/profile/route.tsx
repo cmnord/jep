@@ -4,6 +4,7 @@ import { data, useFetcher } from "react-router";
 import Button from "~/components/button";
 import { ErrorMessage, SuccessMessage } from "~/components/error";
 import { Cog6Tooth, PaperAirplane, PencilSquare } from "~/components/icons";
+import Input from "~/components/input";
 import Link from "~/components/link";
 import Main from "~/components/main";
 import OfflineIndicator from "~/components/offline-indicator";
@@ -212,7 +213,8 @@ function PlayerDefaultsControl({
           />
         </label>
         <div className="flex w-full items-center gap-2 rounded-xl text-white">
-          <input
+          <Input
+            variant="player"
             ref={inputRef}
             id="defaultPlayerName"
             type="text"
@@ -222,7 +224,6 @@ function PlayerDefaultsControl({
             onChange={(e) => setNameDraft(e.target.value)}
             onFocus={handleFocus}
             onBlur={handleBlur}
-            className="block w-full min-w-0 bg-transparent font-handwriting text-2xl font-bold placeholder:font-sans placeholder:text-sm placeholder:font-normal placeholder:text-white/40 focus:outline-none"
             aria-label="Player name"
           />
           {editing ? (
@@ -263,7 +264,7 @@ function PlayerDefaultsControl({
 
       <div className="grid grid-cols-2 gap-3">
         <Button
-          htmlType="button"
+          type="button"
           disabled={playerName == null}
           onClick={() => {
             setNameDraft("");
@@ -274,7 +275,7 @@ function PlayerDefaultsControl({
           Clear name
         </Button>
         <Button
-          htmlType="button"
+          type="button"
           disabled={playerColor == null}
           onClick={() => setPlayerColor(undefined)}
         >
@@ -332,13 +333,12 @@ function OnlineProfile({
           userId={loaderData.user.id}
         />
 
-        <p className="mb-4">
-          <Link
-            to="/settings"
-            className="inline-flex items-center gap-1.5 text-sm"
-          >
-            <Cog6Tooth className="h-4 w-4" />
-            Account settings
+        <p className="mb-4 text-sm">
+          <Link to="/settings">
+            <span className="inline-flex items-center gap-1.5">
+              <Cog6Tooth className="h-4 w-4" />
+              Account settings
+            </span>
           </Link>
         </p>
         <OfflineIndicator />

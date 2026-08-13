@@ -11,21 +11,22 @@ export function GameVisibilityTag({
       className={`flex items-center rounded-md border border-slate-200 bg-slate-100 px-1 text-slate-500`}
     >
       <span className="text-xs">{visibility}</span>
-      <GameVisibilityIcon
-        className="m-1 inline-block h-3 w-3"
-        visibility={visibility}
-      />
+      <GameVisibilityIcon variant="tag" visibility={visibility} />
     </div>
   );
 }
 
 export default function GameVisibilityIcon({
-  className,
+  variant,
   visibility,
 }: {
-  className: string;
+  variant: "tag" | "menu";
   visibility: GameVisibility;
 }) {
+  const className =
+    variant === "tag"
+      ? "m-1 inline-block h-3 w-3"
+      : "absolute left-0 m-1 h-5 w-5";
   switch (visibility) {
     case "PUBLIC":
       return (
