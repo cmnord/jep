@@ -33,6 +33,14 @@ test.describe("solves tracking", () => {
     // auto-navigate to the summary page.
     await expect(page).toHaveURL(/\/summary/, { timeout: 15_000 });
 
+    // Room and summary pages expose the game preview from their shared menu.
+    await page.getByRole("button", { name: "Customise options" }).click();
+    const summaryDetailsLink = page.getByRole("menuitem", {
+      name: "Game details",
+    });
+    await expect(summaryDetailsLink).toHaveAttribute("href", `/game/${gameId}`);
+    await expect(summaryDetailsLink).toHaveAttribute("target", "_blank");
+
     // Navigate to profile and check the solve appears
     await page.goto("/profile");
     await expect(
@@ -42,5 +50,8 @@ test.describe("solves tracking", () => {
     // The solve should show the game title in the solves section
     // Use last() since the game also appears in "My Games" above
     await expect(page.getByText("Mock 1x1 Game").last()).toBeVisible();
+    await expect(
+      page.locator(`a[href="/game/${gameId}"]`, { hasText: "Game details" }),
+    ).toBeVisible();
   });
 });

@@ -104,8 +104,9 @@ test.describe("game management", () => {
     const gameRow = page.locator(`li:has(a[href="/game/${gameId}/play"])`);
     await changeVisibility(page, gameRow, "Make public");
 
-    await page.goto("/");
-    await page.locator(`a[href="/game/${gameId}"]`).first().click();
+    // The visibility action intentionally keeps this menu open while the
+    // fetcher updates the row, so the details action remains available.
+    await page.getByRole("menuitem", { name: "Game details" }).click();
     await expect(page).toHaveURL(`/game/${gameId}`);
     await expect(
       page.getByRole("heading", { level: 1, name: "Mock 1x1 Game" }),
@@ -127,7 +128,7 @@ test.describe("game management", () => {
   }) => {
     // As authed user on /, find the game card and verify "More actions" is visible.
     await page.goto("/");
-    const authedCard = page.locator(`a[href="/game/${gameId}"]`).first();
+    const authedCard = page.locator(`a[href="/game/${gameId}/play"]`).first();
     await expect(authedCard).toBeVisible({ timeout: 5_000 });
     await expect(
       authedCard.getByRole("button", { name: "More actions" }),
@@ -137,7 +138,9 @@ test.describe("game management", () => {
     const guestContext = await browser.newContext();
     const guestPage = await guestContext.newPage();
     await guestPage.goto("/");
-    const guestCard = guestPage.locator(`a[href="/game/${gameId}"]`).first();
+    const guestCard = guestPage
+      .locator(`a[href="/game/${gameId}/play"]`)
+      .first();
     await expect(guestCard).toBeVisible({ timeout: 5_000 });
     await expect(
       guestCard.getByRole("button", { name: "More actions" }),

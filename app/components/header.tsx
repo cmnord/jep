@@ -14,7 +14,7 @@ function isGameLoaderData(data: unknown): data is { game: Game } {
 import { stringToHslColor } from "~/utils";
 import { useGameDefaults } from "~/utils/user-settings";
 
-import { ExclamationTriangle, InformationCircle } from "./icons";
+import { ExclamationTriangle, Eye, InformationCircle } from "./icons";
 
 function LoginButton({ pathname }: { pathname: string }) {
   const to =
@@ -97,6 +97,16 @@ function GameSettings({ game, url }: { game: Game; url: string }) {
 
           <DropdownMenu.Separator />
 
+          <DropdownMenu.Item asChild>
+            <RouterLink
+              to={`/game/${game.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Eye className="absolute left-0 m-1 h-5 w-5" />
+              <p className="pl-7">Game details</p>
+            </RouterLink>
+          </DropdownMenu.Item>
           <DropdownMenu.Item
             // Prevent the dropdown menu from closing
             onSelect={(e: Event) => e.preventDefault()}

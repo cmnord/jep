@@ -9,7 +9,12 @@ import * as DropdownMenu from "~/components/dropdown-menu";
 import GameVisibilityIcon, {
   GameVisibilityTag,
 } from "~/components/game-visibility-icon";
-import { ArrowDownTray, ExclamationTriangle, Trash } from "~/components/icons";
+import {
+  ArrowDownTray,
+  ExclamationTriangle,
+  Eye,
+  Trash,
+} from "~/components/icons";
 import StyledLink from "~/components/link";
 import type { DbGame, GameVisibility } from "~/models/game.server";
 
@@ -114,6 +119,12 @@ export function GameInfo({
           <DropdownMenu.MoreActionsTrigger />
           <DropdownMenu.Portal>
             <DropdownMenu.Content>
+              <DropdownMenu.Item asChild>
+                <Link to={`/game/${game.id}`}>
+                  <Eye className="absolute left-0 m-1 h-5 w-5" />
+                  <p className="pl-7">Game details</p>
+                </Link>
+              </DropdownMenu.Item>
               {game.visibility === "PUBLIC" ? null : (
                 <ChangeVisibilityItem
                   gameId={game.id}
