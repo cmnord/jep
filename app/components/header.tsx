@@ -14,7 +14,11 @@ function isGameLoaderData(data: unknown): data is { game: Game } {
 import { stringToHslColor } from "~/utils";
 import { useGameDefaults } from "~/utils/user-settings";
 
-import { ExclamationTriangle, Eye, InformationCircle } from "./icons";
+import {
+  ArrowTopRightOnSquare,
+  ExclamationTriangle,
+  InformationCircle,
+} from "./icons";
 
 function LoginButton({ pathname }: { pathname: string }) {
   const to =
@@ -103,7 +107,7 @@ function GameSettings({ game, url }: { game: Game; url: string }) {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <Eye className="absolute left-0 m-1 h-5 w-5" />
+              <ArrowTopRightOnSquare className="absolute left-0 m-1 h-5 w-5" />
               <p className="pl-7">Game details</p>
             </RouterLink>
           </DropdownMenu.Item>

@@ -1,4 +1,5 @@
 export { ArrowDownTray } from "./arrow-down-tray";
+export { ArrowTopRightOnSquare } from "./arrow-top-right-on-square";
 export { ArrowUturnLeft } from "./arrow-uturn-left";
 export { Check } from "./check";
 export { CheckCircle } from "./check-circle";

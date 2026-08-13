@@ -11,8 +11,8 @@ import GameVisibilityIcon, {
 } from "~/components/game-visibility-icon";
 import {
   ArrowDownTray,
+  ArrowTopRightOnSquare,
   ExclamationTriangle,
-  Eye,
   Trash,
 } from "~/components/icons";
 import StyledLink from "~/components/link";
@@ -120,8 +120,12 @@ export function GameInfo({
           <DropdownMenu.Portal>
             <DropdownMenu.Content>
               <DropdownMenu.Item asChild>
-                <Link to={`/game/${game.id}`}>
-                  <Eye className="absolute left-0 m-1 h-5 w-5" />
+                <Link
+                  to={`/game/${game.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <ArrowTopRightOnSquare className="absolute left-0 m-1 h-5 w-5" />
                   <p className="pl-7">Game details</p>
                 </Link>
               </DropdownMenu.Item>

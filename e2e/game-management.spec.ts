@@ -106,13 +106,18 @@ test.describe("game management", () => {
 
     // The visibility action intentionally keeps this menu open while the
     // fetcher updates the row, so the details action remains available.
+    const previewPagePromise = page.waitForEvent("popup");
     await page.getByRole("menuitem", { name: "Game details" }).click();
-    await expect(page).toHaveURL(`/game/${gameId}`);
+    const previewPage = await previewPagePromise;
+    await expect(previewPage).toHaveURL(`/game/${gameId}`);
     await expect(
-      page.getByRole("heading", { level: 1, name: "Mock 1x1 Game" }),
+      previewPage.getByRole("heading", {
+        level: 1,
+        name: "Mock 1x1 Game",
+      }),
     ).toBeVisible();
     await expect(
-      page.getByRole("link", { name: "Play with friends" }),
+      previewPage.getByRole("link", { name: "Play with friends" }),
     ).toBeVisible();
 
     const jsonResponse = await page.request.get(`/game/${gameId}/json`);

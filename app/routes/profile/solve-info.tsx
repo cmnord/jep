@@ -1,3 +1,4 @@
+import { ArrowTopRightOnSquare } from "~/components/icons";
 import Link from "~/components/link";
 import SolveIcon from "~/components/solve-icon";
 import { Solve } from "~/models/solves.server";
@@ -31,7 +32,17 @@ export default function SolveInfo({ solve }: { solve: Solve }) {
       <span className="text-sm text-slate-500">{solveDate}</span>
       {gameId ? (
         <span className="text-sm">
-          &middot; <Link to={`/game/${gameId}`}>Game details</Link>
+          &middot;{" "}
+          <Link
+            to={`/game/${gameId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span className="inline-flex items-center gap-1">
+              Game details
+              <ArrowTopRightOnSquare className="h-3.5 w-3.5" />
+            </span>
+          </Link>
         </span>
       ) : null}
     </div>

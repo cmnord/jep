@@ -50,8 +50,10 @@ test.describe("solves tracking", () => {
     // The solve should show the game title in the solves section
     // Use last() since the game also appears in "My Games" above
     await expect(page.getByText("Mock 1x1 Game").last()).toBeVisible();
-    await expect(
-      page.locator(`a[href="/game/${gameId}"]`, { hasText: "Game details" }),
-    ).toBeVisible();
+    const attemptDetailsLink = page.locator(`a[href="/game/${gameId}"]`, {
+      hasText: "Game details",
+    });
+    await expect(attemptDetailsLink).toBeVisible();
+    await expect(attemptDetailsLink).toHaveAttribute("target", "_blank");
   });
 });
