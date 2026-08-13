@@ -27,6 +27,7 @@ type CategoryAndClues = DbCategory & { clues: DbClue[] | null };
  */
 const SEARCHABLE_GAME_COLUMNS = ["title", "author"];
 const RESULTS_PER_PAGE = 10;
+const SITEMAP_RESULTS_PER_PAGE = 1000;
 
 /* Helpers */
 
@@ -202,17 +203,27 @@ export async function getGames(
 export async function getPublicGameSitemapEntries() {
   // Use the anonymous client so row-level security guarantees that only public
   // games can be exposed, even if this query changes later.
-  const { data, error } = await getSupabase()
-    .from("games")
-    .select("id")
-    .eq("visibility", "PUBLIC")
-    .order("created_at", { ascending: false });
+  const client = getSupabase();
+  const entries: { id: string }[] = [];
 
-  if (error !== null) {
-    throw new Error(error.message);
+  for (let from = 0; ; from += SITEMAP_RESULTS_PER_PAGE) {
+    const { data, error } = await client
+      .from("games")
+      .select("id")
+      .eq("visibility", "PUBLIC")
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: false })
+      .range(from, from + SITEMAP_RESULTS_PER_PAGE - 1);
+
+    if (error !== null) {
+      throw new Error(error.message);
+    }
+
+    entries.push(...data);
+    if (data.length < SITEMAP_RESULTS_PER_PAGE) break;
   }
 
-  return data;
+  return entries;
 }
 
 /* Writes */

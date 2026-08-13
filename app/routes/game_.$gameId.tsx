@@ -1,15 +1,17 @@
 import { redirect } from "react-router";
 import { z } from "zod";
 
+import { EmptyBoard } from "~/components/board/layout";
 import { ButtonLink } from "~/components/button";
 import { GameVisibilityTag } from "~/components/game-visibility-icon";
-import Main from "~/components/main";
+import { Play, User } from "~/components/icons";
 import { getValidAuthSession } from "~/models/auth";
 import {
   deleteGame,
   getGame,
   updateGameVisibility,
 } from "~/models/game.server";
+import type { GameVisibility } from "~/models/game.server";
 import { flashFormState } from "~/session.server";
 import { parseFormData } from "~/utils/http.server";
 import { getPageMetadata } from "~/utils/seo";
@@ -85,58 +87,121 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     throw new Response("game not found", { status: 404 });
   }
 
-  return { game };
+  const clueCount = game.boards.reduce(
+    (total, board) =>
+      total +
+      board.categories.reduce(
+        (boardTotal, category) => boardTotal + category.clues.length,
+        0,
+      ),
+    0,
+  );
+  const startingBoard = game.boards.at(0);
+  const startingGrid = {
+    columns: startingBoard?.categories.length ?? 0,
+    rows: Math.max(
+      0,
+      ...(startingBoard?.categories.map((category) => category.clues.length) ??
+        []),
+    ),
+  };
+
+  // A preview must not serialize category names, clues, or answers to the
+  // browser. Keep the full game behind the play and JSON routes.
+  return {
+    game: {
+      id: game.id,
+      author: game.author,
+      title: game.title,
+      copyright: game.copyright,
+      note: game.note,
+      visibility: game.visibility,
+      roundCount: game.boards.length,
+      clueCount,
+      startingGrid,
+    },
+  };
 }
 
-export default function GamePreview({ loaderData }: Route.ComponentProps) {
-  const { game } = loaderData;
+type PreviewGame = {
+  id: string;
+  author: string;
+  title: string;
+  copyright: string;
+  note: string;
+  visibility: GameVisibility;
+  roundCount: number;
+  clueCount: number;
+  startingGrid: { columns: number; rows: number };
+};
 
+function GameStat({ count, label }: { count: number; label: string }) {
   return (
-    <div className="max-w-full grow">
-      <Main>
-        <div className="mb-2 flex items-start justify-between gap-4">
-          <h1 className="text-3xl font-semibold text-slate-900">
-            {game.title}
-          </h1>
+    <span>
+      {count} {label}
+      {count === 1 ? "" : "s"}
+    </span>
+  );
+}
+
+function PlayLinks({ gameId }: { gameId: string }) {
+  return (
+    <div className="grid gap-3 sm:flex sm:flex-wrap">
+      <ButtonLink to={`/game/${gameId}/play`} variant="primary">
+        <Play className="h-4 w-4" />
+        Play with friends
+      </ButtonLink>
+      <ButtonLink to={`/game/${gameId}/solo`} variant="inverse">
+        <User className="h-4 w-4" />
+        Play solo
+      </ButtonLink>
+    </div>
+  );
+}
+
+function GameInvitation({ game }: { game: PreviewGame }) {
+  return (
+    <main className="flex grow flex-col bg-blue-1000 text-white">
+      <EmptyBoard {...game.startingGrid} />
+
+      <div className="mx-auto flex w-full max-w-screen-lg flex-col gap-5 p-3 text-slate-100 sm:p-6 md:p-12">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-3xl leading-tight font-semibold tracking-tight text-white sm:text-4xl">
+              {game.title}
+            </h1>
+            <p className="mt-2 text-sm text-slate-300 sm:text-base">
+              By {game.author}
+            </p>
+          </div>
           {game.visibility !== "PUBLIC" ? (
             <GameVisibilityTag visibility={game.visibility} />
           ) : null}
         </div>
-        <p className="mb-4 text-slate-500">By {game.author}</p>
-        {game.note ? <p className="mb-6">{game.note}</p> : null}
 
-        <div className="mb-8 flex flex-wrap gap-2">
-          <ButtonLink to={`/game/${game.id}/play`} variant="primary">
-            Play with friends
-          </ButtonLink>
-          <ButtonLink to={`/game/${game.id}/solo`}>Play solo</ButtonLink>
+        {game.note ? (
+          <p className="max-w-2xl text-sm leading-relaxed text-slate-200 sm:text-base">
+            {game.note}
+          </p>
+        ) : null}
+
+        <div className="flex gap-2 text-sm text-slate-300">
+          <GameStat count={game.roundCount} label="round" />
+          <span aria-hidden="true">&middot;</span>
+          <GameStat count={game.clueCount} label="clue" />
         </div>
 
-        <h2 className="mb-3 text-xl font-semibold">
-          {game.boards.length} round{game.boards.length === 1 ? "" : "s"}
-        </h2>
-        <ol className="flex flex-col gap-5">
-          {game.boards.map((board, boardIndex) => (
-            <li key={boardIndex}>
-              <h3 className="mb-2 font-semibold">Round {boardIndex + 1}</h3>
-              <ul className="flex flex-wrap gap-2">
-                {board.categoryNames.map((categoryName, categoryIndex) => (
-                  <li
-                    key={`${categoryName}-${categoryIndex}`}
-                    className="rounded-md bg-slate-100 px-3 py-1 text-sm"
-                  >
-                    {categoryName}
-                  </li>
-                ))}
-              </ul>
-            </li>
-          ))}
-        </ol>
+        <PlayLinks gameId={game.id} />
 
         {game.copyright ? (
-          <p className="mt-8 text-sm text-slate-500">{game.copyright}</p>
+          <p className="text-xs text-slate-400">{game.copyright}</p>
         ) : null}
-      </Main>
-    </div>
+      </div>
+    </main>
   );
+}
+
+export default function GamePreview({ loaderData }: Route.ComponentProps) {
+  const { game } = loaderData;
+  return <GameInvitation game={game} />;
 }

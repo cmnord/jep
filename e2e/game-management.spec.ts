@@ -119,6 +119,8 @@ test.describe("game management", () => {
     await expect(
       previewPage.getByRole("link", { name: "Play with friends" }),
     ).toBeVisible();
+    await expect(previewPage.getByText("Solo Category")).not.toBeVisible();
+    expect(await previewPage.content()).not.toContain("Solo Category");
 
     const jsonResponse = await page.request.get(`/game/${gameId}/json`);
     expect(jsonResponse.status()).toBe(200);
