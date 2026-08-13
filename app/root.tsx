@@ -8,6 +8,7 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLocation,
   useRouteError,
 } from "react-router";
 
@@ -18,37 +19,49 @@ import { getValidAuthSession } from "~/models/auth";
 import { getUserByEmail } from "~/models/user";
 import { parseUserSettings } from "~/models/user-settings.server";
 import { BASE_URL, getBrowserEnv, IS_VERCEL, NODE_ENV } from "~/utils";
+import { getSearchMetadata, NO_INDEX_DIRECTIVES } from "~/utils/seo";
 import { UserSettingsProvider } from "~/utils/user-settings";
 
 import type { Route } from "./+types/root";
 
 import stylesheet from "./styles.css?url";
 
-const META_URL = "https://whatis.club";
 const META_TITLE = "Jep!";
 const META_DESCRIPTION =
   "A website for sharing J! trivia and playing collaboratively with friends in real time.";
-const META_IMAGE = META_URL + "/images/meta.png";
 
-export const meta: Route.MetaFunction = () => [
-  { title: META_TITLE },
-  { name: "title", content: META_TITLE },
-  { name: "description", content: META_DESCRIPTION },
+export const meta: Route.MetaFunction = ({ loaderData }) => {
+  if (!loaderData) {
+    return [
+      { title: META_TITLE },
+      { name: "title", content: META_TITLE },
+      { name: "description", content: META_DESCRIPTION },
+    ];
+  }
 
-  // Open Graph / Facebook
-  { property: "og:type", content: "website" },
-  { property: "og:url", content: META_URL },
-  { property: "og:title", content: META_TITLE },
-  { property: "og:description", content: META_DESCRIPTION },
-  { property: "og:image", content: META_IMAGE },
+  const metaUrl = loaderData.BASE_URL;
+  const metaImage = new URL("/images/meta.png", metaUrl).toString();
 
-  // Twitter
-  { property: "twitter:card", content: "summary_large_image" },
-  { property: "twitter:url", content: META_URL },
-  { property: "twitter:title", content: META_TITLE },
-  { property: "twitter:description", content: META_DESCRIPTION },
-  { property: "twitter:image", content: META_IMAGE },
-];
+  return [
+    { title: META_TITLE },
+    { name: "title", content: META_TITLE },
+    { name: "description", content: META_DESCRIPTION },
+
+    // Open Graph / Facebook
+    { property: "og:type", content: "website" },
+    { property: "og:url", content: metaUrl },
+    { property: "og:title", content: META_TITLE },
+    { property: "og:description", content: META_DESCRIPTION },
+    { property: "og:image", content: metaImage },
+
+    // Twitter
+    { property: "twitter:card", content: "summary_large_image" },
+    { property: "twitter:url", content: metaUrl },
+    { property: "twitter:title", content: META_TITLE },
+    { property: "twitter:description", content: META_DESCRIPTION },
+    { property: "twitter:image", content: metaImage },
+  ];
+};
 
 export const links: Route.LinksFunction = () => [
   { rel: "icon", href: "/favicon.ico", type: "image/x-icon", sizes: "16x16" },
@@ -101,11 +114,21 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export default function App({ loaderData }: Route.ComponentProps) {
+  const location = useLocation();
+  const searchMetadata = getSearchMetadata(
+    location.pathname,
+    loaderData.BASE_URL,
+  );
+
   return (
     <html lang="en">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <meta name="robots" content={searchMetadata.robots} />
+        {searchMetadata.canonicalUrl ? (
+          <link rel="canonical" href={searchMetadata.canonicalUrl} />
+        ) : null}
         <Meta />
         <Links />
       </head>
@@ -155,6 +178,7 @@ function ErrorDocument({ children }: { children: React.ReactNode }) {
         <title>Oh no!</title>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <meta name="robots" content={NO_INDEX_DIRECTIVES} />
         <Meta />
         <Links />
       </head>
