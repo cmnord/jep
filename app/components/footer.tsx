@@ -6,7 +6,7 @@ export default function Footer() {
   const matches = useMatches();
   const isInGame = matches.some(
     (match) =>
-      match.id !== "routes/game_.$gameId" &&
+      match.id !== "routes/game_.$gameId_" &&
       match.loaderData &&
       typeof match.loaderData === "object" &&
       "game" in match.loaderData,

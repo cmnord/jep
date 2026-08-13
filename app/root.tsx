@@ -121,7 +121,7 @@ export default function App({ loaderData }: Route.ComponentProps) {
   const matches = useMatches();
   const publicGamePreview = matches.some(
     (match) =>
-      match.id === "routes/game_.$gameId" &&
+      match.id === "routes/game_.$gameId_" &&
       typeof match.loaderData === "object" &&
       match.loaderData !== null &&
       "game" in match.loaderData &&

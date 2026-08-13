@@ -42,7 +42,7 @@ export default function handleRequest(
     BASE_URL,
     isPublicGamePreviewData(
       reactRouterContext.staticHandlerContext.loaderData[
-        "routes/game_.$gameId"
+        "routes/game_.$gameId_"
       ],
     ),
   );

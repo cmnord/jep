@@ -157,7 +157,8 @@ export default function Header({
   const matches = useMatches();
   const gameRoute = matches.find(
     (match) =>
-      match.id !== "routes/game_.$gameId" && isGameLoaderData(match.loaderData),
+      match.id !== "routes/game_.$gameId_" &&
+      isGameLoaderData(match.loaderData),
   );
   const game =
     gameRoute && isGameLoaderData(gameRoute.loaderData)

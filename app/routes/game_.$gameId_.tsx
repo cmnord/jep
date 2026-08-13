@@ -16,7 +16,7 @@ import { flashFormState } from "~/session.server";
 import { parseFormData } from "~/utils/http.server";
 import { getPageMetadata } from "~/utils/seo";
 
-import type { Route } from "./+types/game_.$gameId";
+import type { Route } from "./+types/game_.$gameId_";
 
 const visibilitySchema = z.object({
   visibility: z.enum(["PUBLIC", "PRIVATE", "UNLISTED"]),
