@@ -12,7 +12,8 @@ import { renderToPipeableStream } from "react-dom/server";
 import type { EntryContext } from "react-router";
 import { ServerRouter } from "react-router";
 
-import { SUPABASE_URL } from "~/utils";
+import { BASE_URL, SUPABASE_URL } from "~/utils";
+import { getSearchMetadata, NO_INDEX_DIRECTIVES } from "~/utils/seo";
 
 export const streamTimeout = 5_000;
 
@@ -22,6 +23,16 @@ export default function handleRequest(
   responseHeaders: Headers,
   reactRouterContext: EntryContext,
 ) {
+  const searchMetadata = getSearchMetadata(
+    new URL(request.url).pathname,
+    BASE_URL,
+  );
+  // Mirror the page's robots policy in the HTTP response so crawlers receive
+  // it even for streamed and error documents, independently of the HTML head.
+  responseHeaders.set(
+    "X-Robots-Tag",
+    responseStatusCode >= 400 ? NO_INDEX_DIRECTIVES : searchMetadata.robots,
+  );
   // Prevent browsers from MIME-sniffing a response away from the declared type
   responseHeaders.set("X-Content-Type-Options", "nosniff");
   // Prevent clickjacking by blocking iframe embedding

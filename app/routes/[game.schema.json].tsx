@@ -89,6 +89,8 @@ export function loader() {
     status: 200,
     headers: {
       "Content-Type": "application/schema+json",
+      // This machine-readable schema is linked for tooling, not search results.
+      "X-Robots-Tag": "noindex",
     },
   });
 }

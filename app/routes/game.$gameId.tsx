@@ -78,6 +78,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     status: 200,
     headers: {
       "Content-Type": "application/json",
+      // Keep this raw game-data endpoint out of human-facing search results.
+      "X-Robots-Tag": "noindex",
     },
   });
 }
