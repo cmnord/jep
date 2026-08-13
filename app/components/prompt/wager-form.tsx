@@ -168,6 +168,7 @@ function WagerForm({
       {/* Input + submit row */}
       <div className="flex w-full items-center gap-2">
         <Input
+          variant="game"
           type="number"
           min={longForm ? 0 : 5}
           max={maxWager}
@@ -177,7 +178,6 @@ function WagerForm({
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
             setWagerValue(e.target.value)
           }
-          className="min-w-0 flex-1 font-handwriting text-xl font-bold placeholder:font-sans placeholder:font-normal"
           placeholder="choose wager amount"
           required
         />

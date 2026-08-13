@@ -4,13 +4,11 @@ import * as React from "react";
 import { LinkIcon } from "~/components/icons";
 
 export default function CopyLinkButton({
-  className,
   url,
   text,
 }: {
   url: string;
   text?: string;
-  className?: string;
 }) {
   const [open, setOpen] = React.useState(false);
   const timerRef = React.useRef(0);
@@ -23,10 +21,7 @@ export default function CopyLinkButton({
     <>
       <button
         type="button"
-        className={
-          (className ?? "") +
-          ` inline-flex items-center rounded-md p-1 text-slate-200 hover:bg-white/10 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none`
-        }
+        className={`inline-flex items-center rounded-md p-1 text-slate-200 hover:bg-white/10 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none ${text ? "w-full" : ""}`}
         onClick={() => {
           navigator.clipboard.writeText(url);
           setOpen(false);

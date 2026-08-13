@@ -62,7 +62,7 @@ export default function Footer() {
           </div>
         }
         description="Jep! is a website for playing trivia puzzles with friends online."
-        onClickClose={() => setShowModal(false)}
+        onClose={() => setShowModal(false)}
       >
         <p className="text-slate-300">
           This website is open to contributions from developers of any level or

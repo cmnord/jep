@@ -60,11 +60,11 @@ function PlayerScores({
               <span className="font-handwriting text-xl font-bold text-slate-300">
                 {name}
               </span>
-              <Dollars amount={score} className="text-xl" />
+              <Dollars amount={score} variant="reveal" />
             </div>
             <DollarsDiff
               amount={correct ? value : -1 * value}
-              className="absolute -top-1/4 -right-1/2 animate-bounce whitespace-nowrap"
+              variant="floating"
             />
           </div>
         );

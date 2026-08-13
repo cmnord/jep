@@ -11,7 +11,6 @@ import GameVisibilityIcon, {
 } from "~/components/game-visibility-icon";
 import {
   ArrowDownTray,
-  EllipsisHorizontal,
   ExclamationTriangle,
   Trash,
 } from "~/components/icons";
@@ -42,13 +41,10 @@ function ChangeVisibilityItem({
     >
       <fetcher.Form method="PATCH" action={`/game/${gameId}`}>
         <input type="hidden" readOnly name="visibility" value={visibility} />
-        <button className="flex grow items-center">
-          <GameVisibilityIcon
-            className="absolute left-0 m-1 h-5 w-5"
-            visibility={visibility}
-          />
+        <DropdownMenu.Action>
+          <GameVisibilityIcon variant="menu" visibility={visibility} />
           <p className="pl-7">Make {visibilityStr}</p>
-        </button>
+        </DropdownMenu.Action>
       </fetcher.Form>
     </DropdownMenu.Item>
   );
@@ -74,7 +70,7 @@ function DeleteGameModal({
           <p>Delete game</p>
         </div>
       }
-      onClickClose={onClickClose}
+      onClose={onClickClose}
       description={`Are you sure you want to delete game "${game.title}"? This action cannot be undone.`}
     >
       <fetcher.Form method="DELETE" action={`/game/${game.id}`}>
@@ -119,14 +115,7 @@ export function GameInfo({
         <GameVisibilityTag visibility={game.visibility} />
         <CopyLinkButton url={url} />
         <DropdownMenu.Root>
-          <DropdownMenu.Trigger asChild>
-            <button
-              className="inline-flex rounded-md p-1 hover:bg-slate-200"
-              title="More actions"
-            >
-              <EllipsisHorizontal className="h-6 w-6" />
-            </button>
-          </DropdownMenu.Trigger>
+          <DropdownMenu.MoreActionsTrigger />
           <DropdownMenu.Portal>
             <DropdownMenu.Content>
               {game.visibility === "PUBLIC" ? null : (
@@ -161,10 +150,10 @@ export function GameInfo({
                 // Prevent the dropdown menu from closing
                 onSelect={(e: Event) => e.preventDefault()}
               >
-                <button onClick={() => setShowModal(true)} className="w-full">
+                <DropdownMenu.Action onClick={() => setShowModal(true)}>
                   <Trash className="absolute left-0 m-1 h-5 w-5 text-red-600 group-hover:text-red-700" />
                   <p className="pl-7">Delete game</p>
-                </button>
+                </DropdownMenu.Action>
               </DropdownMenu.Item>
             </DropdownMenu.Content>
           </DropdownMenu.Portal>

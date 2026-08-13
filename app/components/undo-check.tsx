@@ -166,7 +166,7 @@ export function UndoCheckConfirm({
           undo (
           <DollarsDiff
             amount={scoreSwing}
-            onLight={commitType === "secondary"}
+            variant={commitType === "secondary" ? "onLight" : "default"}
           />
           )
         </Button>

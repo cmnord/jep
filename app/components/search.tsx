@@ -28,7 +28,7 @@ export default function Search({
           type="search"
           id={name}
           name={name}
-          className="p-4 pl-10"
+          variant="search"
           placeholder="Search games..."
           onChange={(e) => onChange(e.target.value)}
           defaultValue={defaultValue}

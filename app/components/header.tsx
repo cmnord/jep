@@ -59,25 +59,28 @@ function GameSettings({ game, url }: { game: Game; url: string }) {
 
       <DropdownMenu.Portal>
         <DropdownMenu.Content>
-          <DropdownMenu.Label className="p-1 font-bold">
-            {game.title}
+          <DropdownMenu.Label>
+            <span className="font-bold">{game.title}</span>
           </DropdownMenu.Label>
-          <DropdownMenu.Label className="p-1 text-slate-400">
-            {game.author} &middot; {game.copyright}
+          <DropdownMenu.Label>
+            <span className="text-slate-400">
+              {game.author} &middot; {game.copyright}
+            </span>
           </DropdownMenu.Label>
           {game.note && (
             <DropdownMenu.Label>
-              <p className="p-1 text-sm break-words">{game.note}</p>
+              <p className="text-sm break-words">{game.note}</p>
             </DropdownMenu.Label>
           )}
-          <DropdownMenu.Label className="p-1 text-sm text-slate-400">
-            {game.boards.length} round{game.boards.length === 1 ? "" : "s"}
+          <DropdownMenu.Label>
+            <span className="text-sm text-slate-400">
+              {game.boards.length} round{game.boards.length === 1 ? "" : "s"}
+            </span>
           </DropdownMenu.Label>
 
-          <DropdownMenu.Separator className="m-1 h-px bg-slate-200" />
+          <DropdownMenu.Separator />
 
           <DropdownMenu.Item
-            className="relative flex items-center rounded-md p-1"
             // Prevent the dropdown menu from closing
             onSelect={(e: Event) => e.preventDefault()}
           >
@@ -86,7 +89,6 @@ function GameSettings({ game, url }: { game: Game; url: string }) {
             </div>
           </DropdownMenu.Item>
           <DropdownMenu.Item
-            className="relative flex items-center rounded-md p-1"
             onSelect={(e: Event) => e.preventDefault()}
           >
             <div className="w-full">
@@ -97,13 +99,11 @@ function GameSettings({ game, url }: { game: Game; url: string }) {
             // Prevent the dropdown menu from closing
             onSelect={(e: Event) => e.preventDefault()}
           >
-            <CopyLinkButton
-              className="grow"
-              url={url}
-              text="Copy link to room"
-            />
+            <div className="w-full">
+              <CopyLinkButton url={url} text="Copy link to room" />
+            </div>
           </DropdownMenu.Item>
-          <DropdownMenu.Item>
+          <DropdownMenu.Item asChild>
             <Link to={`/report?gameId=${game.id}`}>
               <ExclamationTriangle
                 title="Report"

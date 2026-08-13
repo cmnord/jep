@@ -4,6 +4,7 @@ import { data, useFetcher } from "react-router";
 import Button from "~/components/button";
 import { ErrorMessage, SuccessMessage } from "~/components/error";
 import { Cog6Tooth, PaperAirplane, PencilSquare } from "~/components/icons";
+import Input from "~/components/input";
 import Link from "~/components/link";
 import Main from "~/components/main";
 import OfflineIndicator from "~/components/offline-indicator";
@@ -212,7 +213,8 @@ function PlayerDefaultsControl({
           />
         </label>
         <div className="flex w-full items-center gap-2 rounded-xl text-white">
-          <input
+          <Input
+            variant="player"
             ref={inputRef}
             id="defaultPlayerName"
             type="text"
@@ -222,7 +224,6 @@ function PlayerDefaultsControl({
             onChange={(e) => setNameDraft(e.target.value)}
             onFocus={handleFocus}
             onBlur={handleBlur}
-            className="block w-full min-w-0 bg-transparent font-handwriting text-2xl font-bold placeholder:font-sans placeholder:text-sm placeholder:font-normal placeholder:text-white/40 focus:outline-none"
             aria-label="Player name"
           />
           {editing ? (

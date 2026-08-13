@@ -117,7 +117,7 @@ export default function Index({ loaderData }: Route.ComponentProps) {
   }, [debouncedSearch, submit]);
 
   return (
-    <Main className="grow">
+    <Main>
       <Form method="GET" ref={searchFormRef}>
         <Search
           name="q"

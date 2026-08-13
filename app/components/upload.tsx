@@ -151,7 +151,7 @@ export default function Upload({
             <p>Confirm public upload</p>
           </div>
         }
-        onClickClose={() => setShowModal(false)}
+        onClose={() => setShowModal(false)}
         description={`Do you want to upload the game "${
           file?.name ?? "unknown"
         }" publicly?`}

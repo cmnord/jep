@@ -7,17 +7,22 @@ export default function Dialog({
   title,
   children,
   description,
-  onClickClose,
+  onClose,
 }: {
   isOpen: boolean;
   title: React.ReactNode;
   description: React.ReactNode;
   children: React.ReactNode;
-  /** onClickClose puts an "X" in the top right corner of the modal. */
-  onClickClose?: () => void;
+  /** When provided, allows the dialog to be dismissed. */
+  onClose?: () => void;
 }) {
   return (
-    <DialogPrimitive.Root open={isOpen}>
+    <DialogPrimitive.Root
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) onClose?.();
+      }}
+    >
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay
           className={`fixed top-0 right-0 bottom-0 left-0 grid animate-overlay-show place-items-center overflow-y-auto bg-slate-500/75 opacity-0`}
@@ -32,12 +37,11 @@ export default function Dialog({
               {description}
             </DialogPrimitive.Description>
             {children}
-            {onClickClose ? (
+            {onClose ? (
               <DialogPrimitive.Close asChild>
                 <button
                   className={`absolute top-3 right-3 inline-flex h-6 w-6 items-center justify-center rounded-full text-blue-600 hover:bg-slate-100 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none`}
                   aria-label="Close"
-                  onClick={onClickClose}
                 >
                   <XMark className="h-6 w-6" />
                 </button>
