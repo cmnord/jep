@@ -29,7 +29,7 @@ export default function GameCard({
   const to =
     solve && !solve.solved_at
       ? `/room/${solve.room_id}-${solve.rooms?.name}`
-      : `/game/${game.id}/play`;
+      : `/game/${game.id}`;
 
   const [downloadStatus, setDownloadStatus] =
     React.useState<DownloadStatus>("none");
@@ -45,7 +45,7 @@ export default function GameCard({
   async function handleDownload() {
     setDownloadStatus("downloading");
     try {
-      const resp = await fetch(`/game/${game.id}`);
+      const resp = await fetch(`/game/${game.id}/json`);
       if (!resp.ok) throw new Error("fetch failed");
       const gameData = await resp.json();
       await cacheGame({

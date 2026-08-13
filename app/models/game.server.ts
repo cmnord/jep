@@ -198,6 +198,23 @@ export async function getGames(
   return data;
 }
 
+/** Returns the minimal public-game data used to build the search sitemap. */
+export async function getPublicGameSitemapEntries() {
+  // Use the anonymous client so row-level security guarantees that only public
+  // games can be exposed, even if this query changes later.
+  const { data, error } = await getSupabase()
+    .from("games")
+    .select("id")
+    .eq("visibility", "PUBLIC")
+    .order("created_at", { ascending: false });
+
+  if (error !== null) {
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
 /* Writes */
 
 export async function createGame(

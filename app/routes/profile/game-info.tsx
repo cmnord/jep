@@ -9,11 +9,7 @@ import * as DropdownMenu from "~/components/dropdown-menu";
 import GameVisibilityIcon, {
   GameVisibilityTag,
 } from "~/components/game-visibility-icon";
-import {
-  ArrowDownTray,
-  ExclamationTriangle,
-  Trash,
-} from "~/components/icons";
+import { ArrowDownTray, ExclamationTriangle, Trash } from "~/components/icons";
 import StyledLink from "~/components/link";
 import type { DbGame, GameVisibility } from "~/models/game.server";
 
@@ -140,7 +136,7 @@ export function GameInfo({
                 />
               )}
               <DropdownMenu.Item asChild>
-                <Link to={"/game/" + game.id} reloadDocument>
+                <Link to={`/game/${game.id}/json`} reloadDocument>
                   <ArrowDownTray className="absolute left-0 m-1 h-5 w-5" />
                   <p className="pl-7">Download JSON file</p>
                 </Link>

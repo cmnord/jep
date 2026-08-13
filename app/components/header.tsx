@@ -1,8 +1,9 @@
-import { Link, useMatches } from "react-router";
+import { Link as RouterLink, useMatches } from "react-router";
 
 import { ButtonLink } from "~/components/button";
 import CopyLinkButton from "~/components/copy-link-button";
 import * as DropdownMenu from "~/components/dropdown-menu";
+import Link from "~/components/link";
 import SoundControl from "~/components/sound";
 import WagerHintsControl from "~/components/wager-hints-control";
 import type { Game } from "~/models/game.server";
@@ -32,7 +33,7 @@ function AccountButton({ user }: { user: { id: string; email: string } }) {
   const backgroundColor =
     playerColor != null ? playerColor : stringToHslColor(user.id);
   return (
-    <Link
+    <RouterLink
       to="/profile"
       className="flex items-center justify-center rounded-full p-1 transition-colors hover:bg-blue-700"
       style={{ backgroundColor }}
@@ -41,7 +42,23 @@ function AccountButton({ user }: { user: { id: string; email: string } }) {
       <div className="flex h-6 w-6 items-center justify-center text-blue-1000 uppercase">
         {user.email.slice(0, 1)}
       </div>
-    </Link>
+    </RouterLink>
+  );
+}
+
+function SiteLinks({ className }: { className?: string }) {
+  return (
+    <div className={className} aria-label="Learn more">
+      <Link variant="inverse" to="/howto">
+        How to Play
+      </Link>
+      <Link variant="inverse" to="/upload-help">
+        Upload a Game
+      </Link>
+      <Link variant="inverse" to="/about">
+        About
+      </Link>
+    </div>
   );
 }
 
@@ -88,9 +105,7 @@ function GameSettings({ game, url }: { game: Game; url: string }) {
               <SoundControl />
             </div>
           </DropdownMenu.Item>
-          <DropdownMenu.Item
-            onSelect={(e: Event) => e.preventDefault()}
-          >
+          <DropdownMenu.Item onSelect={(e: Event) => e.preventDefault()}>
             <div className="w-full">
               <WagerHintsControl />
             </div>
@@ -104,13 +119,13 @@ function GameSettings({ game, url }: { game: Game; url: string }) {
             </div>
           </DropdownMenu.Item>
           <DropdownMenu.Item asChild>
-            <Link to={`/report?gameId=${game.id}`}>
+            <RouterLink to={`/report?gameId=${game.id}`}>
               <ExclamationTriangle
                 title="Report"
                 className="absolute left-0 m-1 h-5 w-5"
               />
               <p className="pl-7">Report game</p>
-            </Link>
+            </RouterLink>
           </DropdownMenu.Item>
         </DropdownMenu.Content>
       </DropdownMenu.Portal>
@@ -126,7 +141,10 @@ export default function Header({
   BASE_URL?: string;
 }) {
   const matches = useMatches();
-  const gameRoute = matches.find((m) => isGameLoaderData(m.loaderData));
+  const gameRoute = matches.find(
+    (match) =>
+      match.id !== "routes/game_.$gameId" && isGameLoaderData(match.loaderData),
+  );
   const game =
     gameRoute && isGameLoaderData(gameRoute.loaderData)
       ? gameRoute.loaderData.game
@@ -134,14 +152,17 @@ export default function Header({
   const pathname = matches[matches.length - 1].pathname;
 
   return (
-    <nav className="bg-blue-bright p-4">
+    <nav className="bg-blue-bright p-4" aria-label="Primary navigation">
       <div className="flex items-center justify-between">
-        <Link to="/">
+        <RouterLink to="/">
           <h1 className="font-korinna text-2xl font-bold text-white text-shadow-md">
             Jep!
           </h1>
-        </Link>
+        </RouterLink>
         <div className="flex items-center gap-2">
+          {!game && (
+            <SiteLinks className="mr-4 hidden items-center gap-6 sm:flex" />
+          )}
           {user ? (
             <AccountButton user={user} />
           ) : (
@@ -150,6 +171,9 @@ export default function Header({
           {game && <GameSettings game={game} url={BASE_URL + pathname} />}
         </div>
       </div>
+      {!game && (
+        <SiteLinks className="mt-3 flex items-center justify-center gap-5 border-t border-blue-500 pt-3 sm:hidden" />
+      )}
     </nav>
   );
 }

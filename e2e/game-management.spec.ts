@@ -97,18 +97,36 @@ test.describe("game management", () => {
     await guestContext.close();
   });
 
-  test("offline download menu visible only for logged-in users", async ({
+  test("public game has a preview and separate JSON download", async ({
     authedPage: page,
-    browser,
   }) => {
-    // Change from private → public so it appears on the home page for everyone
     await page.goto("/profile");
     const gameRow = page.locator(`li:has(a[href="/game/${gameId}/play"])`);
     await changeVisibility(page, gameRow, "Make public");
 
+    const previewResponse = await page.goto(`/game/${gameId}`);
+    expect(previewResponse?.status()).toBe(200);
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Mock 1x1 Game" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "Play with friends" }),
+    ).toBeVisible();
+
+    const jsonResponse = await page.request.get(`/game/${gameId}/json`);
+    expect(jsonResponse.status()).toBe(200);
+    expect(jsonResponse.headers()["content-type"]).toContain(
+      "application/json",
+    );
+  });
+
+  test("offline download menu visible only for logged-in users", async ({
+    authedPage: page,
+    browser,
+  }) => {
     // As authed user on /, find the game card and verify "More actions" is visible.
     await page.goto("/");
-    const authedCard = page.locator(`a[href="/game/${gameId}/play"]`).first();
+    const authedCard = page.locator(`a[href="/game/${gameId}"]`).first();
     await expect(authedCard).toBeVisible({ timeout: 5_000 });
     await expect(
       authedCard.getByRole("button", { name: "More actions" }),
@@ -118,9 +136,7 @@ test.describe("game management", () => {
     const guestContext = await browser.newContext();
     const guestPage = await guestContext.newPage();
     await guestPage.goto("/");
-    const guestCard = guestPage
-      .locator(`a[href="/game/${gameId}/play"]`)
-      .first();
+    const guestCard = guestPage.locator(`a[href="/game/${gameId}"]`).first();
     await expect(guestCard).toBeVisible({ timeout: 5_000 });
     await expect(
       guestCard.getByRole("button", { name: "More actions" }),

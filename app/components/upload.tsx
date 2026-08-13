@@ -102,7 +102,7 @@ function UploadBox({
           onChange={(e) => onChange(e.target.files?.[0])}
         />
       </button>
-      <Link to="/help">
+      <Link to="/upload-help">
         <p id="upload_help" className="mt-1 text-sm">
           Upload help
         </p>

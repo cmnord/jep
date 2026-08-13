@@ -17,6 +17,20 @@ import { getSearchMetadata, NO_INDEX_DIRECTIVES } from "~/utils/seo";
 
 export const streamTimeout = 5_000;
 
+function isPublicGamePreviewData(data: unknown) {
+  if (typeof data !== "object" || data === null || !("game" in data)) {
+    return false;
+  }
+
+  const game = data.game;
+  return (
+    typeof game === "object" &&
+    game !== null &&
+    "visibility" in game &&
+    game.visibility === "PUBLIC"
+  );
+}
+
 export default function handleRequest(
   request: Request,
   responseStatusCode: number,
@@ -26,6 +40,11 @@ export default function handleRequest(
   const searchMetadata = getSearchMetadata(
     new URL(request.url).pathname,
     BASE_URL,
+    isPublicGamePreviewData(
+      reactRouterContext.staticHandlerContext.loaderData[
+        "routes/game_.$gameId"
+      ],
+    ),
   );
   // Mirror the page's robots policy in the HTTP response so crawlers receive
   // it even for streamed and error documents, independently of the HTML head.

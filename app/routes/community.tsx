@@ -1,11 +1,15 @@
-import Link, { Anchor } from "~/components/link";
+import { ButtonLink } from "~/components/button";
+import { Anchor } from "~/components/link";
 import Main from "~/components/main";
+import { getPageMetadata } from "~/utils/seo";
 
 import type { Route } from "./+types/community";
 
-export const meta: Route.MetaFunction = () => [
-  { title: "Community Guidelines" },
-];
+export const meta: Route.MetaFunction = () =>
+  getPageMetadata(
+    "Jep! Community Guidelines",
+    "Read the community standards and moderation policy for public games shared on Jep!.",
+  );
 
 const SPORCLE = "https://www.sporcle.com/community/";
 
@@ -15,14 +19,15 @@ export default function Login() {
       <Main>
         <h1 className="mb-4 text-2xl font-semibold">Community Guidelines</h1>
         <h2 className="mt-8 mb-4 text-xl font-semibold">Summary</h2>
-        <p className="mb-2">
+        <p className="mb-4">
           Be polite; don't post anything inappropriate.
           <br className="mb-1" />
-          Report any inappropriate game content <Link to="/report">
-            here
-          </Link>{" "}
-          or by clicking the "Report" button in the game.
+          Report inappropriate game content using the form below or by clicking
+          the "Report" button in the game.
         </p>
+        <ButtonLink to="/report" variant="primary">
+          Report a game
+        </ButtonLink>
         <h2 className="mt-8 mb-4 text-xl font-semibold">
           Moderation policy for uploaded games
         </h2>

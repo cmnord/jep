@@ -9,6 +9,7 @@ import {
   Scripts,
   ScrollRestoration,
   useLocation,
+  useMatches,
   useRouteError,
 } from "react-router";
 
@@ -19,7 +20,11 @@ import { getValidAuthSession } from "~/models/auth";
 import { getUserByEmail } from "~/models/user";
 import { parseUserSettings } from "~/models/user-settings.server";
 import { BASE_URL, getBrowserEnv, IS_VERCEL, NODE_ENV } from "~/utils";
-import { getSearchMetadata, NO_INDEX_DIRECTIVES } from "~/utils/seo";
+import {
+  getSearchMetadata,
+  NO_INDEX_DIRECTIVES,
+  SITE_DESCRIPTION,
+} from "~/utils/seo";
 import { UserSettingsProvider } from "~/utils/user-settings";
 
 import type { Route } from "./+types/root";
@@ -27,15 +32,13 @@ import type { Route } from "./+types/root";
 import stylesheet from "./styles.css?url";
 
 const META_TITLE = "Jep!";
-const META_DESCRIPTION =
-  "A website for sharing J! trivia and playing collaboratively with friends in real time.";
 
 export const meta: Route.MetaFunction = ({ loaderData }) => {
   if (!loaderData) {
     return [
       { title: META_TITLE },
       { name: "title", content: META_TITLE },
-      { name: "description", content: META_DESCRIPTION },
+      { name: "description", content: SITE_DESCRIPTION },
     ];
   }
 
@@ -45,20 +48,20 @@ export const meta: Route.MetaFunction = ({ loaderData }) => {
   return [
     { title: META_TITLE },
     { name: "title", content: META_TITLE },
-    { name: "description", content: META_DESCRIPTION },
+    { name: "description", content: SITE_DESCRIPTION },
 
     // Open Graph / Facebook
     { property: "og:type", content: "website" },
     { property: "og:url", content: metaUrl },
     { property: "og:title", content: META_TITLE },
-    { property: "og:description", content: META_DESCRIPTION },
+    { property: "og:description", content: SITE_DESCRIPTION },
     { property: "og:image", content: metaImage },
 
     // Twitter
     { property: "twitter:card", content: "summary_large_image" },
     { property: "twitter:url", content: metaUrl },
     { property: "twitter:title", content: META_TITLE },
-    { property: "twitter:description", content: META_DESCRIPTION },
+    { property: "twitter:description", content: SITE_DESCRIPTION },
     { property: "twitter:image", content: metaImage },
   ];
 };
@@ -115,10 +118,32 @@ export async function loader({ request }: Route.LoaderArgs) {
 
 export default function App({ loaderData }: Route.ComponentProps) {
   const location = useLocation();
+  const matches = useMatches();
+  const publicGamePreview = matches.some(
+    (match) =>
+      match.id === "routes/game_.$gameId" &&
+      typeof match.loaderData === "object" &&
+      match.loaderData !== null &&
+      "game" in match.loaderData &&
+      typeof match.loaderData.game === "object" &&
+      match.loaderData.game !== null &&
+      "visibility" in match.loaderData.game &&
+      match.loaderData.game.visibility === "PUBLIC",
+  );
   const searchMetadata = getSearchMetadata(
     location.pathname,
     loaderData.BASE_URL,
+    publicGamePreview,
   );
+  const applicationStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: META_TITLE,
+    url: loaderData.BASE_URL,
+    description: SITE_DESCRIPTION,
+    applicationCategory: "GameApplication",
+    operatingSystem: "Any",
+  };
 
   return (
     <html lang="en">
@@ -128,6 +153,19 @@ export default function App({ loaderData }: Route.ComponentProps) {
         <meta name="robots" content={searchMetadata.robots} />
         {searchMetadata.canonicalUrl ? (
           <link rel="canonical" href={searchMetadata.canonicalUrl} />
+        ) : null}
+        {location.pathname === "/" ? (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              // Keep a future dynamic value containing "</script>" from
+              // terminating this script element and injecting markup.
+              __html: JSON.stringify(applicationStructuredData).replace(
+                /</g,
+                "\\u003c",
+              ),
+            }}
+          />
         ) : null}
         <Meta />
         <Links />
