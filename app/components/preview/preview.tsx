@@ -152,9 +152,11 @@ function PreviewRoundDialog({
           </div>
           <WagerHintsControl theme="dark" />
           <HowToPlay />
-          <Link className="mb-2 text-sm text-white" to="/howto">
-            Practice buzzing &rarr;
-          </Link>
+          <div className="mb-2">
+            <Link variant="inverse" to="/howto">
+              Practice buzzing &rarr;
+            </Link>
+          </div>
         </div>
       ) : null}
       {correction ? (

@@ -332,13 +332,12 @@ function OnlineProfile({
           userId={loaderData.user.id}
         />
 
-        <p className="mb-4">
-          <Link
-            to="/settings"
-            className="inline-flex items-center gap-1.5 text-sm"
-          >
-            <Cog6Tooth className="h-4 w-4" />
-            Account settings
+        <p className="mb-4 text-sm">
+          <Link to="/settings">
+            <span className="inline-flex items-center gap-1.5">
+              <Cog6Tooth className="h-4 w-4" />
+              Account settings
+            </span>
           </Link>
         </p>
         <OfflineIndicator />
