@@ -263,7 +263,7 @@ function PlayerDefaultsControl({
 
       <div className="grid grid-cols-2 gap-3">
         <Button
-          htmlType="button"
+          type="button"
           disabled={playerName == null}
           onClick={() => {
             setNameDraft("");
@@ -274,7 +274,7 @@ function PlayerDefaultsControl({
           Clear name
         </Button>
         <Button
-          htmlType="button"
+          type="button"
           disabled={playerColor == null}
           onClick={() => setPlayerColor(undefined)}
         >

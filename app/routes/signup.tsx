@@ -144,8 +144,8 @@ export default function Signup({ actionData }: Route.ComponentProps) {
             </div>
           </div>
           <Button
-            type="primary"
-            htmlType="submit"
+            variant="primary"
+            type="submit"
             disabled={loading}
             loading={loading}
           >

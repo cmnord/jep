@@ -50,19 +50,14 @@ function CheckForm({
       )}
       <p className="font-bold text-white">Were you right?</p>
       <div className="flex gap-2">
-        <Button
-          htmlType="submit"
-          name="result"
-          value="incorrect"
-          loading={loading}
-        >
+        <Button type="submit" name="result" value="incorrect" loading={loading}>
           incorrect
         </Button>
         <Button
-          htmlType="submit"
+          type="submit"
           name="result"
           value="correct"
-          type="primary"
+          variant="primary"
           autoFocus
           loading={loading}
         >
@@ -144,12 +139,11 @@ export function ConnectedCheckForm({
           />
           <Button
             ref={revealButtonRef}
-            type="primary"
-            htmlType="button"
+            variant="primary"
+            type="button"
             disabled={disabled}
             onClick={onClickShowAnswer}
             loading={loading}
-            className="relative"
           >
             Reveal answer
           </Button>

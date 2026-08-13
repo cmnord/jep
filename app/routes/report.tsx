@@ -172,7 +172,7 @@ export default function Report({
             placeholder="e.g. spam"
             required
           />
-          <Button type="primary" htmlType="submit">
+          <Button variant="primary" type="submit">
             Report
           </Button>
           {actionData ? (

@@ -38,7 +38,7 @@ function AnswerForm({
           required
           className={`min-w-48 font-handwriting text-xl font-bold placeholder:font-sans placeholder:font-normal`}
         />
-        <Button type="primary" htmlType="submit" loading={loading}>
+        <Button variant="primary" type="submit" loading={loading}>
           submit
         </Button>
       </div>

@@ -45,10 +45,10 @@ function RemoveDownloadModal({
       description={`Remove the offline download for "${gameTitle}"? You won't be able to play this game offline until you download it again.`}
     >
       <Dialog.Footer>
-        <Button onClick={onClickClose} htmlType="button">
+        <Button onClick={onClickClose} type="button">
           Cancel
         </Button>
-        <Button type="danger" onClick={onConfirm} htmlType="button">
+        <Button variant="danger" onClick={onConfirm} type="button">
           Remove download
         </Button>
       </Dialog.Footer>

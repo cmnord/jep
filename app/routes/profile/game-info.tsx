@@ -79,10 +79,10 @@ function DeleteGameModal({
     >
       <fetcher.Form method="DELETE" action={`/game/${game.id}`}>
         <Dialog.Footer>
-          <Button autoFocus onClick={onClickClose} htmlType="button">
+          <Button autoFocus onClick={onClickClose} type="button">
             Cancel
           </Button>
-          <Button type="danger" htmlType="submit">
+          <Button variant="danger" type="submit">
             Delete game
           </Button>
         </Dialog.Footer>

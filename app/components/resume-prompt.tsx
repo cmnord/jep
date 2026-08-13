@@ -15,10 +15,10 @@ export default function ResumePrompt({
       description="You have a saved game in progress. Would you like to resume where you left off or start a new game?"
     >
       <Dialog.Footer>
-        <Button onClick={onNewGame} htmlType="button">
+        <Button onClick={onNewGame} type="button">
           New Game
         </Button>
-        <Button type="primary" onClick={onResume} htmlType="button" autoFocus>
+        <Button variant="primary" onClick={onResume} type="button" autoFocus>
           Resume Game
         </Button>
       </Dialog.Footer>

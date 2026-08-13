@@ -1,6 +1,6 @@
 import { Link, useMatches } from "react-router";
 
-import Button from "~/components/button";
+import { ButtonLink } from "~/components/button";
 import CopyLinkButton from "~/components/copy-link-button";
 import * as DropdownMenu from "~/components/dropdown-menu";
 import SoundControl from "~/components/sound";
@@ -21,9 +21,9 @@ function LoginButton({ pathname }: { pathname: string }) {
       ? "/login"
       : `/login?redirectTo=${encodeURIComponent(pathname)}`;
   return (
-    <Link to={to}>
-      <Button type="transparent">Log in</Button>
-    </Link>
+    <ButtonLink to={to} variant="inverse">
+      Log in
+    </ButtonLink>
   );
 }
 

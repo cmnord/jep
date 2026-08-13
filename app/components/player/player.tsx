@@ -328,7 +328,7 @@ export function PlayerScores({ roomId, userId }: RoomProps) {
       roomId={roomId}
       userId={userId}
       prompt="Undo your check on the last clue?"
-      commitType="default"
+      commitType="secondary"
     />
   ) : undefined;
 

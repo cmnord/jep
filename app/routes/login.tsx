@@ -139,7 +139,7 @@ export default function Login({ actionData }: Route.ComponentProps) {
           <div className="flex justify-end text-sm">
             <Link to="/forgot-password">Forgot password?</Link>
           </div>
-          <Button type="primary" htmlType="submit" disabled={disabled}>
+          <Button variant="primary" type="submit" disabled={disabled}>
             Log in
           </Button>
           {actionData?.error ? (

@@ -104,7 +104,10 @@ function SuggestedDrawer({
         ) : null}
         {recommendations.map((rec, i) => (
           <div key={i} className="flex items-center gap-1">
-            <Button type="primary" onClick={() => onSelectAmount(rec.amount)}>
+            <Button
+              variant="primary"
+              onClick={() => onSelectAmount(rec.amount)}
+            >
               {rec.label}:{" "}
               <span className="font-handwriting font-bold">
                 {formatDollars(rec.amount)}
@@ -178,13 +181,16 @@ function WagerForm({
           placeholder="choose wager amount"
           required
         />
-        <Button type="default" htmlType="submit" loading={loading}>
+        <Button type="submit" loading={loading}>
           Submit
         </Button>
       </div>
 
       {/* All-in button */}
-      <Button type="primary" onClick={() => setWagerValue(maxWager.toString())}>
+      <Button
+        variant="primary"
+        onClick={() => setWagerValue(maxWager.toString())}
+      >
         All-in (
         <span className="font-handwriting font-bold">
           {formatDollars(maxWager)}

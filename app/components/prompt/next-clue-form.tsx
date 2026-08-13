@@ -164,11 +164,10 @@ export function ConnectedNextClueForm({ roomId, userId }: RoomProps) {
               <input type="hidden" value={i} name="i" />
               <input type="hidden" value={j} name="j" />
               <Button
-                type="primary"
-                htmlType="submit"
+                variant="primary"
+                type="submit"
                 autoFocus
                 loading={loading}
-                className="relative"
               >
                 <div
                   className="absolute left-0 h-full rounded-md bg-blue-400"

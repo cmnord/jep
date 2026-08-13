@@ -61,7 +61,7 @@ function JoinGameDialog({
           {playerColor != null && (
             <input type="hidden" name="color" value={playerColor} />
           )}
-          <Button type="primary" htmlType="submit">
+          <Button variant="primary" type="submit">
             Join game
           </Button>
         </Form>
@@ -184,7 +184,7 @@ function PreviewRoundDialog({
           <Form method="POST" action={`/room/${roomId}/start`}>
             <input type="hidden" name="round" value={round} />
             <input type="hidden" name="userId" value={userId} />
-            <Button type="primary" htmlType="submit" onClick={onDismiss}>
+            <Button variant="primary" type="submit" onClick={onDismiss}>
               Start round
             </Button>
           </Form>

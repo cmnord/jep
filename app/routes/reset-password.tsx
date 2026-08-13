@@ -180,7 +180,7 @@ export default function ResetPassword({ actionData }: Route.ComponentProps) {
                   required
                 />
               </div>
-              <Button type="primary" htmlType="submit" disabled={disabled}>
+              <Button variant="primary" type="submit" disabled={disabled}>
                 Reset password
               </Button>
               {actionData?.error ? (
