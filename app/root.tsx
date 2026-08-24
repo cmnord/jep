@@ -20,6 +20,7 @@ import { getValidAuthSession } from "~/models/auth";
 import { getUserByEmail } from "~/models/user";
 import { parseUserSettings } from "~/models/user-settings.server";
 import { BASE_URL, getBrowserEnv, IS_VERCEL, NODE_ENV } from "~/utils";
+import { redactAnalyticsEvent } from "~/utils/analytics";
 import {
   getSearchMetadata,
   NO_INDEX_DIRECTIVES,
@@ -172,7 +173,7 @@ export default function App({ loaderData }: Route.ComponentProps) {
       </head>
       <body className="relative flex min-h-screen flex-col">
         {loaderData.NODE_ENV === "production" && loaderData.IS_VERCEL ? (
-          <Analytics />
+          <Analytics beforeSend={redactAnalyticsEvent} />
         ) : null}
         <ToastPrimitive.Provider swipeDirection="right">
           <ToastPrimitive.Viewport

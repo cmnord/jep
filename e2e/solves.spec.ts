@@ -18,7 +18,19 @@ test.describe("solves tracking", () => {
       timeout: 10_000,
     });
     await waitForConnected(page);
-    await page.getByRole("button", { name: /join game/i }).click();
+    const [joinResponse] = await Promise.all([
+      page.waitForResponse(
+        (response) => response.request().method() === "POST",
+      ),
+      page.getByRole("button", { name: /join game/i }).click(),
+    ]);
+    expect(joinResponse.ok()).toBe(true);
+
+    // This test covers persisted solve tracking, not realtime delivery. Reload
+    // after the join action so the room starts from its persisted event state
+    // instead of depending on subscription timing in the local stack.
+    await page.reload();
+    await waitForConnected(page);
 
     // Start round 1
     await expect(

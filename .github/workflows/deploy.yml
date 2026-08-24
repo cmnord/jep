@@ -5,30 +5,30 @@ on:
       - main
   pull_request: {}
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
-  actions: write
   contents: read
 
 jobs:
   test:
     name: 🧪 Test
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - name: 🛑 Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.11.0
-
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v4
 
       - name: ⎔ Setup node
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version-file: .node-version
+          cache: npm
 
       - name: 📥 Download deps
-        uses: bahmutov/npm-install@v1
-        with:
-          useLockFile: false
+        run: npm ci
 
       - name: 💅 Format check
         run: npm run format:check
@@ -40,15 +40,13 @@ jobs:
         run: npm run typecheck
 
       - name: ⚡ Run vitest
-        run: npm run test
+        run: npm run test -- --run
 
   playwright:
     name: 🎭 Playwright
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
-      - name: 🛑 Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.11.0
-
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v4
 
@@ -58,30 +56,19 @@ jobs:
       - name: ⎔ Setup node
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version-file: .node-version
+          cache: npm
 
       - name: 📥 Download deps
-        uses: bahmutov/npm-install@v1
-        with:
-          useLockFile: false
+        run: npm ci
 
       - name: 🛠 Setup Database
+        # GitHub's ubuntu-latest image provides a running Docker Engine.
         # db:start only starts the kong and postgrest containers.
         run: npm run db:start
 
-      - name: Export local Supabase env vars
-        run: |
-          npx supabase status -o env \
-            --override-name api.url=SUPABASE_URL \
-            --override-name auth.anon_key=SUPABASE_ANON_KEY \
-            --override-name auth.service_role_key=SUPABASE_SERVICE_ROLE_KEY \
-            | grep -E '^SUPABASE_(URL|ANON_KEY|SERVICE_ROLE_KEY)=' >> .env
-
       - name: 🌐 Install Playwright browsers
         run: npx playwright install --with-deps chromium
-
-      - name: ⚙️ Build
-        run: npm run build
 
       - name: 🎭 Playwright run
         run: npm run test:e2e:run
