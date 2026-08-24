@@ -15,8 +15,8 @@
     "test": "vitest --coverage",
     "test:coverage": "open coverage/index.html; vitest --coverage",
     "test:e2e:dev": "PW_USE_DEV_SERVER=1 npx playwright test --ui",
-    "pretest:e2e:run": "npm run build",
-    "test:e2e:run": "npx playwright test",
+    "test:e2e:execute": "npm run build && playwright test",
+    "test:e2e:run": "./scripts/with-local-supabase.sh npm run test:e2e:execute",
     "typecheck": "react-router typegen && tsc -b",
     "validate": "run-p \"test -- --run\" format lint typecheck test:e2e:run"
   },

@@ -1,12 +1,11 @@
 "$schema" = "https://conductor.build/schemas/settings.repo.schema.json"
 
 [scripts]
-setup = "npm ci"
+setup = "./scripts/setup.sh"
 run_mode = "nonconcurrent"
 
 [scripts.run.dev]
-available_in = ["local"]
-command = "npm run db:start && npm run dev -- --port $CONDUCTOR_PORT"
+command = "npm run db:start && ./scripts/with-local-supabase.sh npm run dev -- --host 0.0.0.0 --port ${CONDUCTOR_PORT:-3000}"
 default = true
 icon = "play"
 
@@ -15,11 +14,9 @@ command = "npm run test"
 icon = "test-tube"
 
 [scripts.run.validate]
-available_in = ["local"]
 command = "npm run db:start && npm run validate"
 icon = "badge-check"
 
 [scripts.run.database]
-available_in = ["local"]
 command = "npm run db:start"
 icon = "database"

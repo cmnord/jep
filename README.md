@@ -10,10 +10,10 @@ Play Jeopardy! online with your friends at [Jep!][jep]. Choose from past games o
 
 To run the app locally, first install [Docker][docker].
 
-Next, install the project's locked local dependencies:
+Next, run the project setup script to install its locked dependencies:
 
 ```sh
-npm ci
+./scripts/setup.sh
 ```
 
 Start the Supabase project:
@@ -51,14 +51,12 @@ npm run db:restart
 ### Conductor
 
 The shared [Conductor configuration](.conductor/settings.toml) installs locked
-dependencies when a workspace is created. Its default **Dev** run script starts
-Supabase and then runs the app on the workspace's allocated port. The
-**Validate** script starts Supabase before running the full validation suite.
+dependencies when a workspace is created. On Linux, setup accepts any running
+Docker-compatible runtime and can bootstrap Docker in `dnf`-based sandboxes;
+other environments are expected to provide their own runtime.
 
-Supabase uses one Docker stack with fixed local ports, so the repository's
-Conductor run scripts are nonconcurrent. Stop a run script in one workspace
-before starting one in another. Conductor copies `.env` files into new
-workspaces by default.
+Local worktrees share one Docker stack with fixed ports. Cloud workspaces run
+their own stack.
 
 ## Supabase
 
