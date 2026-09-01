@@ -97,7 +97,7 @@ export function shouldRevalidate({
 
 export async function loader({ request }: Route.LoaderArgs) {
   const authSession = await getValidAuthSession(request);
-  const showAnalytics = ENV.NODE_ENV === "production" && ENV.VERCEL;
+  const showAnalytics = ENV.NODE_ENV === "production" && ENV.VERCEL === "1";
 
   try {
     const user = authSession
