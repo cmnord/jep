@@ -5,7 +5,7 @@
 Run the full validation suite (lint, format, typecheck, unit tests, e2e tests):
 
 ```sh
-npm run validate
+pnpm validate
 ```
 
 ### Individual checks
@@ -13,13 +13,13 @@ npm run validate
 **Lint** (ESLint):
 
 ```sh
-npm run lint
+pnpm lint
 ```
 
 **Format** (oxfmt):
 
 ```sh
-npm run format
+pnpm format
 ```
 
 This writes formatted files in-place. CI should run the same command — oxfmt
@@ -29,7 +29,7 @@ failure.
 **Typecheck** (TypeScript):
 
 ```sh
-npm run typecheck
+pnpm typecheck
 ```
 
 This generates React Router types first (`react-router typegen`), then checks
@@ -38,22 +38,22 @@ the app.
 **Unit tests** (Vitest):
 
 ```sh
-npm run test -- --run
+pnpm test -- --run
 ```
 
-`npm run test` (without `--run`) starts Vitest in watch mode with coverage.
+`pnpm test` (without `--run`) starts Vitest in watch mode with coverage.
 
 **E2E tests** (Playwright):
 
 ```sh
-npm run test:e2e:run
+pnpm test:e2e:run
 ```
 
 Builds the app, starts the server, and runs Playwright headless. A running
-local Supabase instance is required (`npm run db:start`).
+local Supabase instance is required (`pnpm db:start`).
 
 For interactive development with the Playwright UI:
 
 ```sh
-npm run test:e2e:dev
+pnpm test:e2e:dev
 ```

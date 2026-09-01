@@ -12,7 +12,7 @@ fi
 
 # Supabase generates these credentials for the active local stack. They can
 # change across CLI upgrades, so prefer them over values in .env.local.
-status_env="$(npm run --silent db:status)"
+status_env="$(pnpm --silent db:status)"
 while IFS="=" read -r name value; do
   value="${value#\"}"
   value="${value%\"}"
