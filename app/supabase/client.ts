@@ -1,19 +1,15 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
+import { ENV } from "varlock/env";
 
 import { AuthSession } from "~/models/auth";
 import type { Database } from "~/models/database.types";
-import {
-  isBrowser,
-  SUPABASE_ANON_KEY,
-  SUPABASE_SERVICE_ROLE_KEY,
-  SUPABASE_URL,
-} from "~/utils";
+import { isBrowser } from "~/utils";
 
 // Cache the browser-side client to avoid multiple GoTrueClient instances.
 let browserClient: SupabaseClient<Database> | undefined;
 let browserClientToken: string | undefined;
 
-function getSupabaseClient(supabaseKey: string, accessToken?: string) {
+export function getSupabaseClient(supabaseKey: string, accessToken?: string) {
   if (isBrowser && browserClient && browserClientToken === accessToken) {
     return browserClient;
   }
@@ -28,7 +24,7 @@ function getSupabaseClient(supabaseKey: string, accessToken?: string) {
       }
     : {};
 
-  const client = createClient<Database>(SUPABASE_URL, supabaseKey, {
+  const client = createClient<Database>(ENV.SUPABASE_URL, supabaseKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
@@ -57,23 +53,7 @@ function getSupabaseClient(supabaseKey: string, accessToken?: string) {
  * Reason : https://github.com/rphlmr/supa-fly-stack/pull/43#issue-1336412790
  */
 function getSupabase(accessToken?: AuthSession["accessToken"]) {
-  return getSupabaseClient(SUPABASE_ANON_KEY, accessToken);
+  return getSupabaseClient(ENV.SUPABASE_ANON_KEY, accessToken);
 }
 
-/**
- * Provides a Supabase Admin Client with full admin privileges
- *
- * It's a per request scoped client, to prevent access token leaking if you don't use it like `getSupabaseAdmin().auth.api`.
- *
- * Reason : https://github.com/rphlmr/supa-fly-stack/pull/43#issue-1336412790
- */
-function getSupabaseAdmin() {
-  if (isBrowser)
-    throw new Error(
-      "getSupabaseAdmin is not available in browser and should NOT be used in insecure environments",
-    );
-
-  return getSupabaseClient(SUPABASE_SERVICE_ROLE_KEY);
-}
-
-export { getSupabase, getSupabaseAdmin };
+export { getSupabase };

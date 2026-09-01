@@ -1,3 +1,5 @@
+import { ENV } from "varlock/env";
+
 import { Dollars } from "~/components/dollars";
 import { ClockDisplay } from "~/components/game-clock";
 import { PlayerScore } from "~/components/player";
@@ -12,7 +14,6 @@ import { getGame } from "~/models/game.server";
 import { getRoomEvents } from "~/models/room-event.server";
 import { getRoom } from "~/models/room.server";
 import { getSolve, markSolved } from "~/models/solves.server";
-import { BASE_URL } from "~/utils";
 
 import type { Route } from "./+types/route";
 import ScoreChart from "./chart";
@@ -84,7 +85,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     game,
     roomEvents,
     roomId,
-    BASE_URL,
+    BASE_URL: ENV.BASE_URL,
   };
 }
 

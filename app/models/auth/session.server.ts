@@ -1,6 +1,6 @@
 import { createCookieSessionStorage, redirect } from "react-router";
+import { ENV } from "varlock/env";
 
-import { NODE_ENV, SESSION_SECRET } from "~/utils";
 import {
   getCurrentPath,
   isGet,
@@ -27,8 +27,8 @@ const sessionStorage = createCookieSessionStorage({
     httpOnly: true,
     path: "/",
     sameSite: "lax",
-    secrets: [SESSION_SECRET],
-    secure: NODE_ENV === "production",
+    secrets: [ENV.SESSION_SECRET],
+    secure: ENV.NODE_ENV === "production",
   },
 });
 

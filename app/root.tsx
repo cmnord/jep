@@ -12,6 +12,7 @@ import {
   useMatches,
   useRouteError,
 } from "react-router";
+import { ENV } from "varlock/env";
 
 import { CodeBlock } from "~/components/code";
 import Footer from "~/components/footer";
@@ -19,7 +20,6 @@ import Header from "~/components/header";
 import { getValidAuthSession } from "~/models/auth";
 import { getUserByEmail } from "~/models/user";
 import { parseUserSettings } from "~/models/user-settings.server";
-import { BASE_URL, getBrowserEnv, IS_VERCEL, NODE_ENV } from "~/utils";
 import { redactAnalyticsEvent } from "~/utils/analytics";
 import {
   getSearchMetadata,
@@ -97,22 +97,20 @@ export function shouldRevalidate({
 
 export async function loader({ request }: Route.LoaderArgs) {
   const authSession = await getValidAuthSession(request);
-  const env = getBrowserEnv();
+  const showAnalytics = ENV.NODE_ENV === "production" && ENV.VERCEL;
 
   try {
     const user = authSession
       ? await getUserByEmail(authSession.email, authSession.accessToken)
       : undefined;
     const userSettings = user ? parseUserSettings(user.settings) : undefined;
-    return { user, userSettings, env, BASE_URL, NODE_ENV, IS_VERCEL };
+    return { user, userSettings, BASE_URL: ENV.BASE_URL, showAnalytics };
   } catch {
     return {
       user: undefined,
       userSettings: undefined,
-      env,
-      BASE_URL,
-      NODE_ENV,
-      IS_VERCEL,
+      BASE_URL: ENV.BASE_URL,
+      showAnalytics,
     };
   }
 }
@@ -172,7 +170,7 @@ export default function App({ loaderData }: Route.ComponentProps) {
         <Links />
       </head>
       <body className="relative flex min-h-screen flex-col">
-        {loaderData.NODE_ENV === "production" && loaderData.IS_VERCEL ? (
+        {loaderData.showAnalytics ? (
           <Analytics beforeSend={redactAnalyticsEvent} />
         ) : null}
         <ToastPrimitive.Provider swipeDirection="right">
@@ -187,11 +185,6 @@ export default function App({ loaderData }: Route.ComponentProps) {
             <Outlet />
             <Footer />
             <ScrollRestoration />
-            <script
-              dangerouslySetInnerHTML={{
-                __html: `window.env = ${JSON.stringify(loaderData.env)}`,
-              }}
-            />
             <Scripts />
           </UserSettingsProvider>
         </ToastPrimitive.Provider>

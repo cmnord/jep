@@ -1,9 +1,9 @@
-import { BASE_URL } from "~/utils";
+import { ENV } from "varlock/env";
 
 /** SCHEMA is the JSON schema for *.jep.json files. */
 const SCHEMA = {
   $schema: "http://json-schema.org/draft-07/schema#",
-  $id: BASE_URL + "/game.schema.json",
+  $id: ENV.BASE_URL + "/game.schema.json",
   additionalProperties: false,
   pattern: "^.*\\.jep\\.json$",
   title: "Jep! Game Schema",

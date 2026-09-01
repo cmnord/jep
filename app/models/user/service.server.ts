@@ -1,7 +1,8 @@
 import type { AuthSession } from "~/models/auth";
 import { createEmailAuthAccount, deleteAuthAccount } from "~/models/auth";
 import type { Database } from "~/models/database.types";
-import { getSupabase, getSupabaseAdmin } from "~/supabase";
+import { getSupabase } from "~/supabase";
+import { getSupabaseAdmin } from "~/supabase/admin.server";
 
 type User = Database["public"]["Tables"]["accounts"]["Row"];
 

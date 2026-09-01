@@ -1,5 +1,7 @@
-import { getSupabase, getSupabaseAdmin } from "~/supabase";
-import { SUPABASE_URL } from "~/utils";
+import { ENV } from "varlock/env";
+
+import { getSupabase } from "~/supabase";
+import { getSupabaseAdmin } from "~/supabase/admin.server";
 
 import { mapAuthSession } from "./mappers";
 import type { AuthSession } from "./types";
@@ -44,7 +46,7 @@ export function sendMagicLink(email: string) {
   return getSupabaseAdmin().auth.signInWithOtp({
     email,
     options: {
-      emailRedirectTo: `${SUPABASE_URL}/oauth/callback`,
+      emailRedirectTo: `${ENV.SUPABASE_URL}/oauth/callback`,
     },
   });
 }

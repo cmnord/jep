@@ -1,9 +1,9 @@
 import { parseFormData } from "@mjackson/form-data-parser";
 import { redirect } from "react-router";
+import { ENV } from "varlock/env";
 
 import { getValidAuthSession } from "~/models/auth";
 import { flashFormState } from "~/session.server";
-import { BASE_URL } from "~/utils";
 import { getRedirectTo, safeRedirect } from "~/utils/http.server";
 
 import type { Route } from "./+types/route";
@@ -41,7 +41,7 @@ export async function action({ request }: Route.ActionArgs) {
       return redirect(safeRedirect(redirectTo), { headers, status: 400 });
     }
 
-    const gameUrl = BASE_URL + "/game/" + gameKey + "/play";
+    const gameUrl = ENV.BASE_URL + "/game/" + gameKey + "/play";
     const formState = {
       success: true,
       message:

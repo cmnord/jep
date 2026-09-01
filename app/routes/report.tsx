@@ -1,4 +1,5 @@
 import { data, Form } from "react-router";
+import { ENV } from "varlock/env";
 import { z } from "zod";
 
 import Button from "~/components/button";
@@ -10,7 +11,7 @@ import { getValidAuthSession } from "~/models/auth";
 import { getGame } from "~/models/game.server";
 import { insertReport } from "~/models/report.server";
 import { getRoom } from "~/models/room.server";
-import { BASE_URL, GITHUB_URL } from "~/utils";
+import { GITHUB_URL } from "~/utils";
 import { parseFormData } from "~/utils/http.server";
 
 import type { Route } from "./+types/report";
@@ -27,7 +28,7 @@ export function loader({ request }: Route.LoaderArgs) {
   const searchParams = new URL(request.url).searchParams;
   const gameId = searchParams.get("gameId");
 
-  return { BASE_URL, gameId };
+  return { BASE_URL: ENV.BASE_URL, gameId };
 }
 
 export async function action({ request }: Route.ActionArgs) {
@@ -35,11 +36,11 @@ export async function action({ request }: Route.ActionArgs) {
   const { url: urlStr, reason } = parseFormData(formData, formSchema);
   const url = new URL(urlStr);
 
-  if (url.origin !== BASE_URL) {
+  if (url.origin !== ENV.BASE_URL) {
     return data(
       {
         success: false,
-        message: `URL must be from ${BASE_URL}`,
+        message: `URL must be from ${ENV.BASE_URL}`,
       },
       { status: 400 },
     );

@@ -1,5 +1,6 @@
 import * as React from "react";
 import { data, useMatches } from "react-router";
+import { ENV } from "varlock/env";
 
 import GameComponent from "~/components/game";
 import ResumePrompt from "~/components/resume-prompt";
@@ -14,7 +15,7 @@ import { getGame } from "~/models/game.server";
 import { getUserByEmail } from "~/models/user";
 import { parseUserSettings } from "~/models/user-settings";
 import { getOrCreateUserSession } from "~/session.server";
-import { BASE_URL, getRandomEmoji } from "~/utils";
+import { getRandomEmoji } from "~/utils";
 import {
   cacheGame,
   deleteSavedSoloState,
@@ -59,11 +60,20 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   // Add the user to the room. If they are logged in, their ID is their user ID.
   // If they are a guest, their ID is their guest session ID.
   if (user) {
-    return { game, userId: user.id, name, playerColor, BASE_URL };
+    return {
+      game,
+      userId: user.id,
+      name,
+      playerColor,
+      BASE_URL: ENV.BASE_URL,
+    };
   } else {
     const headers = new Headers();
     const userId = await getOrCreateUserSession(request, headers);
-    return data({ game, userId, name, playerColor, BASE_URL }, { headers });
+    return data(
+      { game, userId, name, playerColor, BASE_URL: ENV.BASE_URL },
+      { headers },
+    );
   }
 }
 

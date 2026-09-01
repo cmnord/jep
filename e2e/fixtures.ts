@@ -1,4 +1,3 @@
-import "dotenv/config";
 import { test as base, type Page } from "@playwright/test";
 
 const EMAIL = process.env.E2E_TEST_EMAIL ?? "playwright@test.local";

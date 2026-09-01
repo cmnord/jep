@@ -1,5 +1,6 @@
 import * as React from "react";
 import { useMatches } from "react-router";
+import { ENV } from "varlock/env";
 
 import GameComponent from "~/components/game";
 import ResumePrompt from "~/components/resume-prompt";
@@ -10,7 +11,6 @@ import {
   useSoloGameEngine,
 } from "~/engine";
 import { getMockGame } from "~/models/mock.server";
-import { BASE_URL } from "~/utils";
 import {
   deleteSavedSoloState,
   deserializeState,
@@ -30,7 +30,7 @@ export const meta: Route.MetaFunction = ({ loaderData }) => {
 export async function loader() {
   const game = await getMockGame();
 
-  return { game, BASE_URL };
+  return { game, BASE_URL: ENV.BASE_URL };
 }
 
 export default function PlayGame({ loaderData }: Route.ComponentProps) {

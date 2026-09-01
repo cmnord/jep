@@ -1,4 +1,5 @@
 import { data, redirect, useMatches } from "react-router";
+import { ENV } from "varlock/env";
 
 import GameComponent from "~/components/game";
 import { ActionType, GameEngineContext, useGameEngine } from "~/engine";
@@ -11,7 +12,7 @@ import { getRoom } from "~/models/room.server";
 import { getUserByEmail } from "~/models/user";
 import { parseUserSettings } from "~/models/user-settings";
 import { getOrCreateUserSession, getUserSession } from "~/session.server";
-import { BASE_URL, getRandomEmoji } from "~/utils";
+import { getRandomEmoji } from "~/utils";
 
 import type { Route } from "./+types/room.$roomName";
 
@@ -91,7 +92,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
         roomId,
         roomName,
         userId,
-        BASE_URL,
+        BASE_URL: ENV.BASE_URL,
         accessToken,
       };
     }
@@ -104,7 +105,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       roomId,
       roomName,
       userId,
-      BASE_URL,
+      BASE_URL: ENV.BASE_URL,
       accessToken,
     };
   }
@@ -121,7 +122,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       roomName,
       accessToken,
       userId,
-      BASE_URL,
+      BASE_URL: ENV.BASE_URL,
     },
     { headers },
   );

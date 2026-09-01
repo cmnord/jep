@@ -1,5 +1,6 @@
+import { ENV } from "varlock/env";
+
 import { getPublicGameSitemapEntries } from "~/models/game.server";
-import { BASE_URL } from "~/utils";
 import { INDEXABLE_PATHS } from "~/utils/seo";
 
 function escapeXml(value: string) {
@@ -34,9 +35,9 @@ export async function loader() {
     console.error("Could not add public games to sitemap", error);
   }
   const urls = [
-    ...INDEXABLE_PATHS.map((pathname) => new URL(pathname, BASE_URL)),
+    ...INDEXABLE_PATHS.map((pathname) => new URL(pathname, ENV.BASE_URL)),
     ...publicGames.map(
-      (game) => new URL(`/game/${encodeURIComponent(game.id)}`, BASE_URL),
+      (game) => new URL(`/game/${encodeURIComponent(game.id)}`, ENV.BASE_URL),
     ),
   ];
 

@@ -1,9 +1,8 @@
 import { randomUUID } from "node:crypto";
 
 import { createCookieSessionStorage } from "react-router";
+import { ENV } from "varlock/env";
 import { z } from "zod";
-
-import { NODE_ENV, SESSION_SECRET } from "~/utils";
 
 const FormStateSchema = z.object({
   success: z.boolean(),
@@ -21,8 +20,8 @@ const { getSession, commitSession } = createCookieSessionStorage({
     httpOnly: true,
     path: "/",
     sameSite: "lax",
-    secrets: [SESSION_SECRET],
-    secure: NODE_ENV === "production",
+    secrets: [ENV.SESSION_SECRET],
+    secure: ENV.NODE_ENV === "production",
   },
 });
 

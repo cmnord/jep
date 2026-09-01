@@ -1,5 +1,6 @@
 import * as React from "react";
 import { data, useFetcher } from "react-router";
+import { ENV } from "varlock/env";
 
 import Button from "~/components/button";
 import { ErrorMessage, SuccessMessage } from "~/components/error";
@@ -18,7 +19,7 @@ import { hueToPlayerColor, normalizePlayerColor } from "~/models/player-color";
 import { getSolvesForUser, type Solve } from "~/models/solves.server";
 import { getUserByEmail } from "~/models/user/service.server";
 import { getSessionFormState } from "~/session.server";
-import { BASE_URL, stringToHue } from "~/utils";
+import { stringToHue } from "~/utils";
 import { getAllCachedGames, type CachedGame } from "~/utils/offline-storage";
 import { useGameDefaults } from "~/utils/user-settings";
 
@@ -27,7 +28,7 @@ interface OnlineLoaderData {
   formState: { success: boolean; message: string } | undefined;
   games: DbGame[];
   solves: Solve[];
-  env: { BASE_URL: string };
+  BASE_URL: string;
   authSession: AuthSession;
 }
 
@@ -66,7 +67,7 @@ export async function loader({ request }: Route.LoaderArgs) {
       formState,
       games,
       solves,
-      env: { BASE_URL },
+      BASE_URL: ENV.BASE_URL,
       authSession,
     },
     { headers },
@@ -368,7 +369,7 @@ function OnlineProfile({
           {loaderData.games.map((game) => (
             <GameInfo
               key={game.id}
-              BASE_URL={loaderData.env.BASE_URL}
+              BASE_URL={loaderData.BASE_URL}
               game={game}
               fetcher={patchGame}
             />

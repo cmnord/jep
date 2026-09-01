@@ -1,6 +1,7 @@
 import { startTransition, StrictMode } from "react";
 import { hydrateRoot } from "react-dom/client";
 import { HydratedRouter } from "react-router/dom";
+import { ENV } from "varlock/env";
 
 startTransition(() => {
   hydrateRoot(
@@ -13,7 +14,7 @@ startTransition(() => {
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    if (import.meta.env.PROD) {
+    if (ENV.NODE_ENV === "production") {
       navigator.serviceWorker.register("/sw.js").catch((err) => {
         console.warn("SW registration failed:", err);
       });

@@ -2,7 +2,8 @@ import type { AuthSession } from "~/models/auth";
 import type { Board, Game as ConvertedGame } from "~/models/convert.server";
 import { Convert, GameSchema } from "~/models/convert.server";
 import type { Database } from "~/models/database.types";
-import { getSupabase, getSupabaseAdmin } from "~/supabase";
+import { getSupabase } from "~/supabase";
+import { getSupabaseAdmin } from "~/supabase/admin.server";
 
 /* Types */
 

@@ -1,19 +1,23 @@
 import { reactRouter } from "@react-router/dev/vite";
 import tailwindcss from "@tailwindcss/vite";
-import { defineConfig, loadEnv } from "vite";
+import { varlockVitePlugin } from "@varlock/vite-integration";
+import { ENV } from "varlock/env";
+import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
-export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), "");
-  const baseUrl =
-    env.BASE_URL || process.env.BASE_URL || "http://localhost:3000";
-  const port = parseInt(new URL(baseUrl).port);
+export default defineConfig(() => {
+  const port = parseInt(new URL(ENV.BASE_URL).port);
 
   return {
     server: { port },
     optimizeDeps: {
       include: ["@vercel/analytics/react"],
     },
-    plugins: [tailwindcss(), reactRouter(), tsconfigPaths()],
+    plugins: [
+      varlockVitePlugin({ ssrInjectMode: "init-only" }),
+      tailwindcss(),
+      reactRouter(),
+      tsconfigPaths(),
+    ],
   };
 });
