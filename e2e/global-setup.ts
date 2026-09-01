@@ -1,4 +1,3 @@
-import "dotenv/config";
 import { createClient } from "@supabase/supabase-js";
 
 const EMAIL = process.env.E2E_TEST_EMAIL ?? "playwright@test.local";

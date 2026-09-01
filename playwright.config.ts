@@ -5,7 +5,7 @@ const host = process.env.HOST ?? "127.0.0.1";
 const port = process.env.PORT ?? "3000";
 const webServerCommand = useDevServer
   ? "npm run dev"
-  : `HOST=${host} PORT=${port} node -r dotenv/config node_modules/.bin/react-router-serve ./build/server/index.js`;
+  : `HOST=${host} PORT=${port} react-router-serve ./build/server/index.js`;
 
 export default defineConfig({
   testDir: "./e2e",

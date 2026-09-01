@@ -1,10 +1,9 @@
 import { href } from "react-router";
-
-import { BASE_URL } from "~/utils";
+import { ENV } from "varlock/env";
 
 export function loader() {
   // Crawlers need access to every route in order to see its noindex directive.
-  const sitemapUrl = new URL(href("/sitemap.xml"), BASE_URL).toString();
+  const sitemapUrl = new URL(href("/sitemap.xml"), ENV.BASE_URL).toString();
   const body = `User-agent: *
 Allow: /
 Sitemap: ${sitemapUrl}

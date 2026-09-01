@@ -6,7 +6,7 @@ import tseslint from "typescript-eslint";
 
 export default defineConfig(
   {
-    ignores: ["node_modules/", "build/", "api/", ".react-router/"],
+    ignores: ["node_modules/", "build/", "api/", ".react-router/", "env.d.ts"],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,

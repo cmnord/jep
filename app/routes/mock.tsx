@@ -1,9 +1,9 @@
 import { useMatches } from "react-router";
+import { ENV } from "varlock/env";
 
 import GameComponent from "~/components/game";
 import { GameEngineContext, useSoloGameEngine } from "~/engine";
 import { getMockGame } from "~/models/mock.server";
-import { BASE_URL } from "~/utils";
 
 import type { Route } from "./+types/mock";
 
@@ -20,7 +20,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   const gameName = url.searchParams.get("game") ?? undefined;
   const game = await getMockGame(gameName);
 
-  return { game, BASE_URL };
+  return { game, BASE_URL: ENV.BASE_URL };
 }
 
 export default function PlayGame({ loaderData }: Route.ComponentProps) {

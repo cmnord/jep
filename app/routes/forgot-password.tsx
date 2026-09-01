@@ -1,4 +1,5 @@
 import { data, Form, useNavigation } from "react-router";
+import { ENV } from "varlock/env";
 import { z } from "zod";
 
 import Button from "~/components/button";
@@ -7,7 +8,6 @@ import Input from "~/components/input";
 import Link from "~/components/link";
 import Main from "~/components/main";
 import { sendPasswordResetEmail } from "~/models/auth";
-import { BASE_URL } from "~/utils";
 import { assertIsPost, parseFormData } from "~/utils/http.server";
 
 import type { Route } from "./+types/forgot-password";
@@ -23,7 +23,7 @@ export async function action({ request }: Route.ActionArgs) {
 
   // Always show success to prevent email enumeration.
   try {
-    await sendPasswordResetEmail(email, BASE_URL + "/reset-password");
+    await sendPasswordResetEmail(email, ENV.BASE_URL + "/reset-password");
   } catch {
     // Silently ignore errors to prevent email enumeration.
   }

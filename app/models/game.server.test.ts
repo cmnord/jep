@@ -6,6 +6,9 @@ const { getSupabase } = vi.hoisted(() => ({
 
 vi.mock("~/supabase", () => ({
   getSupabase,
+}));
+
+vi.mock("~/supabase/admin.server", () => ({
   getSupabaseAdmin: vi.fn(),
 }));
 

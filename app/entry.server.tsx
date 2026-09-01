@@ -11,8 +11,8 @@ import { isbot } from "isbot";
 import { renderToPipeableStream } from "react-dom/server";
 import type { EntryContext } from "react-router";
 import { ServerRouter } from "react-router";
+import { ENV } from "varlock/env";
 
-import { BASE_URL, SUPABASE_URL } from "~/utils";
 import { getSearchMetadata, NO_INDEX_DIRECTIVES } from "~/utils/seo";
 
 export const streamTimeout = 5_000;
@@ -39,7 +39,7 @@ export default function handleRequest(
 ) {
   const searchMetadata = getSearchMetadata(
     new URL(request.url).pathname,
-    BASE_URL,
+    ENV.BASE_URL,
     isPublicGamePreviewData(
       reactRouterContext.staticHandlerContext.loaderData[
         "routes/game_.$gameId_"
@@ -83,7 +83,7 @@ export default function handleRequest(
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline'",
       "style-src 'self' 'unsafe-inline'",
-      `connect-src 'self' ${SUPABASE_URL} ws://${new URL(SUPABASE_URL).host} wss://${new URL(SUPABASE_URL).host}`,
+      `connect-src 'self' ${ENV.SUPABASE_URL} ws://${new URL(ENV.SUPABASE_URL).host} wss://${new URL(ENV.SUPABASE_URL).host}`,
       "img-src 'self' data: https://www.j-archive.com https://upload.wikimedia.org",
     ].join("; "),
   );

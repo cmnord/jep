@@ -1,4 +1,3 @@
-export * from "./env";
 export * from "./is-browser";
 export { getRandomEmoji, getRandomName } from "./name";
 export {

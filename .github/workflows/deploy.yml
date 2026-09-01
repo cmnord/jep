@@ -38,6 +38,13 @@ jobs:
 
       - name: 🔎 Type check
         run: npm run typecheck
+        # React Router typegen loads the Vite config, which makes Varlock
+        # validate the complete schema. Typechecking never uses these values,
+        # so non-secret placeholders are sufficient.
+        env:
+          SESSION_SECRET: ${{ github.sha }}
+          SUPABASE_ANON_KEY: "typecheck-only-key"
+          SUPABASE_SERVICE_ROLE_KEY: ${{ github.sha }}
 
       - name: ⚡ Run vitest
         run: npm run test -- --run
@@ -49,9 +56,6 @@ jobs:
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v4
-
-      - name: 🏄 Copy test env vars
-        run: cp .env.example .env
 
       - name: ⎔ Setup node
         uses: actions/setup-node@v4
@@ -74,8 +78,7 @@ jobs:
         run: npm run test:e2e:run
         env:
           CI: "true"
-          PORT: "8811"
-          BASE_URL: "http://localhost:8811"
+          SESSION_SECRET: ${{ github.sha }}
 
       - name: 📤 Upload Playwright report
         uses: actions/upload-artifact@v4

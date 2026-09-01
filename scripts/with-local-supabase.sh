@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Run a command with credentials from the active local Supabase stack instead
-# of potentially stale values copied from a developer's environment file.
+# of potentially stale values in a developer's local override file.
 
 set -euo pipefail
 
@@ -11,8 +11,8 @@ if [[ $# -eq 0 ]]; then
 fi
 
 # Supabase generates these credentials for the active local stack. They can
-# change across CLI upgrades, so prefer them over values copied in from .env.
-status_env="$(npx supabase status -o env)"
+# change across CLI upgrades, so prefer them over values in .env.local.
+status_env="$(npm run --silent db:status)"
 while IFS="=" read -r name value; do
   value="${value#\"}"
   value="${value%\"}"

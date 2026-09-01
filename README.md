@@ -24,12 +24,11 @@ npm run db:start
 
 Set environment variables. In particular, set `SUPABASE_URL`,
 `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` from the results of `npx
-supabase status`.
+supabase status`, and replace `SESSION_SECRET` with a long random value.
 
 ```sh
-cp .env.example .env
-vim .env # add secrets to .env
-source .env
+vim .env.local
+npm exec -- varlock load
 ```
 
 Afterwards, start the development server like so:
@@ -69,25 +68,25 @@ View mock emails sent for password reset and email verification at
 Link to your own production Supabase project with:
 
 ```sh
-npx supabase link --project-ref $SUPABASE_PROJECT_REF --password $SUPABASE_DB_PASSWORD
+npm run db:link
 ```
 
 ### Make a migration[^1]
 
 ```sh
-npx supabase db diff -f my_migration_name
+npm run db:migration:new -- my_migration_name
 ```
 
 ### Deploy a migration[^2]
 
 ```sh
-npx supabase db push
+npm run db:push
 ```
 
 ### Generate Typescript types from the database schema:
 
 ```sh
-npx supabase gen types typescript --linked > app/models/database.types.ts
+npm run db:types
 ```
 
 ## Tools used
@@ -97,6 +96,7 @@ npx supabase gen types typescript --linked > app/models/database.types.ts
 - Hosting, deployment: [Vercel](https://vercel.com)
 - Database: [Supabase](https://supabase.com/)
 - UI components: [Radix UI](https://radix-ui.com/)
+- Environment validation: [Varlock][varlock]
 
 ## Thanks
 
@@ -118,6 +118,7 @@ npx supabase gen types typescript --linked > app/models/database.types.ts
 [jep]: https://whatis.club
 [blog]: https://clairenord.com/jep.html
 [docker]: https://www.docker.com/
+[varlock]: https://varlock.dev/
 
 [^1]: https://supabase.com/docs/guides/cli/local-development#database-migrations
 

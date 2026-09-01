@@ -6,5 +6,5 @@
   "experimentalSortImports": {},
   "printWidth": 80,
   "experimentalSortPackageJson": false,
-  "ignorePatterns": []
+  "ignorePatterns": ["env.d.ts"]
 }
