@@ -21,23 +21,26 @@ jobs:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v4
 
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: ⎔ Setup node
         uses: actions/setup-node@v4
         with:
           node-version-file: .node-version
-          cache: npm
+          cache: pnpm
 
       - name: 📥 Download deps
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: 💅 Format check
-        run: npm run format:check
+        run: pnpm format:check
 
       - name: 🔬 Lint
-        run: npm run lint
+        run: pnpm lint
 
       - name: 🔎 Type check
-        run: npm run typecheck
+        run: pnpm typecheck
         # React Router typegen loads the Vite config, which makes Varlock
         # validate the complete schema. Typechecking never uses these values,
         # so non-secret placeholders are sufficient.
@@ -47,7 +50,7 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ github.sha }}
 
       - name: ⚡ Run vitest
-        run: npm run test -- --run
+        run: pnpm test -- --run
 
   playwright:
     name: 🎭 Playwright
@@ -57,25 +60,28 @@ jobs:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v4
 
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: ⎔ Setup node
         uses: actions/setup-node@v4
         with:
           node-version-file: .node-version
-          cache: npm
+          cache: pnpm
 
       - name: 📥 Download deps
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: 🛠 Setup Database
         # GitHub's ubuntu-latest image provides a running Docker Engine.
         # db:start only starts the kong and postgrest containers.
-        run: npm run db:start
+        run: pnpm db:start
 
       - name: 🌐 Install Playwright browsers
-        run: npx playwright install --with-deps chromium
+        run: pnpm exec playwright install --with-deps chromium
 
       - name: 🎭 Playwright run
-        run: npm run test:e2e:run
+        run: pnpm test:e2e:run
         env:
           CI: "true"
           SESSION_SECRET: ${{ github.sha }}

@@ -5,18 +5,18 @@ setup = "./scripts/setup.sh"
 run_mode = "nonconcurrent"
 
 [scripts.run.dev]
-command = "npm run db:start && ./scripts/with-local-supabase.sh npm run dev -- --host 0.0.0.0 --port ${CONDUCTOR_PORT:-3000}"
+command = "pnpm db:start && ./scripts/with-local-supabase.sh pnpm dev --host 0.0.0.0 --port ${CONDUCTOR_PORT:-3000}"
 default = true
 icon = "play"
 
 [scripts.run.test]
-command = "npm run test"
+command = "pnpm test"
 icon = "test-tube"
 
 [scripts.run.validate]
-command = "npm run db:start && npm run validate"
+command = "pnpm db:start && pnpm validate"
 icon = "badge-check"
 
 [scripts.run.database]
-command = "npm run db:start"
+command = "pnpm db:start"
 icon = "database"

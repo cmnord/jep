@@ -2,8 +2,8 @@
 
 set -euo pipefail
 
-npm ci
-npx playwright install chromium
+corepack pnpm install --frozen-lockfile
+corepack pnpm exec playwright install chromium
 
 if [[ "$(uname -s)" == "Linux" ]]; then
   ./scripts/setup-linux.sh

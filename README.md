@@ -19,22 +19,22 @@ Next, run the project setup script to install its locked dependencies:
 Start the Supabase project:
 
 ```sh
-npm run db:start
+pnpm db:start
 ```
 
 Set environment variables. In particular, set `SUPABASE_URL`,
-`SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` from the results of `npx
-supabase status`, and replace `SESSION_SECRET` with a long random value.
+`SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` from the results of `pnpm
+exec supabase status`, and replace `SESSION_SECRET` with a long random value.
 
 ```sh
 vim .env.local
-npm exec -- varlock load
+pnpm exec varlock load
 ```
 
 Afterwards, start the development server like so:
 
 ```sh
-npm run dev
+pnpm dev
 ```
 
 Open up [http://localhost:3000](http://localhost:3000) and you should be ready to go!
@@ -44,7 +44,7 @@ project is already running even though its containers are exited. Recover the
 local stack without deleting its data with:
 
 ```sh
-npm run db:restart
+pnpm db:restart
 ```
 
 ### Conductor
@@ -68,25 +68,25 @@ View mock emails sent for password reset and email verification at
 Link to your own production Supabase project with:
 
 ```sh
-npm run db:link
+pnpm db:link
 ```
 
 ### Make a migration[^1]
 
 ```sh
-npm run db:migration:new -- my_migration_name
+pnpm db:migration:new my_migration_name
 ```
 
 ### Deploy a migration[^2]
 
 ```sh
-npm run db:push
+pnpm db:push
 ```
 
 ### Generate Typescript types from the database schema:
 
 ```sh
-npm run db:types
+pnpm db:types
 ```
 
 ## Tools used
