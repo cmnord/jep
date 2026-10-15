@@ -45,9 +45,6 @@ export default defineConfig({
 
   webServer: {
     command: webServerCommand,
-    // Vercel imports the built server without `varlock run`. Prevent the
-    // Playwright process's Varlock payload from hiding initialization bugs.
-    env: useDevServer ? undefined : { __VARLOCK_ENV: "" },
     url: `http://localhost:${port}`,
     reuseExistingServer: !process.env.CI,
     timeout: 30_000,
