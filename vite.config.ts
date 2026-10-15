@@ -14,7 +14,14 @@ export default defineConfig(() => {
       include: ["@vercel/analytics/react"],
     },
     plugins: [
-      varlockVitePlugin({ ssrInjectMode: "init-only" }),
+      varlockVitePlugin({
+        // Initialize from build-time config, including on Vercel where the
+        // platform imports the server directly without `varlock run`.
+        ssrInjectMode: "resolved-env",
+        // React Router's virtual entry has no extension, so Varlock's
+        // automatic entry detection does not recognize it.
+        ssrEntryModuleIds: ["\0virtual:react-router/server-build"],
+      }),
       tailwindcss(),
       reactRouter(),
       tsconfigPaths(),
