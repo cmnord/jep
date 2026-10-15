@@ -52,6 +52,13 @@ jobs:
       - name: ⚡ Run vitest
         run: pnpm test -- --run
 
+      - name: 🥶 Check Vercel server cold start
+        run: pnpm test:server
+        env:
+          SESSION_SECRET: ${{ github.sha }}
+          SUPABASE_ANON_KEY: "startup-check-only-key"
+          SUPABASE_SERVICE_ROLE_KEY: ${{ github.sha }}
+
   playwright:
     name: 🎭 Playwright
     runs-on: ubuntu-latest
