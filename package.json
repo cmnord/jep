@@ -21,11 +21,10 @@
     "test": "vitest --coverage",
     "test:coverage": "open coverage/index.html; vitest --coverage",
     "test:e2e:dev": "PW_USE_DEV_SERVER=1 pnpm exec playwright test --ui",
-    "test:e2e:execute": "pnpm build && varlock run -- playwright test",
+    "test:e2e:execute": "VERCEL=1 pnpm build && varlock run -- playwright test",
     "test:e2e:run": "./scripts/with-local-supabase.sh pnpm test:e2e:execute",
-    "test:server": "VERCEL=1 pnpm build && node scripts/check-server-startup.mjs",
     "typecheck": "varlock codegen && react-router typegen && tsc -b",
-    "validate": "run-p \"test -- --run\" format lint typecheck && pnpm test:server && pnpm test:e2e:run"
+    "validate": "run-p \"test -- --run\" format lint typecheck && pnpm test:e2e:run"
   },
   "dependencies": {
     "@fontsource-variable/caveat": "^5.2.8",
