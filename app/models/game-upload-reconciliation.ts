@@ -1,8 +1,10 @@
 import { canonicalJson, normalizeGame } from "./game-upload-contract";
 
-// Legacy inserts did not retain source ordering. Reconciliation compares full
-// category/clue multisets within each round, including duplicates and metadata.
-// Normal API idempotency continues to compare ordered, normalized content.
+// This migrates upload receipts onto existing games without reinserting them.
+// Source ordering means the category/clue array order in the original JSON.
+// Old rows have no explicit array-position columns, so reads cannot reliably
+// reconstruct that order. Compare full multisets within each round instead,
+// preserving duplicate counts and metadata. Normal API retries remain ordered.
 export function legacyGamesEquivalent(existing: unknown, incoming: unknown) {
   function comparable(input: unknown) {
     const game = normalizeGame(input);
