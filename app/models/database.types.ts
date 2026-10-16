@@ -131,6 +131,118 @@ export type Database = {
           },
         ];
       };
+      game_upload_receipts: {
+        Row: {
+          content: Json;
+          content_hash: string;
+          created_at: string;
+          game_id: string | null;
+          key: string;
+          uploader_id: string;
+        };
+        Insert: {
+          content: Json;
+          content_hash: string;
+          created_at?: string;
+          game_id?: string | null;
+          key: string;
+          uploader_id: string;
+        };
+        Update: {
+          content?: Json;
+          content_hash?: string;
+          created_at?: string;
+          game_id?: string | null;
+          key?: string;
+          uploader_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "game_upload_receipts_game_id_fkey";
+            columns: ["game_id"];
+            isOneToOne: false;
+            referencedRelation: "games";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "game_upload_receipts_uploader_id_fkey";
+            columns: ["uploader_id"];
+            isOneToOne: false;
+            referencedRelation: "game_uploaders";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      game_upload_reservations: {
+        Row: {
+          key: string;
+          uploader_id: string;
+        };
+        Insert: {
+          key: string;
+          uploader_id: string;
+        };
+        Update: {
+          key?: string;
+          uploader_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "game_upload_reservations_uploader_id_fkey";
+            columns: ["uploader_id"];
+            isOneToOne: false;
+            referencedRelation: "game_uploaders";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      game_upload_tokens: {
+        Row: {
+          created_at: string;
+          revoked_at: string | null;
+          token_hash: string;
+          uploader_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          revoked_at?: string | null;
+          token_hash: string;
+          uploader_id: string;
+        };
+        Update: {
+          created_at?: string;
+          revoked_at?: string | null;
+          token_hash?: string;
+          uploader_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "game_upload_tokens_uploader_id_fkey";
+            columns: ["uploader_id"];
+            isOneToOne: false;
+            referencedRelation: "game_uploaders";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      game_uploaders: {
+        Row: {
+          enabled: boolean;
+          id: string;
+          name: string;
+        };
+        Insert: {
+          enabled?: boolean;
+          id?: string;
+          name: string;
+        };
+        Update: {
+          enabled?: boolean;
+          id?: string;
+          name?: string;
+        };
+        Relationships: [];
+      };
       games: {
         Row: {
           author: string;
@@ -323,7 +435,35 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      create_game_atomic: {
+        Args: {
+          p_game: Json;
+          p_uploaded_by?: string;
+          p_visibility: Database["public"]["Enums"]["game_visibility"];
+        };
+        Returns: string;
+      };
+      game_upload_snapshot: { Args: { p_game_id: string }; Returns: Json };
+      reconcile_game_upload: {
+        Args: {
+          p_content_hash: string;
+          p_expected_snapshot: Json;
+          p_game: Json;
+          p_game_id: string;
+          p_key: string;
+          p_uploader: string;
+        };
+        Returns: undefined;
+      };
+      upload_game: {
+        Args: {
+          p_content_hash: string;
+          p_game: Json;
+          p_key: string;
+          p_token_hash: string;
+        };
+        Returns: Json;
+      };
     };
     Enums: {
       game_visibility: "PUBLIC" | "PRIVATE" | "UNLISTED";
