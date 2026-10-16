@@ -1,0 +1,70 @@
+{
+  "apiVersion": "1",
+  "idempotencyKey": "example:1",
+  "input": {
+    "title": "  Example game  ",
+    "author": "Uploader",
+    "copyright": "",
+    "note": "",
+    "ignored": "stripped",
+    "boards": [
+      {
+        "categoryNames": ["Unicode 🎲"],
+        "categories": [
+          {
+            "name": "Unicode 🎲",
+            "clues": [
+              {
+                "clue": " What is 2 + 2? ",
+                "answer": " 4 ",
+                "value": 200
+              },
+              {
+                "clue": "A final question",
+                "answer": "An answer",
+                "value": 0,
+                "wagerable": true,
+                "longForm": true
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "normalized": {
+    "title": "Example game",
+    "author": "Uploader",
+    "copyright": "",
+    "note": "",
+    "boards": [
+      {
+        "categoryNames": ["Unicode 🎲"],
+        "categories": [
+          {
+            "name": "Unicode 🎲",
+            "clues": [
+              {
+                "clue": "What is 2 + 2?",
+                "answer": "4",
+                "value": 200,
+                "wagerable": false,
+                "longForm": false
+              },
+              {
+                "clue": "A final question",
+                "answer": "An answer",
+                "value": 0,
+                "wagerable": true,
+                "longForm": true
+              }
+            ],
+            "note": ""
+          }
+        ]
+      }
+    ]
+  },
+  "canonicalJson": "{\"author\":\"Uploader\",\"boards\":[{\"categories\":[{\"clues\":[{\"answer\":\"4\",\"clue\":\"What is 2 + 2?\",\"longForm\":false,\"value\":200,\"wagerable\":false},{\"answer\":\"An answer\",\"clue\":\"A final question\",\"longForm\":true,\"value\":0,\"wagerable\":true}],\"name\":\"Unicode 🎲\",\"note\":\"\"}],\"categoryNames\":[\"Unicode 🎲\"]}],\"copyright\":\"\",\"note\":\"\",\"title\":\"Example game\"}",
+  "contentHash": "b2c921d667ce8892633b4b0505c618cbfe581520137e0bea769f9d865395419e"
+}

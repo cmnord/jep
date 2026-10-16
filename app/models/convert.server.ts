@@ -26,7 +26,11 @@ export const ClueSchema = z
   .object({
     clue: z.string().trim().min(1, "clue must not be empty"),
     answer: z.string().trim().min(1, "answer must not be empty"),
-    value: z.number(),
+    value: z
+      .number()
+      .int()
+      .min(Number.MIN_SAFE_INTEGER)
+      .max(Number.MAX_SAFE_INTEGER),
     imageSrc: z
       .string()
       .trim()
