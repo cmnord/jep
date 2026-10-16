@@ -89,7 +89,10 @@ export async function action({ request }: { request: Request }) {
         if (done) break;
         size += value.byteLength;
         if (size > MAX_BODY_BYTES) {
-          await reader.cancel();
+          // Cancelling the Node request stream destroys its socket before the
+          // adapter can send 413. Release it; Connection: close ends the request
+          // after the error response without buffering the remaining body.
+          reader.releaseLock();
           return failure(
             413,
             "payload_too_large",
