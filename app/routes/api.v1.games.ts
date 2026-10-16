@@ -1,17 +1,13 @@
-import { createHash } from "node:crypto";
-
 import { ENV } from "varlock/env";
 import { z } from "zod";
 
-import { normalizeGame, gameContentHash } from "~/models/game-upload-contract";
-import { getSupabaseAdmin } from "~/supabase/admin.server";
+import { normalizeGame } from "~/models/game-upload-contract";
+import {
+  authenticateGameUpload,
+  uploadGame,
+} from "~/models/game-upload.server";
 
 const MAX_BODY_BYTES = 1_000_000;
-const resultSchema = z.object({
-  result: z.enum(["created", "replayed"]),
-  gameId: z.uuid(),
-  contentHash: z.string().regex(/^[0-9a-f]{64}$/),
-});
 
 function failure(
   status: number,
@@ -19,22 +15,15 @@ function failure(
   message: string,
   issues?: unknown,
 ) {
+  const headers = new Headers({ "Cache-Control": "no-store" });
+  // Reusing a connection with an unread oversized body caused socket resets
+  // in integration tests. Close it after delivering the 413 response.
+  if (status === 413) headers.set("Connection", "close");
+  if (status === 401) headers.set("WWW-Authenticate", "Bearer");
+  if (status === 405) headers.set("Allow", "POST");
   return Response.json(
-    {
-      apiVersion: "1",
-      error: { code, message, ...(issues ? { issues } : {}) },
-    },
-    {
-      status,
-      headers: {
-        "Cache-Control": "no-store",
-        // A rejected oversized request may still be transmitting its body.
-        // Do not reuse that HTTP/1 connection for the client's next request.
-        ...(status === 413 ? { Connection: "close" } : {}),
-        ...(status === 401 ? { "WWW-Authenticate": "Bearer" } : {}),
-        ...(status === 405 ? { Allow: "POST" } : {}),
-      },
-    },
+    { apiVersion: "1", error: { code, message, issues } },
+    { status, headers },
   );
 }
 
@@ -44,24 +33,11 @@ export function loader() {
 
 export async function action({ request }: { request: Request }) {
   if (request.method !== "POST") return loader();
-  const token = /^Bearer (jep_upload_[A-Za-z0-9_-]{43})$/i.exec(
-    request.headers.get("Authorization") ?? "",
-  )?.[1];
-  if (!token)
-    return failure(401, "unauthorized", "A valid upload token is required.");
-  const tokenHash = createHash("sha256").update(token).digest("hex");
   try {
-    const client = getSupabaseAdmin();
-    // Reject credentials before reading/parsing the request. The RPC repeats
-    // this check under locks so revocation cannot race with creation.
-    const { data: credential, error: authError } = await client
-      .from("game_upload_tokens")
-      .select("uploader_id, game_uploaders!inner(enabled)")
-      .eq("token_hash", tokenHash)
-      .is("revoked_at", null)
-      .maybeSingle();
-    if (authError) throw authError;
-    if (!credential?.game_uploaders.enabled)
+    const tokenHash = await authenticateGameUpload(
+      request.headers.get("Authorization"),
+    );
+    if (!tokenHash)
       return failure(401, "unauthorized", "A valid upload token is required.");
     const key = request.headers.get("Idempotency-Key");
     if (!key || !/^[\x21-\x7e]{1,200}$/.test(key))
@@ -127,16 +103,9 @@ export async function action({ request }: { request: Request }) {
         );
       throw error;
     }
-    const { data, error } = await client.rpc("upload_game", {
-      p_token_hash: tokenHash,
-      p_key: key,
-      p_game: game,
-      p_content_hash: gameContentHash(game),
-    });
-    if (error) throw error;
-    const problem = z.object({ error: z.string() }).safeParse(data);
-    if (problem.success) {
-      const code = problem.data.error;
+    const result = await uploadGame(tokenHash, key, game);
+    if ("error" in result) {
+      const code = result.error;
       if (code === "unauthorized")
         return failure(401, code, "A valid upload token is required.");
       if (code === "idempotency_conflict")
@@ -159,7 +128,6 @@ export async function action({ request }: { request: Request }) {
         );
       throw new Error("Unexpected upload result");
     }
-    const result = resultSchema.parse(data);
     return Response.json(
       {
         apiVersion: "1",

@@ -89,11 +89,6 @@ pnpm db:push
 pnpm db:types
 ```
 
-## Game upload API
-
-See [the v1 contract and operator guide](docs/game-upload-api.md) for upload-only
-credentials, idempotency, legacy reconciliation, and deployment order.
-
 ## Tools used
 
 - Web framework: [React Router v7](https://reactrouter.com/)

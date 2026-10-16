@@ -7,6 +7,10 @@ const webServerCommand = useDevServer
   ? "pnpm dev"
   : `HOST=${host} PORT=${port} react-router-serve ./build/server/index.js`;
 
+// One shared selector keeps the two projects disjoint.
+const databaseSpecs =
+  /(auth|solves|game-management|settings|upload-api)\.spec\.ts/;
+
 export default defineConfig({
   testDir: "./e2e",
   globalSetup: "./e2e/global-setup.ts",
@@ -29,12 +33,12 @@ export default defineConfig({
     {
       name: "solo",
       use: { ...devices["Desktop Chrome"] },
-      testIgnore: /(auth|solves|game-management|settings|upload-api)\.spec\.ts/,
+      testIgnore: databaseSpecs,
     },
     {
       name: "db",
       use: { ...devices["Desktop Chrome"] },
-      testMatch: /(auth|solves|game-management|settings|upload-api)\.spec\.ts/,
+      testMatch: databaseSpecs,
       dependencies: ["solo"],
       // These specs share one test user and one database, so they cannot
       // run concurrently with each other.
