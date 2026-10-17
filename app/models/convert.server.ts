@@ -26,7 +26,8 @@ export const ClueSchema = z
   .object({
     clue: z.string().trim().min(1, "clue must not be empty"),
     answer: z.string().trim().min(1, "answer must not be empty"),
-    value: z.number(),
+    // PostgreSQL stores whole points; Zod's int() also rejects unsafe JS integers.
+    value: z.number().int(),
     imageSrc: z
       .string()
       .trim()
