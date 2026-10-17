@@ -1,5 +1,6 @@
 import { createHash, randomBytes } from "node:crypto";
 import { readFile, writeFile, unlink } from "node:fs/promises";
+import { parseArgs } from "node:util";
 
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
@@ -26,27 +27,82 @@ import { legacyGamesEquivalent } from "../app/models/game-upload-reconciliation"
  * hash. Back up client identities, reservations and receipts alongside games.
  * Retire the importer's old management PAT separately after verified cutover.
  */
-const usage = `Usage: pnpm upload:admin <command> ...
+const usage = `Manage API credentials and reconcile existing game uploads.
+Usage: pnpm upload:admin <command> ...
+
+Credentials:
   create <name>                              Create a disabled API client
   token <uploader UUID> <new-secret-file>     Issue games:upload token (0600); print hash
   revoke <token SHA256>                      Revoke one token
   enable|disable <uploader UUID>             Enable only after reservation setup
+
+Existing-game migration:
   reserve <uploader UUID> <keys.json>         Reserve keys; uploader must be disabled
   reconcile <uploader UUID> <mappings.json> [--write]   Preview by default
   release <uploader UUID> <key> --write --reason <evidence>
 
 keys.json: array of key strings. mappings.json: array of
 {idempotencyKey, gameId, game}. Only operators have the service-role credential.
-All commands except reconcile preview mutate the configured database.`;
-const [command, first, second, ...options] = process.argv.slice(2);
-if (!command || command === "--help") {
+All commands except reconcile preview mutate the configured database.
+Example: pnpm upload:admin create 'archive client'
+Help: -h, --help (also after a command). Issues: https://github.com/cmnord/jep/issues`;
+const args = process.argv.slice(2);
+if (
+  !args.length ||
+  args.includes("--help") ||
+  args.includes("-h") ||
+  args[0] === "help"
+) {
   console.log(usage);
   process.exit(0);
 }
+let parsed;
+try {
+  parsed = parseArgs({
+    args,
+    allowPositionals: true,
+    options: { write: { type: "boolean" }, reason: { type: "string" } },
+  });
+  const [command, ...parameters] = parsed.positionals;
+  const arity: Record<string, number> = {
+    create: 1,
+    token: 2,
+    revoke: 1,
+    enable: 1,
+    disable: 1,
+    reserve: 2,
+    reconcile: 2,
+    release: 2,
+  };
+  if (!Object.hasOwn(arity, command))
+    throw new Error(`Unknown command: ${command}`);
+  if (parameters.length !== arity[command])
+    throw new Error(`${command} requires ${arity[command]} arguments.`);
+  if (parsed.values.write && command !== "reconcile" && command !== "release")
+    throw new Error(`--write is not supported by ${command}.`);
+  if (parsed.values.reason !== undefined && command !== "release")
+    throw new Error(`--reason is only supported by release.`);
+  if (
+    command === "release" &&
+    (!parsed.values.write || !parsed.values.reason?.trim())
+  )
+    throw new Error("release requires --write and --reason <evidence>.");
+} catch (error) {
+  console.error(
+    `${error instanceof Error ? error.message : "Invalid arguments"}\nRun pnpm upload:admin --help for usage.`,
+  );
+  process.exit(1);
+}
+const [command, first, second] = parsed.positionals;
+const { write, reason } = parsed.values;
+// Help and argument errors must work before loading any credentials.
+await import("varlock/auto-load");
 const url = process.env.SUPABASE_URL;
 const secret = process.env.SUPABASE_SERVICE_ROLE_KEY;
-if (!url || !secret)
-  throw new Error("SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required");
+if (!url || !secret) {
+  console.error("SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required");
+  process.exit(1);
+}
 const client = createClient<Database>(url, secret, {
   auth: { persistSession: false, autoRefreshToken: false },
 });
@@ -141,7 +197,6 @@ try {
       )
       .min(1)
       .parse(JSON.parse(await readFile(second, "utf8")));
-    if (options.some((option) => option !== "--write")) throw new Error(usage);
     for (const mapping of mappings) {
       const game = normalizeGame(mapping.game);
       const { data: snapshot, error } = await client.rpc(
@@ -181,7 +236,7 @@ try {
         throw new Error(
           `Content mismatch or missing game: ${mapping.idempotencyKey} / ${mapping.gameId}`,
         );
-      if (options.includes("--write")) {
+      if (write) {
         const { error: reconcileError } = await client.rpc(
           "reconcile_game_upload",
           {
@@ -200,22 +255,13 @@ try {
           key: mapping.idempotencyKey,
           gameId: mapping.gameId,
           contentHash: gameContentHash(game),
-          result: options.includes("--write")
-            ? "reconciled"
-            : "verified_preview",
+          result: write ? "reconciled" : "verified_preview",
         }),
       );
     }
   } else if (command === "release") {
     const id = z.uuid().parse(first);
     const key = keySchema.parse(second);
-    if (
-      options[0] !== "--write" ||
-      options[1] !== "--reason" ||
-      !options[2]?.trim() ||
-      options.length !== 3
-    )
-      throw new Error(usage);
     await disabled(id);
     const { error } = await client
       .from("game_upload_reservations")
@@ -223,9 +269,7 @@ try {
       .eq("uploader_id", id)
       .eq("key", key);
     check(error);
-    console.log(
-      JSON.stringify({ released: key, uploaderId: id, reason: options[2] }),
-    );
+    console.log(JSON.stringify({ released: key, uploaderId: id, reason }));
   } else {
     throw new Error(usage);
   }
