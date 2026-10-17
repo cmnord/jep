@@ -12,6 +12,20 @@ import {
 } from "../app/models/game-upload-contract";
 import { legacyGamesEquivalent } from "../app/models/game-upload-reconciliation";
 
+/**
+ * Apply the database migration before deploying Jep. With server credentials in
+ * varlock, run create -> reserve -> reconcile (preview, then --write) -> token ->
+ * enable. New clients without prior imports can skip reserve/reconcile.
+ * For jarchive, reserve ALL jarchive:1..9556 before activation; its migration
+ * exporter provides reservations and 185 verified mappings. Unknown historical
+ * UUIDs remain guarded until verified reconciliation or proven never-imported
+ * release. Never infer identity from titles. See cmnord/jarchive's README.
+ *
+ * Give clients only the token file and canonical BASE_URL, using workspace secrets
+ * or ignored env files. Rotate tokens on the SAME client UUID, then revoke the old
+ * hash. Back up client identities, reservations and receipts alongside games.
+ * Retire the importer's old management PAT separately after verified cutover.
+ */
 const usage = `Usage: pnpm upload:admin <command> ...
   create <name>                              Create a disabled API client
   token <uploader UUID> <new-secret-file>     Issue games:upload token (0600); print hash

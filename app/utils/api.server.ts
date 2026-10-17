@@ -53,14 +53,13 @@ export async function readIdempotentApiRequest(
   ) {
     throw apiFailure(415, "unsupported_media_type", "Use application/json.");
   }
-  const tooLarge = () =>
-    apiFailure(
-      413,
-      "payload_too_large",
-      `Body exceeds ${maxBodyBytes.toLocaleString("en-US")} bytes.`,
-    );
+  const tooLarge = apiFailure(
+    413,
+    "payload_too_large",
+    `Body exceeds ${maxBodyBytes.toLocaleString("en-US")} bytes.`,
+  );
   if (Number(request.headers.get("Content-Length")) > maxBodyBytes)
-    throw tooLarge();
+    throw tooLarge;
   const reader = request.body?.getReader();
   const chunks: Uint8Array[] = [];
   let size = 0;
@@ -70,10 +69,10 @@ export async function readIdempotentApiRequest(
       if (done) break;
       size += value.byteLength;
       if (size > maxBodyBytes) {
-        // Cancelling the Node stream destroys the socket before 413 is sent.
-        // Release it; Connection: close ends it after the response instead.
+        // Release the reader's ownership without cancelling the request:
+        // cancellation closes the socket before we can send the 413 response.
         reader.releaseLock();
-        throw tooLarge();
+        throw tooLarge;
       }
       chunks.push(value);
     }
