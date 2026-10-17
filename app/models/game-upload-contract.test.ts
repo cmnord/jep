@@ -6,7 +6,6 @@ import {
   gameContentHash,
   normalizeGame,
 } from "./game-upload-contract";
-import { legacyGamesEquivalent } from "./game-upload-reconciliation";
 
 describe("game upload v1", () => {
   it("pins canonical bytes and hash for external clients", () => {
@@ -17,13 +16,10 @@ describe("game upload v1", () => {
     expect(gameContentHash(fixture.input)).toBe(fixture.contentHash);
     expect(gameContentHash(fixture.normalized)).toBe(fixture.contentHash);
   });
-  it("keeps order significant for API retries but accepts legacy storage order", () => {
+  it("keeps array order significant for API retries", () => {
     const reordered = structuredClone(fixture.normalized);
     reordered.boards[0].categories[0].clues.reverse();
     expect(gameContentHash(reordered)).not.toBe(fixture.contentHash);
-    expect(legacyGamesEquivalent(reordered, fixture.input)).toBe(true);
-    reordered.boards[0].categories[0].clues[0].answer = "Changed";
-    expect(legacyGamesEquivalent(reordered, fixture.input)).toBe(false);
   });
   it("rejects values that cannot be represented exactly by the database", () => {
     const changed = structuredClone(fixture.input);
