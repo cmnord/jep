@@ -1,4 +1,4 @@
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { mkdtempSync, writeFileSync, rmSync } from "node:fs";
 import { request as httpRequest } from "node:http";
@@ -60,6 +60,36 @@ test.beforeAll(async () => {
   const provisioned = await provision();
   uploader = provisioned.id;
   credential = provisioned.secret;
+});
+
+test("operator help and invalid arguments work without credentials or writes", () => {
+  const env = {
+    ...process.env,
+    SUPABASE_URL: "invalid",
+    SUPABASE_SERVICE_ROLE_KEY: "",
+  };
+  for (const args of [["-h"], ["token", "--help"], ["help", "release"]]) {
+    const result = spawnSync("pnpm", ["upload:admin", ...args], {
+      env,
+      encoding: "utf8",
+    });
+    expect(result.status).toBe(0);
+    expect(result.stdout).toContain("Usage: pnpm upload:admin");
+  }
+  for (const args of [
+    ["create", "example", "--typo"],
+    ["create", "example", "unexpected"],
+    ["create", "example", "--write"],
+    ["release", uploader, "reserved-key", "--reason", "unverified"],
+  ]) {
+    const result = spawnSync("pnpm", ["upload:admin", ...args], {
+      env,
+      encoding: "utf8",
+    });
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain("Run pnpm upload:admin --help for usage.");
+    expect(result.stderr).not.toContain("SUPABASE");
+  }
 });
 
 test("new upload, normalized replay, conflict, and token rotation", async ({

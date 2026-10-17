@@ -4,8 +4,6 @@ import { createHash } from "node:crypto";
 
 import { GameSchema } from "./convert.server";
 
-export { GameSchema } from "./convert.server";
-
 export function normalizeGame(input: unknown) {
   const game = GameSchema.parse(input);
   return {
@@ -25,6 +23,7 @@ export function normalizeGame(input: unknown) {
   };
 }
 
+// Object key order must not change equality or hashes; array order still matters.
 export function canonicalJson(value: unknown): string {
   if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;
   if (value !== null && typeof value === "object") {
@@ -38,6 +37,7 @@ export function canonicalJson(value: unknown): string {
   return JSON.stringify(value);
 }
 
+// Clients verify this fingerprint before recording a successful upload receipt.
 export function gameContentHash(input: unknown): string {
   return createHash("sha256")
     .update(canonicalJson(normalizeGame(input)), "utf8")

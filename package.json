@@ -25,7 +25,7 @@
     "test:e2e:run": "./scripts/with-local-supabase.sh pnpm test:e2e:execute",
     "typecheck": "varlock codegen && react-router typegen && tsc -b",
     "validate": "run-p \"test -- --run\" format lint typecheck && pnpm test:e2e:run",
-    "upload:admin": "varlock run -- tsx scripts/game-upload-admin.ts"
+    "upload:admin": "tsx scripts/game-upload-admin.ts"
   },
   "dependencies": {
     "@fontsource-variable/caveat": "^5.2.8",

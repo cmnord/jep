@@ -9,7 +9,7 @@ export async function authenticateApiToken(token: string, scope: ApiScope) {
   const tokenHash = createHash("sha256").update(token).digest("hex");
   const { data, error } = await getSupabaseAdmin()
     .from("api_tokens")
-    .select("api_clients!inner(enabled)")
+    .select("api_clients(enabled)")
     .eq("token_hash", tokenHash)
     .is("revoked_at", null)
     .contains("scopes", [scope])
