@@ -23,7 +23,7 @@ const anon = createClient<Database>(
   process.env.SUPABASE_URL!,
   process.env.SUPABASE_ANON_KEY!,
 );
-const token = () => `jep_upload_${randomBytes(32).toString("base64url")}`;
+const token = () => `jep_api_${randomBytes(32).toString("base64url")}`;
 const hash = (value: string) =>
   createHash("sha256").update(value).digest("hex");
 let uploader: string;
@@ -34,11 +34,11 @@ const headers = (key: string, secret = credential) => ({
   "Idempotency-Key": key,
 });
 
-async function provision(existing?: string) {
+async function provision(existing?: string, scopes = ["games:upload"]) {
   let id = existing;
   if (!id) {
     const result = await admin
-      .from("game_uploaders")
+      .from("api_clients")
       .insert({ name: "E2E uploader", enabled: true })
       .select("id")
       .single();
@@ -49,8 +49,8 @@ async function provision(existing?: string) {
   expect(
     (
       await admin
-        .from("game_upload_tokens")
-        .insert({ uploader_id: id, token_hash: hash(secret) })
+        .from("api_tokens")
+        .insert({ client_id: id, token_hash: hash(secret), scopes })
     ).error,
   ).toBeNull();
   return { id, secret };
@@ -100,7 +100,7 @@ test("new upload, normalized replay, conflict, and token rotation", async ({
   expect(rotatedReplay.status()).toBe(200);
   expect((await rotatedReplay.json()).gameId).toBe(result.gameId);
   await admin
-    .from("game_upload_tokens")
+    .from("api_tokens")
     .update({ revoked_at: new Date().toISOString() })
     .eq("token_hash", hash(rotated.secret));
   expect(
@@ -118,6 +118,67 @@ test("new upload, normalized replay, conflict, and token rotation", async ({
   });
   expect(isolated.status()).toBe(201);
   expect((await isolated.json()).gameId).not.toBe(result.gameId);
+});
+
+test("API token scopes are checked before both new uploads and replays", async ({
+  request,
+}) => {
+  const secret = token();
+  const tokenHash = hash(secret);
+  const key = randomUUID();
+  // No implicit permissions: a generic API token defaults to no scopes.
+  expect(
+    (
+      await admin
+        .from("api_tokens")
+        .insert({ client_id: uploader, token_hash: tokenHash })
+    ).error,
+  ).toBeNull();
+  const post = () =>
+    request.post("/api/v1/games", {
+      headers: headers(key, secret),
+      data: game,
+    });
+  expect((await post()).status()).toBe(401);
+  await admin
+    .from("api_tokens")
+    .update({ scopes: ["future:read"] })
+    .eq("token_hash", tokenHash);
+  expect((await post()).status()).toBe(401);
+  const denied = await admin.rpc("upload_game", {
+    p_token_hash: tokenHash,
+    p_key: key,
+    p_game: game,
+    p_content_hash: fixture.contentHash,
+  });
+  expect(denied.error).toBeNull();
+  expect(denied.data).toEqual({ error: "unauthorized" });
+  expect(
+    (
+      await admin
+        .from("game_upload_receipts")
+        .select("key")
+        .eq("uploader_id", uploader)
+        .eq("key", key)
+    ).data,
+  ).toEqual([]);
+  await admin
+    .from("api_tokens")
+    .update({ scopes: ["games:upload"] })
+    .eq("token_hash", tokenHash);
+  expect((await post()).status()).toBe(201);
+  await admin
+    .from("api_tokens")
+    .update({ scopes: [] })
+    .eq("token_hash", tokenHash);
+  expect((await post()).status()).toBe(401);
+  const deniedReplay = await admin.rpc("upload_game", {
+    p_token_hash: tokenHash,
+    p_key: key,
+    p_game: game,
+    p_content_hash: fixture.contentHash,
+  });
+  expect(deniedReplay.data).toEqual({ error: "unauthorized" });
 });
 
 test("concurrent first requests create exactly one complete game", async ({
@@ -214,7 +275,7 @@ test("reserved keys fail closed and operator reconciliation only attaches equiva
   expect((await blocked.json()).error.code).toBe("reconciliation_required");
   const legacy = structuredClone(game);
   legacy.boards[0].categories[0].clues.reverse();
-  const existing = await admin.rpc("create_game_atomic", {
+  const existing = await admin.rpc("create_game", {
     p_game: legacy,
     p_visibility: "PUBLIC",
   });
@@ -356,7 +417,7 @@ test("structured HTTP errors and privileged RPC/table isolation", async ({
   expect(streamedStatus).toBe(413);
   expect(
     (
-      await anon.rpc("create_game_atomic", {
+      await anon.rpc("create_game", {
         p_game: game,
         p_visibility: "PUBLIC",
       })
@@ -372,11 +433,8 @@ test("structured HTTP errors and privileged RPC/table isolation", async ({
       })
     ).error,
   ).not.toBeNull();
-  expect((await anon.from("game_upload_tokens").select()).error).not.toBeNull();
-  await admin
-    .from("game_uploaders")
-    .update({ enabled: false })
-    .eq("id", uploader);
+  expect((await anon.from("api_tokens").select()).error).not.toBeNull();
+  await admin.from("api_clients").update({ enabled: false }).eq("id", uploader);
   expect(
     (
       await request.post("/api/v1/games", {
@@ -385,8 +443,5 @@ test("structured HTTP errors and privileged RPC/table isolation", async ({
       })
     ).status(),
   ).toBe(401);
-  await admin
-    .from("game_uploaders")
-    .update({ enabled: true })
-    .eq("id", uploader);
+  await admin.from("api_clients").update({ enabled: true }).eq("id", uploader);
 });

@@ -1,23 +1,24 @@
 -- Only the trusted Jep server/operator can access upload credentials or invoke
--- these RPCs. Browser uploads also use create_game_atomic after session checks.
-create table public.game_uploaders (
+-- these RPCs. Browser uploads also use create_game after session checks.
+create table public.api_clients (
   id uuid primary key default gen_random_uuid(),
   name text not null,
   enabled boolean not null default false
 );
-create table public.game_upload_tokens (
+create table public.api_tokens (
   token_hash text primary key check (token_hash ~ '^[0-9a-f]{64}$'),
-  uploader_id uuid not null references public.game_uploaders(id),
+  client_id uuid not null references public.api_clients(id),
+  scopes text[] not null default '{}',
   revoked_at timestamptz,
   created_at timestamptz not null default now()
 );
 create table public.game_upload_reservations (
-  uploader_id uuid not null references public.game_uploaders(id),
+  uploader_id uuid not null references public.api_clients(id),
   key text not null,
   primary key (uploader_id, key)
 );
 create table public.game_upload_receipts (
-  uploader_id uuid not null references public.game_uploaders(id),
+  uploader_id uuid not null references public.api_clients(id),
   key text not null,
   content jsonb not null,
   content_hash text not null,
@@ -26,16 +27,16 @@ create table public.game_upload_receipts (
   primary key (uploader_id, key)
 );
 
-alter table public.game_uploaders enable row level security;
-alter table public.game_upload_tokens enable row level security;
+alter table public.api_clients enable row level security;
+alter table public.api_tokens enable row level security;
 alter table public.game_upload_reservations enable row level security;
 alter table public.game_upload_receipts enable row level security;
-revoke all on public.game_uploaders, public.game_upload_tokens,
+revoke all on public.api_clients, public.api_tokens,
   public.game_upload_reservations, public.game_upload_receipts from anon, authenticated;
-grant all on public.game_uploaders, public.game_upload_tokens,
+grant all on public.api_clients, public.api_tokens,
   public.game_upload_reservations, public.game_upload_receipts to service_role;
 
-create function public.create_game_atomic(
+create function public.create_game(
   p_game jsonb, p_visibility public.game_visibility, p_uploaded_by uuid default null
 ) returns uuid language plpgsql set search_path = '' as $$
 declare
@@ -74,9 +75,9 @@ declare
   receipt public.game_upload_receipts;
   new_id uuid;
 begin
-  select u.id into uploader from public.game_uploaders u
-    join public.game_upload_tokens t on t.uploader_id = u.id
-    where t.token_hash = p_token_hash and t.revoked_at is null and u.enabled
+  select u.id into uploader from public.api_clients u
+    join public.api_tokens t on t.client_id = u.id
+    where t.token_hash = p_token_hash and t.revoked_at is null and u.enabled and 'games:upload' = any(t.scopes)
     for share of u, t;
   if uploader is null then return jsonb_build_object('error', 'unauthorized'); end if;
   -- Serialize a key, including the first request when there is no receipt row.
@@ -90,7 +91,7 @@ begin
   if exists(select 1 from public.game_upload_reservations where uploader_id = uploader and key = p_key) then
     return jsonb_build_object('error', 'reconciliation_required');
   end if;
-  new_id := public.create_game_atomic(p_game, 'PUBLIC', null);
+  new_id := public.create_game(p_game, 'PUBLIC', null);
   insert into public.game_upload_receipts(uploader_id, key, content, content_hash, game_id)
     values(uploader, p_key, p_game, p_content_hash, new_id);
   return jsonb_build_object('result', 'created', 'gameId', new_id, 'contentHash', p_content_hash);
@@ -145,9 +146,9 @@ begin
 end;
 $$;
 
-revoke all on function public.create_game_atomic(jsonb, public.game_visibility, uuid),
+revoke all on function public.create_game(jsonb, public.game_visibility, uuid),
   public.upload_game(text, text, jsonb, text), public.game_upload_snapshot(uuid),
   public.reconcile_game_upload(uuid, text, uuid, jsonb, jsonb, text) from public, anon, authenticated;
-grant execute on function public.create_game_atomic(jsonb, public.game_visibility, uuid),
+grant execute on function public.create_game(jsonb, public.game_visibility, uuid),
   public.upload_game(text, text, jsonb, text), public.game_upload_snapshot(uuid),
   public.reconcile_game_upload(uuid, text, uuid, jsonb, jsonb, text) to service_role;
