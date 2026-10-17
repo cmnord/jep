@@ -1,7 +1,10 @@
+import { z } from "zod";
+
 import type { AuthSession } from "~/models/auth";
 import type { Board, Game as ConvertedGame } from "~/models/convert.server";
 import { Convert, GameSchema } from "~/models/convert.server";
 import type { Database } from "~/models/database.types";
+import { gameContentHash } from "~/models/game-upload-contract";
 import { getSupabase } from "~/supabase";
 import { getSupabaseAdmin } from "~/supabase/admin.server";
 
@@ -230,13 +233,46 @@ export async function getPublicGameSitemapEntries() {
 
 /* Writes */
 
+const uploadResultSchema = z.union([
+  z.object({
+    result: z.enum(["created", "replayed"]),
+    gameId: z.uuid(),
+    contentHash: z.string().regex(/^[0-9a-f]{64}$/),
+  }),
+  z.object({
+    error: z.enum([
+      "unauthorized",
+      "idempotency_conflict",
+      "reconciliation_required",
+      "game_deleted",
+    ]),
+  }),
+]);
+
+export async function uploadGame(
+  tokenHash: string,
+  idempotencyKey: string,
+  game: ConvertedGame,
+) {
+  // The RPC checks credentials again under locks, so revocation between the
+  // initial check and creation takes effect without splitting the transaction.
+  const { data, error } = await getSupabaseAdmin().rpc("upload_game", {
+    p_token_hash: tokenHash,
+    p_key: idempotencyKey,
+    p_game: game,
+    p_content_hash: gameContentHash(game),
+  });
+  if (error) throw error;
+  return uploadResultSchema.parse(data);
+}
+
 export async function createGame(
   inputGame: ConvertedGame,
   visibility: GameVisibility,
   uploadedByUserId?: string,
 ) {
   const game = GameSchema.parse(inputGame);
-  const { data, error } = await getSupabaseAdmin().rpc("create_game_atomic", {
+  const { data, error } = await getSupabaseAdmin().rpc("create_game", {
     p_game: game,
     p_visibility: visibility,
     p_uploaded_by: uploadedByUserId,

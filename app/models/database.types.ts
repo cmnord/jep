@@ -55,6 +55,56 @@ export type Database = {
         };
         Relationships: [];
       };
+      api_clients: {
+        Row: {
+          enabled: boolean;
+          id: string;
+          name: string;
+        };
+        Insert: {
+          enabled?: boolean;
+          id?: string;
+          name: string;
+        };
+        Update: {
+          enabled?: boolean;
+          id?: string;
+          name?: string;
+        };
+        Relationships: [];
+      };
+      api_tokens: {
+        Row: {
+          client_id: string;
+          created_at: string;
+          revoked_at: string | null;
+          scopes: string[];
+          token_hash: string;
+        };
+        Insert: {
+          client_id: string;
+          created_at?: string;
+          revoked_at?: string | null;
+          scopes?: string[];
+          token_hash: string;
+        };
+        Update: {
+          client_id?: string;
+          created_at?: string;
+          revoked_at?: string | null;
+          scopes?: string[];
+          token_hash?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "api_tokens_client_id_fkey";
+            columns: ["client_id"];
+            isOneToOne: false;
+            referencedRelation: "api_clients";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       categories: {
         Row: {
           created_at: string;
@@ -168,7 +218,7 @@ export type Database = {
             foreignKeyName: "game_upload_receipts_uploader_id_fkey";
             columns: ["uploader_id"];
             isOneToOne: false;
-            referencedRelation: "game_uploaders";
+            referencedRelation: "api_clients";
             referencedColumns: ["id"];
           },
         ];
@@ -191,57 +241,10 @@ export type Database = {
             foreignKeyName: "game_upload_reservations_uploader_id_fkey";
             columns: ["uploader_id"];
             isOneToOne: false;
-            referencedRelation: "game_uploaders";
+            referencedRelation: "api_clients";
             referencedColumns: ["id"];
           },
         ];
-      };
-      game_upload_tokens: {
-        Row: {
-          created_at: string;
-          revoked_at: string | null;
-          token_hash: string;
-          uploader_id: string;
-        };
-        Insert: {
-          created_at?: string;
-          revoked_at?: string | null;
-          token_hash: string;
-          uploader_id: string;
-        };
-        Update: {
-          created_at?: string;
-          revoked_at?: string | null;
-          token_hash?: string;
-          uploader_id?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "game_upload_tokens_uploader_id_fkey";
-            columns: ["uploader_id"];
-            isOneToOne: false;
-            referencedRelation: "game_uploaders";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
-      game_uploaders: {
-        Row: {
-          enabled: boolean;
-          id: string;
-          name: string;
-        };
-        Insert: {
-          enabled?: boolean;
-          id?: string;
-          name: string;
-        };
-        Update: {
-          enabled?: boolean;
-          id?: string;
-          name?: string;
-        };
-        Relationships: [];
       };
       games: {
         Row: {
@@ -435,7 +438,7 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      create_game_atomic: {
+      create_game: {
         Args: {
           p_game: Json;
           p_uploaded_by?: string;

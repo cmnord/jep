@@ -13,8 +13,8 @@ import {
 import { legacyGamesEquivalent } from "../app/models/game-upload-reconciliation";
 
 const usage = `Usage: pnpm upload:admin <command> ...
-  create <name>                              Create a disabled uploader
-  token <uploader UUID> <new-secret-file>     Write a new token (0600); print hash
+  create <name>                              Create a disabled API client
+  token <uploader UUID> <new-secret-file>     Issue games:upload token (0600); print hash
   revoke <token SHA256>                      Revoke one token
   enable|disable <uploader UUID>             Enable only after reservation setup
   reserve <uploader UUID> <keys.json>         Reserve keys; uploader must be disabled
@@ -42,7 +42,7 @@ function check(error: { message: string } | null) {
 }
 async function disabled(id: string) {
   const { data, error } = await client
-    .from("game_uploaders")
+    .from("api_clients")
     .select("enabled")
     .eq("id", id)
     .single();
@@ -55,7 +55,7 @@ try {
   if (command === "create") {
     const name = z.string().min(1).parse(first);
     const { data, error } = await client
-      .from("game_uploaders")
+      .from("api_clients")
       .insert({ name })
       .select("id, name, enabled")
       .single();
@@ -64,12 +64,12 @@ try {
   } else if (command === "token") {
     const id = z.uuid().parse(first);
     const file = z.string().min(1).parse(second);
-    const token = `jep_upload_${randomBytes(32).toString("base64url")}`;
+    const token = `jep_api_${randomBytes(32).toString("base64url")}`;
     const hash = createHash("sha256").update(token).digest("hex");
     await writeFile(file, token + "\n", { mode: 0o600, flag: "wx" });
     const { error } = await client
-      .from("game_upload_tokens")
-      .insert({ uploader_id: id, token_hash: hash });
+      .from("api_tokens")
+      .insert({ client_id: id, token_hash: hash, scopes: ["games:upload"] });
     if (error) {
       await unlink(file);
       check(error);
@@ -83,7 +83,7 @@ try {
       .regex(/^[0-9a-f]{64}$/)
       .parse(first);
     const { error } = await client
-      .from("game_upload_tokens")
+      .from("api_tokens")
       .update({ revoked_at: new Date().toISOString() })
       .eq("token_hash", hash);
     check(error);
@@ -91,7 +91,7 @@ try {
   } else if (command === "enable" || command === "disable") {
     const id = z.uuid().parse(first);
     const { data, error } = await client
-      .from("game_uploaders")
+      .from("api_clients")
       .update({ enabled: command === "enable" })
       .eq("id", id)
       .select("id")
