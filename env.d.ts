@@ -117,6 +117,14 @@ export type CoercedEnvSchema = {
   VERCEL: "0" | "1";
   
   /**
+   * **VERCEL_ENV**  
+   * Set by the Vercel platform. Production builds refuse to deploy until every  
+   * repo migration is applied to the production database.  
+   * ![icon](data:image/svg+xml;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22%23808080%22%20d%3D%22M7.885%2010.23L12%203.463l4.116%206.769zm9.606%2011q-1.558%200-2.64-1.081t-1.082-2.64t1.082-2.649t2.64-1.09t2.649%201.09t1.09%202.649t-1.09%202.64t-2.649%201.082m-13.722-.5v-6.462h6.462v6.462z%22%2F%3E%3C%2Fsvg%3E)   
+   */
+  VERCEL_ENV?: "production" | "preview" | "development";
+  
+  /**
    * **SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID**  
    * OAuth provider credentials used only by the local Supabase stack. Production  
    * providers are configured in the Supabase dashboard.  
@@ -156,11 +164,11 @@ export type CoercedEnvSchema = {
   
 };
 
-type _CoercedEnvSchema_e2aab7b9 = CoercedEnvSchema;
+type _CoercedEnvSchema_9a57433e = CoercedEnvSchema;
 
 declare module 'varlock/env' {
-  export interface TypedEnvSchema extends Readonly<_CoercedEnvSchema_e2aab7b9> {}
-  export interface PublicTypedEnvSchema extends Readonly<Pick<_CoercedEnvSchema_e2aab7b9, 'BASE_URL' | 'SUPABASE_URL' | 'SUPABASE_ANON_KEY' | 'SUPABASE_PROJECT_REF' | 'E2E_TEST_EMAIL' | 'E2E_TEST_PASSWORD' | 'HOST' | 'PORT' | 'PW_USE_DEV_SERVER' | 'UNDO_SHOTS_DIR' | 'NODE_ENV' | 'VERCEL' | 'SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID' | 'SUPABASE_AUTH_EXTERNAL_DISCORD_CLIENT_ID'>> {}
+  export interface TypedEnvSchema extends Readonly<_CoercedEnvSchema_9a57433e> {}
+  export interface PublicTypedEnvSchema extends Readonly<Pick<_CoercedEnvSchema_9a57433e, 'BASE_URL' | 'SUPABASE_URL' | 'SUPABASE_ANON_KEY' | 'SUPABASE_PROJECT_REF' | 'E2E_TEST_EMAIL' | 'E2E_TEST_PASSWORD' | 'HOST' | 'PORT' | 'PW_USE_DEV_SERVER' | 'UNDO_SHOTS_DIR' | 'NODE_ENV' | 'VERCEL' | 'VERCEL_ENV' | 'SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID' | 'SUPABASE_AUTH_EXTERNAL_DISCORD_CLIENT_ID'>> {}
 }
 
 
@@ -170,11 +178,11 @@ export type EnvSchemaAsStrings = {
       : (CoercedEnvSchema[Property] extends boolean ? ('true' | 'false') : string)
 };
 
-type _EnvSchemaAsStrings_e2aab7b9 = EnvSchemaAsStrings;
+type _EnvSchemaAsStrings_9a57433e = EnvSchemaAsStrings;
 declare global {
 
   // add types for global import.meta.env
-  interface ImportMetaEnv extends _EnvSchemaAsStrings_e2aab7b9 {
+  interface ImportMetaEnv extends _EnvSchemaAsStrings_9a57433e {
     [key: string]: string | undefined;
   }
   interface ImportMeta {
@@ -183,7 +191,7 @@ declare global {
 
   // add types for global process.env
   namespace NodeJS {
-    interface ProcessEnv extends _EnvSchemaAsStrings_e2aab7b9 {
+    interface ProcessEnv extends _EnvSchemaAsStrings_9a57433e {
       [key: string]: string | undefined;
     }
   }

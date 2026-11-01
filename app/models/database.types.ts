@@ -438,6 +438,7 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      applied_migrations: { Args: never; Returns: string[] };
       create_game: {
         Args: {
           p_game: Json;

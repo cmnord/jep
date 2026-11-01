@@ -4,7 +4,7 @@
   "type": "module",
   "sideEffects": false,
   "scripts": {
-    "build": "react-router build",
+    "build": "tsx scripts/check-migrations.ts && react-router build",
     "db:link": "varlock run -- sh -c 'pnpm exec supabase link --project-ref \"$SUPABASE_PROJECT_REF\" --password \"$SUPABASE_DB_PASSWORD\"'",
     "db:migration:new": "varlock run -- pnpm exec supabase db diff -f",
     "db:push": "varlock run -- pnpm exec supabase db push",

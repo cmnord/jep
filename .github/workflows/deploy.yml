@@ -77,6 +77,13 @@ jobs:
         # db:start only starts the kong and postgrest containers.
         run: pnpm db:start
 
+      - name: 🗄️ Check production migration guard
+        # Vercel production builds run this against the production database.
+        # Run it here against the freshly migrated local stack so it stays working.
+        run: ./scripts/with-local-supabase.sh pnpm exec tsx scripts/check-migrations.ts
+        env:
+          VERCEL_ENV: production
+
       - name: 🌐 Install Playwright browsers
         run: pnpm exec playwright install --with-deps chromium
 

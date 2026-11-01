@@ -79,9 +79,19 @@ pnpm db:migration:new my_migration_name
 
 ### Deploy a migration[^2]
 
+Vercel deploys `main` as soon as a PR merges, but migrations are applied by
+hand. Apply a PR's migrations to production **before** merging it:
+
 ```sh
 pnpm db:push
 ```
+
+Production builds run `scripts/check-migrations.ts` first. That build fails
+while any file in `supabase/migrations` is unapplied, so the previous
+deployment keeps serving. If a merged build fails this check, run
+`pnpm db:push` and then redeploy from Vercel. Because migrations go live before
+the code that uses them, write them so the deployed code keeps working (for
+example, add new columns now and drop old ones in a later PR).
 
 ### Generate Typescript types from the database schema:
 
