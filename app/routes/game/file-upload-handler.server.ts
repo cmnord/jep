@@ -30,12 +30,7 @@ export function newUploadHandler(
     const jsonString = new TextDecoder().decode(bytes);
 
     const game = Convert.toGame(jsonString);
-    const gameId = await createGame(
-      game,
-      visibility,
-      userId,
-      authSession?.accessToken,
-    );
+    const gameId = await createGame(game, visibility, userId);
 
     return gameId;
   };

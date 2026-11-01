@@ -1,5 +1,13 @@
 import { z } from "zod";
 
+// PostgreSQL text/jsonb reject NUL and unpaired Unicode surrogates.
+const GameText = z
+  .string()
+  .refine(
+    (value) => !value.includes("\0") && !/[\uD800-\uDFFF]/u.test(value),
+    "Text must not contain NUL or unpaired Unicode surrogates",
+  );
+
 /** IMAGE_DOMAIN_ALLOWLIST lists the domains that are allowed for image sources.
  * Some clues have images, and we want to make sure that the images are hosted
  * on a trusted domain. This is for security and to prevent abuse.
@@ -24,12 +32,11 @@ function isValidImageSrc(src: string): boolean {
 
 export const ClueSchema = z
   .object({
-    clue: z.string().trim().min(1, "clue must not be empty"),
-    answer: z.string().trim().min(1, "answer must not be empty"),
-    value: z.number(),
-    imageSrc: z
-      .string()
-      .trim()
+    clue: GameText.trim().min(1, "clue must not be empty"),
+    answer: GameText.trim().min(1, "answer must not be empty"),
+    // PostgreSQL stores whole points; Zod's int() also rejects unsafe JS integers.
+    value: z.number().int(),
+    imageSrc: GameText.trim()
       .min(1, "imageSrc must not be empty; remove the field instead")
       .refine(
         isValidImageSrc,
@@ -44,15 +51,15 @@ export const ClueSchema = z
   });
 
 export const CategorySchema = z.object({
-  name: z.string().trim().min(1, "category name must not be empty"),
+  name: GameText.trim().min(1, "category name must not be empty"),
   clues: z.array(ClueSchema).min(1, "category must have at least one clue"),
-  note: z.string().optional(),
+  note: GameText.optional(),
 });
 
 export const BoardSchema = z
   .object({
     categoryNames: z
-      .array(z.string())
+      .array(GameText)
       .min(1, "board must have at least one category name"),
     categories: z
       .array(CategorySchema)
@@ -72,10 +79,10 @@ export const BoardSchema = z
   );
 
 export const GameSchema = z.object({
-  title: z.string().trim().min(1, "title must not be empty"),
-  author: z.string().trim().min(1, "author must not be empty"),
-  copyright: z.string(),
-  note: z.string(),
+  title: GameText.trim().min(1, "title must not be empty"),
+  author: GameText.trim().min(1, "author must not be empty"),
+  copyright: GameText,
+  note: GameText,
   boards: z.array(BoardSchema).min(1, "game must have at least one board"),
 });
 

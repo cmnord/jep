@@ -1,7 +1,10 @@
+import { z } from "zod";
+
 import type { AuthSession } from "~/models/auth";
 import type { Board, Game as ConvertedGame } from "~/models/convert.server";
 import { Convert, GameSchema } from "~/models/convert.server";
 import type { Database } from "~/models/database.types";
+import { gameContentHash } from "~/models/game-upload-contract";
 import { getSupabase } from "~/supabase";
 import { getSupabaseAdmin } from "~/supabase/admin.server";
 
@@ -129,6 +132,7 @@ export async function getGame(
     .select<"*, clues ( * )", CategoryAndClues>("*, clues ( * )")
     .eq("game_id", gameId)
     .order("created_at")
+    .order("id")
     .order("value", { foreignTable: "clues" });
 
   if (categoryErr !== null) {
@@ -229,99 +233,52 @@ export async function getPublicGameSitemapEntries() {
 
 /* Writes */
 
+const uploadResultSchema = z.union([
+  z.object({
+    result: z.enum(["created", "replayed"]),
+    gameId: z.uuid(),
+    contentHash: z.string().regex(/^[0-9a-f]{64}$/),
+  }),
+  z.object({
+    error: z.enum([
+      "unauthorized",
+      "idempotency_conflict",
+      "reconciliation_required",
+      "game_deleted",
+    ]),
+  }),
+]);
+
+export async function uploadGame(
+  tokenHash: string,
+  idempotencyKey: string,
+  game: ConvertedGame,
+) {
+  // The RPC checks credentials again under locks, so revocation between the
+  // initial check and creation takes effect without splitting the transaction.
+  const { data, error } = await getSupabaseAdmin().rpc("upload_game", {
+    p_token_hash: tokenHash,
+    p_key: idempotencyKey,
+    p_game: game,
+    p_content_hash: gameContentHash(game),
+  });
+  if (error) throw error;
+  return uploadResultSchema.parse(data);
+}
+
 export async function createGame(
   inputGame: ConvertedGame,
   visibility: GameVisibility,
   uploadedByUserId?: string,
-  accessToken?: AuthSession["accessToken"],
 ) {
-  GameSchema.parse(inputGame);
-  const client = getSupabase(accessToken);
-
-  const { data: gameData, error: gameErr } = await client
-    .from<"games", GameTable>("games")
-    .insert<GameTable["Insert"]>({
-      author: inputGame.author,
-      copyright: inputGame.copyright,
-      note: inputGame.note,
-      title: inputGame.title,
-      visibility,
-      uploaded_by: uploadedByUserId,
-    })
-    .select();
-
-  if (gameErr !== null) {
-    throw gameErr;
-  }
-  const game = gameData.at(0);
-  if (!game) {
-    throw new Error("game data response must not be null");
-  }
-
-  const categoriesToInsert: CategoryTable["Insert"][] = [];
-  for (let round = 0; round < inputGame.boards.length; round++) {
-    const board = inputGame.boards[round];
-    for (const category of board.categories) {
-      categoriesToInsert.push({
-        game_id: game.id,
-        name: category.name,
-        note: category.note ?? null,
-        round,
-      });
-    }
-  }
-
-  const { data: categoryData, error: categoryErr } = await client
-    .from<"categories", CategoryTable>("categories")
-    .insert<CategoryTable["Insert"]>(categoriesToInsert)
-    .select();
-
-  // TODO: createGame is not transactional, so if any category fails to insert
-  // the game will still be created.
-  if (categoryErr !== null) {
-    throw categoryErr;
-  }
-  if (categoryData === null) {
-    throw new Error("category data response must not be null");
-  }
-
-  const cluesToInsert: ClueTable["Insert"][] = [];
-  for (let round = 0; round < inputGame.boards.length; round++) {
-    const board = inputGame.boards[round];
-    for (const category of board.categories) {
-      const dbCategory = categoryData.find(
-        (c) => c.name === category.name && c.round == round,
-      );
-      if (!dbCategory) {
-        throw new Error(
-          "category " + category.name + " not inserted into database",
-        );
-      }
-      for (const clue of category.clues) {
-        cluesToInsert.push({
-          category_id: dbCategory.id,
-          answer: clue.answer,
-          clue: clue.clue,
-          value: clue.value,
-          wagerable: clue.wagerable ?? false,
-          long_form: clue.longForm ?? false,
-          image_src: clue.imageSrc,
-        });
-      }
-    }
-  }
-
-  const { error: cluesErr } = await client
-    .from<"clues", ClueTable>("clues")
-    .insert<ClueTable["Insert"]>(cluesToInsert);
-
-  // TODO: createGame is not transactional, so if any clue fails to insert the
-  // game will still be created.
-  if (cluesErr !== null) {
-    throw cluesErr;
-  }
-
-  return game.id;
+  const game = GameSchema.parse(inputGame);
+  const { data, error } = await getSupabaseAdmin().rpc("create_game", {
+    p_game: game,
+    p_visibility: visibility,
+    p_uploaded_by: uploadedByUserId,
+  });
+  if (error) throw error;
+  return data;
 }
 
 export async function updateGameVisibility(
