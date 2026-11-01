@@ -155,7 +155,9 @@ try {
     const { error } = await client
       .from("api_tokens")
       .update({ revoked_at: new Date().toISOString() })
-      .eq("token_hash", hash);
+      .eq("token_hash", hash)
+      .select("token_hash")
+      .single();
     check(error);
     console.log("Token revoked");
   } else if (command === "enable" || command === "disable") {
@@ -207,6 +209,7 @@ try {
       const [
         { data: existingGame, error: gameError },
         { data: receipt, error: receiptError },
+        { data: reservation, error: reservationError },
       ] = await Promise.all([
         client
           .from("games")
@@ -219,9 +222,18 @@ try {
           .eq("uploader_id", id)
           .eq("key", mapping.idempotencyKey)
           .maybeSingle(),
+        client
+          .from("game_upload_reservations")
+          .select("key")
+          .eq("uploader_id", id)
+          .eq("key", mapping.idempotencyKey)
+          .maybeSingle(),
       ]);
       check(gameError);
       check(receiptError);
+      check(reservationError);
+      if (!reservation)
+        throw new Error(`Key is not reserved: ${mapping.idempotencyKey}`);
       if (existingGame?.visibility !== "PUBLIC")
         throw new Error(`Existing game must be public: ${mapping.gameId}`);
       if (
@@ -267,7 +279,9 @@ try {
       .from("game_upload_reservations")
       .delete()
       .eq("uploader_id", id)
-      .eq("key", key);
+      .eq("key", key)
+      .select("key")
+      .single();
     check(error);
     console.log(JSON.stringify({ released: key, uploaderId: id, reason }));
   } else {

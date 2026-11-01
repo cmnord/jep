@@ -127,6 +127,12 @@ begin
   -- Reconciliation is an infrequent operator action. Freeze all components
   -- during the verified snapshot check, including against legacy direct SQL.
   perform pg_advisory_xact_lock(hashtextextended(p_uploader::text || ':' || p_key, 0));
+  -- Hold the reservation against concurrent release until attachment commits.
+  perform 1 from public.game_upload_reservations
+    where uploader_id = p_uploader and key = p_key for update;
+  if not found then
+    raise exception 'Key is not reserved for this uploader';
+  end if;
   lock table public.games, public.categories, public.clues in share row exclusive mode;
   if public.game_upload_snapshot(p_game_id) is distinct from p_expected_snapshot
      or p_expected_snapshot is null

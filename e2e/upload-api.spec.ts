@@ -150,6 +150,75 @@ test("new upload, normalized replay, conflict, and token rotation", async ({
   expect((await isolated.json()).gameId).not.toBe(result.gameId);
 });
 
+test("operator revoke and release report success only for matching rows", async ({
+  request,
+}) => {
+  const target = await provision();
+  const run = (...args: string[]) =>
+    spawnSync(
+      "node_modules/.bin/tsx",
+      ["scripts/game-upload-admin.ts", ...args],
+      { env: process.env, encoding: "utf8" },
+    );
+  const missingToken = run("revoke", hash(token()));
+  expect(missingToken.status).not.toBe(0);
+  expect(missingToken.stdout).not.toContain("Token revoked");
+  const post = () =>
+    request.post("/api/v1/games", {
+      headers: headers(randomUUID(), target.secret),
+      data: game,
+    });
+  expect((await post()).status()).toBe(201);
+  const revoked = run("revoke", hash(target.secret));
+  expect(revoked.status).toBe(0);
+  expect(revoked.stdout).toContain("Token revoked");
+  expect((await post()).status()).toBe(401);
+  expect(run("revoke", hash(target.secret)).status).toBe(0);
+
+  const ownKey = randomUUID();
+  const otherKey = randomUUID();
+  expect(
+    (
+      await admin.from("game_upload_reservations").insert([
+        { uploader_id: target.id, key: ownKey },
+        { uploader_id: uploader, key: otherKey },
+      ])
+    ).error,
+  ).toBeNull();
+  expect(
+    (
+      await admin
+        .from("api_clients")
+        .update({ enabled: false })
+        .eq("id", target.id)
+    ).error,
+  ).toBeNull();
+  const release = (key: string) =>
+    run(
+      "release",
+      target.id!,
+      key,
+      "--write",
+      "--reason",
+      "Disposable test reservation",
+    );
+  for (const key of [randomUUID(), otherKey]) {
+    const missing = release(key);
+    expect(missing.status).not.toBe(0);
+    expect(missing.stdout).not.toContain('"released"');
+  }
+  const released = release(ownKey);
+  expect(released.status).toBe(0);
+  expect(JSON.parse(released.stdout).released).toBe(ownKey);
+  expect(release(ownKey).status).not.toBe(0);
+  const remaining = await admin
+    .from("game_upload_reservations")
+    .select("uploader_id,key")
+    .in("key", [ownKey, otherKey]);
+  expect(remaining.error).toBeNull();
+  expect(remaining.data).toEqual([{ uploader_id: uploader, key: otherKey }]);
+});
+
 test("API token scopes are checked before both new uploads and replays", async ({
   request,
 }) => {
@@ -319,6 +388,41 @@ test("reserved keys fail closed and operator reconciliation only attaches equiva
       { env: process.env, encoding: "utf8", stdio: "pipe" },
     );
   try {
+    const unreservedKey = randomUUID();
+    writeFileSync(
+      file,
+      JSON.stringify([
+        { idempotencyKey: unreservedKey, gameId: existing.data, game },
+      ]),
+    );
+    expect(() => run()).toThrow(/Key is not reserved/);
+    expect(() => run("--write")).toThrow(/Key is not reserved/);
+    const snapshot = await admin.rpc("game_upload_snapshot", {
+      p_game_id: existing.data!,
+    });
+    expect(snapshot.error).toBeNull();
+    const other = await provision();
+    for (const [clientId, candidateKey] of [
+      [uploader, unreservedKey],
+      [other.id!, key],
+    ]) {
+      const unreserved = await admin.rpc("reconcile_game_upload", {
+        p_uploader: clientId,
+        p_key: candidateKey,
+        p_game_id: existing.data!,
+        p_expected_snapshot: snapshot.data!,
+        p_game: game,
+        p_content_hash: fixture.contentHash,
+      });
+      expect(unreserved.error?.message).toContain("Key is not reserved");
+      const receipts = await admin
+        .from("game_upload_receipts")
+        .select("key")
+        .eq("uploader_id", clientId)
+        .eq("key", candidateKey);
+      expect(receipts.error).toBeNull();
+      expect(receipts.data).toEqual([]);
+    }
     writeFileSync(
       file,
       JSON.stringify([
@@ -362,13 +466,13 @@ test("reserved keys fail closed and operator reconciliation only attaches equiva
     expect(run("--write")).toContain("reconciled");
     const stale = await admin.rpc("reconcile_game_upload", {
       p_uploader: uploader,
-      p_key: randomUUID(),
+      p_key: key,
       p_game_id: existing.data!,
       p_expected_snapshot: game,
       p_game: game,
       p_content_hash: fixture.contentHash,
     });
-    expect(stale.error).not.toBeNull();
+    expect(stale.error?.message).toContain("Existing game changed");
     await admin.from("games").delete().eq("id", existing.data!);
     const deleted = await request.post("/api/v1/games", {
       headers: headers(key),
@@ -379,6 +483,47 @@ test("reserved keys fail closed and operator reconciliation only attaches equiva
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
+});
+
+test("database-invalid text returns 422 without consuming an upload key", async ({
+  request,
+}) => {
+  const key = randomUUID();
+  for (const text of ["\0", "\uD800", "\uDFFF"]) {
+    const invalid = structuredClone(game);
+    invalid.boards[0].categories[0].clues[0].answer = `Invalid ${text}`;
+    const response = await request.post("/api/v1/games", {
+      headers: headers(key),
+      data: invalid,
+    });
+    expect(response.status()).toBe(422);
+    expect((await response.json()).error).toMatchObject({
+      code: "invalid_game",
+      issues: [
+        expect.objectContaining({
+          path: ["boards", 0, "categories", 0, "clues", 0, "answer"],
+        }),
+      ],
+    });
+  }
+  const receipts = await admin
+    .from("game_upload_receipts")
+    .select("key")
+    .eq("uploader_id", uploader)
+    .eq("key", key);
+  expect(receipts.error).toBeNull();
+  expect(receipts.data).toEqual([]);
+  const valid = { ...game, note: "Café 中文 🎉" };
+  const response = await request.post("/api/v1/games", {
+    headers: headers(key),
+    data: valid,
+  });
+  expect(response.status()).toBe(201);
+  const snapshot = await admin.rpc("game_upload_snapshot", {
+    p_game_id: (await response.json()).gameId,
+  });
+  expect(snapshot.error).toBeNull();
+  expect(normalizeGame(snapshot.data)).toEqual(valid);
 });
 
 test("structured HTTP errors and privileged RPC/table isolation", async ({
