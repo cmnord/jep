@@ -15,6 +15,7 @@ import {
   isClueAction,
   isCorrectCheckAction,
   isClueWagerAction,
+  isHostAction,
   isPassClueAction,
   isPlayerAction,
   isRenameTeamAction,
@@ -24,6 +25,9 @@ import {
   isSetTeamAction,
   isSkipClueAction,
   isTransferPlayerAction,
+  parseHostSeat,
+  parseReleaseHost,
+  parseRevealAnswer,
 } from "./actions";
 import { isAnswerTimeSec } from "./answer-timer";
 import {
@@ -134,6 +138,19 @@ export enum ActionType {
    * server) adds points to a player's score or sets it to an exact value,
    * any time before game over. It doesn't change the game's flow. */
   AdjustScore = "adjust_score",
+  /** ClaimHost: a visitor who doesn't play takes the free host seat
+   * (feature 22). Between questions, before game over. */
+  ClaimHost = "claim_host",
+  /** ReleaseHost: the host (or the site admin, `admin: true`) frees the host
+   * seat between questions; the room goes back to self-marking. */
+  ReleaseHost = "release_host",
+  /** AssignHost (site admin only, `admin: true`): give the host seat to a
+   * visitor who doesn't play (or the admin). Replacing a host is allowed any
+   * time; filling an empty seat only between questions. */
+  AssignHost = "assign_host",
+  /** RevealAnswer (server only): the answer of a question resolved in host
+   * mode, for players whose page doesn't have it. */
+  RevealAnswer = "reveal_answer",
   /** Restore replaces the entire state (used for restoring saved solo games). */
   Restore = "restore",
 }
@@ -167,6 +184,23 @@ function isValidBuzz(deltaMs: number, buzzWindowMs: number): boolean {
 export function getTiebreakerSeed(clue?: Pick<Clue, "clue" | "answer">) {
   if (!clue) return undefined;
   return clue.clue || clue.answer;
+}
+
+/** getStateTiebreakerSeed is the tiebreak seed of the active question. In
+ * host mode players' pages don't have the answer (see withhold-answers), so a
+ * question without text falls back to its position instead of its answer —
+ * the same on every client. The mode only changes between questions. */
+export function getStateTiebreakerSeed(
+  state: Pick<State, "host" | "activeClue" | "round" | "game">,
+) {
+  if (!state.activeClue) return undefined;
+  const [i, j] = state.activeClue;
+  const clue = state.game.boards.at(state.round)?.categories.at(j)?.clues.at(i);
+  if (!clue) return undefined;
+  if (state.host) {
+    return clue.clue || `${state.round},${i},${j}`;
+  }
+  return getTiebreakerSeed(clue);
 }
 
 /** getWinningBuzzer returns undefined if there were no valid buzzes (within
@@ -556,10 +590,16 @@ function finishBoard(draft: Draft<State>, ts: number) {
 
 /** markSkipped marks question (i, j) of the current round as played and
  * skipped by the admin. */
-function markSkipped(draft: Draft<State>, i: number, j: number) {
+function markSkipped(
+  draft: Draft<State>,
+  i: number,
+  j: number,
+  byHost: boolean,
+) {
   const cell = draft.isAnswered[draft.round][i][j];
   cell.isAnswered = true;
   cell.skipped = true;
+  if (byHost) cell.skippedByHost = true;
   cell.answerOrder = getNextAnswerOrder(draft.isAnswered);
   draft.numAnswered += 1;
 }
@@ -590,8 +630,35 @@ export function isGameUnderway(
   );
 }
 
+/** isHostId: `userId` holds the host seat. */
+function isHostId(state: Pick<State, "host">, userId: string) {
+  return state.host !== null && state.host.userId === userId;
+}
+
+/** mayRunFlow: in host mode only the host (their own id), or an event
+ * tagged by the server for the admin or the host, starts rounds and moves
+ * on from a question (feature 22). */
+function mayRunFlow(
+  state: Pick<State, "host">,
+  action: Action,
+  userId: string,
+) {
+  return (
+    isHostId(state, userId) || isAdminAction(action) || isHostAction(action)
+  );
+}
+
 /** gameEngine is the reducer (aka state machine) which implements the game. */
 export function gameEngine(state: State, action: Action): State {
+  // The server tags events the host made with `host: true`; without a host
+  // such an event is ignored.
+  if (
+    action.type !== ActionType.Restore &&
+    state.host === null &&
+    isHostAction(action)
+  ) {
+    return state;
+  }
   switch (action.type) {
     case ActionType.Join:
       if (!isPlayerAction(action)) {
@@ -603,6 +670,10 @@ export function gameEngine(state: State, action: Action): State {
           return;
         }
         const { userId, name } = action.payload;
+        // The host doesn't play (feature 22).
+        if (isHostId(draft, userId)) {
+          return;
+        }
         // Seats are keyed by userId and never reset by a Join: a player who
         // is already seated keeps their seat, and one who left (or was
         // removed by the admin) during the game gets it back — score, color,
@@ -742,7 +813,12 @@ export function gameEngine(state: State, action: Action): State {
           board.categories.length === 1 &&
           board.categories[0].clues.length === 1 &&
           board.categories[0].clues[0].longForm;
-        if (!isSingleLongFormClue && draft.boardControl !== userId) {
+        if (draft.host) {
+          // Host mode: the host starts every round.
+          if (!mayRunFlow(draft, action, userId)) {
+            return;
+          }
+        } else if (!isSingleLongFormClue && draft.boardControl !== userId) {
           return;
         }
 
@@ -754,7 +830,12 @@ export function gameEngine(state: State, action: Action): State {
         throw new Error("ClickClue action must have an associated index");
       }
       return produce(state, (draft) => {
-        const { userId, i, j } = action.payload;
+        const { i, j } = action.payload;
+        // In host mode the host may choose for the board-control player.
+        const userId =
+          isHostId(draft, action.payload.userId) && draft.boardControl
+            ? draft.boardControl
+            : action.payload.userId;
         // Can't choose a clue while paused.
         if (draft.isPaused) {
           return;
@@ -929,6 +1010,7 @@ export function gameEngine(state: State, action: Action): State {
       return produce(state, (draft) => {
         const { userId, i, j, deltaMs } = action.payload;
         if (
+          isHostId(draft, userId) ||
           (draft.type !== GameState.ReadClue &&
             draft.type !== GameState.ReadWagerableClue) ||
           draft.activeClue?.[0] !== i ||
@@ -954,7 +1036,7 @@ export function gameEngine(state: State, action: Action): State {
 
         const winningBuzzer = getWinningBuzzer(
           draft.buzzes,
-          getTiebreakerSeed(clue),
+          getStateTiebreakerSeed(draft),
           getBuzzWindowMs(draft),
         );
         if (!winningBuzzer) {
@@ -995,6 +1077,7 @@ export function gameEngine(state: State, action: Action): State {
       return produce(state, (draft) => {
         const { userId, i, j, answer } = action.payload;
         if (
+          isHostId(draft, userId) ||
           draft.type !== GameState.ReadLongFormClue ||
           draft.activeClue?.[0] !== i ||
           draft.activeClue?.[1] !== j ||
@@ -1045,6 +1128,19 @@ export function gameEngine(state: State, action: Action): State {
 
         const board = draft.game.boards.at(draft.round);
         const clue = board?.categories.at(j)?.clues.at(i);
+        const autoChecked = clue !== undefined && isAutoCheckedClue(clue);
+
+        // Host mode: the host (or the admin) judges. A player may only pick
+        // an option of a multiple choice question themselves; the host's
+        // device sends a timeout.
+        if (
+          draft.host &&
+          !isHostAction(action) &&
+          !isAdminAction(action) &&
+          !(autoChecked && choice !== undefined && timedOut !== true)
+        ) {
+          return;
+        }
 
         // Ignore the action if it was from a player who didn't answer the clue.
         const key = `${draft.round},${i},${j}`;
@@ -1056,7 +1152,7 @@ export function gameEngine(state: State, action: Action): State {
         } else {
           const winningBuzzer = getWinningBuzzer(
             draft.buzzes,
-            getTiebreakerSeed(clue),
+            getStateTiebreakerSeed(draft),
             getBuzzWindowMs(draft),
           );
           if (userId !== winningBuzzer?.userId) {
@@ -1067,7 +1163,7 @@ export function gameEngine(state: State, action: Action): State {
         // Multiple choice: the player answers by picking an option, which is
         // checked against the answer here (every client derives the same
         // result from the game data, so a forged "correct" flag is ignored).
-        if (clue && isAutoCheckedClue(clue)) {
+        if (clue && autoChecked) {
           if (
             choice === undefined &&
             timedOut === true &&
@@ -1080,7 +1176,12 @@ export function gameEngine(state: State, action: Action): State {
             if (choice === undefined || !isChoiceIndex(clue, choice)) {
               return;
             }
-            correct = isCorrectChoice(clue, choice);
+            // In host mode players' pages don't have the answer: the check
+            // route judged the pick from the game data (only the server
+            // inserts room events). Self-marking rooms re-check it here.
+            if (!draft.host) {
+              correct = isCorrectChoice(clue, choice);
+            }
             const picks =
               draft.choicePicks.get(key) ?? new Map<string, number>();
             picks.set(userId, choice);
@@ -1199,6 +1300,9 @@ export function gameEngine(state: State, action: Action): State {
         const { round, userId, i, j, correct } = action.payload;
         const correction = draft.checkCorrection;
         if (
+          // Host mode: the host's (or the admin's) verdicts stand unless they
+          // correct them.
+          (draft.host && !isHostAction(action) && !isAdminAction(action)) ||
           !canCorrectCheck(draft.type) ||
           !correction ||
           correction.round !== round ||
@@ -1267,6 +1371,7 @@ export function gameEngine(state: State, action: Action): State {
             ?.categories.at(j)
             ?.clues.at(i);
           if (!clue?.longForm) return;
+          if (draft.host && !mayRunFlow(draft, action, userId)) return;
 
           const allCantBuzz =
             draft.buzzes.size === draft.players.size &&
@@ -1297,7 +1402,12 @@ export function gameEngine(state: State, action: Action): State {
           .at(draft.round)
           ?.categories.at(j)
           ?.clues.at(i);
-        if (!clue?.longForm && draft.boardControl !== userId) {
+        if (draft.host) {
+          // Host mode: the host moves on.
+          if (!mayRunFlow(draft, action, userId)) {
+            return;
+          }
+        } else if (!clue?.longForm && draft.boardControl !== userId) {
           return;
         }
 
@@ -1514,13 +1624,16 @@ export function gameEngine(state: State, action: Action): State {
           finalAnswerTimeSec,
           wagerTimeSec,
           admin,
+          host,
         } = action.payload;
         // The site admin (whether playing or not), or a player: solo play
         // and room events from before only the admin could change them.
         // Between questions only: a change mid-question would move the
         // running answer timer.
         if (
-          (admin !== true && !draft.players.has(userId)) ||
+          (admin !== true &&
+            !(host === true && isHostId(draft, userId)) &&
+            !draft.players.has(userId)) ||
           draft.type === GameState.GameOver ||
           draft.activeClue !== null ||
           !isAnswerTimeSec(answerTimeSec) ||
@@ -1554,7 +1667,7 @@ export function gameEngine(state: State, action: Action): State {
         if (!canSkipClue(draft, i, j)) {
           return;
         }
-        markSkipped(draft, i, j);
+        markSkipped(draft, i, j, isHostAction(action));
 
         // From the board: played without opening it.
         if (draft.type === GameState.ShowBoard) {
@@ -1601,8 +1714,73 @@ export function gameEngine(state: State, action: Action): State {
           delta: change,
           question: getScoreAdjustmentQuestion(draft),
           ts: action.ts,
+          ...(isHostAction(action) ? { byHost: true } : {}),
         });
       });
+    case ActionType.ClaimHost: {
+      const seat = parseHostSeat(action);
+      if (!seat) return state;
+      return produce(state, (draft) => {
+        if (
+          draft.host !== null ||
+          draft.type === GameState.GameOver ||
+          draft.activeClue !== null ||
+          draft.players.has(seat.userId)
+        ) {
+          return;
+        }
+        draft.host = seat;
+        // Someone who left the game before it got underway isn't in it.
+        if (!isGameUnderway(draft)) {
+          draft.leftPlayers.delete(seat.userId);
+        }
+      });
+    }
+    case ActionType.AssignHost: {
+      const seat = parseHostSeat(action);
+      if (!seat || !isAdminAction(action)) return state;
+      return produce(state, (draft) => {
+        if (
+          draft.type === GameState.GameOver ||
+          draft.players.has(seat.userId) ||
+          // Filling an empty seat switches to host mode: between questions.
+          (draft.host === null && draft.activeClue !== null)
+        ) {
+          return;
+        }
+        draft.host = seat;
+        // Someone who left the game before it got underway isn't in it.
+        if (!isGameUnderway(draft)) {
+          draft.leftPlayers.delete(seat.userId);
+        }
+      });
+    }
+    case ActionType.ReleaseHost: {
+      const payload = parseReleaseHost(action);
+      if (!payload) return state;
+      return produce(state, (draft) => {
+        if (
+          draft.host === null ||
+          draft.type === GameState.GameOver ||
+          // Back to self-marking only between questions.
+          draft.activeClue !== null ||
+          (!isHostId(draft, payload.userId) && !isAdminAction(action))
+        ) {
+          return;
+        }
+        draft.host = null;
+      });
+    }
+    case ActionType.RevealAnswer: {
+      const reveal = parseRevealAnswer(action);
+      if (!reveal) return state;
+      const { round, i, j, ...answer } = reveal;
+      const key = `${round},${i},${j}`;
+      if (state.revealed.has(key)) return state;
+      return produce(state, (draft) => {
+        draft.revealed.set(key, answer);
+      });
+    }
     case ActionType.Restore:
       if (!isRestoreAction(action)) {
         throw new Error("Restore action must have a State payload");

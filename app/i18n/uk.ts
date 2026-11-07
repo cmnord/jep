@@ -9,6 +9,7 @@ import { errors } from "./uk/errors";
 import { game } from "./uk/game";
 import { header } from "./uk/header";
 import { home } from "./uk/home";
+import { host } from "./uk/host";
 import { howto } from "./uk/howto";
 import { play } from "./uk/play";
 import { profile } from "./uk/profile";
@@ -49,6 +50,7 @@ export const uk: Dictionary<typeof en> = {
   ...settings,
   ...random,
   ...watch,
+  ...host,
   ...team,
   ...soundboard,
   ...standings,

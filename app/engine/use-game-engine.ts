@@ -12,11 +12,17 @@ import { canSkipOpenClue, getAdminStep } from "./admin";
 import type { Action } from "./engine";
 import {
   gameEngine,
-  getTiebreakerSeed,
+  getStateTiebreakerSeed,
   getWinningBuzzer,
   parseUtcMs,
 } from "./engine";
-import { countWatchers, type PresenceRole } from "./presence";
+import {
+  countWatchers,
+  listWatchers,
+  type PresenceIdentity,
+  type PresenceRole,
+} from "./presence";
+import { withRevealedAnswers } from "./revealed";
 import {
   createListenerSet,
   NO_BROADCAST,
@@ -76,6 +82,8 @@ function maxEventId(events: readonly DbRoomEvent[], initial = 0) {
   return events.reduce((max, e) => Math.max(max, e.id), initial);
 }
 
+const NO_WATCHERS: PresenceIdentity[] = [];
+
 export function stateToGameEngine(
   game: Game,
   state: State,
@@ -85,17 +93,24 @@ export function stateToGameEngine(
     lastMessageAt,
     reconnect,
     watchers = 0,
+    watcherList = NO_WATCHERS,
     soundboard = NO_BROADCAST,
   }: {
     connectionState: ConnectionState;
     lastMessageAt?: number;
     reconnect?: () => void;
     watchers?: number;
+    watcherList?: PresenceIdentity[];
     soundboard?: RoomBroadcast;
   },
 ) {
-  // Board may be undefined
-  const board = game.boards.at(state.round);
+  // Board may be undefined. In host mode answers withheld from this visitor
+  // are filled in once the server reveals them.
+  const board = withRevealedAnswers(
+    game.boards.at(state.round),
+    state.round,
+    state.revealed,
+  );
 
   let clue: Clue | undefined;
   let category: string | undefined;
@@ -119,7 +134,7 @@ export function stateToGameEngine(
 
   const winningBuzz = getWinningBuzzer(
     state.buzzes,
-    getTiebreakerSeed(clue),
+    getStateTiebreakerSeed(state),
     getBuzzWindowMs(state),
   );
   const winningBuzzer = winningBuzz?.userId ?? undefined;
@@ -131,13 +146,21 @@ export function stateToGameEngine(
   const scoreChanges = getScoreChanges(state);
 
   let numSkipped = 0;
+  let numSkippedByHost = 0;
   for (const rows of state.isAnswered) {
     for (const row of rows) {
       for (const cell of row) {
         if (cell.skipped) numSkipped += 1;
+        if (cell.skippedByHost) numSkippedByHost += 1;
       }
     }
   }
+  const activeCell = state.activeClue
+    ? state.isAnswered
+        .at(state.round)
+        ?.at(state.activeClue[0])
+        ?.at(state.activeClue[1])
+    : undefined;
 
   const clueKey = `${state.round},${
     state.activeClue ? state.activeClue[0] : -1
@@ -199,6 +222,9 @@ export function stateToGameEngine(
     /** How many people are watching the room without playing (spectators,
      * counted with Realtime presence; 0 in solo play). */
     watchers,
+    /** The spectators who announced who they are (the admin may make one
+     * of them the host). */
+    watcherList,
     /** Soundboard sounds on the room channel (Realtime broadcast, never
      * stored); unavailable in solo play. */
     soundboard,
@@ -211,13 +237,14 @@ export function stateToGameEngine(
     scoreAdjustments: state.scoreAdjustments,
     /** How many questions the site admin skipped so far (all rounds). */
     numSkipped,
-    /** The site admin skipped the active question. */
-    activeClueSkipped: state.activeClue
-      ? (state.isAnswered
-          .at(state.round)
-          ?.at(state.activeClue[0])
-          ?.at(state.activeClue[1])?.skipped ?? false)
-      : false,
+    /** How many of them the room's host skipped (feature 22). */
+    numSkippedByHost,
+    /** The site admin (or the host) skipped the active question. */
+    activeClueSkipped: activeCell?.skipped ?? false,
+    /** The host (not the admin) skipped the active question. */
+    activeClueSkippedByHost: activeCell?.skippedByHost ?? false,
+    /** The host seat (feature 22): null plays the self-marking game. */
+    host: state.host,
     /** What the game waits for from a player (the admin panel). */
     adminStep: getAdminStep(state),
     /** The open question may be skipped by the admin. */
@@ -245,6 +272,18 @@ export function useGameEngine(
   roomId: number,
   accessToken?: AuthSession["accessToken"],
   presence: PresenceRole | null = null,
+  {
+    answersHidden = false,
+    presenceIdentity,
+  }: {
+    /** The loader withheld the answers of unresolved questions (host mode,
+     * feature 22). When this changes the state is rebuilt with the new game
+     * data. */
+    answersHidden?: boolean;
+    /** Announced with a spectator's presence so the admin can make them the
+     * host (feature 22). */
+    presenceIdentity?: PresenceIdentity;
+  } = {},
 ) {
   // Every room event applied to `state`, sorted by (ts, id). Used to dedupe
   // events by id and to rebuild state if an event arrives out of order.
@@ -281,6 +320,22 @@ export function useGameEngine(
   React.useEffect(() => {
     gameRef.current = game;
   }, [game]);
+
+  // Host mode switched (a host claimed or freed the seat) and the loader
+  // sent the game with (or without) the answers: replay the known events
+  // with it, so the engine and the board use the new game data.
+  const answersHiddenRef = React.useRef(answersHidden);
+  React.useEffect(() => {
+    if (answersHiddenRef.current === answersHidden) return;
+    answersHiddenRef.current = answersHidden;
+    dispatch({
+      type: REPLACE_STATE,
+      state: applyRoomEventsToState(
+        stateFromGame(game),
+        knownEvents.current ?? [],
+      ),
+    });
+  }, [answersHidden, game]);
 
   /** Merge room events from any source (realtime, catch-up fetch, loader
    * snapshot) into state. `complete` marks a source that returns every event
@@ -325,15 +380,28 @@ export function useGameEngine(
   // re-subscribing (e.g. a spectator joins the game), so it is kept in a ref
   // and re-announced on the live channel.
   const [watchers, setWatchers] = React.useState(0);
-  const presenceRef = React.useRef(presence);
+  const [watcherList, setWatcherList] = React.useState(NO_WATCHERS);
+  const presenceRef = React.useRef({ role: presence, presenceIdentity });
+  /** What this client last announced on the live channel. */
+  const announcedRef = React.useRef<string | null>(null);
   const channelRef = React.useRef<RealtimeChannel | null>(null);
+  const identityUserId = presenceIdentity?.userId;
+  const identityName = presenceIdentity?.name;
   React.useEffect(() => {
-    presenceRef.current = presence;
+    const identity =
+      identityUserId !== undefined && identityName !== undefined
+        ? { userId: identityUserId, name: identityName }
+        : undefined;
+    presenceRef.current = { role: presence, presenceIdentity: identity };
     const channel = channelRef.current;
-    if (channel?.state === "joined") {
-      announcePresence(channel, presence);
+    // Re-announce only a real change: tracking the same presence again
+    // right after a reload of the page's data can close the channel.
+    const key = presenceKey(presence, identity);
+    if (channel?.state === "joined" && announcedRef.current !== key) {
+      announcedRef.current = key;
+      announcePresence(channel, presence, identity);
     }
-  }, [presence]);
+  }, [presence, identityUserId, identityName]);
 
   // Soundboard: ephemeral Realtime broadcasts on the same channel. Listeners
   // survive reconnects (they are not tied to one channel instance).
@@ -445,6 +513,7 @@ export function useGameEngine(
       .on("presence", { event: "sync" }, () => {
         if (disposed) return;
         setWatchers(countWatchers(channel.presenceState()));
+        setWatcherList(listWatchers(channel.presenceState()));
       })
       .on("broadcast", { event: SOUNDBOARD_EVENT }, (message) => {
         if (disposed) return;
@@ -458,7 +527,15 @@ export function useGameEngine(
             hasConnectedOnce.current = true;
             clearReconnectingTimer();
             setConnectionState(ConnectionState.CONNECTED);
-            announcePresence(channel, presenceRef.current);
+            announcedRef.current = presenceKey(
+              presenceRef.current.role,
+              presenceRef.current.presenceIdentity,
+            );
+            announcePresence(
+              channel,
+              presenceRef.current.role,
+              presenceRef.current.presenceIdentity,
+            );
             fetchMissedEvents();
             clearTimeout(catchUpTimer);
             catchUpTimer = setTimeout(fetchMissedEvents, CATCH_UP_DELAY_MS);
@@ -548,14 +625,32 @@ export function useGameEngine(
     lastMessageAt,
     reconnect,
     watchers,
+    watcherList,
     soundboard,
   });
 }
 
+/** presenceKey identifies what announcePresence sends. */
+function presenceKey(role: PresenceRole | null, identity?: PresenceIdentity) {
+  return role === "spectator" && identity
+    ? `${role}:${identity.userId}:${identity.name}`
+    : String(role);
+}
+
 /** announcePresence tracks this client's role on the channel, or stops
  * tracking it. Presence is best-effort: failures only affect the count. */
-function announcePresence(channel: RealtimeChannel, role: PresenceRole | null) {
-  const request = role ? channel.track({ role }) : channel.untrack();
+function announcePresence(
+  channel: RealtimeChannel,
+  role: PresenceRole | null,
+  identity?: PresenceIdentity,
+) {
+  const request = role
+    ? channel.track(
+        role === "spectator" && identity
+          ? { role, userId: identity.userId, name: identity.name }
+          : { role },
+      )
+    : channel.untrack();
   request.catch((err: unknown) =>
     console.warn("Realtime presence update failed:", err),
   );

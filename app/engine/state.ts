@@ -3,6 +3,7 @@ import type { Board, Clue, Game } from "~/models/convert.server";
 import type { PlayerColor } from "~/models/player-color";
 import type { TeamId } from "~/models/team";
 import { hasChoices } from "~/utils/choices";
+import type { MediaBlock } from "~/utils/media";
 
 import { DEFAULT_AUTO_WRONG_ON_TIMEOUT } from "./answer-timer";
 import { DEFAULT_ROOM_TIMERS } from "./room-timers";
@@ -38,6 +39,8 @@ export interface ClueAnswer {
   /** The site admin skipped this question (ActionType.SkipClue): it counts
    * as played, without points for anyone for the skip itself. */
   skipped?: boolean;
+  /** The room's host (not the site admin) skipped it (feature 22). */
+  skippedByHost?: boolean;
 }
 
 /** QuestionRef names a question of the game: round and board cell. */
@@ -59,6 +62,8 @@ export interface ScoreAdjustment {
    * question). See getScoreChanges in standings.ts. */
   question: QuestionRef | null;
   ts: number;
+  /** The room's host (not the site admin) made the change (feature 22). */
+  byHost?: boolean;
 }
 
 export interface CheckCorrection {
@@ -87,6 +92,23 @@ export interface Player {
   avatar?: Avatar;
   /** The player's team (team mode, see models/team.ts). No team plays solo. */
   team?: TeamId;
+}
+
+/** Host is the holder of the room's host seat (feature 22, SIGame's
+ * "showman"): not a player — no score, no buzzing — who sees the answers,
+ * judges the players' spoken answers and runs the game. */
+export interface Host {
+  userId: string;
+  name: string;
+  avatar?: Avatar;
+}
+
+/** RevealedAnswer is the answer of a question resolved in host mode, sent by
+ * the server in a reveal_answer event: players' pages don't get answers of
+ * unresolved questions (see models/withhold-answers.ts). */
+export interface RevealedAnswer {
+  answer: string;
+  answerMedia?: MediaBlock[];
 }
 
 export function clueIsPlayable(clue: Clue) {
@@ -120,6 +142,12 @@ export interface State {
   /** Score changes made by the site admin, oldest first (rooms only: solo
    * play has no admin). */
   readonly scoreAdjustments: ScoreAdjustment[];
+  /** The host seat (feature 22): null plays the self-marking game. Solo
+   * play never has a host. */
+  readonly host: Host | null;
+  /** Answers revealed by the server (reveal_answer events) of questions
+   * resolved in host mode, by `round,i,j`. */
+  readonly revealed: Map<RoundIJKey, RevealedAnswer>;
 
   // per round state
   readonly activeClue: [number, number] | null;
@@ -193,6 +221,8 @@ export function stateFromGame(game: Game) {
     checkCorrection: null,
     teamNames: new Map(),
     scoreAdjustments: [],
+    host: null,
+    revealed: new Map(),
     numAnswered: 0,
     numCluesInBoard: getNumCluesInBoard(game, 0),
     numExpectedWagers: 0,
@@ -218,6 +248,12 @@ export function stateFromGame(game: Game) {
   }
 
   return state;
+}
+
+/** isHostMode: someone holds the host seat, so the host judges the answers
+ * (feature 22). Without a host the players mark their own answers. */
+export function isHostMode(state: Pick<State, "host">) {
+  return state.host !== null;
 }
 
 /** getBoardSize is the [rows, columns] of a board's grid. Categories may have

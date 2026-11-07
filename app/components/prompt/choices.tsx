@@ -143,17 +143,34 @@ export function ChoiceList({
 }
 
 /** ConnectedChoiceList shows the active question's options and picks. */
+/** useCorrectChoiceIndex is the right option of the active question. In
+ * host mode (feature 22) players' pages don't have the answer until it is
+ * revealed, but a pick judged right by the server is the right option. */
+export function useCorrectChoiceIndex() {
+  const { activeClue, answeredBy, clue, choicePicks } = useEngineContext();
+  if (!clue) return -1;
+  const fromAnswer = getCorrectChoiceIndex(clue);
+  if (fromAnswer !== -1 || !activeClue) return fromAnswer;
+  for (const [userId, choice] of choicePicks) {
+    if (answeredBy(activeClue[0], activeClue[1], userId) === true) {
+      return choice;
+    }
+  }
+  return -1;
+}
+
 export function ConnectedChoiceList({
   revealCorrect = false,
 }: {
   revealCorrect?: boolean;
 }) {
   const { clue, choicePicks, players } = useEngineContext();
+  const correctIndex = useCorrectChoiceIndex();
   if (!clue?.choices) return null;
   return (
     <ChoiceList
       choices={clue.choices}
-      correctIndex={getCorrectChoiceIndex(clue)}
+      correctIndex={correctIndex}
       picks={choicePicks}
       players={players}
       revealCorrect={revealCorrect}
@@ -174,6 +191,7 @@ export function ConnectedChoicePicker({
 }) {
   const { activeClue, clue, choicePicks, players, soloDispatch } =
     useEngineContext();
+  const correctIndex = useCorrectChoiceIndex();
   const { t } = useTranslation();
   const fetcher = useFetcher<Action>();
   useSoloAction(fetcher, soloDispatch);
@@ -225,7 +243,7 @@ export function ConnectedChoicePicker({
       </p>
       <ChoiceList
         choices={clue.choices}
-        correctIndex={getCorrectChoiceIndex(clue)}
+        correctIndex={correctIndex}
         picks={choicePicks}
         players={players}
         onPick={pick}

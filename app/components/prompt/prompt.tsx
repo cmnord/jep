@@ -806,17 +806,28 @@ function RevealAnswerToBuzzerPrompt({ roomId, userId }: RoomProps) {
     category,
     clue,
     getClueValue,
+    host,
     players,
     winningBuzzer,
   } = useEngineContext();
   const { t } = useTranslation();
   const clueMedia = useClueMedia();
+  // Host mode (feature 22): the player answers out loud and the host judges
+  // (a multiple choice option is still picked here).
+  const hostMode = host !== null;
 
   // The answer timer (room setting): everyone sees the countdown; when it
-  // runs out, the answering player's own device marks the answer wrong.
+  // runs out, the answering player's own device marks the answer wrong (in
+  // host mode the host's device does).
   const timer = useAnswerTimer();
   const [marked, setMarked] = React.useState(false);
-  const timedOut = useAutoWrongOnTimeout({ roomId, userId, timer, marked });
+  const timedOut = useAutoWrongOnTimeout({
+    roomId,
+    userId,
+    timer,
+    marked,
+    enabled: !hostMode,
+  });
 
   if (!clue) throw new Error("clue is undefined");
   if (!activeClue) throw new Error("activeClue is undefined");
@@ -916,6 +927,15 @@ function RevealAnswerToBuzzerPrompt({ roomId, userId }: RoomProps) {
             </p>
           </>
         )
+      ) : hostMode ? (
+        <p
+          className="p-2 text-center font-bold text-white"
+          data-testid="host-judges"
+        >
+          {canShowAnswer
+            ? t("host.player.youAnswer")
+            : t("host.player.answering", { name: winningPlayerName })}
+        </p>
       ) : canShowAnswer ? (
         <CheckForm
           roomId={roomId}
@@ -933,7 +953,7 @@ function RevealAnswerToBuzzerPrompt({ roomId, userId }: RoomProps) {
       )}
       {timer.timed ? (
         <ConnectedAnswerTimer timer={timer}>
-          {canShowAnswer && timer.status ? (
+          {canShowAnswer && timer.status && !hostMode ? (
             <AnswerTimerHint
               expired={timer.status.expired}
               autoWrong={autoWrongOnTimeout}
@@ -957,6 +977,7 @@ function RevealAnswerLongFormPrompt({ roomId, userId }: RoomProps) {
     category,
     clue,
     getClueValue,
+    host,
     players,
   } = useEngineContext();
   const { t, rich } = useTranslation();
@@ -966,8 +987,12 @@ function RevealAnswerLongFormPrompt({ roomId, userId }: RoomProps) {
 
   const clueValue = getClueValue(activeClue, userId);
   const buzzDurationMs = buzzes.get(userId);
+  // Host mode (feature 22): the host judges every answer.
+  const hostMode = host !== null;
   const canCheckAnswer =
-    buzzDurationMs !== undefined && buzzDurationMs !== CANT_BUZZ_FLAG;
+    !hostMode &&
+    buzzDurationMs !== undefined &&
+    buzzDurationMs !== CANT_BUZZ_FLAG;
 
   const playersList = Array.from(players.values()).map((p) => ({
     name: p.name,
@@ -1013,6 +1038,13 @@ function RevealAnswerLongFormPrompt({ roomId, userId }: RoomProps) {
           longForm={true}
           onClickShowAnswer={() => null}
         />
+      ) : hostMode ? (
+        <p
+          className="p-2 text-center font-bold text-white"
+          data-testid="host-judges"
+        >
+          {t("host.player.judging")}
+        </p>
       ) : (
         <p className="p-2 text-center text-sm text-slate-300">
           {t("play.waitingForChecks", {
@@ -1049,8 +1081,9 @@ function RevealAnswerLongFormPrompt({ roomId, userId }: RoomProps) {
  * GameState.ReadAnswerToAll.
  */
 function RevealAnswerToAllPrompt({ roomId, userId }: RoomProps) {
-  const { activeClue, answeredBy, board, category, clue, getClueValue } =
+  const { activeClue, answeredBy, board, category, clue, getClueValue, host } =
     useEngineContext();
+  const { t } = useTranslation();
   const clueMedia = useClueMedia();
   if (!clue) throw new Error("clue is undefined");
 
@@ -1086,7 +1119,10 @@ function RevealAnswerToAllPrompt({ roomId, userId }: RoomProps) {
         media={revealMedia(clue, true, clueMedia)}
         autoPlayMedia={hasAnswerMedia(clue)}
         showAnswer
-        answer={clue.answer}
+        // Host mode: the server's reveal may arrive a moment later.
+        answer={
+          clue.answer || (host !== null ? t("host.player.revealing") : "")
+        }
       />
       <TimesUpNotice />
       <ConnectedChoiceList revealCorrect />

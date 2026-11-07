@@ -38,6 +38,17 @@ export function applyRoomEventsToState(
   return state;
 }
 
+const HOST_SEAT_EVENTS: ReadonlySet<string> = new Set([
+  ActionType.ClaimHost,
+  ActionType.AssignHost,
+]);
+
+/** hasHostSeatEvents: the room ever had a host (feature 22). Rooms without
+ * one need no replay to know they are not in host mode. */
+export function hasHostSeatEvents(events: readonly DbRoomEvent[] | undefined) {
+  return events?.some((e) => HOST_SEAT_EVENTS.has(e.type)) ?? false;
+}
+
 type TypedRoomEvent = DbRoomEvent & { type: ActionType };
 
 /** compareRoomEvents orders room events the way the server does (by ts), with

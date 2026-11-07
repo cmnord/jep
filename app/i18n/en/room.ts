@@ -124,6 +124,16 @@ export const room = {
   "room.answerTimeAdminOnly": "Only the admin can change this.",
   "room.answerTimeReadOnly":
     "Answer time: {value}. Only the admin can change this.",
+  "room.error.hostOnly": "only the host can do this",
+  "room.error.hostRunsGame": "in this room the host runs the game",
+  "room.error.hostJudges": "the host judges the answers in this room",
+  "room.error.hostRoomsOnly": "solo games have no host",
+  "room.error.noHost": "nobody is hosting this game",
+  "room.error.hostBetweenQuestions":
+    "the host seat can only change between questions",
+  "room.error.hostIsPlayer": "players can't host: leave the game first",
+  "room.error.hostSeatTaken": "{name} is already hosting",
+  "room.error.joinWhileHosting": "you're hosting: stop hosting to play",
   "room.error.adminOnly": "only the admin can do this",
   "room.error.adminRoomsOnly": "admin controls are only for game rooms",
   "room.error.adminNothingToSkip": "this question can't be skipped now",

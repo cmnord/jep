@@ -2,6 +2,11 @@ import { data } from "react-router";
 import { z } from "zod";
 
 import { getAdmin } from "~/admin/auth.server";
+import {
+  ACT_AS_HOST_FIELD,
+  requireRoomHost,
+  type RoomActorTag,
+} from "~/admin/room-actor.server";
 import { ActionType } from "~/engine";
 import { MAX_ADMIN_SCORE } from "~/engine/actions";
 import { canSkipClue } from "~/engine/admin";
@@ -9,6 +14,7 @@ import { GameState } from "~/engine/state";
 import { createT, getRequestLocale } from "~/i18n";
 import { getValidAuthSession } from "~/models/auth";
 import { createRoomEventAsServer } from "~/models/room-event.server";
+import { revealResolvedAnswer } from "~/models/room-reveal.server";
 import { getRoomState } from "~/models/room-state.server";
 import { getRoom } from "~/models/room.server";
 import { parseFormData } from "~/utils/http.server";
@@ -40,7 +46,8 @@ const formSchema = z.discriminatedUnion("intent", [
 export type AdminRoomActionData = { error: string } | null;
 
 /** The site admin's own interventions in a room (feature 20): skip a
- * question and change scores. (Doing a stuck player's step for them goes
+ * question and change scores. The room's host may do the same (`host=true`,
+ * feature 22). (Doing a stuck player's step for them goes
  * through that step's own route with `admin=true`, see
  * authorizeRoomActor.)
  *
@@ -52,7 +59,11 @@ export type AdminRoomActionData = { error: string } | null;
  * room page shows it in the panel. Solo play has no admin. */
 export async function action({ request, params }: Route.ActionArgs) {
   const t = createT(getRequestLocale(request));
-  if (!(await getAdmin(request))) {
+  const formData = await request.formData();
+  // The room's host has the same controls (feature 22), checked against the
+  // room below; everyone else needs an admin session, checked first.
+  const asHost = formData.get(ACT_AS_HOST_FIELD) === "true";
+  if (!asHost && !(await getAdmin(request))) {
     throw new Response(t("room.error.adminOnly"), { status: 403 });
   }
 
@@ -64,14 +75,17 @@ export async function action({ request, params }: Route.ActionArgs) {
     throw new Response(t("room.error.adminRoomsOnly"), { status: 400 });
   }
 
-  const form = parseFormData(await request.formData(), formSchema);
+  const form = parseFormData(formData, formSchema);
 
   const authSession = await getValidAuthSession(request);
   const room = await getRoom(roomId, authSession?.accessToken);
   if (!room) {
     throw new Response(t("room.error.roomNotFound"), { status: 404 });
   }
-  const { state } = await getRoomState(room, authSession, t);
+  const { state } = asHost
+    ? await requireRoomHost(request, room, authSession, t)
+    : await getRoomState(room, authSession, t);
+  const tag: RoomActorTag = asHost ? { host: true } : { admin: true };
   if (state.type === GameState.GameOver) {
     return data({ error: t("room.error.gameIsOver") }, { status: 409 });
   }
@@ -87,8 +101,9 @@ export async function action({ request, params }: Route.ActionArgs) {
     await createRoomEventAsServer(room.id, ActionType.SkipClue, {
       i,
       j,
-      admin: true,
+      ...tag,
     });
+    await revealResolvedAnswer(room, authSession);
     return null;
   }
 
@@ -108,7 +123,7 @@ export async function action({ request, params }: Route.ActionArgs) {
   await createRoomEventAsServer(room.id, ActionType.AdjustScore, {
     userId,
     ...change,
-    admin: true,
+    ...tag,
   });
   return null;
 }

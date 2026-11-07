@@ -136,6 +136,18 @@ export const room: Dictionary<typeof en> = {
   "room.answerTimeAdminOnly": "Змінити це може лише адміністратор.",
   "room.answerTimeReadOnly":
     "Час на відповідь: {value}. Змінити це може лише адміністратор.",
+  "room.error.hostOnly": "це може зробити лише ведучий",
+  "room.error.hostRunsGame": "у цій кімнаті гру веде ведучий",
+  "room.error.hostJudges": "у цій кімнаті відповіді оцінює ведучий",
+  "room.error.hostRoomsOnly": "в одиночній грі немає ведучого",
+  "room.error.noHost": "цю гру ніхто не веде",
+  "room.error.hostBetweenQuestions":
+    "місце ведучого можна змінити лише між питаннями",
+  "room.error.hostIsPlayer":
+    "гравець не може бути ведучим: спершу вийдіть із гри",
+  "room.error.hostSeatTaken": "{name} уже веде цю гру",
+  "room.error.joinWhileHosting":
+    "ви ведучий: щоб грати, спершу перестаньте вести гру",
   "room.error.adminOnly": "це може зробити лише адміністратор",
   "room.error.adminRoomsOnly":
     "керування адміністратора є лише в ігрових кімнатах",

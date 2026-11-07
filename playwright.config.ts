@@ -30,13 +30,13 @@ export default defineConfig({
       name: "solo",
       use: { ...devices["Desktop Chrome"] },
       testIgnore:
-        /(auth|solves|game-management|settings|rooms|media-upload|choices-room|secret-room|avatars-room|hydration-room|siq-import|random-board|watch-room|teams-room|answer-timer-room|admin-timer-room|soundboard-room|seat-lock-room|admin-interventions-room|room-timers-room|admin)\.spec\.ts/,
+        /(auth|solves|game-management|settings|rooms|media-upload|choices-room|secret-room|avatars-room|hydration-room|siq-import|random-board|watch-room|teams-room|answer-timer-room|admin-timer-room|soundboard-room|seat-lock-room|admin-interventions-room|room-timers-room|host-role-room|admin)\.spec\.ts/,
     },
     {
       name: "db",
       use: { ...devices["Desktop Chrome"] },
       testMatch:
-        /(auth|solves|game-management|settings|rooms|media-upload|choices-room|secret-room|avatars-room|hydration-room|siq-import|random-board|watch-room|teams-room|answer-timer-room|admin-timer-room|soundboard-room|seat-lock-room|admin-interventions-room|room-timers-room|admin)\.spec\.ts/,
+        /(auth|solves|game-management|settings|rooms|media-upload|choices-room|secret-room|avatars-room|hydration-room|siq-import|random-board|watch-room|teams-room|answer-timer-room|admin-timer-room|soundboard-room|seat-lock-room|admin-interventions-room|room-timers-room|host-role-room|admin)\.spec\.ts/,
       dependencies: ["solo"],
       // These specs share one test user and one database, so they cannot
       // run concurrently with each other.

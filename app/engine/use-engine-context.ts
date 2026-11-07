@@ -48,13 +48,17 @@ export const GameEngineContext = React.createContext<
   wagerStartedAt: null,
   longFormStartedAt: null,
   watchers: 0,
+  watcherList: [],
   soundboard: NO_BROADCAST,
   scoreChanges: NO_SCORE_CHANGES,
   scoreChangesKey: "",
   scoreAdjustments: [],
   numSkipped: 0,
+  numSkippedByHost: 0,
   activeClueSkipped: false,
+  activeClueSkippedByHost: false,
   adminStep: { kind: "none" },
+  host: null,
   canSkipOpenClue: false,
 });
 

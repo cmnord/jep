@@ -1,14 +1,21 @@
 import * as React from "react";
+import { useRevalidator } from "react-router";
 import { ENV } from "varlock/env";
 
 import { Presenter } from "~/components/watch/presenter";
 import { GameEngineContext, useGameEngine } from "~/engine";
+import { applyRoomEventsToState } from "~/engine/room-event";
+import { stateFromGame } from "~/engine/state";
 import { createT, getRequestLocale } from "~/i18n";
 import { metaT } from "~/i18n/meta";
 import { getValidAuthSession } from "~/models/auth";
 import { getGame } from "~/models/game.server";
 import { getRoomEvents } from "~/models/room-event.server";
 import { getRoomByName } from "~/models/room.server";
+import {
+  shouldWithholdAnswers,
+  withholdAnswers,
+} from "~/models/withhold-answers";
 import { noteServerTime } from "~/utils/server-clock";
 
 import type { Route } from "./+types/room.$roomName_.present";
@@ -44,8 +51,13 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     throw new Response(t("room.error.gameNotFound"), { status: 404 });
   }
   const roomEvents = await getRoomEvents(room.id, accessToken);
+  // Host mode (feature 22): the TV shows the room to everyone, so it never
+  // gets the answers of unresolved questions (they arrive with the reveal).
+  const state = applyRoomEventsToState(stateFromGame(game), roomEvents);
+  const answersHidden = shouldWithholdAnswers(state, null, false);
   return {
-    game,
+    game: answersHidden ? withholdAnswers(game, state) : game,
+    answersHidden,
     roomEvents,
     roomId: room.id,
     accessToken,
@@ -62,7 +74,22 @@ export default function PresentRoom({ loaderData }: Route.ComponentProps) {
     loaderData.roomId,
     loaderData.accessToken,
     "presenter",
+    { answersHidden: loaderData.answersHidden },
   );
+  // The host seat changed: fetch the game with (or without) the answers.
+  const hideAnswers = shouldWithholdAnswers(engine, null, false);
+  const revalidator = useRevalidator();
+  const revalidatedFor = React.useRef<string | null>(null);
+  const hostKey = engine.host?.userId ?? "";
+  React.useEffect(() => {
+    if (hideAnswers === loaderData.answersHidden) {
+      revalidatedFor.current = null;
+      return;
+    }
+    if (revalidatedFor.current === hostKey) return;
+    revalidatedFor.current = hostKey;
+    void revalidator.revalidate();
+  }, [hideAnswers, loaderData.answersHidden, hostKey, revalidator]);
   // A sample for the server clock estimate (answer timer).
   React.useEffect(() => {
     noteServerTime(loaderData.serverNow);

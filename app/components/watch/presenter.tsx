@@ -4,6 +4,7 @@ import * as React from "react";
 import BoardComponent from "~/components/board";
 import Connection from "~/components/connection";
 import GameClock from "~/components/game-clock";
+import { HostBadge } from "~/components/host/host-badge";
 import { PausedOverlay } from "~/components/pause";
 import { PlayerIcon, PlayerScore } from "~/components/player";
 import { PROMPT_STATES } from "~/components/prompt/prompt";
@@ -375,6 +376,7 @@ export function Presenter({ game, joinUrl }: { game: Game; joinUrl: string }) {
             ? ` · ${t("watch.roundOf", { round: round + 1, total: game.boards.length })}`
             : null}
         </p>
+        <HostBadge />
         <div className="ml-auto flex items-center gap-2">
           <WatcherCount count={watchers} className="text-sm text-slate-300" />
           <GameClock roomId={-1} readOnly />

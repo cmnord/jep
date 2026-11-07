@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { getAdmin } from "~/admin/auth.server";
+import { ACT_AS_HOST_FIELD, isRoomHost } from "~/admin/room-actor.server";
 import { ActionType } from "~/engine";
 import { applyRoomEventsToState } from "~/engine/room-event";
 import { GameState, stateFromGame } from "~/engine/state";
@@ -30,7 +31,8 @@ const formSchema = roomSettingsFormSchema.extend({
  * time, buzz window, Final answer and wager time). Last change wins.
  *
  * In a room only the site admin (a valid admin session, see /admin) may
- * change them, whether they play in the room or not. The event is inserted
+ * change them, whether they play in the room or not — or the room's host
+ * (`host=true`, feature 22). The event is inserted
  * with the service role: the browser key may not insert set_settings events
  * (RLS), so this check can't be skipped by writing to the table directly.
  * Solo play (roomId -1) has no room events: the player keeps the setting. */
@@ -49,7 +51,10 @@ export async function action({ request, params }: Route.ActionArgs) {
     return { type: ActionType.SetSettings, payload, ts: Date.now() };
   }
 
-  if (!(await getAdmin(request))) {
+  // The room's host may change them too (feature 22), checked against the
+  // room below; everyone else needs an admin session, checked first.
+  const asHost = formData.get(ACT_AS_HOST_FIELD) === "true";
+  if (!asHost && !(await getAdmin(request))) {
     throw new Response(t("room.error.settingsAdminOnly"), { status: 403 });
   }
 
@@ -70,6 +75,13 @@ export async function action({ request, params }: Route.ActionArgs) {
     stateFromGame(game),
     await getRoomEvents(room.id, authSession?.accessToken),
   );
+  if (
+    asHost &&
+    (state.host?.userId !== form.userId ||
+      !(await isRoomHost(request, state, authSession)))
+  ) {
+    throw new Response(t("room.error.hostOnly"), { status: 403 });
+  }
   if (state.type === GameState.GameOver) {
     throw new Response(t("room.error.gameIsOver"), { status: 409 });
   }
@@ -81,7 +93,7 @@ export async function action({ request, params }: Route.ActionArgs) {
 
   await createRoomEventAsServer(room.id, ActionType.SetSettings, {
     ...payload,
-    admin: true,
+    ...(asHost ? { host: true } : { admin: true }),
   });
 
   return null;

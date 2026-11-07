@@ -6,6 +6,8 @@ import { AnswerTimerControl } from "~/components/answer-timer-settings";
 import BoardComponent from "~/components/board";
 import Connection from "~/components/connection";
 import GameClock from "~/components/game-clock";
+import { HostBadge } from "~/components/host/host-badge";
+import { HostPrompt } from "~/components/host/host-prompt";
 import Link from "~/components/link";
 import { PauseControl, PausedOverlay } from "~/components/pause";
 import { PlayerScores } from "~/components/player";
@@ -119,6 +121,7 @@ export default function GameComponent({
   const {
     boardControl,
     connectionState,
+    host,
     lastMessageAt,
     players,
     reconnect,
@@ -131,6 +134,10 @@ export default function GameComponent({
   // Everyone who is not in the game (still deciding in the join dialog, or
   // watching) sees the room read-only: no control on the page sends anything.
   const isPlayer = players.has(userId);
+  // The host (feature 22) doesn't play but runs the game: they see the
+  // answers, judge, start rounds and move on.
+  const isHost = host !== null && host.userId === userId;
+  const runsGame = isPlayer || isHost;
 
   const [playBoardFillSfx] = useGameSound(BOARD_FILL_SFX);
   const [playFinalSfx] = useGameSound(FINAL_CATEGORY_REVEAL_SFX);
@@ -161,33 +168,37 @@ export default function GameComponent({
         watching={watching}
       />
       <div className="flex grow flex-col bg-blue-1000">
-        <BoardComponent roomId={roomId} userId={userId} readOnly={!isPlayer} />
+        <BoardComponent roomId={roomId} userId={userId} readOnly={!runsGame} />
         <div
           className={`mx-auto flex w-full max-w-screen-lg flex-col gap-4 p-3 text-slate-100 sm:p-6 md:p-12`}
         >
           <div className="flex flex-wrap items-center justify-between gap-y-1">
-            <CallToAction
-              boardController={boardController}
-              type={type}
-              isSingleLongFormClue={isSingleLongFormClue}
-              roomName={roomName}
-              userId={userId}
-            />
+            <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
+              <CallToAction
+                boardController={boardController}
+                type={type}
+                isSingleLongFormClue={isSingleLongFormClue}
+                roomName={roomName}
+                userId={userId}
+              />
+              <HostBadge roomId={roomId} userId={userId} />
+            </div>
             <div className="flex items-center gap-1">
               <WatcherCount
                 count={watchers}
                 className="px-2 text-sm whitespace-nowrap text-slate-300"
               />
               <StandingsButton userId={userId} />
-              {isPlayer || isAdmin ? (
+              {runsGame || isAdmin ? (
                 <AnswerTimerControl
                   roomId={roomId}
                   userId={userId}
                   isAdmin={isAdmin}
+                  isHost={isHost}
                 />
               ) : null}
-              {isPlayer ? <PauseControl roomId={roomId} /> : null}
-              <GameClock roomId={roomId} readOnly={!isPlayer} />
+              {runsGame ? <PauseControl roomId={roomId} /> : null}
+              <GameClock roomId={roomId} readOnly={!runsGame} />
             </div>
           </div>
           <PlayerScores roomId={roomId} userId={userId} isAdmin={isAdmin} />
@@ -199,6 +210,8 @@ export default function GameComponent({
         </div>
         {isPlayer ? (
           <Prompt roomId={roomId} userId={userId} />
+        ) : isHost ? (
+          <HostPrompt roomId={roomId} userId={userId} />
         ) : (
           <SpectatorPrompt />
         )}
@@ -207,17 +220,21 @@ export default function GameComponent({
           <div className="h-16 shrink-0" aria-hidden />
         ) : null}
       </div>
-      <PausedOverlay roomId={roomId} canResume={isPlayer} />
+      <PausedOverlay roomId={roomId} canResume={runsGame} />
       <Soundboard userId={userId} />
       {/* Solo play (room -1) has no admin. */}
-      {isAdmin && roomId !== -1 ? (
+      {(isAdmin || isHost) && roomId !== -1 ? (
         <AdminControls
           roomId={roomId}
-          raised={!isPlayer && watching && Boolean(onWatchingChange)}
+          // The site admin's controls are a superset of the host's.
+          actor={isAdmin ? "admin" : "host"}
+          userId={userId}
+          name={name}
+          raised={!runsGame && watching && Boolean(onWatchingChange)}
         />
       ) : null}
       <AdminToasts />
-      {!isPlayer && watching && onWatchingChange ? (
+      {!runsGame && watching && onWatchingChange ? (
         <>
           {/* Room for the floating bar below the page content. */}
           <div className="h-16" aria-hidden />

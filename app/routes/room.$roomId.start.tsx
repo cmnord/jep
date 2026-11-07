@@ -1,6 +1,9 @@
 import { z } from "zod";
 
-import { adminTag, authorizeRoomActor } from "~/admin/room-actor.server";
+import {
+  authorizeRoomActor,
+  requireHostModeFlow,
+} from "~/admin/room-actor.server";
 import { ActionType } from "~/engine";
 import { createT, getRequestLocale } from "~/i18n";
 import { getValidAuthSession } from "~/models/auth";
@@ -34,22 +37,25 @@ export async function action({ request, params }: Route.ActionArgs) {
   }
 
   const authSession = await getValidAuthSession(request);
-  const byAdmin = await authorizeRoomActor(
+  const actor = await authorizeRoomActor(
     request,
     formData,
     userId,
     authSession,
     t,
+    roomId,
   );
   const room = await getRoom(roomId, authSession?.accessToken);
   if (!room) {
     throw new Response(t("room.error.roomNotFound"), { status: 404 });
   }
+  // Host mode (feature 22): the host runs the game.
+  await requireHostModeFlow(room, userId, actor, authSession, t);
 
   await createRoomEventAsServer(room.id, ActionType.StartRound, {
     round,
     userId,
-    ...adminTag(byAdmin),
+    ...actor,
   });
 
   return null;

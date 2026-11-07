@@ -56,7 +56,10 @@ export function JoinGameDialog({
 } & RoomProps) {
   const { t } = useTranslation();
   const [avatar, setAvatar] = useJoinAvatar();
-  const { teamNames } = useEngineContext();
+  const { teamNames, host, activeClue } = useEngineContext();
+  // Host mode (feature 22): a visitor may take the free host seat instead of
+  // playing (rooms only; the seat changes between questions).
+  const canClaimHost = onWatch !== undefined && !host && activeClue === null;
   const [team, setTeam] = React.useState<TeamId | null>(null);
   return (
     <Dialog
@@ -88,6 +91,12 @@ export function JoinGameDialog({
         </div>
         <AvatarPicker value={avatar} onChange={setAvatar} />
       </div>
+      {host ? (
+        <p className="mb-4 text-slate-300" data-testid="join-host-info">
+          <span aria-hidden>🎤 </span>
+          {t("host.seatTaken", { name: host.name })}
+        </p>
+      ) : null}
       <div className="mb-4 flex flex-col gap-2">
         <p className="text-slate-300">{t("team.pickOptional")}</p>
         <TeamPicker
@@ -97,12 +106,28 @@ export function JoinGameDialog({
           teamNames={teamNames}
         />
       </div>
+      {canClaimHost ? (
+        <p className="mb-2 text-sm text-slate-300">{t("host.claimHelp")}</p>
+      ) : null}
       <Dialog.Footer>
         {onWatch ? (
           // Watching sends nothing: the visitor only reads the room.
           <Button type="button" onClick={onWatch}>
             {t("watch.justWatch")}
           </Button>
+        ) : null}
+        {canClaimHost ? (
+          <Form method="POST" action={`/room/${roomId}/host`}>
+            <input type="hidden" name="intent" value="claim" />
+            <input type="hidden" name="userId" value={userId} />
+            <input type="hidden" name="name" value={name} />
+            {avatar ? (
+              <input type="hidden" name="avatar" value={avatar} />
+            ) : null}
+            <Button type="submit">
+              <span aria-hidden>🎤</span> {t("host.claim")}
+            </Button>
+          </Form>
         ) : null}
         <Form method="POST" action={`/room/${roomId}/player`}>
           <input type="hidden" name="userId" value={userId} />
@@ -134,6 +159,7 @@ function PreviewRoundDialog({
   roomId,
   userId,
   isAdmin = false,
+  isHost = false,
 }: {
   board: Board;
   boardControl: string | null;
@@ -150,9 +176,11 @@ function PreviewRoundDialog({
   const isOpen = type === GameState.PreviewRound;
 
   // The dialog is modal, so a correction still pending from the last clue
-  // of the previous round must be reachable from inside it.
-  const { getCheckCorrection } = useEngineContext();
-  const correction = getCheckCorrection(userId);
+  // of the previous round must be reachable from inside it. In host mode
+  // (feature 22) the verdicts are the host's: players have nothing to undo.
+  const { getCheckCorrection, host } = useEngineContext();
+  const hostMode = host !== null;
+  const correction = hostMode ? undefined : getCheckCorrection(userId);
   const { armed, setArmed } = React.useContext(UndoArmingContext);
 
   const boardController = boardControl ? players.get(boardControl) : undefined;
@@ -199,9 +227,19 @@ function PreviewRoundDialog({
         )
       }
     >
+      {hostMode ? (
+        <p className="mb-2 text-slate-300" data-testid="preview-host">
+          <span aria-hidden>🎤 </span>
+          {isHost
+            ? t("host.startRoundHelp")
+            : t("host.badge", { name: host.name })}
+        </p>
+      ) : null}
       {round === 0 ? (
         <div className="flex flex-col gap-2">
-          <EditPlayerForm roomId={roomId} userId={userId} winning={false} />
+          {isHost ? null : (
+            <EditPlayerForm roomId={roomId} userId={userId} winning={false} />
+          )}
           <div className="flex flex-wrap gap-2">
             {Array.from(players.values()).map((p, i) => (
               <PlayerIcon key={i} player={p} size="lg" />
@@ -221,6 +259,7 @@ function PreviewRoundDialog({
           roomId={roomId}
           userId={userId}
           isAdmin={isAdmin}
+          isHost={isHost}
         />
       </div>
       {correction ? (
@@ -242,7 +281,13 @@ function PreviewRoundDialog({
       ) : null}
       <Dialog.Footer>
         <CopyLinkButton url={url} text={t("header.copyRoomLink")} />
-        {boardControl === userId || isSingleLongFormClue ? (
+        {hostMode && !isHost ? (
+          <p className="self-center text-sm text-slate-300">
+            {t("host.player.hostStarts")}
+          </p>
+        ) : null}
+        {(hostMode && isHost) ||
+        (!hostMode && (boardControl === userId || isSingleLongFormClue)) ? (
           <Form method="POST" action={`/room/${roomId}/start`}>
             <input type="hidden" name="round" value={round} />
             <input type="hidden" name="userId" value={userId} />
@@ -283,7 +328,7 @@ export function Preview({
   watching?: boolean;
 } & RoomProps &
   SettingsAccessProps) {
-  const { type, board, boardControl, players, round, soloDispatch } =
+  const { type, board, boardControl, host, players, round, soloDispatch } =
     useEngineContext();
 
   const fetcher = useFetcher<Action>();
@@ -293,8 +338,10 @@ export function Preview({
   if (!board) return null;
 
   const userInGame = players.has(userId);
+  // The host doesn't play but starts the rounds (feature 22).
+  const isHost = host?.userId === userId;
 
-  if (userInGame) {
+  if (userInGame || isHost) {
     return (
       <PreviewRoundDialog
         board={board}
@@ -309,6 +356,7 @@ export function Preview({
         roomId={roomId}
         userId={userId}
         isAdmin={isAdmin}
+        isHost={isHost}
       />
     );
   }

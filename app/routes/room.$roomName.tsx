@@ -1,5 +1,5 @@
 import * as React from "react";
-import { data, redirect, useMatches } from "react-router";
+import { data, redirect, useMatches, useRevalidator } from "react-router";
 import { ENV } from "varlock/env";
 
 import { getAdmin } from "~/admin/auth.server";
@@ -18,6 +18,12 @@ import {
 import { getRoomByName } from "~/models/room.server";
 import { getUserByEmail } from "~/models/user";
 import { parseUserSettings } from "~/models/user-settings";
+import {
+  getAnswerToReveal,
+  revealPayload,
+  shouldWithholdAnswers,
+  withholdAnswers,
+} from "~/models/withhold-answers";
 import { getOrCreateUserSession, getUserSession } from "~/session.server";
 import { getRandomEmoji } from "~/utils";
 import { noteServerTime } from "~/utils/server-clock";
@@ -56,14 +62,26 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     : null;
   const accessToken = authSession?.accessToken;
 
-  const roomEvents = await getRoomEvents(room.id, accessToken);
+  let roomEvents = await getRoomEvents(room.id, accessToken);
   const gameDefaults = user
     ? parseUserSettings(user.settings).gameDefaults
     : undefined;
   const name = gameDefaults?.playerName ?? getRandomEmoji();
   const playerColor = gameDefaults?.playerColor;
 
-  const state = applyRoomEventsToState(stateFromGame(game), roomEvents);
+  let state = applyRoomEventsToState(stateFromGame(game), roomEvents);
+  // Host mode (feature 22): a question resolved without its reveal (e.g. the
+  // route's reveal failed) gets it now, so players see the answer.
+  const reveal = getAnswerToReveal(state);
+  if (reveal) {
+    await createRoomEventAsServer(
+      room.id,
+      ActionType.RevealAnswer,
+      revealPayload(reveal),
+    );
+    roomEvents = await getRoomEvents(room.id, accessToken);
+    state = applyRoomEventsToState(stateFromGame(game), roomEvents);
+  }
   // Only whether the visitor is the site admin (may change the answer
   // timer), never anything about the admin session itself.
   const isAdmin = (await getAdmin(request)) !== null;
@@ -71,6 +89,16 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   if (state.type === GameState.GameOver) {
     return redirect(`/room/${roomName}/summary`);
   }
+
+  /** The game as this visitor may see it: in host mode only the host and
+   * the admin get the answers of unresolved questions. */
+  const gameFor = (userId: string) => {
+    const answersHidden = shouldWithholdAnswers(state, userId, isAdmin);
+    return {
+      game: answersHidden ? withholdAnswers(game, state) : game,
+      answersHidden,
+    };
+  };
 
   if (user) {
     const userId = user.id;
@@ -96,7 +124,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       // Re-fetch room events to include the transfer.
       const updatedRoomEvents = await getRoomEvents(room.id, accessToken);
       return {
-        game,
+        ...gameFor(userId),
         name,
         playerColor,
         roomEvents: updatedRoomEvents,
@@ -111,7 +139,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     }
 
     return {
-      game,
+      ...gameFor(userId),
       name,
       playerColor,
       roomEvents,
@@ -129,7 +157,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   const userId = await getOrCreateUserSession(request, headers);
   return data(
     {
-      game,
+      ...gameFor(userId),
       name,
       playerColor,
       roomEvents,
@@ -156,13 +184,44 @@ export default function PlayGame({ loaderData }: Route.ComponentProps) {
   // later.
   const [presence, setPresence] = React.useState<PresenceRole | null>(null);
 
+  // Spectators say who they are (the admin may make one the host). The name
+  // is the one the visitor got when the page loaded (guests get a random
+  // one per load), so revalidations don't re-announce it.
+  const [identity] = React.useState(() => ({
+    userId: loaderData.userId,
+    name: loaderData.name,
+  }));
   const engine = useGameEngine(
     loaderData.game,
     loaderData.roomEvents,
     loaderData.roomId,
     loaderData.accessToken,
     presence,
+    {
+      answersHidden: loaderData.answersHidden,
+      presenceIdentity: identity,
+    },
   );
+
+  // Host mode (feature 22): when the host seat changes, the answers this
+  // page may have change too — fetch the game again (once per seat change).
+  const hideAnswers = shouldWithholdAnswers(
+    engine,
+    loaderData.userId,
+    loaderData.isAdmin,
+  );
+  const revalidator = useRevalidator();
+  const revalidatedFor = React.useRef<string | null>(null);
+  const hostKey = engine.host?.userId ?? "";
+  React.useEffect(() => {
+    if (hideAnswers === loaderData.answersHidden) {
+      revalidatedFor.current = null;
+      return;
+    }
+    if (revalidatedFor.current === hostKey) return;
+    revalidatedFor.current = hostKey;
+    void revalidator.revalidate();
+  }, [hideAnswers, loaderData.answersHidden, hostKey, revalidator]);
 
   // The server's time when the loader ran: a sample for the server clock
   // estimate (answer timer), e.g. for a reload in the middle of a turn.
@@ -171,11 +230,14 @@ export default function PlayGame({ loaderData }: Route.ComponentProps) {
   }, [loaderData.serverNow]);
 
   const isPlayer = engine.players.has(loaderData.userId);
+  const isHost = engine.host?.userId === loaderData.userId;
   const role: PresenceRole | null = isPlayer
     ? "player"
-    : watching
-      ? "spectator"
-      : null;
+    : isHost
+      ? "host"
+      : watching
+        ? "spectator"
+        : null;
   React.useEffect(() => setPresence(role), [role]);
 
   return (

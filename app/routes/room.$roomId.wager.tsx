@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { adminTag, authorizeRoomActor } from "~/admin/room-actor.server";
+import { authorizeRoomActor } from "~/admin/room-actor.server";
 import { ActionType, getWagerRange } from "~/engine";
 import { GameState } from "~/engine/state";
 import { createT, getRequestLocale } from "~/i18n";
@@ -54,12 +54,13 @@ export async function action({ request, params }: Route.ActionArgs) {
   }
 
   const authSession = await getValidAuthSession(request);
-  const byAdmin = await authorizeRoomActor(
+  const actor = await authorizeRoomActor(
     request,
     formData,
     userId,
     authSession,
     t,
+    roomId,
   );
   const room = await getRoom(roomId, authSession?.accessToken);
   if (!room) {
@@ -99,7 +100,7 @@ export async function action({ request, params }: Route.ActionArgs) {
     j,
     userId,
     wager,
-    ...adminTag(byAdmin),
+    ...actor,
   });
 
   return null;

@@ -115,6 +115,7 @@ export function ConnectedBoardComponent({
   const {
     board,
     boardControl,
+    host,
     isAnswered,
     numAnswered,
     soloDispatch,
@@ -160,8 +161,13 @@ export function ConnectedBoardComponent({
     board.categories[0].clues.length === 1 &&
     Boolean(board.categories[0].clues[0].longForm);
 
+  // In host mode (feature 22) the host may choose for the board-control
+  // player.
   const hasBoardControl =
-    !readOnly && (boardControl === userId || isSingleLongFormClue);
+    !readOnly &&
+    (boardControl === userId ||
+      isSingleLongFormClue ||
+      (host !== null && host.userId === userId));
 
   /** focusCell focuses the clue at (i, j) and returns whether there is one
    * (shorter categories leave empty cells at the bottom of the board). */

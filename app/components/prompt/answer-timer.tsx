@@ -278,12 +278,19 @@ export function useAutoWrongOnTimeout({
   userId,
   timer,
   marked,
+  asHost = false,
+  enabled = true,
 }: {
   roomId: number;
   userId: string;
   timer: AnswerTimer;
   /** The player already marked (or picked) themselves. */
   marked: boolean;
+  /** Host mode (feature 22): this device is the host's and sends the
+   * timeout for whoever is answering (the players' devices don't). */
+  asHost?: boolean;
+  /** false: never send (a player's device in host mode). */
+  enabled?: boolean;
 }) {
   const { activeClue, answerStartedAt, autoWrongOnTimeout, soloDispatch } =
     useEngineContext();
@@ -291,9 +298,12 @@ export function useAutoWrongOnTimeout({
   useSoloAction(fetcher, soloDispatch);
   const submit = fetcher.submit;
 
+  const answererId = timer.answererId;
   const timeUp =
+    enabled &&
     timer.timed &&
-    timer.answererId === userId &&
+    answererId !== undefined &&
+    (asHost || answererId === userId) &&
     autoWrongOnTimeout &&
     timer.status?.expired === true;
 
@@ -315,13 +325,24 @@ export function useAutoWrongOnTimeout({
       {
         i: i.toString(),
         j: j.toString(),
-        userId,
+        userId: answererId ?? userId,
         result: "incorrect",
         timedOut: "true",
+        ...(asHost ? { host: "true" } : {}),
       },
       { method: "post", action: `/room/${roomId}/check` },
     );
-  }, [timeUp, activeClue, answerStartedAt, marked, submit, userId, roomId]);
+  }, [
+    timeUp,
+    activeClue,
+    answerStartedAt,
+    marked,
+    submit,
+    userId,
+    answererId,
+    asHost,
+    roomId,
+  ]);
 
   return timeUp && !marked;
 }

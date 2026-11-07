@@ -30,10 +30,13 @@ function PlayerScores({
   wagerable,
   longForm,
   skipped,
+  skippedByHost = false,
 }: {
   answerers: PlayerScore[];
-  /** The site admin skipped the question. */
+  /** The site admin (or the host) skipped the question. */
   skipped: boolean;
+  /** …the host did (feature 22). */
+  skippedByHost?: boolean;
   /** undefined when this user has board control. */
   boardControlName: string | undefined;
   wagerable: boolean;
@@ -42,7 +45,11 @@ function PlayerScores({
   const { t } = useTranslation();
   if (!answerers.length) {
     if (skipped) {
-      return <p className="font-bold text-white">{t("play.next.skipped")}</p>;
+      return (
+        <p className="font-bold text-white">
+          {skippedByHost ? t("host.skipped") : t("play.next.skipped")}
+        </p>
+      );
     }
     if (wagerable && longForm) {
       return (
@@ -86,7 +93,9 @@ export function ConnectedNextClueForm({ roomId, userId }: RoomProps) {
   const {
     activeClue,
     activeClueSkipped,
+    activeClueSkippedByHost,
     answeredBy,
+    host,
     clue,
     getCheckCorrection,
     getClueValue,
@@ -129,7 +138,13 @@ export function ConnectedNextClueForm({ roomId, userId }: RoomProps) {
 
   const hasBoardControl = boardControl === userId;
   const isRevealingAnswer = type === GameState.ReadLongFormClue;
-  const correction = getCheckCorrection(userId);
+  // Host mode (feature 22): the host moves on, and verdicts are the host's
+  // (players have nothing to undo).
+  const hostMode = host !== null;
+  const isHost = host?.userId === userId;
+  const canMoveOn = hostMode ? isHost : hasBoardControl || clue.longForm;
+  const autoAdvance = hostMode ? isHost : hasBoardControl;
+  const correction = hostMode ? undefined : getCheckCorrection(userId);
 
   // Submit the form by default after a few seconds. Pause the countdown
   // while the undo confirmation is armed so it can't be yanked away
@@ -138,7 +153,7 @@ export function ConnectedNextClueForm({ roomId, userId }: RoomProps) {
     () => {
       fetcher.submit(formRef.current);
     },
-    hasBoardControl && !clue.longForm && !confirmingUndo
+    autoAdvance && !clue.longForm && !confirmingUndo
       ? DEFAULT_COUNTDOWN_MS
       : null,
   );
@@ -152,6 +167,7 @@ export function ConnectedNextClueForm({ roomId, userId }: RoomProps) {
           wagerable={clue.wagerable ?? false}
           longForm={clue.longForm ?? false}
           skipped={activeClueSkipped}
+          skippedByHost={activeClueSkippedByHost}
         />
       )}
       {correction && confirmingUndo ? (
@@ -166,7 +182,7 @@ export function ConnectedNextClueForm({ roomId, userId }: RoomProps) {
           {correction ? (
             <UndoCheckButton onClick={() => setConfirmingUndo(true)} />
           ) : null}
-          {hasBoardControl || clue.longForm ? (
+          {canMoveOn ? (
             <fetcher.Form
               method="POST"
               action={`/room/${roomId}/next-clue`}
@@ -199,6 +215,10 @@ export function ConnectedNextClueForm({ roomId, userId }: RoomProps) {
                 </span>
               </Button>
             </fetcher.Form>
+          ) : hostMode ? (
+            <p className="text-sm text-slate-300">
+              {t("host.player.hostMovesOn")}
+            </p>
           ) : null}
         </div>
       )}

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { countWatchers } from "./presence";
+import { countWatchers, listWatchers } from "./presence";
 
 describe("countWatchers", () => {
   it("is 0 for an empty channel", () => {
@@ -26,5 +26,24 @@ describe("countWatchers", () => {
     expect(
       countWatchers({ a: [{ role: "player" }, { role: "spectator" }] }),
     ).toBe(1);
+  });
+});
+
+describe("listWatchers", () => {
+  it("lists spectators who said who they are, once per user", () => {
+    expect(
+      listWatchers({
+        a: [{ role: "spectator", userId: "u2", name: "Zed" }],
+        b: [{ role: "player", userId: "u3", name: "Player" }],
+        c: [{ role: "presenter" }],
+        d: [{ role: "spectator", userId: "u1", name: "Ann" }],
+        e: [{ role: "spectator", userId: "u1", name: "Ann" }],
+        f: [{ role: "spectator" }],
+        g: [{ role: "spectator", userId: 5, name: "Bad" }],
+      }),
+    ).toEqual([
+      { userId: "u1", name: "Ann" },
+      { userId: "u2", name: "Zed" },
+    ]);
   });
 });

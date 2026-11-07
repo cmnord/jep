@@ -7,10 +7,11 @@ import {
   type PlayerColor,
 } from "~/models/player-color";
 import { isTeamId, TEAM_IDS, type TeamId } from "~/models/team";
+import { MEDIA_TYPES, type MediaBlock } from "~/utils/media";
 
 import type { Action } from "./engine";
 import { ActionType } from "./engine";
-import type { State } from "./state";
+import type { Host, RevealedAnswer, State } from "./state";
 
 const CluePayload = z.object({
   userId: z.string(),
@@ -60,6 +61,9 @@ const CheckPayload = CluePayload.extend({
    * out (answer timer). On a multiple choice clue it marks the answer wrong
    * without a pick. Older events have none. */
   timedOut: z.boolean().optional(),
+  /** Set by the server when the room's host judged the answer (host mode,
+   * feature 22). Only the server inserts room events. */
+  host: z.literal(true).optional(),
 });
 const CorrectCheckPayload = CluePayload.extend({
   correct: z.boolean(),
@@ -96,8 +100,14 @@ const SetSettingsPayload = z.object({
   /** Set by the server when the site admin made the change (only the server
    * can insert set_settings events into a room, see the settings route). */
   admin: z.literal(true).optional(),
+  /** Set by the server when the room's host made the change (feature 22). */
+  host: z.literal(true).optional(),
 });
 const AdminFlagPayload = z.object({ admin: z.literal(true) });
+const HostFlagPayload = z.object({ host: z.literal(true) });
+/** Exactly one of the admin / host flags (the server sets them). */
+const byAdminOrHost = (p: { admin?: true; host?: true }) =>
+  p.admin === true || p.host === true;
 /** The largest score (and score change) the admin may set: far beyond any
  * game, small enough to stay exact. */
 export const MAX_ADMIN_SCORE = 1_000_000;
@@ -106,12 +116,16 @@ const AdminScoreAmount = z
   .int()
   .min(-MAX_ADMIN_SCORE)
   .max(MAX_ADMIN_SCORE);
-const SkipCluePayload = z.object({
-  i: z.number().int(),
-  j: z.number().int(),
-  /** Only the server inserts skips, for the site admin. */
-  admin: z.literal(true),
-});
+const SkipCluePayload = z
+  .object({
+    i: z.number().int(),
+    j: z.number().int(),
+    /** Only the server inserts skips, for the site admin… */
+    admin: z.literal(true).optional(),
+    /** …or the room's host (feature 22). */
+    host: z.literal(true).optional(),
+  })
+  .refine(byAdminOrHost);
 const AdjustScorePayload = z
   .object({
     userId: z.string(),
@@ -119,10 +133,35 @@ const AdjustScorePayload = z
     delta: AdminScoreAmount.optional(),
     /** …or set the score to exactly this. */
     score: AdminScoreAmount.optional(),
-    /** Only the server inserts score changes, for the site admin. */
-    admin: z.literal(true),
+    /** Only the server inserts score changes, for the site admin… */
+    admin: z.literal(true).optional(),
+    /** …or the room's host (feature 22). */
+    host: z.literal(true).optional(),
   })
-  .refine((p) => (p.delta === undefined) !== (p.score === undefined));
+  .refine((p) => (p.delta === undefined) !== (p.score === undefined))
+  .refine(byAdminOrHost);
+const HostSeatPayload = z.object({
+  userId: z.string().min(1),
+  name: z.string(),
+  /** Invalid avatars are dropped (like a player's). */
+  avatar: z.preprocess(
+    (value) => normalizeAvatar(value),
+    z.string().optional(),
+  ),
+});
+const ReleaseHostPayload = z.object({ userId: z.string() });
+const MediaBlockPayload = z.object({
+  type: z.enum(MEDIA_TYPES),
+  src: z.string(),
+  alt: z.string().optional(),
+});
+const RevealAnswerPayload = z.object({
+  round: z.number().int(),
+  i: z.number().int(),
+  j: z.number().int(),
+  answer: z.string(),
+  answerMedia: z.array(MediaBlockPayload).optional(),
+});
 const TransferPlayerPayload = z.object({
   oldUserId: z.string(),
   newUserId: z.string(),
@@ -227,6 +266,7 @@ export function isCheckAction(action: Action): action is {
     correct: boolean;
     choice?: number;
     timedOut?: boolean;
+    host?: true;
   };
   ts: number;
 } {
@@ -297,6 +337,7 @@ export function isSetSettingsAction(action: Action): action is {
     finalAnswerTimeSec?: number;
     wagerTimeSec?: number;
     admin?: true;
+    host?: true;
   };
   ts: number;
 } {
@@ -330,7 +371,7 @@ export function isRestoreAction(action: Action): action is {
 
 export function isSkipClueAction(action: Action): action is {
   type: ActionType.SkipClue;
-  payload: { i: number; j: number; admin: true };
+  payload: { i: number; j: number; admin?: true; host?: true };
   ts: number;
 } {
   return (
@@ -341,7 +382,13 @@ export function isSkipClueAction(action: Action): action is {
 
 export function isAdjustScoreAction(action: Action): action is {
   type: ActionType.AdjustScore;
-  payload: { userId: string; delta?: number; score?: number; admin: true };
+  payload: {
+    userId: string;
+    delta?: number;
+    score?: number;
+    admin?: true;
+    host?: true;
+  };
   ts: number;
 } {
   return (
@@ -355,4 +402,47 @@ export function isAdjustScoreAction(action: Action): action is {
  * such event types, see the room_events insert policy. */
 export function isAdminAction(action: Action) {
   return AdminFlagPayload.safeParse(action.payload).success;
+}
+
+/** isHostAction is true for an event the server inserted for the room's
+ * host (payload `host: true`, feature 22): the host judged an answer or did a
+ * player's step for them. The engine ignores such events while there is no
+ * host. */
+export function isHostAction(action: Action) {
+  return HostFlagPayload.safeParse(action.payload).success;
+}
+
+/** parseHostSeat reads a claim_host / assign_host payload (null when
+ * malformed: a bad event is ignored, never thrown). */
+export function parseHostSeat(action: Action): Host | null {
+  const parsed = HostSeatPayload.safeParse(action.payload);
+  if (!parsed.success) return null;
+  const { userId, name, avatar } = parsed.data;
+  return { userId, name, ...(avatar ? { avatar } : {}) };
+}
+
+/** parseReleaseHost reads a release_host payload (null when malformed). */
+export function parseReleaseHost(action: Action): { userId: string } | null {
+  const parsed = ReleaseHostPayload.safeParse(action.payload);
+  return parsed.success ? parsed.data : null;
+}
+
+/** parseRevealAnswer reads a reveal_answer payload (null when malformed). */
+export function parseRevealAnswer(
+  action: Action,
+): ({ round: number; i: number; j: number } & RevealedAnswer) | null {
+  const parsed = RevealAnswerPayload.safeParse(action.payload);
+  if (!parsed.success) return null;
+  const { round, i, j, answer, answerMedia } = parsed.data;
+  const media: MediaBlock[] | undefined = answerMedia?.map(
+    ({ type, src, alt }) =>
+      alt === undefined ? { type, src } : { type, src, alt },
+  );
+  return {
+    round,
+    i,
+    j,
+    answer,
+    ...(media?.length ? { answerMedia: media } : {}),
+  };
 }

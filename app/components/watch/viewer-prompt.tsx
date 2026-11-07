@@ -73,6 +73,8 @@ export function useViewerStatus(): ViewerStatus {
 /** viewerStatusText translates a status into a sentence. */
 export function useViewerStatusText(status: ViewerStatus): string {
   const { t } = useTranslation();
+  // Host mode (feature 22): the host judges the Final's answers.
+  const { host } = useEngineContext();
   switch (status.kind) {
     case "paused":
       return t("watch.status.paused");
@@ -111,7 +113,7 @@ export function useViewerStatusText(status: ViewerStatus): string {
     case "writing":
       return t("watch.status.writing");
     case "checking":
-      return t("watch.status.checking");
+      return host ? t("host.player.judging") : t("watch.status.checking");
     case "gotIt":
       return t("watch.status.gotIt", { name: status.name });
     case "noOneAnswered":

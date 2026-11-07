@@ -10,6 +10,7 @@ import {
   createRoomEventAsServer,
   getRoomEvents,
 } from "~/models/room-event.server";
+import { getRoomState } from "~/models/room-state.server";
 import { getRoom } from "~/models/room.server";
 import { getSolve, markAttempted } from "~/models/solves.server";
 import { getUserSession, requireSessionUserId } from "~/session.server";
@@ -97,6 +98,14 @@ export async function action({ request, params }: Route.ActionArgs) {
       ...(byAdmin ? { admin: true } : {}),
     });
     return null;
+  }
+
+  if (request.method === "POST") {
+    // The host doesn't play (feature 22): they free the seat first.
+    const { state } = await getRoomState(room, authSession, t);
+    if (state.host?.userId === userId) {
+      throw new Response(t("room.error.joinWhileHosting"), { status: 409 });
+    }
   }
 
   // Mark the game as started if it hasn't been already

@@ -156,6 +156,16 @@ Difficulty estimates from the original planning discussion.
       `readTimeSec`, used by "Auto" — see [features/21-room-timers.md](./features/21-room-timers.md)
       — ⭐⭐ medium
 
+- [x] Host role (owner's request, SIGame's showman / ведучий) — a visitor who doesn't play
+      takes the **🎤 Host** seat from the join dialog (the admin can give, take or free it); the
+      host sees the answer all the time, players answer out loud and the host taps **Right /
+      Wrong** (Final: per player; multiple choice stays automatic), starts rounds and moves on,
+      and gets the admin's room controls and the room timers. Players never get the answer of an
+      open question — the room/TV loaders withhold unresolved answers and the server reveals
+      each one (`reveal_answer`) when the question is resolved. Without a host the room plays
+      the self-marking game as before — see [features/22-host-role.md](./features/22-host-role.md)
+      — ⭐⭐⭐ large
+
 Question search · Discord login · keyboard shortcuts ·
 OBS/browser-source mode ·
 auto-reconnect · host controls from phone ·
@@ -297,3 +307,10 @@ scripts/cleanup-inactive-rooms.mjs`, admin Rooms button; 7-day dashboard tile re
   dependencies.
 - **2026-11-07** — Fixed a crash ("Failed to execute 'removeChild' on 'Node'") caused by browser machine translation rewriting the page: every document now sets `translate="no"` and `<meta name="google" content="notranslate">` (the site has its own Ukrainian UI).
 - **2026-11-07** — Follow-up on `feat/upload-progress` (owner's request "add load screen when uploading packs"): upload screen with a real progress bar (XHR upload events, cancel), then "Importing the pack…" while the server processes it; `POST /game` answers XHR uploads with JSON + the same flash cookie, the box navigates like the old redirect; network/proxy errors get a retry button — see [features/08-import-export.md](./features/08-import-export.md#upload-screen-follow-up-featupload-progress). No migration, no new dependencies.
+- **2026-11-07** — `feat/host-role` (owner's request "rework the answer system… a host role
+  which will see the answer constantly… mimic the host role in SIGame"): host seat
+  (`claim_host` / `release_host` / `assign_host`), host-mode judging and flow in the engine,
+  `POST /room/:id/host`, `host=true` on the act-for-player / admin / settings routes, answers of
+  unresolved questions withheld from players and the TV with server-inserted `reveal_answer`,
+  host and player screens (EN/UK, Classic/Dark, phones) — see
+  [features/22-host-role.md](./features/22-host-role.md). No migration, no new dependencies.

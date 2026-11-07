@@ -8,6 +8,7 @@ export { errors } from "./errors";
 export { game } from "./game";
 export { header } from "./header";
 export { home } from "./home";
+export { host } from "./host";
 export { howto } from "./howto";
 export { play } from "./play";
 export { profile } from "./profile";

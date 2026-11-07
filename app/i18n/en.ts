@@ -8,6 +8,7 @@ import {
   game,
   header,
   home,
+  host,
   howto,
   play,
   profile,
@@ -54,4 +55,5 @@ export const en = {
   ...soundboard,
   ...standings,
   ...admin,
+  ...host,
 } as const satisfies Messages;

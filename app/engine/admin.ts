@@ -1,4 +1,8 @@
-import { CANT_BUZZ_FLAG, getTiebreakerSeed, getWinningBuzzer } from "./engine";
+import {
+  CANT_BUZZ_FLAG,
+  getStateTiebreakerSeed,
+  getWinningBuzzer,
+} from "./engine";
 import { getBuzzWindowMs } from "./room-timers";
 import { OPEN_QUESTION_STATES } from "./skip";
 import { GameState, type State, isAutoCheckedClue } from "./state";
@@ -122,7 +126,7 @@ export function getAdminStep(state: State): AdminStep {
     case GameState.RevealAnswerToBuzzer: {
       const winner = getWinningBuzzer(
         state.buzzes,
-        getTiebreakerSeed(clue),
+        getStateTiebreakerSeed(state),
         getBuzzWindowMs(state),
       );
       return winner && state.players.has(winner.userId)

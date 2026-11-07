@@ -40,6 +40,23 @@ const NUMBER_INPUT =
 
 type Fields = Record<string, string>;
 
+/** RoomActor: whose controls these are — the site admin's (🛡) or the room
+ * host's (🎤, feature 22). The host's requests carry `host=true` and the
+ * server checks the host seat; the admin's carry `admin=true` where a route
+ * needs it. */
+export type RoomActor = "admin" | "host";
+const ActorContext = React.createContext<RoomActor>("admin");
+
+/** The act-for-a-player flag of this panel's actor. */
+function useActorField(): Fields {
+  return { [React.useContext(ActorContext)]: "true" };
+}
+
+/** The flag the admin route needs from the host (the admin needs none). */
+function useHostField(): Fields {
+  return React.useContext(ActorContext) === "host" ? { host: "true" } : {};
+}
+
 /** useAdminFetcher submits an admin intervention and exposes the error the
  * admin route may answer with. */
 function useAdminFetcher() {
@@ -55,9 +72,10 @@ function useAdminFetcher() {
  * player's device would call, with `admin=true` (see authorizeRoomActor). */
 function usePlayerStep(roomId: number, path: string) {
   const { fetcher, busy } = useAdminFetcher();
+  const actorField = useActorField();
   const send = (fields: Fields) =>
     fetcher.submit(
-      { ...fields, admin: "true" },
+      { ...fields, ...actorField },
       { method: "post", action: `/room/${roomId}/${path}` },
     );
   return { send, busy };
@@ -202,6 +220,7 @@ function WagerForPlayer({
 }) {
   const { t } = useTranslation();
   const { activeClue, board, clue, players } = useEngineContext();
+  const actor = React.useContext(ActorContext);
   const fetcher = useFetcher();
   const player = players.get(userId);
   if (!activeClue || !clue || !player) return null;
@@ -213,7 +232,7 @@ function WagerForPlayer({
       action={`/room/${roomId}/wager`}
       className="flex flex-wrap items-end gap-2"
     >
-      <input type="hidden" name="admin" value="true" />
+      <input type="hidden" name={actor} value="true" />
       <input type="hidden" name="userId" value={userId} />
       <input type="hidden" name="i" value={activeClue[0]} />
       <input type="hidden" name="j" value={activeClue[1]} />
@@ -335,6 +354,7 @@ function AnswerForPlayer({
 }) {
   const { t } = useTranslation();
   const { activeClue, players } = useEngineContext();
+  const actor = React.useContext(ActorContext);
   const fetcher = useFetcher();
   if (!activeClue) return null;
   return (
@@ -343,7 +363,7 @@ function AnswerForPlayer({
       action={`/room/${roomId}/answer`}
       className="flex flex-wrap items-end gap-2"
     >
-      <input type="hidden" name="admin" value="true" />
+      <input type="hidden" name={actor} value="true" />
       <input type="hidden" name="userId" value={userId} />
       <input type="hidden" name="i" value={activeClue[0]} />
       <input type="hidden" name="j" value={activeClue[1]} />
@@ -597,11 +617,12 @@ function SkipQuestion({ roomId }: { roomId: number }) {
   const { t } = useTranslation();
   const { activeClue, canSkipOpenClue, type } = useEngineContext();
   const { fetcher, error, busy } = useAdminFetcher();
+  const hostField = useHostField();
   const [confirming, setConfirming] = React.useState(false);
   const skip = (i: number, j: number) => {
     setConfirming(false);
     fetcher.submit(
-      { intent: "skip", i: String(i), j: String(j) },
+      { intent: "skip", i: String(i), j: String(j), ...hostField },
       { method: "post", action: `/room/${roomId}/admin` },
     );
   };
@@ -663,6 +684,7 @@ function SkipQuestion({ roomId }: { roomId: number }) {
 function ScoreRow({ roomId, player }: { roomId: number; player: Player }) {
   const { t } = useTranslation();
   const { fetcher, error, busy } = useAdminFetcher();
+  const hostField = useHostField();
   return (
     <li
       className="flex flex-col gap-2 rounded-lg bg-white/5 p-2"
@@ -681,6 +703,9 @@ function ScoreRow({ roomId, player }: { roomId: number; player: Player }) {
       >
         <input type="hidden" name="intent" value="score" />
         <input type="hidden" name="userId" value={player.userId} />
+        {hostField.host ? (
+          <input type="hidden" name="host" value="true" />
+        ) : null}
         <input
           type="number"
           name="amount"
@@ -727,8 +752,136 @@ function ScoreRow({ roomId, player }: { roomId: number; player: Player }) {
   );
 }
 
-/** AdminPanel is the content of the admin controls sheet. */
-export function AdminPanel({ roomId }: { roomId: number }) {
+/** HostSeat (site admin only, feature 22): who hosts, and take / give /
+ * free the host seat. Watchers are the spectators who announced who they
+ * are (Realtime presence). */
+function HostSeat({
+  roomId,
+  userId,
+  name,
+}: {
+  roomId: number;
+  userId: string;
+  name: string;
+}) {
+  const { t } = useTranslation();
+  const { activeClue, host, players, type, watcherList } = useEngineContext();
+  const { fetcher, error, busy } = useAdminFetcher();
+  if (type === GameState.GameOver) return null;
+  const assign = (targetId: string, targetName: string) =>
+    fetcher.submit(
+      { intent: "assign", userId: targetId, name: targetName },
+      { method: "post", action: `/room/${roomId}/host` },
+    );
+  // Filling an empty seat switches to host mode: between questions only.
+  const canChange = host !== null || activeClue === null;
+  const candidates = watcherList.filter(
+    (w) => w.userId !== host?.userId && !players.has(w.userId),
+  );
+  const isAdminHost = host?.userId === userId;
+  return (
+    <Section title={t("host.admin.seat")} testId="admin-host-seat">
+      <p className="text-sm" data-testid="admin-host-status">
+        {host ? t("host.admin.is", { name: host.name }) : t("host.admin.none")}
+      </p>
+      {!canChange ? (
+        <p className="text-sm text-slate-300">
+          {t("host.admin.betweenQuestions")}
+        </p>
+      ) : (
+        <>
+          <div className="flex flex-wrap gap-2">
+            {!isAdminHost && !players.has(userId) ? (
+              <button
+                type="button"
+                className={PRIMARY}
+                disabled={busy}
+                onClick={() => assign(userId, name)}
+              >
+                🎤 {t("host.admin.take")}
+              </button>
+            ) : null}
+            {host && activeClue === null ? (
+              <button
+                type="button"
+                className={SECONDARY}
+                disabled={busy}
+                onClick={() =>
+                  fetcher.submit(
+                    { intent: "release", userId: host.userId },
+                    { method: "post", action: `/room/${roomId}/host` },
+                  )
+                }
+              >
+                {t("host.admin.free")}
+              </button>
+            ) : null}
+          </div>
+          <p className="text-sm text-slate-300">{t("host.admin.watchers")}</p>
+          {candidates.length === 0 ? (
+            <p className="text-sm text-slate-400">
+              {t("host.admin.noWatchers")}
+            </p>
+          ) : (
+            <ul className="flex flex-wrap gap-2">
+              {candidates.map((w) => (
+                <li key={w.userId}>
+                  <button
+                    type="button"
+                    className={SECONDARY}
+                    disabled={busy}
+                    onClick={() => assign(w.userId, w.name)}
+                  >
+                    {t("host.admin.makeHost", { name: w.name })}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
+      )}
+      <ErrorText error={error} />
+    </Section>
+  );
+}
+
+/** AdminPanel is the content of the admin controls sheet (or the host's,
+ * `actor` "host": the same controls without the host seat). */
+export function AdminPanel({
+  roomId,
+  actor = "admin",
+  userId = "",
+  name = "",
+}: {
+  roomId: number;
+  actor?: RoomActor;
+  /** The admin's own id and name (to take the host seat). */
+  userId?: string;
+  name?: string;
+}) {
+  return (
+    <ActorContext.Provider value={actor}>
+      <AdminPanelContent
+        roomId={roomId}
+        actor={actor}
+        userId={userId}
+        name={name}
+      />
+    </ActorContext.Provider>
+  );
+}
+
+function AdminPanelContent({
+  roomId,
+  actor,
+  userId,
+  name,
+}: {
+  roomId: number;
+  actor: RoomActor;
+  userId: string;
+  name: string;
+}) {
   const { t } = useTranslation();
   const { adminStep, isPaused, players } = useEngineContext();
   return (
@@ -754,6 +907,9 @@ export function AdminPanel({ roomId }: { roomId: number }) {
           </ul>
         )}
       </Section>
+      {actor === "admin" && userId ? (
+        <HostSeat roomId={roomId} userId={userId} name={name} />
+      ) : null}
     </div>
   );
 }
@@ -765,12 +921,23 @@ export function AdminPanel({ roomId }: { roomId: number }) {
 export function AdminControls({
   roomId,
   raised = false,
+  actor = "admin",
+  userId = "",
+  name = "",
 }: {
   roomId: number;
   /** Lift the button above the spectator bar. */
   raised?: boolean;
+  /** The site admin's 🛡 controls, or the room host's 🎤 (feature 22). */
+  actor?: RoomActor;
+  /** The visitor's id and name (the admin may take the host seat). */
+  userId?: string;
+  name?: string;
 }) {
   const { t } = useTranslation();
+  const icon = actor === "host" ? "🎤" : "🛡";
+  const openLabel =
+    actor === "host" ? t("host.panel.open") : t("room.admin.open");
   const { type } = useEngineContext();
   const [open, setOpen] = React.useState(false);
   const promptOpen = PROMPT_STATES.has(type);
@@ -780,8 +947,8 @@ export function AdminControls({
       <DialogPrimitive.Trigger asChild>
         <button
           type="button"
-          aria-label={t("room.admin.open")}
-          title={t("room.admin.open")}
+          aria-label={openLabel}
+          title={openLabel}
           data-testid="admin-controls-button"
           onKeyDown={stopEnter}
           className={clsx(
@@ -796,7 +963,7 @@ export function AdminControls({
             open && "bg-blue-600",
           )}
         >
-          <span aria-hidden>🛡</span>
+          <span aria-hidden>{icon}</span>
         </button>
       </DialogPrimitive.Trigger>
       <DialogPrimitive.Portal>
@@ -816,11 +983,15 @@ export function AdminControls({
           <div className="flex items-start justify-between gap-2 p-4 pb-2">
             <div className="flex flex-col gap-1">
               <DialogPrimitive.Title className="flex items-center gap-2 text-2xl font-medium text-white">
-                <span aria-hidden>🛡</span>
-                {t("room.admin.title")}
+                <span aria-hidden>{icon}</span>
+                {actor === "host"
+                  ? t("host.panel.title")
+                  : t("room.admin.title")}
               </DialogPrimitive.Title>
               <DialogPrimitive.Description className="text-sm text-slate-300">
-                {t("room.admin.description")}
+                {actor === "host"
+                  ? t("host.panel.description")
+                  : t("room.admin.description")}
               </DialogPrimitive.Description>
             </div>
             <DialogPrimitive.Close asChild>
@@ -834,7 +1005,12 @@ export function AdminControls({
             </DialogPrimitive.Close>
           </div>
           <div className="min-h-0 overflow-y-auto p-4 pt-2">
-            <AdminPanel roomId={roomId} />
+            <AdminPanel
+              roomId={roomId}
+              actor={actor}
+              userId={userId}
+              name={name}
+            />
           </div>
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>

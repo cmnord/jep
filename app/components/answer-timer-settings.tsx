@@ -27,12 +27,19 @@ const TIMER_SYMBOL = "⏱"; // ⏱
 export interface SettingsAccessProps {
   /** The visitor is logged in as the site admin (room loader). */
   isAdmin?: boolean;
+  /** The visitor holds the room's host seat (feature 22). */
+  isHost?: boolean;
 }
 
-/** mayEditSettings: in a room only the site admin may change the settings
- * (the server enforces it too); in solo play (room -1) the player may. */
-export function mayEditSettings(roomId: number, isAdmin = false) {
-  return isAdmin || roomId === -1;
+/** mayEditSettings: in a room only the site admin (or the room's host) may
+ * change the settings (the server enforces it too); in solo play (room -1)
+ * the player may. */
+export function mayEditSettings(
+  roomId: number,
+  isAdmin = false,
+  isHost = false,
+) {
+  return isAdmin || isHost || roomId === -1;
 }
 
 /** settingsFromFormData reads the values a pending settings request sends
@@ -69,6 +76,7 @@ function useRoomSettings({
   roomId,
   userId,
   isAdmin,
+  isHost = false,
 }: RoomProps & SettingsAccessProps) {
   const {
     activeClue,
@@ -96,17 +104,22 @@ function useRoomSettings({
   const pending = fetcher.formData;
   const values = pending ? settingsFromFormData(pending, current) : current;
 
-  const editable = mayEditSettings(roomId, isAdmin);
+  const editable = mayEditSettings(roomId, isAdmin, isHost);
   const betweenQuestions = activeClue === null && type !== GameState.GameOver;
   const canChange =
     editable &&
     betweenQuestions &&
-    // The admin needn't play; in solo play the player sets it.
-    (isAdmin || players.has(userId));
+    // The admin and the host needn't play; in solo play the player sets it.
+    (isAdmin || isHost || players.has(userId));
 
   const save = (next: RoomSettingsValues) =>
     fetcher.submit(
-      { userId, ...toSettingsFormData(next) },
+      {
+        userId,
+        ...toSettingsFormData(next),
+        // The host's change (the server checks the seat).
+        ...(isHost && !isAdmin ? { host: "true" } : {}),
+      },
       { method: "post", action: `/room/${roomId}/settings` },
     );
 
@@ -269,6 +282,7 @@ export function AnswerTimerSettings({
   roomId,
   userId,
   isAdmin = false,
+  isHost = false,
   showTitle = true,
 }: RoomProps & SettingsAccessProps & { showTitle?: boolean }) {
   const { t } = useTranslation();
@@ -276,6 +290,7 @@ export function AnswerTimerSettings({
     roomId,
     userId,
     isAdmin,
+    isHost,
   });
 
   return (
@@ -303,6 +318,7 @@ export function AnswerTimerControl({
   roomId,
   userId,
   isAdmin = false,
+  isHost = false,
 }: RoomProps & SettingsAccessProps) {
   const { t } = useTranslation();
   const { answerTimeSec, activeClue, type } = useEngineContext();
@@ -321,7 +337,7 @@ export function AnswerTimerControl({
     </>
   );
 
-  if (!mayEditSettings(roomId, isAdmin)) {
+  if (!mayEditSettings(roomId, isAdmin, isHost)) {
     const label = t("room.answerTimeReadOnly", { value });
     return (
       <span
@@ -361,6 +377,7 @@ export function AnswerTimerControl({
           roomId={roomId}
           userId={userId}
           isAdmin={isAdmin}
+          isHost={isHost}
           showTitle={false}
         />
         <div className="mt-4">
