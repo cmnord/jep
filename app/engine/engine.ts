@@ -27,6 +27,7 @@ import {
   isTransferPlayerAction,
   parseHostSeat,
   parseReleaseHost,
+  parseReplayMedia,
   parseRevealAnswer,
 } from "./actions";
 import { isAnswerTimeSec } from "./answer-timer";
@@ -151,6 +152,10 @@ export enum ActionType {
   /** RevealAnswer (server only): the answer of a question resolved in host
    * mode, for players whose page doesn't have it. */
   RevealAnswer = "reveal_answer",
+  /** ReplayMedia (host or site admin, inserted by the server with `host:
+   * true` / `admin: true`): restart the open question's audio/video on
+   * every device (feature 23). */
+  ReplayMedia = "replay_media",
   /** Restore replaces the entire state (used for restoring saved solo games). */
   Restore = "restore",
 }
@@ -1779,6 +1784,27 @@ export function gameEngine(state: State, action: Action): State {
       if (state.revealed.has(key)) return state;
       return produce(state, (draft) => {
         draft.revealed.set(key, answer);
+      });
+    }
+    case ActionType.ReplayMedia: {
+      const replay = parseReplayMedia(action);
+      if (!replay) return state;
+      const { userId, round, i, j } = replay;
+      if (
+        state.round !== round ||
+        state.activeClue?.[0] !== i ||
+        state.activeClue[1] !== j ||
+        (!isAdminAction(action) && !isHostId(state, userId))
+      ) {
+        return state;
+      }
+      const prev = state.mediaReplay;
+      const count =
+        prev && prev.round === round && prev.i === i && prev.j === j
+          ? prev.count + 1
+          : 1;
+      return produce(state, (draft) => {
+        draft.mediaReplay = { round, i, j, count };
       });
     }
     case ActionType.Restore:

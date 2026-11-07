@@ -22,3 +22,5 @@ See the backlog in [../README.md](../README.md#feature-backlog).
 - [18 — Admin panel](./18-admin.md)
 - [20 — Admin interventions](./20-admin-interventions.md)
 - [21 — Room timers](./21-room-timers.md)
+- [22 — Host role (SIGame showman)](./22-host-role.md)
+- [23 — Host replays audio/video](./23-host-media-replay.md)

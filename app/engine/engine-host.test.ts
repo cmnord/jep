@@ -843,3 +843,68 @@ describe("replay", () => {
     expect(state.boardControl).toBe(P2.userId);
   });
 });
+
+describe("replay_media (feature 23)", () => {
+  const replay = (userId: string, i: number, j: number, extra: object) => ({
+    type: ActionType.ReplayMedia,
+    payload: { userId, round: 0, i, j, ...extra },
+  });
+  const OPEN_AUDIO = [
+    join(P1),
+    join(P2),
+    claim(),
+    start(HOST.userId),
+    choose(0, 1),
+  ];
+  const media = (actions: TestAction[]) =>
+    run(actions, stateFromGame(MEDIA_GAME));
+
+  it("the host's replays of the open question are counted", () => {
+    const state = media([
+      ...OPEN_AUDIO,
+      replay(HOST.userId, 0, 1, { host: true }),
+      replay(HOST.userId, 0, 1, { host: true }),
+    ]);
+    expect(state.mediaReplay).toEqual({ round: 0, i: 0, j: 1, count: 2 });
+  });
+
+  it("the admin may replay too", () => {
+    const state = media([
+      ...OPEN_AUDIO,
+      replay(OTHER.userId, 0, 1, { admin: true }),
+    ]);
+    expect(state.mediaReplay?.count).toBe(1);
+  });
+
+  it("ignores players, untagged events and other questions", () => {
+    const state = media([
+      ...OPEN_AUDIO,
+      replay(P1.userId, 0, 1, { host: true }),
+      replay(HOST.userId, 0, 1, {}),
+      replay(HOST.userId, 1, 1, { host: true }),
+    ]);
+    expect(state.mediaReplay ?? null).toBeNull();
+  });
+
+  it("is ignored without a host", () => {
+    const state = media([
+      join(P1),
+      start(),
+      choose(0, 1),
+      replay(HOST.userId, 0, 1, { host: true }),
+    ]);
+    expect(state.mediaReplay ?? null).toBeNull();
+  });
+
+  it("starts over on the next question", () => {
+    const state = media([
+      ...OPEN_AUDIO,
+      replay(HOST.userId, 0, 1, { host: true }),
+      skip(0, 1),
+      next(HOST.userId, 0, 1),
+      choose(1, 1, P1.userId),
+      replay(HOST.userId, 1, 1, { host: true }),
+    ]);
+    expect(state.mediaReplay).toEqual({ round: 0, i: 1, j: 1, count: 1 });
+  });
+});

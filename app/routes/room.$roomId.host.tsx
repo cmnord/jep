@@ -12,6 +12,7 @@ import { getRoomState } from "~/models/room-state.server";
 import { getRoom } from "~/models/room.server";
 import { requireSessionUserId } from "~/session.server";
 import { parseFormData } from "~/utils/http.server";
+import { getClueMedia, hasPlayableMedia } from "~/utils/media";
 
 import type { Route } from "./+types/room.$roomId.host";
 
@@ -29,12 +30,16 @@ const formSchema = z.discriminatedUnion("intent", [
   z.object({ intent: z.literal("release"), userId: z.string().min(1) }),
   /** The admin gives the seat to a visitor (or takes it). */
   z.object({ intent: z.literal("assign"), ...SeatFields }),
+  /** The host (as themselves) or the admin replays the open question's
+   * audio/video on every device (feature 23). */
+  z.object({ intent: z.literal("replay"), userId: z.string().min(1) }),
 ]);
 
 export type HostSeatActionData = { error: string } | null;
 
 /** The host seat of a room (feature 22): claim the free seat, free it, or
- * (site admin) give it to someone. The checks mirror the engine's, so a
+ * (site admin) give it to someone; and the host's replay of a question's
+ * audio/video (feature 23). The checks mirror the engine's, so a
  * request that would be ignored answers with a message instead (409); the
  * event is inserted with the service role (the browser key can't insert room
  * events). Solo play has no host. */
@@ -69,6 +74,30 @@ export async function action({ request, params }: Route.ActionArgs) {
 
   if (state.type === GameState.GameOver) {
     return conflict(t("room.error.gameIsOver"));
+  }
+
+  if (form.intent === "replay") {
+    if (!isAdmin) {
+      if (!state.host || form.userId !== state.host.userId) {
+        throw new Response(t("room.error.hostOnly"), { status: 403 });
+      }
+      await requireSessionUserId(request, form.userId, authSession);
+    }
+    const clue = state.activeClue
+      ? state.game.boards.at(state.round)?.categories[state.activeClue[1]]
+          ?.clues[state.activeClue[0]]
+      : undefined;
+    if (!state.activeClue || !clue || !hasPlayableMedia(getClueMedia(clue))) {
+      return conflict(t("room.error.noMediaToReplay"));
+    }
+    await createRoomEventAsServer(room.id, ActionType.ReplayMedia, {
+      userId: form.userId,
+      round: state.round,
+      i: state.activeClue[0],
+      j: state.activeClue[1],
+      ...(isAdmin ? { admin: true } : { host: true }),
+    });
+    return null;
   }
 
   if (form.intent === "release") {

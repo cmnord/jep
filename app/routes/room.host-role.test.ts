@@ -517,6 +517,66 @@ describe("host powers", () => {
   });
 });
 
+describe("replaying media (feature 23)", () => {
+  /** The host opened the audio question (0, 1) of the media pack. */
+  const AUDIO_OPEN: Payloads = [
+    ...HOSTED_BOARD,
+    [ActionType.ChooseClue, { userId: ANN, i: 0, j: 1 }],
+  ];
+  const replay = (userId = HOST) =>
+    call(hostAction, "host", { intent: "replay", userId });
+
+  beforeEach(async () => {
+    mocks.getGame.mockResolvedValue(await getMockGame("media"));
+    mocks.getRoomEvents.mockResolvedValue(toEvents(AUDIO_OPEN));
+  });
+
+  it("the host replays the open question's audio for everyone", async () => {
+    mocks.session.userId = HOST;
+    expect(await outcome(replay())).toMatchObject({ status: 200 });
+    expect(inserted()).toEqual([
+      [
+        ActionType.ReplayMedia,
+        { userId: HOST, round: 0, i: 0, j: 1, host: true },
+      ],
+    ]);
+  });
+
+  it("403 for players and for someone else claiming to be the host", async () => {
+    mocks.session.userId = ANN;
+    expect((await outcome(replay(ANN))).status).toBe(403);
+    expect((await outcome(replay(HOST))).status).toBe(403);
+    expect(inserted()).toEqual([]);
+  });
+
+  it("the admin may replay", async () => {
+    mocks.getAdmin.mockResolvedValue({ id: "admin" });
+    mocks.session.userId = VISITOR;
+    expect(await outcome(replay(VISITOR))).toMatchObject({ status: 200 });
+    expect(inserted()).toEqual([
+      [
+        ActionType.ReplayMedia,
+        { userId: VISITOR, round: 0, i: 0, j: 1, admin: true },
+      ],
+    ]);
+  });
+
+  it("409 without an open question or without audio/video", async () => {
+    mocks.session.userId = HOST;
+    mocks.getRoomEvents.mockResolvedValue(toEvents(HOSTED_BOARD));
+    expect((await outcome(replay())).status).toBe(409);
+    // (0, 0) only has a picture.
+    mocks.getRoomEvents.mockResolvedValue(
+      toEvents([
+        ...HOSTED_BOARD,
+        [ActionType.ChooseClue, { userId: ANN, i: 0, j: 0 }],
+      ]),
+    );
+    expect((await outcome(replay())).status).toBe(409);
+    expect(inserted()).toEqual([]);
+  });
+});
+
 describe("joining while hosting", () => {
   it("409: the host frees the seat first", async () => {
     mocks.session.userId = HOST;

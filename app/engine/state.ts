@@ -111,6 +111,15 @@ export interface RevealedAnswer {
   answerMedia?: MediaBlock[];
 }
 
+/** MediaReplay counts the host's replays of a question's audio/video
+ * (feature 23): every device restarts the clip when `count` goes up. */
+export interface MediaReplay {
+  round: number;
+  i: number;
+  j: number;
+  count: number;
+}
+
 export function clueIsPlayable(clue: Clue) {
   const clueText = clue.clue.toLowerCase();
   return (
@@ -148,6 +157,10 @@ export interface State {
   /** Answers revealed by the server (reveal_answer events) of questions
    * resolved in host mode, by `round,i,j`. */
   readonly revealed: Map<RoundIJKey, RevealedAnswer>;
+  /** How many times the host replayed the audio/video of a question
+   * (replay_media events), for the question at `round,i,j`. Older saved
+   * states have none. */
+  readonly mediaReplay?: MediaReplay | null;
 
   // per round state
   readonly activeClue: [number, number] | null;
@@ -223,6 +236,7 @@ export function stateFromGame(game: Game) {
     scoreAdjustments: [],
     host: null,
     revealed: new Map(),
+    mediaReplay: null,
     numAnswered: 0,
     numCluesInBoard: getNumCluesInBoard(game, 0),
     numExpectedWagers: 0,

@@ -133,6 +133,7 @@ export const room = {
     "the host seat can only change between questions",
   "room.error.hostIsPlayer": "players can't host: leave the game first",
   "room.error.hostSeatTaken": "{name} is already hosting",
+  "room.error.noMediaToReplay": "this question has no audio or video to replay",
   "room.error.joinWhileHosting": "you're hosting: stop hosting to play",
   "room.error.adminOnly": "only the admin can do this",
   "room.error.adminRoomsOnly": "admin controls are only for game rooms",

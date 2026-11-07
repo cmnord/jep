@@ -245,11 +245,27 @@ export function stateToGameEngine(
     activeClueSkippedByHost: activeCell?.skippedByHost ?? false,
     /** The host seat (feature 22): null plays the self-marking game. */
     host: state.host,
+    /** How many times the host replayed the open question's audio/video
+     * (feature 23); media restarts on every device when it goes up. */
+    mediaReplayCount: getMediaReplayCount(state),
     /** What the game waits for from a player (the admin panel). */
     adminStep: getAdminStep(state),
     /** The open question may be skipped by the admin. */
     canSkipOpenClue: canSkipOpenClue(state),
   };
+}
+
+/** getMediaReplayCount is the replay count of the open question (0 when
+ * none, or when the count belongs to another question). */
+function getMediaReplayCount(state: State) {
+  const replay = state.mediaReplay;
+  const clue = state.activeClue;
+  if (!replay || !clue) return 0;
+  return replay.round === state.round &&
+    replay.i === clue[0] &&
+    replay.j === clue[1]
+    ? replay.count
+    : 0;
 }
 
 /** useGameEngine provides all the state variables associated with a game.  The

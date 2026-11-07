@@ -66,6 +66,35 @@ function useInitialPlay(
   }, [ref]);
 }
 
+/** useReplay restarts the clip from the start each time `replayNonce` goes
+ * up after the element mounted (the host's replay, feature 23). The value
+ * at mount never replays, so a prompt that remounts doesn't restart media. */
+function useReplay(
+  ref: React.RefObject<HTMLMediaElement | null>,
+  replayNonce: number,
+  onBlocked: () => void,
+) {
+  const { mute } = useSoundSettings();
+  const seen = React.useRef(replayNonce);
+  const onBlockedRef = React.useRef(onBlocked);
+  onBlockedRef.current = onBlocked;
+
+  React.useEffect(() => {
+    if (replayNonce <= seen.current) return;
+    seen.current = replayNonce;
+    const el = ref.current;
+    if (!el) return;
+    try {
+      el.currentTime = 0;
+      if (mute) return;
+      const result = el.play();
+      if (result) result.catch(() => onBlockedRef.current());
+    } catch {
+      onBlockedRef.current();
+    }
+  }, [ref, replayNonce, mute]);
+}
+
 /** useMediaVolume applies the user's volume setting to a media element. */
 function useMediaVolume(ref: React.RefObject<HTMLMediaElement | null>) {
   const { volume } = useSoundSettings();
@@ -114,9 +143,12 @@ function formatTime(sec: number) {
 export function AudioPlayer({
   block,
   autoPlay,
+  replayNonce = 0,
 }: {
   block: MediaBlock;
   autoPlay: boolean;
+  /** Goes up when the host replays the clip (feature 23). */
+  replayNonce?: number;
 }) {
   const { t } = useTranslation();
   const ref = React.useRef<HTMLAudioElement>(null);
@@ -127,6 +159,7 @@ export function AudioPlayer({
 
   useMediaVolume(ref);
   useInitialPlay(ref, autoPlay, () => setBlocked(true));
+  useReplay(ref, replayNonce, () => setBlocked(true));
 
   function toggle() {
     const audio = ref.current;
@@ -223,9 +256,12 @@ export function AudioPlayer({
 export function VideoPlayer({
   block,
   autoPlay,
+  replayNonce = 0,
 }: {
   block: MediaBlock;
   autoPlay: boolean;
+  /** Goes up when the host replays the clip (feature 23). */
+  replayNonce?: number;
 }) {
   const { t } = useTranslation();
   const ref = React.useRef<HTMLVideoElement>(null);
@@ -234,6 +270,7 @@ export function VideoPlayer({
 
   useMediaVolume(ref);
   useInitialPlay(ref, autoPlay, () => setBlocked(true));
+  useReplay(ref, replayNonce, () => setBlocked(true));
 
   return (
     <div
@@ -301,10 +338,17 @@ export function YouTubePlayer({
 export function PlayableMedia({
   blocks,
   autoPlay,
+  replayNonce = 0,
 }: {
   blocks: MediaBlock[];
   autoPlay: boolean;
+  /** Goes up when the host replays the question's clip (feature 23): the
+   * first clip restarts, like the one that started by itself. */
+  replayNonce?: number;
 }) {
+  // The replay count when this list mounted: a YouTube player is remounted
+  // (its iframe can't be told to restart) only for later replays.
+  const [mountNonce] = React.useState(replayNonce);
   const playable = blocks.filter((b) => b.type !== "image");
   if (playable.length === 0) return null;
   return (
@@ -313,13 +357,21 @@ export function PlayableMedia({
         const key = `${i}-${block.type}-${block.src}`;
         // Only the first clip starts by itself; overlapping sound is useless.
         const props = { block, autoPlay: autoPlay && i === 0 };
+        const replay = i === 0 ? replayNonce : 0;
         if (block.type === "audio") {
-          return <AudioPlayer key={key} {...props} />;
+          return <AudioPlayer key={key} {...props} replayNonce={replay} />;
         }
         if (parseYouTubeUrl(block.src)) {
-          return <YouTubePlayer key={key} {...props} />;
+          const replayed = replay > mountNonce;
+          return (
+            <YouTubePlayer
+              key={replayed ? `${key}-replay-${replay}` : key}
+              {...props}
+              autoPlay={props.autoPlay || replayed}
+            />
+          );
         }
-        return <VideoPlayer key={key} {...props} />;
+        return <VideoPlayer key={key} {...props} replayNonce={replay} />;
       })}
     </div>
   );

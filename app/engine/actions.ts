@@ -162,6 +162,16 @@ const RevealAnswerPayload = z.object({
   answer: z.string(),
   answerMedia: z.array(MediaBlockPayload).optional(),
 });
+const ReplayMediaPayload = z
+  .object({
+    userId: z.string().min(1),
+    round: z.number().int(),
+    i: z.number().int(),
+    j: z.number().int(),
+    admin: z.literal(true).optional(),
+    host: z.literal(true).optional(),
+  })
+  .refine(byAdminOrHost);
 const TransferPlayerPayload = z.object({
   oldUserId: z.string(),
   newUserId: z.string(),
@@ -445,4 +455,15 @@ export function parseRevealAnswer(
     answer,
     ...(media?.length ? { answerMedia: media } : {}),
   };
+}
+
+/** parseReplayMedia reads a replay_media payload (null when malformed or
+ * not tagged by the server for the host or the admin). */
+export function parseReplayMedia(
+  action: Action,
+): { userId: string; round: number; i: number; j: number } | null {
+  const parsed = ReplayMediaPayload.safeParse(action.payload);
+  if (!parsed.success) return null;
+  const { userId, round, i, j } = parsed.data;
+  return { userId, round, i, j };
 }

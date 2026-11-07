@@ -14,6 +14,8 @@ export const host = {
   "host.secretAnswering": "Cat in the bag: {name} is answering",
   "host.right": "Right",
   "host.wrong": "Wrong",
+  "host.replayMedia": "Replay for everyone",
+  "host.replayMediaHelp": "Restarts the audio or video on every screen.",
   "host.rightFor": "Right: {name}",
   "host.wrongFor": "Wrong: {name}",
   "host.pickAuto": "The pick is checked automatically.",

@@ -59,6 +59,7 @@ export const GameEngineContext = React.createContext<
   activeClueSkippedByHost: false,
   adminStep: { kind: "none" },
   host: null,
+  mediaReplayCount: 0,
   canSkipOpenClue: false,
 });
 

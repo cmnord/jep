@@ -17,6 +17,8 @@ export const host: Dictionary<typeof en> = {
   "host.secretAnswering": "Кіт у мішку: відповідає {name}",
   "host.right": "Правильно",
   "host.wrong": "Неправильно",
+  "host.replayMedia": "Повторити для всіх",
+  "host.replayMediaHelp": "Запускає аудіо чи відео спочатку на всіх екранах.",
   "host.rightFor": "Правильно: {name}",
   "host.wrongFor": "Неправильно: {name}",
   "host.pickAuto": "Вибір перевіряється автоматично.",

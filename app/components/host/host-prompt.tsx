@@ -37,6 +37,7 @@ import { getSecretTopic, isSecretClue } from "~/engine/state";
 import { useTranslation } from "~/i18n";
 import type { Clue } from "~/models/convert.server";
 import { hasChoices } from "~/utils/choices";
+import { hasPlayableMedia } from "~/utils/media";
 
 const JUDGE_BUTTON =
   "inline-flex min-h-12 min-w-28 touch-manipulation items-center justify-center rounded-xl px-5 py-3 text-lg font-bold text-white shadow-md transition-colors focus:ring-2 focus:ring-white focus:outline-none disabled:cursor-not-allowed disabled:opacity-50";
@@ -67,6 +68,42 @@ function HostAnswer({ clue }: { clue: Clue }) {
         ))}
       <PlayableMedia blocks={media} autoPlay={false} />
     </section>
+  );
+}
+
+/** ReplayMediaButton restarts the question's audio/video on every device
+ * (feature 23). Only the host sees it. */
+function ReplayMediaButton({
+  roomId,
+  userId,
+}: {
+  roomId: number;
+  userId: string;
+}) {
+  const { t } = useTranslation();
+  const fetcher = useFetcher();
+  return (
+    <div className="flex flex-col items-center gap-1 px-4 pb-2">
+      <button
+        type="button"
+        data-testid="host-replay-media"
+        className="inline-flex min-h-11 touch-manipulation items-center justify-center gap-2 rounded-xl bg-white/15 px-4 py-2 font-bold text-white shadow-md transition-colors hover:bg-white/25 focus:ring-2 focus:ring-white focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+        disabled={fetcher.state !== "idle"}
+        title={t("host.replayMediaHelp")}
+        onClick={() =>
+          fetcher.submit(
+            { intent: "replay", userId },
+            { method: "post", action: `/room/${roomId}/host` },
+          )
+        }
+        // Enter is the buzz key elsewhere; don't replay by accident.
+        onKeyDown={(e) => {
+          if (e.key === "Enter") e.preventDefault();
+        }}
+      >
+        <span aria-hidden>🔁</span> {t("host.replayMedia")}
+      </button>
+    </div>
   );
 }
 
@@ -349,6 +386,9 @@ function HostPromptContent({ roomId, userId }: RoomProps) {
           type === GameState.ReadLongFormClue
         }
       />
+      {hasPlayableMedia(clueMedia(clue)) ? (
+        <ReplayMediaButton roomId={roomId} userId={userId} />
+      ) : null}
       <HostAnswer clue={clue} />
       {/* The host knows the right option all along. */}
       <ConnectedChoiceList revealCorrect />

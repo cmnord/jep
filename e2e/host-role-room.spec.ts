@@ -9,6 +9,7 @@ import {
   openClue,
   uploadGame,
   waitForBoardReady,
+  stubExternalMedia,
   waitForConnected,
 } from "./helpers";
 
@@ -17,6 +18,14 @@ import {
  * not on screen, not in the room's data. */
 
 const MOCK_3x3_PATH = path.resolve("app/static/mock-3x3.jep.json");
+const MEDIA_PATH = path.resolve("app/static/mock-media.jep.json");
+
+declare global {
+  interface Window {
+    /** How many times media playback started (the replay test). */
+    plays?: number;
+  }
+}
 
 async function newPage(browser: Browser) {
   const context = await browser.newContext();
@@ -155,5 +164,60 @@ test.describe("host role", () => {
       ).toBeVisible({ timeout: 1_000 });
     }).toPass({ timeout: 20_000 });
     await expect(bob.getByText("b1-answer").first()).toBeAttached();
+  });
+
+  test("the host replays a question's audio on every device", async ({
+    authedPage: uploader,
+    browser,
+  }) => {
+    test.setTimeout(120_000);
+    await goto(uploader, "/profile");
+    const gameId = await uploadGame(uploader, MEDIA_PATH);
+    await goto(uploader, `/game/${gameId}/play`);
+    await expect(uploader).toHaveURL(/\/room\/\d+-\w+$/);
+    const roomUrl = uploader.url();
+
+    const host = await newPage(browser);
+    await stubExternalMedia(host);
+    await goto(host, roomUrl);
+    await waitForConnected(host);
+    await host.getByRole("button", { name: /Host this game/ }).click();
+    await expect(host.getByTestId("host-badge")).toContainText(
+      "You're the host",
+      { timeout: 10_000 },
+    );
+
+    // Count every start of playback on Ann's device.
+    const ann = await newPage(browser);
+    await stubExternalMedia(ann);
+    await ann.addInitScript(() => {
+      window.plays = 0;
+      const play = HTMLMediaElement.prototype.play;
+      HTMLMediaElement.prototype.play = function () {
+        window.plays = (window.plays ?? 0) + 1;
+        return play.call(this).catch(() => undefined);
+      };
+    });
+    await goto(ann, roomUrl);
+    await join(ann);
+    await clickStartRound(host);
+
+    // "Music & Film" $200 is an audio question.
+    await openClue(ann, ann.getByRole("button", { name: "$ 200" }).nth(1));
+    const replay = host.getByTestId("host-replay-media");
+    await expect(replay).toBeVisible({ timeout: 10_000 });
+    await expect(ann.getByTestId("host-replay-media")).toHaveCount(0);
+
+    // Once Ann answers (no more autoplay), the host replays the clip.
+    await buzzIn(ann);
+    const plays = () => ann.evaluate(() => window.plays ?? 0);
+    const before = await plays();
+    await replay.click();
+    await expect.poll(plays, { timeout: 10_000 }).toBeGreaterThan(before);
+    await expect
+      .poll(() =>
+        ann.evaluate(() => document.querySelector("audio")?.currentTime ?? -1),
+      )
+      .toBeLessThan(1);
   });
 });

@@ -168,6 +168,8 @@ export function ClueText({
     maxFontSize: 200,
   });
   const pointerType = React.useRef("");
+  // The host's replays of the question's audio/video (feature 23).
+  const { mediaReplayCount } = useEngineContext();
   const images = media.filter((b) => b.type === "image");
   const hasMedia = media.length > 0;
 
@@ -237,7 +239,11 @@ export function ClueText({
       </button>
       {/* Audio/video controls live outside the buzz button: tapping them must
           not buzz in, and interactive content can't be nested in a button. */}
-      <PlayableMedia blocks={media} autoPlay={autoPlayMedia} />
+      <PlayableMedia
+        blocks={media}
+        autoPlay={autoPlayMedia}
+        replayNonce={mediaReplayCount}
+      />
     </div>
   );
 }

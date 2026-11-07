@@ -166,3 +166,62 @@ describe("ClueText", () => {
     expect(container.querySelector("[data-testid=clue-media]")).toBeNull();
   });
 });
+
+describe("host replay (feature 23)", () => {
+  it("restarts the first clip when the replay count goes up, not at mount", () => {
+    render(
+      <PlayableMedia
+        blocks={[AUDIO, VIDEO]}
+        autoPlay={false}
+        replayNonce={2}
+      />,
+    );
+    expect(play).not.toHaveBeenCalled();
+    const [audio, video] =
+      container.querySelectorAll<HTMLMediaElement>("audio, video");
+    audio.currentTime = 12;
+    video.currentTime = 7;
+
+    render(
+      <PlayableMedia
+        blocks={[AUDIO, VIDEO]}
+        autoPlay={false}
+        replayNonce={3}
+      />,
+    );
+    expect(play).toHaveBeenCalledTimes(1);
+    expect(play.mock.contexts[0]).toBe(audio);
+    expect(audio.currentTime).toBe(0);
+    expect(video.currentTime).toBe(7);
+
+    // Re-rendering with the same count doesn't replay again.
+    render(
+      <PlayableMedia
+        blocks={[AUDIO, VIDEO]}
+        autoPlay={false}
+        replayNonce={3}
+      />,
+    );
+    expect(play).toHaveBeenCalledTimes(1);
+  });
+
+  it("restarts a video clip", () => {
+    render(<VideoPlayer block={VIDEO} autoPlay={false} replayNonce={0} />);
+    render(<VideoPlayer block={VIDEO} autoPlay={false} replayNonce={1} />);
+    expect(play).toHaveBeenCalledTimes(1);
+  });
+
+  it("reloads a YouTube player with autoplay", () => {
+    render(
+      <PlayableMedia blocks={[YOUTUBE]} autoPlay={false} replayNonce={0} />,
+    );
+    const before = container.querySelector("iframe")?.getAttribute("src");
+    expect(before).not.toContain("autoplay=1");
+    render(
+      <PlayableMedia blocks={[YOUTUBE]} autoPlay={false} replayNonce={1} />,
+    );
+    expect(container.querySelector("iframe")?.getAttribute("src")).toContain(
+      "autoplay=1",
+    );
+  });
+});
