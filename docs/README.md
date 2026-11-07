@@ -294,3 +294,4 @@ scripts/cleanup-inactive-rooms.mjs`, admin Rooms button; 7-day dashboard tile re
   button/hint removed; `/login` & co. still work by URL; an existing account session keeps
   its profile menu) — see [features/18-admin.md](./features/18-admin.md). No migration, no new
   dependencies.
+- **2026-11-07** — Fixed a crash ("Failed to execute 'removeChild' on 'Node'") caused by browser machine translation rewriting the page: every document now sets `translate="no"` and `<meta name="google" content="notranslate">` (the site has its own Ukrainian UI).

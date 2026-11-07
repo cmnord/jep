@@ -275,9 +275,14 @@ export default function App({ loaderData }: Route.ComponentProps) {
   };
 
   return (
-    <html lang={locale} data-theme={theme}>
+    // translate="no" + notranslate: browser translation (e.g. Chrome's
+    // Google Translate) rewrites text nodes behind React's back, and the next
+    // update that removes one crashes the app ("Failed to execute
+    // 'removeChild' on 'Node'"). The site has a real Ukrainian UI instead.
+    <html lang={locale} data-theme={theme} translate="no">
       <head>
         <meta charSet="utf-8" />
+        <meta name="google" content="notranslate" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <meta name="robots" content={searchMetadata.robots} />
         {searchMetadata.canonicalUrl ? (
@@ -378,10 +383,11 @@ function ErrorDocument({ children }: { children: React.ReactNode }) {
   const theme = useErrorTheme();
   const t = createT(locale);
   return (
-    <html lang={locale} data-theme={theme}>
+    <html lang={locale} data-theme={theme} translate="no">
       <head>
         <title>{t("common.errorTitle")}</title>
         <meta charSet="utf-8" />
+        <meta name="google" content="notranslate" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <meta name="robots" content={NO_INDEX_DIRECTIVES} />
         <Meta />
