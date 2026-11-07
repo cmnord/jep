@@ -29,4 +29,23 @@ export const upload = {
   "upload.error.unsupported":
     "Unsupported file. Upload a Jep! game (.jep.json) or a SIGame pack (.siq).",
   "upload.error.jsonTooLarge": "JSON games must be at most 1 MB.",
+  "upload.progress.importingTitle": "Importing the pack…",
+  "upload.progress.savingTitle": "Saving the game…",
+  "upload.progress.uploadingHint": "Please keep this page open.",
+  "upload.progress.importingHint":
+    "Processing media files — large packs can take a minute. Please keep this page open.",
+  "upload.progress.savingHint": "Almost done.",
+  "upload.progress.bytes": "{loaded} of {total}",
+  "upload.progress.barLabel": "Upload progress",
+  "upload.progress.processingLabel": "Processing on the server",
+  "upload.progress.cancel": "Cancel upload",
+  "upload.progress.announceUploading": "Uploading {name}…",
+  "upload.progress.announceImporting": "Upload complete. Importing the pack…",
+  "upload.progress.announceSaving": "Upload complete. Saving the game…",
+  "upload.progress.announceCanceled": "Upload canceled.",
+  "upload.retry": "Try again",
+  "upload.error.network":
+    "Error uploading game: the connection was lost. Check your internet connection and try again.",
+  "upload.error.server":
+    "Error uploading game: the server answered with error {status}. Please try again later.",
 } as const;

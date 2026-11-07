@@ -124,6 +124,62 @@ questions is rejected.
 - The flash message is size-bounded (≤ 8 warnings, ≤ 160 chars each, ≤ 1200 bytes, title ≤ 80
   chars) so the session cookie stays under the browser limit.
 
+## Upload screen (follow-up, `feat/upload-progress`)
+
+Owner's request: "add load screen when uploading packs". While a file uploads, a modal screen
+covers the page with the file name and size and two stages:
+
+1. **Uploading…** — a real progress bar with the percentage and "192.0 KB of 402.8 KB", and a
+   **Cancel upload** button (aborts the request).
+2. **Importing the pack…** (`.siq`) / **Saving the game…** (`.jep.json`) — once every byte is
+   sent: an indeterminate animated bar and "Processing media files — large packs can take a
+   minute. Please keep this page open."
+
+Then the page shows the summary / error message exactly as before.
+
+Design decisions:
+
+- **XMLHttpRequest instead of the fetcher.** `fetch` can't report upload progress (streaming
+  request bodies need HTTP/2 + `duplex`), so the box posts the same multipart body with an XHR
+  (`app/utils/upload-with-progress.ts`). An XHR follows redirects itself, which would make the
+  redirect target's loader consume the flashed result before the page could show it, so the
+  request carries `X-Jep-Upload: 1` and `POST /game` then answers `{ "redirectTo": "/" }` as
+  JSON (status 200, or 400 for errors) with the same flash cookie; the box then
+  `navigate()`s there (replace, no scroll reset) — the same navigation the fetcher's redirect
+  did, so the success summary, the skipped/changed list and the error messages work unchanged.
+  Without the header the action redirects as before.
+- **No flash for quick uploads:** the screen appears only after 300 ms (`.jep.json` uploads
+  usually finish before), and once shown it stays at least 500 ms. Meanwhile the upload box shows
+  its spinner.
+- **One upload at a time:** the input is disabled and a second start is ignored while busy.
+- **Errors the server didn't flash** (connection lost; a proxy error page such as 413/502) show
+  a message under the box with a **Try again** button (re-sends the same file, no new dialog).
+  Canceling just resets the box. Leaving the page aborts the upload.
+- **Accessibility:** Radix dialog (focus kept inside, can't be dismissed by Escape/outside
+  click), `role="progressbar"` with `aria-valuenow` (upload) or without it (processing), and a
+  polite `role="status"` live region announcing "Uploading x.siq…", "Upload complete.
+  Importing the pack…", "Upload canceled.". The live region renders empty on the server — no
+  hydration mismatch.
+- Looks like the existing confirm dialog (navy card, gold bar) in Classic and Dark; works at
+  phone width. EN + UK strings (`upload.progress.*`, `upload.retry`, `upload.error.network`,
+  `upload.error.server`).
+
+Files: `app/components/upload.tsx` (+ `upload.test.tsx`), `app/components/upload-progress.tsx`,
+`app/utils/upload-with-progress.ts` (+ test), `app/test-fixtures/fake-xhr.ts`,
+`app/routes/game/route.tsx` (+ test), `app/routes/_index/route.tsx`,
+`app/routes/profile/route.tsx` (`onUploadStart` replaces the fetcher), `app/styles.css`
+(`animate-upload-indeterminate`), `app/i18n/{en,uk}/upload.ts`, `e2e/siq-import.spec.ts`.
+
+Verification: component tests with a fake XHR (progress %, bytes, stage switch, live region,
+disabled input, navigation to the flashed result, quick uploads skip the screen, JSON "Saving
+the game…", cancel, network error + retry, unexpected status, guest confirm first, Ukrainian);
+route tests for the JSON answer (200/400, no `Location`, flash headers kept); e2e "SIGame pack
+upload screen" throttles the upload via CDP (`Network.emulateNetworkConditions`) and holds the
+response at the response stage (`Fetch.enable`, `requestStage: "Response"` — `page.route` pauses
+before the body is sent, so the browser reports no progress), then asserts **Uploading…** with
+an `aria-valuenow` progress bar, **Importing the pack…** with the processing bar, and finally
+the import summary.
+
 ## Not done / limitations
 
 - **Deleting a game doesn't delete its imported media** (files stay in the bucket under their
@@ -137,7 +193,8 @@ questions is rejected.
 - Media timing (placement, duration, background audio) is ignored; files are shown/played as in
   feature 03.
 - Large imports run within one request: a 100 MB pack with many files can take a while (the
-  button shows "Importing SIGame pack…"). Behind nginx the proxy timeouts must allow that.
+  upload screen shows "Importing the pack…", see below). Behind nginx the proxy timeouts must
+  allow that.
 - A guest can import up to 100 MB of media publicly (same rules as JSON uploads: public,
   community guidelines).
 - The tiny fixture video is placeholder bytes (not playable); it's only used for mapping tests.

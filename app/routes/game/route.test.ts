@@ -32,6 +32,8 @@ vi.mock("~/models/siq/media-store.server", () => ({
   }),
 }));
 
+import { UPLOAD_PROGRESS_HEADER } from "~/utils/upload-with-progress";
+
 import {
   MAX_JSON_SIZE,
   MAX_SIQ_SIZE,
@@ -205,6 +207,42 @@ describe("POST /game", () => {
     );
     expect(response.status).toBe(400);
     expect(formState?.message).toMatch(/too large/);
+  });
+});
+
+describe("POST /game from the progress upload", () => {
+  const headers = { [UPLOAD_PROGRESS_HEADER]: "1" };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.getValidAuthSession.mockResolvedValue(null);
+    mocks.createGame.mockResolvedValue("game-1");
+    mocks.flashFormState.mockResolvedValue(
+      // (happy-dom hides Set-Cookie, so a stand-in header.)
+      new Headers({ "X-Flash": "flash" }),
+    );
+  });
+
+  it("answers with JSON instead of a redirect and still flashes the result", async () => {
+    const { response, formState } = await upload(
+      new File([JSON_GAME], "game.jep.json", { type: "application/json" }),
+      headers,
+    );
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Location")).toBeNull();
+    expect(response.headers.get("X-Flash")).toBe("flash");
+    expect(await response.json()).toEqual({ redirectTo: "/profile" });
+    expect(formState?.success).toBe(true);
+  });
+
+  it("answers errors with JSON and status 400", async () => {
+    const { response, formState } = await upload(
+      new File(["not a zip"], "broken.siq"),
+      headers,
+    );
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({ redirectTo: "/profile" });
+    expect(formState?.message).toMatch(/not a SIGame pack/);
   });
 });
 

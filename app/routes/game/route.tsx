@@ -12,6 +12,10 @@ import { SiqImportError } from "~/models/siq/errors";
 import { formatSiqSummary } from "~/models/siq/summary";
 import { flashFormState } from "~/session.server";
 import { getRedirectTo, safeRedirect } from "~/utils/http.server";
+import {
+  UPLOAD_PROGRESS_HEADER,
+  type UploadResult,
+} from "~/utils/upload-with-progress";
 
 import type { Route } from "./+types/route";
 import { MAX_SIQ_SIZE, newUploadHandler } from "./file-upload-handler.server";
@@ -32,6 +36,22 @@ export async function action({ request }: Route.ActionArgs) {
     success: false,
     message: t("upload.error.prefix", { reason }),
   });
+  // The upload box posts with an XMLHttpRequest to show progress; it gets
+  // JSON (with the same flash cookie) and navigates itself, because the
+  // request would follow a redirect and consume the flash message.
+  const progressUpload = request.headers.get(UPLOAD_PROGRESS_HEADER) === "1";
+  const finish = async (
+    formState: Parameters<typeof flashFormState>[1],
+    status?: number,
+  ) => {
+    const headers = await flashFormState(request, formState);
+    const to = safeRedirect(redirectTo);
+    if (progressUpload) {
+      const result: UploadResult = { redirectTo: to };
+      return Response.json(result, { headers, status: status ?? 200 });
+    }
+    return redirect(to, status ? { headers, status } : { headers });
+  };
 
   try {
     const uploadHandler = newUploadHandler(authSession, visibility, locale);
@@ -50,8 +70,7 @@ export async function action({ request }: Route.ActionArgs) {
 
     if (!gameKey) {
       const formState = uploadError(t("upload.error.noGameKey"));
-      const headers = await flashFormState(request, formState);
-      return redirect(safeRedirect(redirectTo), { headers, status: 400 });
+      return finish(formState, 400);
     }
 
     const gameUrl = ENV.BASE_URL + "/game/" + gameKey + "/play";
@@ -70,25 +89,21 @@ export async function action({ request }: Route.ActionArgs) {
         ? { details: imported.details }
         : {}),
     };
-    const headers = await flashFormState(request, formState);
-    return redirect(safeRedirect(redirectTo), { headers });
+    return finish(formState);
   } catch (error: unknown) {
     if (error instanceof MaxFileSizeExceededError) {
       const formState = uploadError(t("upload.error.tooLarge"));
-      const headers = await flashFormState(request, formState);
-      return redirect(safeRedirect(redirectTo), { headers, status: 400 });
+      return finish(formState, 400);
     }
     if (error instanceof SiqImportError) {
       const formState = uploadError(error.localize(locale));
-      const headers = await flashFormState(request, formState);
-      return redirect(safeRedirect(redirectTo), { headers, status: 400 });
+      return finish(formState, 400);
     }
     if (error instanceof Error) {
       // Other messages (JSON syntax and schema problems, database errors)
       // are technical and stay in English.
       const formState = uploadError(error.message);
-      const headers = await flashFormState(request, formState);
-      return redirect(safeRedirect(redirectTo), { headers, status: 400 });
+      return finish(formState, 400);
     }
     throw error;
   }

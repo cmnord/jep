@@ -347,7 +347,6 @@ function OnlineProfile({
 }) {
   const { t } = useTranslation();
   const patchGame = useFetcher<never>();
-  const uploadGame = useFetcher<never>();
   const formRef = React.useRef<HTMLFormElement | null>(null);
 
   const [formState, setFormState] = React.useState(loaderData.formState);
@@ -357,12 +356,6 @@ function OnlineProfile({
       setFormState(undefined);
     }
   }, [patchGame.state]);
-
-  React.useEffect(() => {
-    if (uploadGame.state === "submitting") {
-      setFormState(undefined);
-    }
-  }, [uploadGame.state]);
 
   const loaderFormState = loaderData.formState;
   React.useEffect(() => {
@@ -409,10 +402,10 @@ function OnlineProfile({
 
         <h2 className="mb-4 text-2xl font-semibold">{t("profile.myGames")}</h2>
         <Upload
-          fetcher={uploadGame}
           formRef={formRef}
           loggedIn
           redirectTo="/profile"
+          onUploadStart={() => setFormState(undefined)}
         />
         {loaderData.games.length === 0 ? (
           <p className="text-sm text-ink-500">{t("profile.noGames")}</p>

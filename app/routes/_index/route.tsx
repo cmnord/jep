@@ -2,7 +2,6 @@ import * as React from "react";
 import {
   data,
   Form,
-  useFetcher,
   useNavigation,
   useSearchParams,
   useSubmit,
@@ -68,7 +67,6 @@ export default function Index({ loaderData }: Route.ComponentProps) {
   const [params] = useSearchParams();
 
   // Upload
-  const uploadFetcher = useFetcher<never>();
   const uploadFormRef = React.useRef<HTMLFormElement | null>(null);
   // The success and error messages are shown even if JavaScript is not
   // available.
@@ -103,13 +101,6 @@ export default function Index({ loaderData }: Route.ComponentProps) {
     solvesMap.set(solve.game_id, solve);
   });
 
-  React.useEffect(() => {
-    if (uploadFetcher.state === "submitting") {
-      // JavaScript to clean messages when submitting
-      setFormState(undefined);
-    }
-  }, [uploadFetcher.state]);
-
   const loaderFormState = loaderData.formState;
   React.useEffect(() => {
     setFormState(loaderFormState);
@@ -143,10 +134,11 @@ export default function Index({ loaderData }: Route.ComponentProps) {
         />
       </Form>
       <Upload
-        fetcher={uploadFetcher}
         formRef={uploadFormRef}
         loggedIn={loaderData.authSession !== null}
         redirectTo="/"
+        // JavaScript to clean messages when submitting
+        onUploadStart={() => setFormState(undefined)}
       />
       <div className="mb-4 flex justify-center">
         <ButtonLink to="/random-board">{t("random.homeButton")}</ButtonLink>

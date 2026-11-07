@@ -1,4 +1,4 @@
-import { randomUUID } from "crypto";
+import { randomBytes, randomUUID } from "crypto";
 
 import { expect, test } from "@playwright/test";
 
@@ -104,5 +104,93 @@ test.describe("SIGame pack import", () => {
       "The file is not a SIGame pack",
       { timeout: 10_000 },
     );
+  });
+});
+
+test.describe("SIGame pack upload screen", () => {
+  // Requests from pages a service worker controls bypass interception.
+  test.use({ serviceWorkers: "block" });
+
+  test("shows upload progress, then the importing stage, then the summary", async ({
+    page,
+  }) => {
+    test.setTimeout(60_000);
+    const title = `E2E SIQ progress ${randomUUID().slice(0, 8)}`;
+    const siq = buildSiq("v5", {
+      "content.xml": fixtureContentXml("v5").replace(
+        'name="Test pack v5"',
+        `name="${title}"`,
+      ),
+      // An unreferenced (and incompressible) file makes the upload take a
+      // moment on the throttled connection below.
+      "Images/padding.bin": new Uint8Array(randomBytes(300 * 1024)),
+    });
+
+    // Slow uploads (about 2 s for the pack) and hold the server's answer for
+    // 2 s, so both stages are observable. Unlike page.route, pausing at the
+    // response stage lets the browser send the body (and report progress).
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send("Network.enable");
+    await cdp.send("Network.emulateNetworkConditions", {
+      offline: false,
+      latency: 0,
+      downloadThroughput: -1,
+      uploadThroughput: 150 * 1024,
+    });
+    await cdp.send("Fetch.enable", {
+      patterns: [
+        { urlPattern: "*/game?redirectTo=*", requestStage: "Response" },
+      ],
+    });
+    cdp.on("Fetch.requestPaused", (event) => {
+      setTimeout(() => {
+        void cdp
+          .send("Fetch.continueRequest", { requestId: event.requestId })
+          .catch(() => {});
+      }, 2_000);
+    });
+
+    await goto(page, "/");
+    const fileChooserPromise = page.waitForEvent("filechooser");
+    await page.locator("#upload-button").click();
+    const fileChooser = await fileChooserPromise;
+    await fileChooser.setFiles({
+      name: "progress-pack.siq",
+      mimeType: "application/octet-stream",
+      buffer: Buffer.from(siq),
+    });
+    await page.getByRole("button", { name: /upload publicly/i }).click();
+
+    // Stage 1: uploading, with a real progress bar.
+    const overlay = page.getByTestId("upload-progress");
+    await expect(overlay).toBeVisible();
+    await expect(overlay).toContainText("progress-pack.siq");
+    await expect(
+      overlay.getByRole("heading", { name: "Uploading…" }),
+    ).toBeVisible();
+    await expect(
+      overlay.getByRole("progressbar", { name: "Upload progress" }),
+    ).toHaveAttribute("aria-valuenow", /^\d+$/);
+    // A second file can't be submitted meanwhile.
+    await expect(page.locator("#upload")).toBeDisabled();
+
+    // Stage 2: the server imports the pack.
+    await expect(
+      overlay.getByRole("heading", { name: "Importing the pack…" }),
+    ).toBeVisible({ timeout: 15_000 });
+    await expect(overlay).toContainText("large packs can take a minute");
+    await expect(
+      overlay.getByRole("progressbar", { name: "Processing on the server" }),
+    ).toBeVisible();
+
+    // Done: the summary as before.
+    await expect(
+      page.getByText(`Imported SIGame pack "${title}"`, { exact: false }),
+    ).toBeVisible({ timeout: 30_000 });
+    await expect(overlay).toBeHidden();
+    await expect(page.getByTestId("form-state-details")).toContainText(
+      'file "missing.png" is missing',
+    );
+    await expect(page.locator("#upload")).toBeEnabled();
   });
 });

@@ -70,7 +70,8 @@ Difficulty estimates from the original planning discussion.
 
 - [x] Import/export JSON + import SIQ packs — **Download JSON** on the game page; the upload box
       takes `.jep.json` and SIGame `.siq` packs (v4 and v5, up to 100 MB; media uploaded to the
-      public Storage bucket `game-media`, zip bomb / XXE guarded, summary of skipped items) — see
+      public Storage bucket `game-media`, zip bomb / XXE guarded, summary of skipped items;
+      upload screen with progress bar + "Importing the pack…" stage) — see
       [features/08-import-export.md](./features/08-import-export.md) — ⭐⭐⭐ large
 
 - [x] Ukrainian translation — whole UI in English and Ukrainian (EN / УКР switcher, cookie +
@@ -295,3 +296,4 @@ scripts/cleanup-inactive-rooms.mjs`, admin Rooms button; 7-day dashboard tile re
   its profile menu) — see [features/18-admin.md](./features/18-admin.md). No migration, no new
   dependencies.
 - **2026-11-07** — Fixed a crash ("Failed to execute 'removeChild' on 'Node'") caused by browser machine translation rewriting the page: every document now sets `translate="no"` and `<meta name="google" content="notranslate">` (the site has its own Ukrainian UI).
+- **2026-11-07** — Follow-up on `feat/upload-progress` (owner's request "add load screen when uploading packs"): upload screen with a real progress bar (XHR upload events, cancel), then "Importing the pack…" while the server processes it; `POST /game` answers XHR uploads with JSON + the same flash cookie, the box navigates like the old redirect; network/proxy errors get a retry button — see [features/08-import-export.md](./features/08-import-export.md#upload-screen-follow-up-featupload-progress). No migration, no new dependencies.

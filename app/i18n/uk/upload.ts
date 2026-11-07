@@ -31,4 +31,23 @@ export const upload: Dictionary<typeof en> = {
   "upload.error.unsupported":
     "Непідтримуваний файл. Завантаж гру Jep! (.jep.json) або пакет SIGame (.siq).",
   "upload.error.jsonTooLarge": "Гра у форматі JSON має бути не більша за 1 МБ.",
+  "upload.progress.importingTitle": "Імпортуємо пакет…",
+  "upload.progress.savingTitle": "Зберігаємо гру…",
+  "upload.progress.uploadingHint": "Не закривай цю сторінку.",
+  "upload.progress.importingHint":
+    "Обробляємо медіафайли — великі пакети можуть імпортуватися до хвилини. Не закривай цю сторінку.",
+  "upload.progress.savingHint": "Майже готово.",
+  "upload.progress.bytes": "{loaded} з {total}",
+  "upload.progress.barLabel": "Хід завантаження",
+  "upload.progress.processingLabel": "Обробка на сервері",
+  "upload.progress.cancel": "Скасувати завантаження",
+  "upload.progress.announceUploading": "Завантажуємо {name}…",
+  "upload.progress.announceImporting": "Файл завантажено. Імпортуємо пакет…",
+  "upload.progress.announceSaving": "Файл завантажено. Зберігаємо гру…",
+  "upload.progress.announceCanceled": "Завантаження скасовано.",
+  "upload.retry": "Спробувати ще раз",
+  "upload.error.network":
+    "Не вдалося завантажити гру: зв’язок обірвався. Перевір підключення до інтернету й спробуй ще раз.",
+  "upload.error.server":
+    "Не вдалося завантажити гру: сервер відповів помилкою {status}. Спробуй ще раз пізніше.",
 };

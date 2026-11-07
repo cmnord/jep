@@ -1,22 +1,35 @@
 import clsx from "clsx";
 import * as React from "react";
 import { useDropzone } from "react-dropzone";
-import type { FetcherWithComponents } from "react-router";
-import { useSubmit } from "react-router";
+import { useNavigate } from "react-router";
 
 import Button from "~/components/button";
 import Dialog from "~/components/dialog";
-import { WarningMessage } from "~/components/error";
+import { ErrorMessage, WarningMessage } from "~/components/error";
 import {
   DocumentArrowUp,
   ExclamationTriangle,
   LoadingSpinner,
 } from "~/components/icons";
 import Link from "~/components/link";
+import {
+  type UploadProgress,
+  UploadProgressOverlay,
+} from "~/components/upload-progress";
 import { useTranslation } from "~/i18n";
+import {
+  UploadError,
+  type UploadResult,
+  uploadWithProgress,
+} from "~/utils/upload-with-progress";
 
 /** Files the upload accepts: Jep! games and SIGame packs. Browsers report
  * .siq files as zip, octet-stream or nothing; the server checks the name. */
+/** Uploads that finish sooner never show the overlay (no flash). */
+export const OVERLAY_DELAY_MS = 300;
+/** Once shown, the overlay stays at least this long. */
+const OVERLAY_MIN_VISIBLE_MS = 500;
+
 const ACCEPT_INPUT = [
   ".jep.json",
   ".json",
@@ -136,37 +149,149 @@ function UploadBox({
   );
 }
 
+type UploadFailure = { kind: "network" } | { kind: "server"; status: number };
+
+function sleep(ms: number) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
 export default function Upload({
-  fetcher,
   formRef,
   loggedIn,
   redirectTo,
+  onUploadStart,
 }: {
-  fetcher: FetcherWithComponents<never>;
   formRef: React.RefObject<HTMLFormElement | null>;
   loggedIn: boolean;
   redirectTo: string;
+  /** Called when an upload starts, e.g. to hide the previous result. */
+  onUploadStart?: () => void;
 }) {
   const { t, rich } = useTranslation();
+  const navigate = useNavigate();
   const [showModal, setShowModal] = React.useState(false);
   const [file, setFile] = React.useState<File | undefined>();
-  const submit = useSubmit();
+  const [progress, setProgress] = React.useState<UploadProgress | undefined>();
+  const [overlayVisible, setOverlayVisible] = React.useState(false);
+  const [failure, setFailure] = React.useState<UploadFailure | undefined>();
+  const [announcement, setAnnouncement] = React.useState("");
+  const busyRef = React.useRef(false);
+  const abortRef = React.useRef<(() => void) | undefined>(undefined);
+  const shownAtRef = React.useRef<number | undefined>(undefined);
+  const showTimerRef = React.useRef<number | undefined>(undefined);
+
+  // Leaving the page abandons the upload.
+  React.useEffect(
+    () => () => {
+      abortRef.current?.();
+      window.clearTimeout(showTimerRef.current);
+    },
+    [],
+  );
+
+  function reset() {
+    busyRef.current = false;
+    abortRef.current = undefined;
+    window.clearTimeout(showTimerRef.current);
+    shownAtRef.current = undefined;
+    setOverlayVisible(false);
+    setProgress(undefined);
+    // Lets the same file be chosen again.
+    formRef.current?.reset();
+  }
+
+  async function startUpload(upload: File) {
+    if (busyRef.current) return;
+    busyRef.current = true;
+    onUploadStart?.();
+    setFailure(undefined);
+
+    const siq = isSiqFile(upload);
+    const info = { name: upload.name, size: upload.size, siq };
+    setProgress({ stage: "uploading", loaded: 0, total: upload.size, ...info });
+    setAnnouncement(
+      t("upload.progress.announceUploading", { name: upload.name }),
+    );
+    showTimerRef.current = window.setTimeout(() => {
+      shownAtRef.current = Date.now();
+      setOverlayVisible(true);
+    }, OVERLAY_DELAY_MS);
+
+    const body = new FormData();
+    body.set("upload", upload, upload.name);
+    const request = uploadWithProgress(`/game?redirectTo=${redirectTo}`, body, {
+      onProgress: (loaded, total) =>
+        setProgress((p) =>
+          p?.stage === "uploading" ? { ...p, loaded, total } : p,
+        ),
+      onUploaded: () => {
+        setProgress({ stage: "processing", ...info });
+        setAnnouncement(
+          siq
+            ? t("upload.progress.announceImporting")
+            : t("upload.progress.announceSaving"),
+        );
+      },
+    });
+    abortRef.current = request.abort;
+
+    let result: UploadResult;
+    try {
+      result = await request.promise;
+    } catch (error: unknown) {
+      reset();
+      if (error instanceof UploadError && error.kind === "aborted") {
+        setAnnouncement(t("upload.progress.announceCanceled"));
+        setFile(undefined);
+        return;
+      }
+      setFailure(
+        error instanceof UploadError && error.kind === "server"
+          ? { kind: "server", status: error.status ?? 0 }
+          : { kind: "network" },
+      );
+      setAnnouncement("");
+      return;
+    }
+
+    // Don't flash the overlay: show it a little longer if it just appeared.
+    window.clearTimeout(showTimerRef.current);
+    if (shownAtRef.current !== undefined) {
+      await sleep(
+        Math.max(0, shownAtRef.current + OVERLAY_MIN_VISIBLE_MS - Date.now()),
+      );
+    }
+    // The same navigation a form submission's redirect does: the page's
+    // loader shows the flashed result (summary or error).
+    await navigate(result.redirectTo, {
+      replace: true,
+      preventScrollReset: true,
+    });
+    setFile(undefined);
+    setAnnouncement("");
+    reset();
+  }
 
   function handleChangeUpload(newFile?: File) {
+    if (!newFile || busyRef.current) return;
     setFile(newFile);
     if (loggedIn) {
-      submit(formRef.current);
+      void startUpload(newFile);
       return;
     }
     setShowModal(true);
   }
 
   return (
-    <fetcher.Form
+    <form
       method="POST"
       action={`/game?redirectTo=${redirectTo}`}
       encType="multipart/form-data"
       ref={formRef}
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (file) void startUpload(file);
+      }}
     >
       <Dialog
         isOpen={showModal}
@@ -195,8 +320,8 @@ export default function Upload({
         <Dialog.Footer>
           <Button
             onClick={() => {
-              submit(formRef.current);
               setShowModal(false);
+              if (file) void startUpload(file);
             }}
           >
             {t("upload.uploadPublicly")}
@@ -215,12 +340,35 @@ export default function Upload({
         </Dialog.Footer>
       </Dialog>
       <UploadBox
-        loading={fetcher.state === "submitting"}
+        loading={progress !== undefined}
         loadingText={
           isSiqFile(file) ? t("upload.importingSiq") : t("upload.uploading")
         }
         onChange={handleChangeUpload}
       />
-    </fetcher.Form>
+      <p role="status" aria-live="polite" className="sr-only">
+        {announcement}
+      </p>
+      {failure ? (
+        <div className="mb-4 flex flex-col items-center gap-2">
+          <ErrorMessage>
+            {failure.kind === "server"
+              ? t("upload.error.server", { status: String(failure.status) })
+              : t("upload.error.network")}
+          </ErrorMessage>
+          {file ? (
+            <Button onClick={() => void startUpload(file)}>
+              {t("upload.retry")}
+            </Button>
+          ) : null}
+        </div>
+      ) : null}
+      {progress && overlayVisible ? (
+        <UploadProgressOverlay
+          progress={progress}
+          onCancel={() => abortRef.current?.()}
+        />
+      ) : null}
+    </form>
   );
 }

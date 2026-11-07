@@ -137,6 +137,8 @@
   --animate-swipe-out: swipe-out 100ms ease-out;
   /* Soundboard cooldown bar (SEND_COOLDOWN_MS in utils/soundboard/limiter.ts). */
   --animate-soundboard-cooldown: soundboard-cooldown 2s linear forwards;
+  /* Upload overlay: the server is processing (no progress to report). */
+  --animate-upload-indeterminate: upload-indeterminate 1.4s ease-in-out infinite;
 
   @keyframes border-pulse {
     0%,
@@ -276,6 +278,15 @@
     to {
       opacity: 1;
       transform: translateX(0);
+    }
+  }
+
+  @keyframes upload-indeterminate {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(300%);
     }
   }
 
