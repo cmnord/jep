@@ -47,15 +47,16 @@ local stack without deleting its data with:
 pnpm db:restart
 ```
 
-### Conductor
+### Cloud agents
 
-The shared [Conductor configuration](.conductor/settings.toml) installs locked
-dependencies when a workspace is created. On Linux, setup accepts any running
-Docker-compatible runtime and can bootstrap Docker in `dnf`-based sandboxes;
-other environments are expected to provide their own runtime.
+The shared [Capy setup](.capy/setup.json) runs `./scripts/setup.sh` to install
+locked dependencies when a cloud agent machine is created. On Linux, setup
+accepts any running Docker-compatible runtime and can bootstrap Docker in
+`dnf`-based sandboxes; other environments are expected to provide their own
+runtime.
 
-Local worktrees share one Docker stack with fixed ports. Cloud workspaces run
-their own stack.
+Local worktrees share one Docker stack with fixed ports. Cloud agent machines
+run their own stack.
 
 ## Supabase
 
