@@ -8,6 +8,7 @@ import {
   CANT_BUZZ_FLAG,
   CLUE_TIMEOUT_MS,
   gameEngine,
+  getHighestClueValue,
   getWinningBuzzer,
   parseUtcMs,
 } from "./engine";
@@ -3678,6 +3679,77 @@ describe("gameEngine", () => {
     expect(result.type).toBe(GameState.PreviewRound);
     expect(result.boardControl).toBe(PLAYER1.userId);
     expect(result.round).toBe(1);
+  });
+  it("clamps a wager outside the allowed range", () => {
+    const actions: TestAction[] = [
+      ...TWO_PLAYERS_ROUND_1,
+      {
+        type: ActionType.StartRound,
+        payload: { round: 1, userId: PLAYER2.userId },
+      },
+      {
+        type: ActionType.ChooseClue,
+        payload: { userId: PLAYER2.userId, i: 0, j: 0 },
+      },
+    ];
+    let state = initialState;
+    for (const action of actions) {
+      state = gameEngine(state, { ts: 0, ...action });
+    }
+
+    const maxWager = getHighestClueValue(MOCK_GAME.boards[1]);
+    for (const [wager, allowedWager] of [
+      [1, 5],
+      [1_000_000, maxWager],
+    ]) {
+      const next = gameEngine(state, {
+        type: ActionType.SetClueWager,
+        payload: { userId: PLAYER2.userId, i: 0, j: 0, wager },
+        ts: 1000,
+      });
+      expect(next.type).toBe(GameState.ReadWagerableClue);
+      expect(next.wagers.get("1,0,0")?.get(PLAYER2.userId)).toBe(allowedWager);
+    }
+  });
+
+  it("plays clues below the first category's last row on uneven boards", () => {
+    const game = produce(MOCK_GAME, (draft) => {
+      const category = draft.boards[0].categories[1];
+      category.clues.push({ ...category.clues[0], value: 400 });
+    });
+    const actions: TestAction[] = [
+      ...TWO_PLAYERS_ROUND_0,
+      {
+        type: ActionType.ChooseClue,
+        payload: { userId: PLAYER1.userId, i: 1, j: 1 },
+      },
+      {
+        type: ActionType.Buzz,
+        payload: { userId: PLAYER2.userId, i: 1, j: 1, deltaMs: 123 },
+      },
+      {
+        type: ActionType.Buzz,
+        payload: {
+          userId: PLAYER1.userId,
+          i: 1,
+          j: 1,
+          deltaMs: CLUE_TIMEOUT_MS + 1,
+        },
+      },
+      {
+        type: ActionType.Check,
+        payload: { userId: PLAYER2.userId, i: 1, j: 1, correct: true },
+      },
+    ];
+
+    let state = stateFromGame(game);
+    for (const action of actions) {
+      state = gameEngine(state, { ts: 0, ...action });
+    }
+
+    expect(state.type).toBe(GameState.RevealAnswerToAll);
+    expect(state.isAnswered[0][1][1].isAnswered).toBe(true);
+    expect(state.players.get(PLAYER2.userId)?.score).toBe(400);
   });
 });
 
