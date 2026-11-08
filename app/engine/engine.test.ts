@@ -8,6 +8,7 @@ import {
   CANT_BUZZ_FLAG,
   CLUE_TIMEOUT_MS,
   gameEngine,
+  getHighestClueValue,
   getWinningBuzzer,
   parseUtcMs,
 } from "./engine";
@@ -3679,7 +3680,7 @@ describe("gameEngine", () => {
     expect(result.boardControl).toBe(PLAYER1.userId);
     expect(result.round).toBe(1);
   });
-  it("ignores a wager outside the allowed range", () => {
+  it("clamps a wager outside the allowed range", () => {
     const actions: TestAction[] = [
       ...TWO_PLAYERS_ROUND_1,
       {
@@ -3696,15 +3697,19 @@ describe("gameEngine", () => {
       state = gameEngine(state, { ts: 0, ...action });
     }
 
-    for (const wager of [1, 1_000_000]) {
+    const maxWager = getHighestClueValue(MOCK_GAME.boards[1]);
+    for (const [wager, allowedWager] of [
+      [1, 5],
+      [1_000_000, maxWager],
+    ]) {
       const next = gameEngine(state, {
         type: ActionType.SetClueWager,
         payload: { userId: PLAYER2.userId, i: 0, j: 0, wager },
         ts: 1000,
       });
-      expect(next).toBe(state);
+      expect(next.type).toBe(GameState.ReadWagerableClue);
+      expect(next.wagers.get("1,0,0")?.get(PLAYER2.userId)).toBe(allowedWager);
     }
-    expect(state.type).toBe(GameState.WagerClue);
   });
 
   it("plays clues below the first category's last row on uneven boards", () => {

@@ -578,23 +578,24 @@ export function gameEngine(state: State, action: Action): State {
           return;
         }
 
-        // Ignore wagers outside the allowed range
+        // Clamp the wager to the allowed range
         const minWager = clue.longForm ? 0 : 5;
         const highestClueValue = getHighestClueValue(board);
         const maxWager = clue.longForm
           ? player.score
           : Math.max(player.score, highestClueValue);
-        if (wager < minWager || wager > maxWager) {
+        if (maxWager < minWager) {
           return;
         }
+        const allowedWager = Math.min(Math.max(wager, minWager), maxWager);
 
         resumeClock(draft, action.ts);
 
         const clueWagers = draft.wagers.get(key);
         if (clueWagers) {
-          clueWagers.set(userId, wager);
+          clueWagers.set(userId, allowedWager);
         } else {
-          draft.wagers.set(key, new Map([[userId, wager]]));
+          draft.wagers.set(key, new Map([[userId, allowedWager]]));
         }
 
         // Read the clue once all wagers are in
