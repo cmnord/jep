@@ -21,12 +21,7 @@ export async function action({ request, params }: Route.ActionArgs) {
     throw new Response("room not found", { status: 404 });
   }
 
-  await createRoomEvent(
-    room.id,
-    ActionType.ToggleClock,
-    null,
-    authSession?.accessToken,
-  );
+  await createRoomEvent(room.id, ActionType.ToggleClock, null);
 
   return null;
 }

@@ -2,6 +2,7 @@ import type { ActionType } from "~/engine";
 import { AuthSession } from "~/models/auth";
 import type { Database, Json } from "~/models/database.types";
 import { getSupabase } from "~/supabase";
+import { getSupabaseAdmin } from "~/supabase/admin.server";
 
 type RoomEventTable = Database["public"]["Tables"]["room_events"];
 export type DbRoomEvent = RoomEventTable["Row"];
@@ -32,10 +33,8 @@ export async function createRoomEvent(
   roomId: number,
   type: ActionType,
   payload?: Json,
-  accessToken?: AuthSession["accessToken"],
 ) {
-  const client = getSupabase(accessToken);
-  const { data, error } = await client
+  const { data, error } = await getSupabaseAdmin()
     .from<"room_events", RoomEventTable>("room_events")
     .insert<RoomEventTable["Insert"]>({
       room_id: roomId,

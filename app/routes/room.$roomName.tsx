@@ -76,12 +76,10 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       anonymousUserId !== userId &&
       state.players.has(anonymousUserId)
     ) {
-      await createRoomEvent(
-        room.id,
-        ActionType.TransferPlayer,
-        { oldUserId: anonymousUserId, newUserId: userId },
-        accessToken,
-      );
+      await createRoomEvent(room.id, ActionType.TransferPlayer, {
+        oldUserId: anonymousUserId,
+        newUserId: userId,
+      });
       // Re-fetch room events to include the transfer.
       const updatedRoomEvents = await getRoomEvents(room.id, accessToken);
       return {
