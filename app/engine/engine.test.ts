@@ -3679,6 +3679,83 @@ describe("gameEngine", () => {
     expect(result.boardControl).toBe(PLAYER1.userId);
     expect(result.round).toBe(1);
   });
+  it("ignores a wager outside the allowed range", () => {
+    const actions: TestAction[] = [
+      ...TWO_PLAYERS_ROUND_1,
+      {
+        type: ActionType.StartRound,
+        payload: { round: 1, userId: PLAYER2.userId },
+      },
+      {
+        type: ActionType.ChooseClue,
+        payload: { userId: PLAYER2.userId, i: 0, j: 0 },
+      },
+    ];
+    let state = initialState;
+    for (const action of actions) {
+      state = gameEngine(state, { ts: 0, ...action });
+    }
+
+    for (const wager of [1, 1_000_000]) {
+      const next = gameEngine(state, {
+        type: ActionType.SetClueWager,
+        payload: { userId: PLAYER2.userId, i: 0, j: 0, wager },
+        ts: 1000,
+      });
+      expect(next).toBe(state);
+    }
+    expect(state.type).toBe(GameState.WagerClue);
+  });
+
+  it("leaves the state unchanged when an action cannot be applied", () => {
+    const state = gameEngine(initialState, { ts: 0, ...PLAYER1_JOIN_ACTION });
+    const next = gameEngine(state, { type: ActionType.Buzz, ts: 0 });
+
+    expect(next).toBe(state);
+    expect(
+      gameEngine(next, { ts: 0, ...PLAYER2_JOIN_ACTION }).players.size,
+    ).toBe(2);
+  });
+
+  it("plays clues below the first category's last row on uneven boards", () => {
+    const game = produce(MOCK_GAME, (draft) => {
+      const category = draft.boards[0].categories[1];
+      category.clues.push({ ...category.clues[0], value: 400 });
+    });
+    const actions: TestAction[] = [
+      ...TWO_PLAYERS_ROUND_0,
+      {
+        type: ActionType.ChooseClue,
+        payload: { userId: PLAYER1.userId, i: 1, j: 1 },
+      },
+      {
+        type: ActionType.Buzz,
+        payload: { userId: PLAYER2.userId, i: 1, j: 1, deltaMs: 123 },
+      },
+      {
+        type: ActionType.Buzz,
+        payload: {
+          userId: PLAYER1.userId,
+          i: 1,
+          j: 1,
+          deltaMs: CLUE_TIMEOUT_MS + 1,
+        },
+      },
+      {
+        type: ActionType.Check,
+        payload: { userId: PLAYER2.userId, i: 1, j: 1, correct: true },
+      },
+    ];
+
+    let state = stateFromGame(game);
+    for (const action of actions) {
+      state = gameEngine(state, { ts: 0, ...action });
+    }
+
+    expect(state.type).toBe(GameState.RevealAnswerToAll);
+    expect(state.isAnswered[0][1][1].isAnswered).toBe(true);
+    expect(state.players.get(PLAYER2.userId)?.score).toBe(400);
+  });
 });
 
 describe("getWinningBuzzer", () => {

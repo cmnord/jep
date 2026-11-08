@@ -122,7 +122,7 @@ export function stateFromGame(game: Game) {
 
   for (let round = 0; round < game.boards.length; round++) {
     const board = game.boards[round];
-    const n = board.categories[0].clues.length;
+    const n = Math.max(...board.categories.map((c) => c.clues.length));
     const m = board.categories.length;
     state.isAnswered[round] = generateGrid(n, m, {
       isAnswered: false,
