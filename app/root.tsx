@@ -145,9 +145,10 @@ export default function App({ loaderData }: Route.ComponentProps) {
   };
 
   return (
-    <html lang="en">
+    <html lang="en" translate="no">
       <head>
         <meta charSet="utf-8" />
+        <meta name="google" content="notranslate" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <meta name="robots" content={searchMetadata.robots} />
         {searchMetadata.canonicalUrl ? (
@@ -205,10 +206,11 @@ const errorHeader = (
 
 function ErrorDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html>
+    <html translate="no">
       <head>
         <title>Oh no!</title>
         <meta charSet="utf-8" />
+        <meta name="google" content="notranslate" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <meta name="robots" content={NO_INDEX_DIRECTIVES} />
         <Meta />
@@ -268,10 +270,11 @@ class SafeErrorBoundary extends React.Component<
   render() {
     if (this.state.hasError) {
       return (
-        <html>
+        <html translate="no">
           <head>
             <title>Oh no!</title>
             <meta charSet="utf-8" />
+            <meta name="google" content="notranslate" />
             <meta
               name="viewport"
               content="width=device-width,initial-scale=1"
