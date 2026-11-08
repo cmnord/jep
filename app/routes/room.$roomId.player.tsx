@@ -80,16 +80,11 @@ export async function action({ request, params }: Route.ActionArgs) {
     }
   }
 
-  await createRoomEvent(
-    room.id,
-    type,
-    {
-      userId,
-      name,
-      color,
-    },
-    authSession?.accessToken,
-  );
+  await createRoomEvent(room.id, type, {
+    userId,
+    name,
+    color,
+  });
 
   return null;
 }

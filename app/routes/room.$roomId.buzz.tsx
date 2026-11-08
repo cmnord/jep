@@ -40,17 +40,12 @@ export async function action({ request, params }: Route.ActionArgs) {
     throw new Response("room not found", { status: 404 });
   }
 
-  await createRoomEvent(
-    room.id,
-    ActionType.Buzz,
-    {
-      i,
-      j,
-      userId,
-      deltaMs,
-    },
-    authSession?.accessToken,
-  );
+  await createRoomEvent(room.id, ActionType.Buzz, {
+    i,
+    j,
+    userId,
+    deltaMs,
+  });
 
   return null;
 }
