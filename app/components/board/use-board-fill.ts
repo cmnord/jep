@@ -2,6 +2,9 @@ import * as React from "react";
 
 import { generateGrid } from "~/utils";
 
+const useIsomorphicLayoutEffect =
+  typeof window === "undefined" ? React.useEffect : React.useLayoutEffect;
+
 interface BoardCell {
   i: number;
   j: number;
@@ -99,7 +102,7 @@ export function useBoardFill(
   );
   const [animating, setAnimating] = React.useState(false);
 
-  React.useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     let cancelled = false;
     const timeouts: ReturnType<typeof setTimeout>[] = [];
 

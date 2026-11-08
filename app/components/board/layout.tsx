@@ -18,9 +18,11 @@ export function getClueButtonClassName({
 }
 
 export function BoardLayout({
+  busy = false,
   children,
   columns,
 }: {
+  busy?: boolean;
   children: React.ReactNode;
   columns: number;
 }) {
@@ -30,7 +32,10 @@ export function BoardLayout({
         className="mx-auto max-w-screen-lg"
         style={{ minWidth: `${columns * 50}px` }}
       >
-        <table className="h-1 w-full table-fixed bg-blue-bright text-white">
+        <table
+          aria-busy={busy}
+          className="h-1 w-full table-fixed bg-blue-bright text-white"
+        >
           {children}
         </table>
       </div>

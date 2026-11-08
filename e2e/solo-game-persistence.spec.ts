@@ -1,15 +1,12 @@
 import { expect, test } from "@playwright/test";
 
-import { playOneClue } from "./helpers";
+import { playOneClue, startMockGame } from "./helpers";
 
 test.describe("solo game persistence", () => {
   test("persists game state and shows resume prompt on reload", async ({
     page,
   }) => {
-    await page.goto("/mockPersistent");
-
-    await page.getByRole("button", { name: /join game/i }).click();
-    await page.getByRole("button", { name: /start round/i }).click();
+    await startMockGame(page, "/mockPersistent");
 
     await playOneClue(page);
 
@@ -38,10 +35,7 @@ test.describe("solo game persistence", () => {
   });
 
   test("new game clears saved state", async ({ page }) => {
-    await page.goto("/mockPersistent");
-
-    await page.getByRole("button", { name: /join game/i }).click();
-    await page.getByRole("button", { name: /start round/i }).click();
+    await startMockGame(page, "/mockPersistent");
 
     await playOneClue(page);
 
