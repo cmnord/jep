@@ -18,8 +18,9 @@ import { useBoardFill } from "./use-board-fill";
 const WAGER_SFX = "/sounds/wager.mp3";
 
 /** BoardComponent is purely presentational and renders the board. */
-function BoardComponent({
+export function BoardComponent({
   board,
+  busy = false,
   hasBoardControl,
   isAnswered,
   isCategoryRevealed,
@@ -30,6 +31,7 @@ function BoardComponent({
   tbodyRef,
 }: {
   board: Board;
+  busy?: boolean;
   hasBoardControl: boolean;
   isAnswered: (i: number, j: number) => boolean;
   isCategoryRevealed: (j: number) => boolean;
@@ -55,7 +57,7 @@ function BoardComponent({
   }
 
   return (
-    <BoardLayout columns={board.categoryNames.length}>
+    <BoardLayout busy={busy} columns={board.categoryNames.length}>
       <thead>
         <tr className="h-1">
           {board.categories.map((category, j) => {
@@ -233,6 +235,7 @@ export function ConnectedBoardComponent({ roomId, userId }: RoomProps) {
   return (
     <BoardComponent
       board={board}
+      busy={animating || !shouldShowBoard}
       tbodyRef={tbodyRef}
       hasBoardControl={!animating && hasBoardControl}
       isAnswered={isAnswered}

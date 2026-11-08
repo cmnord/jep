@@ -3,12 +3,23 @@ import path from "path";
 import { expect } from "@playwright/test";
 import type { Page } from "@playwright/test";
 
+/** Wait until the board is shown and done filling in. The board table sets
+ *  `aria-busy` while it is hidden behind the round preview or animating (cells
+ *  ignore clicks then). A single long-form board renders no table, so this
+ *  passes there. */
+export async function waitForBoardReady(page: Page) {
+  await expect(page.locator('table[aria-busy="true"]')).toHaveCount(0, {
+    timeout: 15_000,
+  });
+}
+
 /** Navigate to a mock game route, join, start round 1, and wait for the board
  *  fill animation to complete. */
 export async function startMockGame(page: Page, route = "/mock") {
   await page.goto(route);
   await page.getByRole("button", { name: /join game/i }).click();
   await page.getByRole("button", { name: /start round/i }).click();
+  await waitForBoardReady(page);
 }
 
 /** Play through a clue using only keyboard inputs.
@@ -86,6 +97,7 @@ export async function waitForConnected(page: Page) {
 }
 
 export async function playOneClue(page: Page) {
+  await waitForBoardReady(page);
   const clueButton = page.getByRole("button", { name: "$ 200" }).first();
 
   // The board fill animation silently ignores clicks, so retry clicking
