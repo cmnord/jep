@@ -3707,16 +3707,6 @@ describe("gameEngine", () => {
     expect(state.type).toBe(GameState.WagerClue);
   });
 
-  it("leaves the state unchanged when an action cannot be applied", () => {
-    const state = gameEngine(initialState, { ts: 0, ...PLAYER1_JOIN_ACTION });
-    const next = gameEngine(state, { type: ActionType.Buzz, ts: 0 });
-
-    expect(next).toBe(state);
-    expect(
-      gameEngine(next, { ts: 0, ...PLAYER2_JOIN_ACTION }).players.size,
-    ).toBe(2);
-  });
-
   it("plays clues below the first category's last row on uneven boards", () => {
     const game = produce(MOCK_GAME, (draft) => {
       const category = draft.boards[0].categories[1];

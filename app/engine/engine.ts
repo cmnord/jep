@@ -373,19 +373,8 @@ function applyCheckCorrection(
       : getNextRoundBoardControl(draft, correctedClueBoardControl);
 }
 
-/** gameEngine is the reducer (aka state machine) which implements the game.
- * An action it cannot apply leaves the state unchanged, so one bad room event
- * cannot stop the events after it from replaying. */
+/** gameEngine is the reducer (aka state machine) which implements the game. */
 export function gameEngine(state: State, action: Action): State {
-  try {
-    return applyAction(state, action);
-  } catch (error) {
-    console.error(`Ignoring ${action.type} action`, error);
-    return state;
-  }
-}
-
-function applyAction(state: State, action: Action): State {
   switch (action.type) {
     case ActionType.Join:
       if (!isPlayerAction(action)) {
