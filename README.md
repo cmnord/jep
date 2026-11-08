@@ -49,15 +49,11 @@ pnpm db:restart
 
 ### Cloud agents
 
-The [Capy setup](.capy/setup.json) prepares cloud agent machines with
-[`scripts/setup-cloud-agent.sh`](scripts/setup-cloud-agent.sh). It runs the
-regular setup, warms the local Supabase images, and writes a git-ignored
-`.env.local` with local credentials so `pnpm validate` works without manual
-configuration. Each machine starts local Supabase on boot.
-
-On Linux, setup accepts any running Docker-compatible runtime and can bootstrap
-Docker in `dnf`-based sandboxes; other environments are expected to provide
-their own runtime.
+The shared [Capy setup](.capy/setup.json) runs `./scripts/setup.sh` to install
+locked dependencies when a cloud agent machine is created. On Linux, setup
+accepts any running Docker-compatible runtime and can bootstrap Docker in
+`dnf`-based sandboxes; other environments are expected to provide their own
+runtime.
 
 Local worktrees share one Docker stack with fixed ports. Cloud agent machines
 run their own stack.

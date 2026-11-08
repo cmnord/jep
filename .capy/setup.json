@@ -2,52 +2,27 @@
   "$schema": "https://api.capy.ai/schemas/setup.v1.json",
   "format_version": 1,
   "scripts": {
-    "initialize": "set -euo pipefail\n./scripts/setup-cloud-agent.sh",
-    "refresh": "set -euo pipefail\n./scripts/setup.sh"
+    "initialize": "./scripts/setup.sh",
+    "refresh": "./scripts/setup.sh"
   },
-  "timeouts": {
-    "initialize": 1200
-  },
-  "startup": [
-    {
-      "name": "database",
-      "command": "pnpm db:start",
-      "timeout": 600
-    }
-  ],
+  "startup": [],
   "commands": [
     {
       "name": "dev",
-      "command": "./scripts/with-local-supabase.sh pnpm dev --host 0.0.0.0 --port 3000",
+      "command": "pnpm db:start && ./scripts/with-local-supabase.sh pnpm dev --host 0.0.0.0 --port 3000",
       "port": 3000
     },
     {
       "name": "test",
-      "command": "pnpm test -- --run"
-    },
-    {
-      "name": "typecheck",
-      "command": "pnpm typecheck"
-    },
-    {
-      "name": "lint",
-      "command": "pnpm lint"
-    },
-    {
-      "name": "format",
-      "command": "pnpm format"
-    },
-    {
-      "name": "e2e",
-      "command": "pnpm test:e2e:run"
+      "command": "pnpm test"
     },
     {
       "name": "validate",
       "command": "pnpm db:start && pnpm validate"
     },
     {
-      "name": "database-restart",
-      "command": "pnpm db:restart"
+      "name": "database",
+      "command": "pnpm db:start"
     }
   ]
 }
